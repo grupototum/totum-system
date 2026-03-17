@@ -103,9 +103,10 @@ export default function Registries() {
         return;
       }
       const newItem: RegistryItem = {
-        ...values,
         id: crypto.randomUUID(),
-        status: "ativo",
+        name: values.name || "",
+        status: "ativo" as const,
+        ...values,
       };
       setDataStore((prev) => ({
         ...prev,
