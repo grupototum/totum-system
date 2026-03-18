@@ -30,8 +30,9 @@ export function TaskFilters({
   responsibleFilter, onResponsibleFilterChange,
   statusFilter, onStatusFilterChange,
   priorityFilter, onPriorityFilterChange,
+  typeFilter, onTypeFilterChange,
 }: TaskFiltersProps) {
-  const hasFilters = clientFilter !== "all" || responsibleFilter !== "all" || statusFilter !== "all" || priorityFilter !== "all";
+  const hasFilters = clientFilter !== "all" || responsibleFilter !== "all" || statusFilter !== "all" || priorityFilter !== "all" || typeFilter !== "all";
 
   const clearAll = () => {
     onClientFilterChange("all");
