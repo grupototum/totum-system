@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Package, FileText, Clock, BarChart3, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoClients } from "@/data/demoData";
@@ -12,6 +10,17 @@ import { ClientHubContracts } from "@/components/client-hub/ClientHubContracts";
 import { ClientHubTimeline } from "@/components/client-hub/ClientHubTimeline";
 import { ClientHubAnalysis } from "@/components/client-hub/ClientHubAnalysis";
 import { ClientHubPendencies } from "@/components/client-hub/ClientHubPendencies";
+import { cn } from "@/lib/utils";
+
+const tabs = [
+  { value: "deliveries", label: "Entregas", icon: Package },
+  { value: "contracts", label: "Contratos", icon: FileText },
+  { value: "timeline", label: "Timeline", icon: Clock },
+  { value: "analysis", label: "Análise de Marketing", icon: BarChart3 },
+  { value: "pendencies", label: "Pendências", icon: AlertTriangle },
+] as const;
+
+type TabValue = (typeof tabs)[number]["value"];
 
 export default function ClientHub() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +28,7 @@ export default function ClientHub() {
   const { isDemoMode } = useDemo();
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabValue>("deliveries");
 
   const fetchClient = useCallback(async () => {
     if (!id) return;
@@ -78,32 +88,40 @@ export default function ClientHub() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="deliveries" className="space-y-4">
-        <TabsList className="bg-white/[0.04] border border-border">
-          <TabsTrigger value="deliveries">Entregas</TabsTrigger>
-          <TabsTrigger value="contracts">Contratos</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          <TabsTrigger value="analysis">Análise de Marketing</TabsTrigger>
-          <TabsTrigger value="pendencies">Pendências</TabsTrigger>
-        </TabsList>
+      {/* Vertical tabs layout */}
+      <div className="flex gap-6">
+        {/* Sidebar nav */}
+        <nav className="w-52 shrink-0 space-y-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left",
+                  isActive
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
 
-        <TabsContent value="deliveries">
-          <ClientHubDeliveries clientId={id!} />
-        </TabsContent>
-        <TabsContent value="contracts">
-          <ClientHubContracts clientId={id!} />
-        </TabsContent>
-        <TabsContent value="timeline">
-          <ClientHubTimeline clientId={id!} />
-        </TabsContent>
-        <TabsContent value="analysis">
-          <ClientHubAnalysis clientId={id!} initialAnalysis={client.marketing_analysis || ""} />
-        </TabsContent>
-        <TabsContent value="pendencies">
-          <ClientHubPendencies clientId={id!} />
-        </TabsContent>
-      </Tabs>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {activeTab === "deliveries" && <ClientHubDeliveries clientId={id!} />}
+          {activeTab === "contracts" && <ClientHubContracts clientId={id!} />}
+          {activeTab === "timeline" && <ClientHubTimeline clientId={id!} />}
+          {activeTab === "analysis" && <ClientHubAnalysis clientId={id!} initialAnalysis={client.marketing_analysis || ""} />}
+          {activeTab === "pendencies" && <ClientHubPendencies clientId={id!} />}
+        </div>
+      </div>
     </div>
   );
 }
