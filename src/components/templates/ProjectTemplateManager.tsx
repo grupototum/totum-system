@@ -44,6 +44,11 @@ export function ProjectTemplateManager() {
   const fetchTemplates = async () => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTemplates([]);
+        return;
+      }
       const { data, error } = await supabase
         .from("project_templates")
         .select("*, project_template_tasks(*)")
@@ -57,8 +62,9 @@ export function ProjectTemplateManager() {
         })),
       }));
       setTemplates(mapped);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao carregar templates:", err);
+      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -85,36 +91,45 @@ export function ProjectTemplateManager() {
   };
 
   const duplicate = async (t: ProjectTemplate) => {
-    const { data: newTpl, error } = await supabase
-      .from("project_templates")
-      .insert({ name: `${t.name} (cópia)`, description: t.description })
-      .select("id")
-      .single();
-    if (error || !newTpl) {
-      toast({ title: "Erro", description: error?.message, variant: "destructive" });
-      return;
+    try {
+      const { data: newTpl, error } = await supabase
+        .from("project_templates")
+        .insert({ name: `${t.name} (cópia)`, description: t.description })
+        .select("id")
+        .single();
+      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
+      const sortedTasks = (t.project_template_tasks || []).sort((a, b) => a.sort_order - b.sort_order);
+      if (sortedTasks.length > 0) {
+        await supabase.from("project_template_tasks").insert(
+          sortedTasks.map((task, idx) => ({
+            template_id: newTpl.id,
+            title: task.title,
+            description: task.description || null,
+            sort_order: idx,
+            subtasks: (task.subtasks || []) as unknown as Json,
+          }))
+        );
+      }
+      toast({ title: "Template duplicado" });
+      fetchTemplates();
+    } catch (err: any) {
+      console.error("Erro ao duplicar template:", err);
+      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
     }
-    const sortedTasks = (t.project_template_tasks || []).sort((a, b) => a.sort_order - b.sort_order);
-    if (sortedTasks.length > 0) {
-      await supabase.from("project_template_tasks").insert(
-        sortedTasks.map((task, idx) => ({
-          template_id: newTpl.id,
-          title: task.title,
-          description: task.description || null,
-          sort_order: idx,
-          subtasks: (task.subtasks || []) as unknown as Json,
-        }))
-      );
-    }
-    toast({ title: "Template duplicado" });
-    fetchTemplates();
   };
 
   const deleteTemplate = async (id: string) => {
-    await supabase.from("project_template_tasks").delete().eq("template_id", id);
-    await supabase.from("project_templates").delete().eq("id", id);
-    toast({ title: "Template removido" });
-    fetchTemplates();
+    try {
+      const { error: tasksErr } = await supabase.from("project_template_tasks").delete().eq("template_id", id);
+      if (tasksErr) throw tasksErr;
+      const { error } = await supabase.from("project_templates").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "Template removido" });
+      fetchTemplates();
+    } catch (err: any) {
+      console.error("Erro ao remover template:", err);
+      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+    }
   };
 
   const addTask = () => {

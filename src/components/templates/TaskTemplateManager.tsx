@@ -38,14 +38,20 @@ export function TaskTemplateManager() {
   const fetch = async () => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTemplates([]);
+        return;
+      }
       const { data, error } = await supabase
         .from("task_templates")
         .select("*, task_template_items(*)")
         .order("name");
       if (error) throw error;
       setTemplates((data as any) || []);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao carregar templates:", err);
+      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -72,35 +78,44 @@ export function TaskTemplateManager() {
   };
 
   const duplicate = async (t: TaskTemplate) => {
-    const { data: newTpl, error } = await supabase
-      .from("task_templates")
-      .insert({ name: `${t.name} (cópia)`, description: t.description })
-      .select("id")
-      .single();
-    if (error || !newTpl) {
-      toast({ title: "Erro", description: error?.message, variant: "destructive" });
-      return;
+    try {
+      const { data: newTpl, error } = await supabase
+        .from("task_templates")
+        .insert({ name: `${t.name} (cópia)`, description: t.description })
+        .select("id")
+        .single();
+      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
+      const sortedItems = (t.task_template_items || []).sort((a, b) => a.sort_order - b.sort_order);
+      if (sortedItems.length > 0) {
+        await supabase.from("task_template_items").insert(
+          sortedItems.map((i, idx) => ({
+            template_id: newTpl.id,
+            title: i.title,
+            description: i.description || null,
+            sort_order: idx,
+          }))
+        );
+      }
+      toast({ title: "Template duplicado" });
+      fetch();
+    } catch (err: any) {
+      console.error("Erro ao duplicar template:", err);
+      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
     }
-    const sortedItems = (t.task_template_items || []).sort((a, b) => a.sort_order - b.sort_order);
-    if (sortedItems.length > 0) {
-      await supabase.from("task_template_items").insert(
-        sortedItems.map((i, idx) => ({
-          template_id: newTpl.id,
-          title: i.title,
-          description: i.description || null,
-          sort_order: idx,
-        }))
-      );
-    }
-    toast({ title: "Template duplicado" });
-    fetch();
   };
 
   const deleteTemplate = async (id: string) => {
-    await supabase.from("task_template_items").delete().eq("template_id", id);
-    await supabase.from("task_templates").delete().eq("id", id);
-    toast({ title: "Template removido" });
-    fetch();
+    try {
+      const { error: itemsErr } = await supabase.from("task_template_items").delete().eq("template_id", id);
+      if (itemsErr) throw itemsErr;
+      const { error } = await supabase.from("task_templates").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "Template removido" });
+      fetch();
+    } catch (err: any) {
+      console.error("Erro ao remover template:", err);
+      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+    }
   };
 
   const addItem = () => {

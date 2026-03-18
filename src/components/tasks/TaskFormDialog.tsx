@@ -65,6 +65,7 @@ export function TaskFormDialog({
   const [dueDate, setDueDate] = useState("");
   const [checklistItems, setChecklistItems] = useState<string[]>([]);
   const [newCheckItem, setNewCheckItem] = useState("");
+  const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
 
@@ -89,6 +90,7 @@ export function TaskFormDialog({
     setDueDate("");
     setChecklistItems([]);
     setNewCheckItem("");
+    setSubtaskItems([]);
     setShowTemplates(false);
   };
 
@@ -107,10 +109,11 @@ export function TaskFormDialog({
       .sort((a: any, b: any) => a.sort_order - b.sort_order)
       .map((i: any) => i.title);
     setChecklistItems(items);
+    setSubtaskItems(items);
     if (!title && template.name) setTitle(template.name);
     if (!description && template.description) setDescription(template.description);
     setShowTemplates(false);
-    toast({ title: "Template aplicado", description: `${items.length} itens adicionados` });
+    toast({ title: "Template aplicado", description: `${items.length} itens adicionados como checklist e subtarefas` });
   };
 
   const handleSave = async () => {
@@ -152,6 +155,18 @@ export function TaskFormDialog({
         completed: false,
       }));
       await supabase.from("task_checklist_items").insert(items);
+    }
+
+    // Insert real subtasks
+    if (subtaskItems.length > 0 && taskData) {
+      const subs = subtaskItems.map((title, i) => ({
+        task_id: taskData.id,
+        title,
+        sort_order: i,
+        status: "pendente" as any,
+      }));
+      const { error: subErr } = await supabase.from("subtasks").insert(subs);
+      if (subErr) console.error("Erro ao criar subtarefas:", subErr);
     }
 
     setSaving(false);
