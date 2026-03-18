@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, RefreshCw, Loader2 } from "lucide-react";
+import { FileText, Calendar, RefreshCw, Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useContracts } from "@/hooks/useContracts";
+import { ContractFormDialog } from "@/components/contracts/ContractFormDialog";
 import { format } from "date-fns";
 
 const statusMap: Record<string, string> = {
