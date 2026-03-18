@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { Building2, Cog, DollarSign, Puzzle, ScrollText, Loader2, Save, Shield } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
 import { CompanyTab } from "@/components/admin-settings/CompanyTab";
 import { SystemTab } from "@/components/admin-settings/SystemTab";
 import { FinancialTab } from "@/components/admin-settings/FinancialTab";
@@ -11,8 +12,9 @@ import { AuditLogsTab } from "@/components/admin-settings/AuditLogsTab";
 
 export default function AdminSettings() {
   const { profile, loading } = useAuth();
+  const { isDemoMode } = useDemo();
 
-  if (loading) {
+  if (loading && !isDemoMode) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -20,7 +22,7 @@ export default function AdminSettings() {
     );
   }
 
-  const isAdmin =
+  const isAdmin = isDemoMode || 
     profile?.roles?.name?.toLowerCase() === "administrador" ||
     profile?.roles?.name?.toLowerCase() === "admin";
 
