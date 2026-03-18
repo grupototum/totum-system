@@ -52,7 +52,7 @@ const systemNav = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { profile, user } = useAuth();
+  const { profile, user, signOut } = useAuth();
   const { isDemoMode, toggleDemo } = useDemo();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
