@@ -10,6 +10,7 @@ import {
   Settings,
   UserCog,
   Database,
+  CheckSquare,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -31,6 +32,7 @@ import {
 const mainNav = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Clientes", url: "/clientes", icon: Users },
+  { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
   { title: "Entregas", url: "/entregas", icon: ClipboardCheck },
   { title: "Contratos", url: "/contratos", icon: FileText },
   { title: "Projetos", url: "/projetos", icon: Briefcase },

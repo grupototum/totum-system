@@ -15,6 +15,7 @@ import Reports from "./pages/Reports";
 import Team from "./pages/Team";
 import SettingsPage from "./pages/SettingsPage";
 import Registries from "./pages/Registries";
+import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/clientes" element={<Clients />} />
+            <Route path="/tarefas" element={<Tasks />} />
             <Route path="/entregas" element={<Fulfillment />} />
             <Route path="/contratos" element={<Contracts />} />
             <Route path="/projetos" element={<Projects />} />
