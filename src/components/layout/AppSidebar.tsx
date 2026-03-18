@@ -17,6 +17,8 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
+import { useAuth } from "@/hooks/useAuth";
+import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
   SidebarContent,
