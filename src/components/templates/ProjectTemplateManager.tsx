@@ -102,7 +102,7 @@ export function ProjectTemplateManager() {
           title: task.title,
           description: task.description || null,
           sort_order: idx,
-          subtasks: task.subtasks || [],
+          subtasks: (task.subtasks || []) as unknown as Json,
         }))
       );
     }
