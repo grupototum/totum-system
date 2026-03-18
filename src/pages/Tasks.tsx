@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2 } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -10,6 +10,7 @@ import { TaskDashboard } from "@/components/tasks/TaskDashboard";
 import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
+import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ import { toast } from "@/hooks/use-toast";
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles, clients } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
@@ -26,6 +27,7 @@ export default function Tasks() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
 
   // Completion dialog state
@@ -225,6 +227,12 @@ export default function Tasks() {
         </div>
         <div className="flex items-center gap-2">
           <Button
+            onClick={() => setCreateOpen(true)}
+            className="gap-2 rounded-full px-4 text-sm"
+          >
+            <Plus className="h-4 w-4" /> Nova Tarefa
+          </Button>
+          <Button
             onClick={() => setGenerateOpen(true)}
             variant="outline"
             className="gap-2 rounded-full px-4 text-sm border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
@@ -317,6 +325,14 @@ export default function Tasks() {
         onOpenChange={setCompletionOpen}
         profiles={profiles}
         onComplete={handleComplete}
+      />
+
+      <TaskFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        clients={clients}
+        profiles={profiles}
+        onCreated={refetch}
       />
     </div>
   );
