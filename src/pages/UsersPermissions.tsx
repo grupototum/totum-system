@@ -488,7 +488,8 @@ export default function UsersPermissions() {
             </DialogHeader>
             <PermissionMatrix
               permissions={getRolePermissions(viewPermsUser.roleId)}
-              readonly
+              onChange={() => {}}
+              readOnly
             />
           </DialogContent>
         </Dialog>
