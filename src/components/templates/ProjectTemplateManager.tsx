@@ -44,6 +44,11 @@ export function ProjectTemplateManager() {
   const fetchTemplates = async () => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTemplates([]);
+        return;
+      }
       const { data, error } = await supabase
         .from("project_templates")
         .select("*, project_template_tasks(*)")
@@ -57,8 +62,9 @@ export function ProjectTemplateManager() {
         })),
       }));
       setTemplates(mapped);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao carregar templates:", err);
+      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
