@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoDeliveryChecklists } from "@/data/demoData";
 import type { Enums } from "@/integrations/supabase/types";
 
 type UIStatus = "entregue" | "entregue_parcialmente" | "nao_entregue" | "nao_aplicavel" | "pending";
@@ -22,6 +24,7 @@ const statusOptions: Enums<"delivery_item_status">[] = ["entregue", "entregue_pa
 interface Props { clientId: string; }
 
 export function ClientHubDeliveries({ clientId }: Props) {
+  const { isDemoMode } = useDemo();
   const [checklists, setChecklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -29,6 +32,11 @@ export function ClientHubDeliveries({ clientId }: Props) {
   const [search, setSearch] = useState("");
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      setChecklists(demoDeliveryChecklists.filter(c => c.client_id === clientId));
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data } = await supabase
       .from("delivery_checklists")
@@ -37,7 +45,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
       .order("created_at", { ascending: false });
     setChecklists(data || []);
     setLoading(false);
-  }, [clientId]);
+  }, [clientId, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -53,6 +61,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
   };
 
   const updateItemStatus = async (itemId: string, status: Enums<"delivery_item_status">) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
     const updates: any = { status };
     if (status === "entregue") updates.completed_at = new Date().toISOString();
     await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
@@ -60,11 +69,13 @@ export function ClientHubDeliveries({ clientId }: Props) {
   };
 
   const updateJustification = async (itemId: string, justification: string) => {
+    if (isDemoMode) return;
     await supabase.from("delivery_checklist_items").update({ justification }).eq("id", itemId);
     await fetch();
   };
 
   const finalizeChecklist = async (checklistId: string) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
     const c = checklists.find(x => x.id === checklistId);
     if (!c) return;
     const items = c.delivery_checklist_items || [];
