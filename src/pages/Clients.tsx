@@ -4,6 +4,7 @@ import { Search, Plus, MoreHorizontal, ArrowUpDown, Loader2 } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useClients, ClientRow } from "@/hooks/useClients";
+import { ClientFormDialog } from "@/components/clients/ClientFormDialog";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
