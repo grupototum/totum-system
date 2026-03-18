@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, RefreshCw, Loader2 } from "lucide-react";
+import { FileText, Calendar, RefreshCw, Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useContracts } from "@/hooks/useContracts";
+import { ContractFormDialog } from "@/components/contracts/ContractFormDialog";
 import { format } from "date-fns";
 
 const statusMap: Record<string, string> = {
@@ -18,15 +21,21 @@ const freqLabels: Record<string, string> = {
 };
 
 export default function Contracts() {
-  const { contracts, loading } = useContracts();
+  const { contracts, loading, addContract } = useContracts();
+  const [showForm, setShowForm] = useState(false);
 
   const activeCount = contracts.filter((c) => c.status === "ativo").length;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-heading font-bold tracking-tight">Contratos</h1>
-        <p className="text-sm text-white/50 mt-1">{activeCount} ativos · {contracts.length} total</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">Contratos</h1>
+          <p className="text-sm text-white/50 mt-1">{activeCount} ativos · {contracts.length} total</p>
+        </div>
+        <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+          <Plus className="h-4 w-4" /> Novo Contrato
+        </Button>
       </div>
 
       {loading ? (
@@ -75,6 +84,8 @@ export default function Contracts() {
           ))}
         </div>
       )}
+
+      <ContractFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addContract} />
     </div>
   );
 }

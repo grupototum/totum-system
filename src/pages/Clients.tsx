@@ -4,6 +4,7 @@ import { Search, Plus, MoreHorizontal, ArrowUpDown, Loader2 } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useClients, ClientRow } from "@/hooks/useClients";
+import { ClientFormDialog } from "@/components/clients/ClientFormDialog";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
@@ -13,8 +14,9 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function Clients() {
-  const { clients, loading } = useClients();
+  const { clients, loading, addClient } = useClients();
   const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
@@ -40,7 +42,7 @@ export default function Clients() {
           <h1 className="text-2xl font-heading font-bold tracking-tight">Clientes</h1>
           <p className="text-sm text-white/50 mt-1">{activeCount} ativos · {clients.length} total</p>
         </div>
-        <Button className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+        <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
           <Plus className="h-4 w-4" /> Novo Cliente
         </Button>
       </div>
@@ -115,6 +117,8 @@ export default function Clients() {
           </div>
         </motion.div>
       )}
+
+      <ClientFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addClient} />
     </div>
   );
 }
