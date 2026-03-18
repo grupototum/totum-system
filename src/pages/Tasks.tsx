@@ -31,6 +31,7 @@ export default function Tasks() {
   const [responsibleFilter, setResponsibleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
