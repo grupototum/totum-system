@@ -15,7 +15,7 @@ interface Props {
   initialData?: any;
 }
 
-export function ProjectFormDialog({ open, onOpenChange, onSubmit }: Props) {
+export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
