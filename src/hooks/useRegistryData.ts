@@ -40,7 +40,8 @@ type ValidTable =
   | "expense_types" | "client_types" | "contract_types" | "plans"
   | "project_types" | "service_types" | "product_types" | "general_categories"
   | "suppliers" | "partners" | "departments" | "tags"
-  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons";
+  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons"
+  | "revenue_types";
 
 export interface RegistryRow {
   id: string;
