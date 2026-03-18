@@ -12,6 +12,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: any) => Promise<boolean>;
+  initialData?: any;
 }
 
 export function ProjectFormDialog({ open, onOpenChange, onSubmit }: Props) {
