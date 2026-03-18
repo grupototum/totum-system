@@ -58,9 +58,19 @@ export default function Projects() {
                 <div className="h-10 w-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
                   <Briefcase className="h-5 w-5 text-primary" />
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[project.status] || "bg-white/10 text-white/50"}`}>
-                  {statusLabels[project.status] || project.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[project.status] || "bg-white/10 text-white/50"}`}>
+                    {statusLabels[project.status] || project.status}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => { e.stopPropagation(); setEditingProject(project); }}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
               <h3 className="font-semibold mb-1">{project.name}</h3>
               <p className="text-sm text-white/50 mb-4">{(project.clients as any)?.name || "—"}</p>
