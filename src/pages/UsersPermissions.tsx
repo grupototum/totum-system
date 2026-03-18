@@ -127,6 +127,7 @@ export default function UsersPermissions() {
   }, [logs, profiles]);
 
   const logAudit = async (action: string, detail: string) => {
+    if (isDemoMode) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.rpc("log_audit", {
