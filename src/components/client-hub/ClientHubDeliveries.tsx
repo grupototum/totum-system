@@ -115,7 +115,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">Nenhuma entrega encontrada</div>
       ) : (
-        <div className={viewMode === "cards" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-3"}>
+        <div className="space-y-3">
           {filtered.map(checklist => {
             const pct = getPct(checklist);
             const isExpanded = expanded.has(checklist.id);
