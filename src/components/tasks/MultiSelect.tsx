@@ -17,6 +17,7 @@ interface MultiSelectProps {
 }
 
 export function MultiSelect({ options, selected, onChange, placeholder = "Todos", allLabel = "Todos" }: MultiSelectProps) {
+  const totalCount = options.some(o => o.count !== undefined) ? options.reduce((sum, o) => sum + (o.count || 0), 0) : undefined;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
