@@ -36,7 +36,7 @@ function useHasAdmin() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.rpc("has_any_admin").then(({ data }) => {
+    (supabase.rpc as any)("has_any_admin").then(({ data }: { data: boolean }) => {
       setHasAdmin(data === true);
     });
   }, []);
