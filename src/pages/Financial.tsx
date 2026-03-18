@@ -61,7 +61,7 @@ export default function Financial() {
                 {entries.length === 0 ? (
                   <tr><td colSpan={4} className="p-8 text-center text-white/30">Nenhum lançamento neste mês</td></tr>
                 ) : entries.map((tx) => {
-                  const isIncome = tx.type === "receita";
+                  const isIncome = tx.type === "receber";
                   return (
                     <tr key={tx.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                       <td className="p-4">

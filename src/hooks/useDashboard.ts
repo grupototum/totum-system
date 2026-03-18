@@ -53,8 +53,8 @@ export function useDashboard() {
       .gte("due_date", monthStart)
       .lt("due_date", monthEnd);
 
-    const income = (entries || []).filter(e => e.type === "receita" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
-    const expense = (entries || []).filter(e => e.type === "despesa" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
+    const income = (entries || []).filter(e => e.type === "receber" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
+    const expense = (entries || []).filter(e => e.type === "pagar" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
     const overdue = (entries || []).filter(e => e.status === "atrasado").length;
 
     // Fulfillment
