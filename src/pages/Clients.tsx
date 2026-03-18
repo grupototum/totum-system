@@ -16,6 +16,7 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function Clients() {
+  const navigate = useNavigate();
   const { clients, loading, addClient, updateClient, deleteClient } = useClients();
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
