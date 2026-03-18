@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,8 +8,10 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { supabase } from "@/integrations/supabase/client";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import SetupPage from "./pages/SetupPage";
 import Index from "./pages/Index";
 import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
@@ -28,6 +31,22 @@ import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+function useHasAdmin() {
+  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("user_roles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin")
+      .then(({ count }) => {
+        setHasAdmin((count ?? 0) > 0);
+      });
+  }, []);
+
+  return hasAdmin;
+}
 
 function ProtectedRoutes() {
   const { session, loading } = useAuth();
@@ -69,8 +88,10 @@ function ProtectedRoutes() {
 
 function AuthRoutes() {
   const { session, loading } = useAuth();
+  const hasAdmin = useHasAdmin();
 
-  if (loading) return null;
+  if (loading || hasAdmin === null) return null;
+  if (!hasAdmin) return <Navigate to="/setup" replace />;
   if (session) return <Navigate to="/" replace />;
 
   return <AuthPage />;
