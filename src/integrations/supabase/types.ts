@@ -1165,6 +1165,7 @@ export type Database = {
           description: string | null
           id: string
           sort_order: number
+          subtasks: Json | null
           template_id: string
           title: string
         }
@@ -1173,6 +1174,7 @@ export type Database = {
           description?: string | null
           id?: string
           sort_order?: number
+          subtasks?: Json | null
           template_id: string
           title: string
         }
@@ -1181,6 +1183,7 @@ export type Database = {
           description?: string | null
           id?: string
           sort_order?: number
+          subtasks?: Json | null
           template_id?: string
           title?: string
         }
