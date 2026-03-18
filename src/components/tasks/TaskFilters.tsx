@@ -20,6 +20,8 @@ interface TaskFiltersProps {
   onStatusFilterChange: (v: string) => void;
   priorityFilter: string;
   onPriorityFilterChange: (v: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (v: string) => void;
 }
 
 export function TaskFilters({
