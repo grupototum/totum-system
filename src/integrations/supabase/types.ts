@@ -1950,6 +1950,7 @@ export type Database = {
     }
     Functions: {
       get_user_permissions: { Args: { _user_id: string }; Returns: Json }
+      has_any_admin: { Args: never; Returns: boolean }
       has_permission: {
         Args: { _perm_key: string; _user_id: string }
         Returns: boolean

@@ -36,13 +36,9 @@ function useHasAdmin() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("user_roles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin")
-      .then(({ count }) => {
-        setHasAdmin((count ?? 0) > 0);
-      });
+    (supabase.rpc as any)("has_any_admin").then(({ data }: { data: boolean }) => {
+      setHasAdmin(data === true);
+    });
   }, []);
 
   return hasAdmin;
