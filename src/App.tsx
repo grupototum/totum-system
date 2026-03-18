@@ -16,6 +16,7 @@ import Team from "./pages/Team";
 import SettingsPage from "./pages/SettingsPage";
 import Registries from "./pages/Registries";
 import Tasks from "./pages/Tasks";
+import UsersPermissions from "./pages/UsersPermissions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
