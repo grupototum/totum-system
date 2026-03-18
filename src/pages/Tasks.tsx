@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -29,6 +29,7 @@ export default function Tasks() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
+  const [showArchived, setShowArchived] = useState(false);
 
   // Completion dialog state
   const [completionTask, setCompletionTask] = useState<Task | null>(null);
@@ -44,6 +45,12 @@ export default function Tasks() {
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
+      // Archive filter: if not showing archived, hide them; if showing archived, ONLY show archived
+      if (showArchived) {
+        if (t.status !== "arquivado") return false;
+      } else {
+        if (t.status === "arquivado") return false;
+      }
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (clientFilter.length > 0 && !clientFilter.includes(t.clientId)) return false;
       if (responsibleFilter.length > 0) {
@@ -55,7 +62,14 @@ export default function Tasks() {
       if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
+  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter, showArchived]);
+
+  const archivedCount = useMemo(() => tasks.filter(t => t.status === "arquivado").length, [tasks]);
+
+  const handleUnarchive = async (taskId: string) => {
+    await updateTaskStatus(taskId, "concluido");
+    toast({ title: "Tarefa restaurada", description: "A tarefa foi movida de volta para Concluído." });
+  };
 
   // Intercept status changes to "concluido" — open completion dialog
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
