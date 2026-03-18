@@ -21,15 +21,21 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function Projects() {
-  const { projects, loading } = useProjects();
+  const { projects, loading, addProject } = useProjects();
+  const [showForm, setShowForm] = useState(false);
 
   const inProgressCount = projects.filter((p) => p.status === "em_andamento").length;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-heading font-bold tracking-tight">Projetos</h1>
-        <p className="text-sm text-white/50 mt-1">{inProgressCount} em andamento · {projects.length} total</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">Projetos</h1>
+          <p className="text-sm text-white/50 mt-1">{inProgressCount} em andamento · {projects.length} total</p>
+        </div>
+        <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+          <Plus className="h-4 w-4" /> Novo Projeto
+        </Button>
       </div>
 
       {loading ? (
