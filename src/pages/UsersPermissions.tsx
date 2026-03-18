@@ -86,6 +86,7 @@ function roleRowToRole(r: RoleRow, profileCount: number): Role {
 
 export default function UsersPermissions() {
   const [tab, setTab] = useState<Tab>("users");
+  const { isDemoMode } = useDemo();
   
   const { profiles, loading: profilesLoading, refetch: refetchProfiles, updateProfile } = useProfiles();
   const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
