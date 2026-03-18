@@ -108,6 +108,7 @@ const App = () => (
             <AuthProvider>
               <Routes>
                 <Route path="/login" element={<AuthRoutes />} />
+                <Route path="/setup" element={<SetupRoute />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/*" element={<ProtectedRoutes />} />
               </Routes>
