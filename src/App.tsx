@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
+import { DemoProvider } from "@/contexts/DemoContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
