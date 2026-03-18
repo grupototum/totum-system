@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -17,6 +18,7 @@ import Products from "./pages/Products";
 import Reports from "./pages/Reports";
 import Team from "./pages/Team";
 import SettingsPage from "./pages/SettingsPage";
+import AdminSettings from "./pages/AdminSettings";
 import Registries from "./pages/Registries";
 import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
@@ -53,6 +55,7 @@ function ProtectedRoutes() {
         <Route path="/cadastros" element={<Registries />} />
         <Route path="/usuarios" element={<UsersPermissions />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
+        <Route path="/admin" element={<AdminSettings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
@@ -71,17 +74,19 @@ function AuthRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<AuthRoutes />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+      <GlobalLoadingProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<AuthRoutes />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/*" element={<ProtectedRoutes />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </GlobalLoadingProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

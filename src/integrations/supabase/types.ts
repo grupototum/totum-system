@@ -225,6 +225,39 @@ export type Database = {
           },
         ]
       }
+      company_settings: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contract_types: {
         Row: {
           created_at: string
@@ -593,6 +626,39 @@ export type Database = {
           is_active?: boolean
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      error_logs: {
+        Row: {
+          context: string | null
+          created_at: string
+          error_type: string
+          id: string
+          message: string
+          stack_trace: string | null
+          technical_message: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          error_type: string
+          id?: string
+          message: string
+          stack_trace?: string | null
+          technical_message?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          error_type?: string
+          id?: string
+          message?: string
+          stack_trace?: string | null
+          technical_message?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1305,6 +1371,48 @@ export type Database = {
           is_active?: boolean
           name?: string
           phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          currency: string
+          date_format: string
+          default_checklist_rules: Json
+          default_contract_rules: Json
+          default_recurrence_rules: Json
+          default_task_priority: string
+          default_task_status: string
+          id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          date_format?: string
+          default_checklist_rules?: Json
+          default_contract_rules?: Json
+          default_recurrence_rules?: Json
+          default_task_priority?: string
+          default_task_status?: string
+          id?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          date_format?: string
+          default_checklist_rules?: Json
+          default_contract_rules?: Json
+          default_recurrence_rules?: Json
+          default_task_priority?: string
+          default_task_status?: string
+          id?: string
+          timezone?: string
           updated_at?: string
         }
         Relationships: []
