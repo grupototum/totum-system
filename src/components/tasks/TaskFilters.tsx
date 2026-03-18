@@ -105,6 +105,20 @@ export function TaskFilters({
           </Select>
         </div>
 
+        {/* Tipo */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Tipo</label>
+          <Select value={typeFilter} onValueChange={onTypeFilterChange}>
+            <SelectTrigger className={selectTriggerClass}><SelectValue placeholder="Todos" /></SelectTrigger>
+            <SelectContent className={selectContentClass}>
+              <SelectItem value="all" className={selectItemClass}>Todos os tipos</SelectItem>
+              {(Object.keys(typeLabels) as TaskType[]).map((t) => (
+                <SelectItem key={t} value={t} className={selectItemClass}>{typeLabels[t]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Responsável */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Responsável</label>

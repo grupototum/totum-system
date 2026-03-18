@@ -128,7 +128,8 @@ export default function Tasks() {
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
             responsibleFilter={responsibleFilter} onResponsibleFilterChange={setResponsibleFilter}
             statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
-            priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
+             priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
+            typeFilter={typeFilter} onTypeFilterChange={setTypeFilter}
           />
         )}
       </div>
