@@ -28,6 +28,7 @@ import Registries from "./pages/Registries";
 import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import Templates from "./pages/Templates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
