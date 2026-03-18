@@ -170,3 +170,51 @@ export function useDepartments() {
 
   return departments;
 }
+
+export function useUserRoles() {
+  const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("user_id, role")
+      .eq("role", "admin");
+
+    if (!error && data) {
+      setAdminUserIds(new Set(data.map((r) => r.user_id)));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  const toggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
+    if (isCurrentlyAdmin) {
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .eq("role", "admin");
+      if (error) {
+        toast({ title: "Erro", description: error.message, variant: "destructive" });
+        return false;
+      }
+      toast({ title: "Admin removido", description: "Permissão administrativa removida" });
+    } else {
+      const { error } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "admin" });
+      if (error) {
+        toast({ title: "Erro", description: error.message, variant: "destructive" });
+        return false;
+      }
+      toast({ title: "Admin concedido", description: "Permissão administrativa concedida" });
+    }
+    await fetch();
+    return true;
+  };
+
+  return { adminUserIds, loading, refetch: fetch, toggleAdmin };
+}

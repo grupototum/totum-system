@@ -20,7 +20,7 @@ import { UserFormDialog } from "@/components/users/UserFormDialog";
 import { RoleFormDialog } from "@/components/users/RoleFormDialog";
 import { PermissionMatrix } from "@/components/users/PermissionMatrix";
 import { AuditLog } from "@/components/users/AuditLog";
-import { useProfiles, useRoles, useAuditLogs, useDepartments, ProfileRow, RoleRow } from "@/hooks/useProfiles";
+import { useProfiles, useRoles, useAuditLogs, useDepartments, useUserRoles, ProfileRow, RoleRow } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
