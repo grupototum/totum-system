@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface MultiSelectOption {
   value: string;
   label: string;
+  count?: number;
 }
 
 interface MultiSelectProps {
@@ -16,6 +17,7 @@ interface MultiSelectProps {
 }
 
 export function MultiSelect({ options, selected, onChange, placeholder = "Todos", allLabel = "Todos" }: MultiSelectProps) {
+  const totalCount = options.some(o => o.count !== undefined) ? options.reduce((sum, o) => sum + (o.count || 0), 0) : undefined;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                 {isAll && <Check className="h-2.5 w-2.5 text-white" />}
               </div>
               <span className={isAll ? "text-white font-medium" : "text-white/60"}>{allLabel}</span>
+              {totalCount !== undefined && (
+                <span className="ml-auto text-[10px] text-white/30 tabular-nums">{totalCount}</span>
+              )}
             </button>
 
             {options.map((opt) => {
@@ -88,6 +93,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                     {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
                   <span className={checked ? "text-white font-medium" : "text-white/60"}>{opt.label}</span>
+                  {opt.count !== undefined && (
+                    <span className="ml-auto text-[10px] text-white/30 tabular-nums">{opt.count}</span>
+                  )}
                 </button>
               );
             })}

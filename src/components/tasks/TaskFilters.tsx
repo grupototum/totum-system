@@ -1,7 +1,8 @@
 import { Search, X } from "lucide-react";
+import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "./MultiSelect";
-import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType } from "./taskData";
+import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
@@ -16,6 +17,7 @@ interface TaskFiltersProps {
   onPriorityFilterChange: (v: string[]) => void;
   typeFilter: string[];
   onTypeFilterChange: (v: string[]) => void;
+  tasks?: Task[];
 }
 
 export function TaskFilters({
@@ -25,6 +27,7 @@ export function TaskFilters({
   statusFilter, onStatusFilterChange,
   priorityFilter, onPriorityFilterChange,
   typeFilter, onTypeFilterChange,
+  tasks = [],
 }: TaskFiltersProps) {
   const hasFilters = clientFilter.length > 0 || responsibleFilter.length > 0 || statusFilter.length > 0 || priorityFilter.length > 0 || typeFilter.length > 0;
 
@@ -36,14 +39,31 @@ export function TaskFilters({
     onTypeFilterChange([]);
   };
 
-  const clientOptions = clientPlans.map((c) => ({ value: c.clientId, label: c.clientName }));
+  const counts = useMemo(() => {
+    const client: Record<string, number> = {};
+    const status: Record<string, number> = {};
+    const priority: Record<string, number> = {};
+    const type: Record<string, number> = {};
+    const responsible: Record<string, number> = {};
+    tasks.forEach((t) => {
+      client[t.clientId] = (client[t.clientId] || 0) + 1;
+      status[t.status] = (status[t.status] || 0) + 1;
+      priority[t.priority] = (priority[t.priority] || 0) + 1;
+      type[t.type] = (type[t.type] || 0) + 1;
+      const key = t.responsible || "unassigned";
+      responsible[key] = (responsible[key] || 0) + 1;
+    });
+    return { client, status, priority, type, responsible };
+  }, [tasks]);
+
+  const clientOptions = clientPlans.map((c) => ({ value: c.clientId, label: c.clientName, count: counts.client[c.clientId] || 0 }));
   const responsibleOptions = [
-    { value: "unassigned", label: "Sem responsável" },
-    ...teamMembers.map((m) => ({ value: m, label: m })),
+    { value: "unassigned", label: "Sem responsável", count: counts.responsible["unassigned"] || 0 },
+    ...teamMembers.map((m) => ({ value: m, label: m, count: counts.responsible[m] || 0 })),
   ];
-  const statusOptions = (Object.keys(statusConfig) as TaskStatus[]).map((s) => ({ value: s, label: statusConfig[s].label }));
-  const priorityOptions = (Object.keys(priorityConfig) as TaskPriority[]).map((p) => ({ value: p, label: priorityConfig[p].label }));
-  const typeOptions = (Object.keys(typeLabels) as TaskType[]).map((t) => ({ value: t, label: typeLabels[t] }));
+  const statusOptions = (Object.keys(statusConfig) as TaskStatus[]).map((s) => ({ value: s, label: statusConfig[s].label, count: counts.status[s] || 0 }));
+  const priorityOptions = (Object.keys(priorityConfig) as TaskPriority[]).map((p) => ({ value: p, label: priorityConfig[p].label, count: counts.priority[p] || 0 }));
+  const typeOptions = (Object.keys(typeLabels) as TaskType[]).map((t) => ({ value: t, label: typeLabels[t], count: counts.type[t] || 0 }));
 
   return (
     <div className="w-full">
