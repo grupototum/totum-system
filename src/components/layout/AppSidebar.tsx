@@ -15,7 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import { useAuth } from "@/hooks/useAuth";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
@@ -120,7 +120,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-white/[0.06]">
-        <div className="flex items-center gap-3">
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-white/[0.06]">
           <UserAvatar
             avatarUrl={profile?.avatar_url}
             fullName={profile?.full_name || "Grupo Totum"}
@@ -132,7 +132,7 @@ export function AppSidebar() {
               <span className="text-xs text-white/40">{profile?.roles?.name || "Usuário"}</span>
             </div>
           )}
-        </div>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );
