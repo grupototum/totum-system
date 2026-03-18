@@ -398,7 +398,7 @@ export default function ExecutiveDashboard() {
               <div className="p-1.5 rounded-lg bg-emerald-500/10"><FileText className="h-3.5 w-3.5 text-emerald-400" /></div>
             </div>
             <p className="text-xl font-heading font-bold">{data.activeContracts}</p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Contratos ativos</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">Contratos ativos<InfoTip label="Contratos ativos" /></p>
           </div>
           <div className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
