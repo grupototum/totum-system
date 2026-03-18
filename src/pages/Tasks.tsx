@@ -326,6 +326,14 @@ export default function Tasks() {
         profiles={profiles}
         onComplete={handleComplete}
       />
+
+      <TaskFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        clients={clients}
+        profiles={profiles}
+        onCreated={refetch}
+      />
     </div>
   );
 }
