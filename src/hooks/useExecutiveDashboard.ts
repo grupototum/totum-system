@@ -49,6 +49,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       return;
     }
     setLoading(true);
+    try {
     const now = new Date();
 
     let periodStart: string;
@@ -186,7 +187,19 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       activeContracts, defaultingContracts, contractFulfillment,
       revenueForecast, topClients, revenueConcentration,
     });
-    setLoading(false);
+    } catch (err) {
+      console.error("[ExecutiveDashboard] Erro ao carregar dados:", err);
+      setData({
+        totalRevenue: 0, mrr: 0, receivables: 0, overdueReceivables: 0, totalExpenses: 0,
+        grossProfit: 0, netProfit: 0, margin: 0, revenueByClient: [], revenueByService: [],
+        expensesByCategory: [], totalTasks: 0, pendingTasks: 0, completedTasks: 0,
+        overdueTasks: 0, completionRate: 0, productivityByUser: [], criticalTasks: [],
+        activeContracts: 0, defaultingContracts: 0, contractFulfillment: [],
+        revenueForecast: 0, topClients: [], revenueConcentration: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [periodFilter, isDemoMode]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
