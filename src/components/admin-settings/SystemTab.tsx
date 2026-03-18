@@ -28,6 +28,7 @@ export function SystemTab() {
   const [timezone, setTimezone] = useState("America/Sao_Paulo");
   const [defaultStatus, setDefaultStatus] = useState("pendente");
   const [defaultPriority, setDefaultPriority] = useState("media");
+  const [archiveDays, setArchiveDays] = useState(30);
 
   useEffect(() => {
     if (settings) {
