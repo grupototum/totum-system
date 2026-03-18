@@ -244,23 +244,28 @@ export function useDepartments() {
       return;
     }
 
-    supabase
-      .from("departments")
-      .select("*")
-      .eq("is_active", true)
-      .order("name")
-      .then(({ data, error }) => {
+    const loadDepartments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("departments")
+          .select("*")
+          .eq("is_active", true)
+          .order("name");
+
         if (error) {
           console.error("Error fetching departments:", error);
           setDepartments([]);
           return;
         }
+
         setDepartments(data || []);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching departments:", error);
         setDepartments([]);
-      });
+      }
+    };
+
+    loadDepartments();
   }, [isDemoMode]);
 
   return departments;
