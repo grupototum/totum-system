@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -13,7 +14,9 @@ import {
   CheckSquare,
   Shield,
   ShieldCheck,
+  Gauge,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
@@ -60,11 +63,26 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   const isAdmin =
     profile?.roles?.name?.toLowerCase() === "administrador" ||
     profile?.roles?.name?.toLowerCase() === "admin";
+
+  // Check executive dashboard permission
+  useEffect(() => {
+    if (!user) return;
+    if (isAdmin) {
+      setHasExecDashboard(true);
+      return;
+    }
+    // Check permission from roles.permissions JSON
+    const perms = profile?.roles?.permissions as Record<string, boolean> | null;
+    if (perms?.acessar_dashboard_executivo) {
+      setHasExecDashboard(true);
+    }
+  }, [user, isAdmin, profile]);
 
   const filteredSystemNav = systemNav.filter(
     (item) => item.url !== "/admin" || isAdmin
@@ -100,6 +118,20 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
+        {/* Executive Dashboard - conditional */}
+        {hasExecDashboard && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
+              Estratégico
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge }])}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
             Principal

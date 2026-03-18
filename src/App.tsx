@@ -22,6 +22,7 @@ import AdminSettings from "./pages/AdminSettings";
 import Registries from "./pages/Registries";
 import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ function ProtectedRoutes() {
         <Route path="/usuarios" element={<UsersPermissions />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
         <Route path="/admin" element={<AdminSettings />} />
+        <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
