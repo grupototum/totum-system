@@ -21,8 +21,9 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function Projects() {
-  const { projects, loading, addProject } = useProjects();
+  const { projects, loading, addProject, updateProject } = useProjects();
   const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
 
   const inProgressCount = projects.filter((p) => p.status === "em_andamento").length;
 
