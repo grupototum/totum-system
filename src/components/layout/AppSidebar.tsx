@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -13,7 +14,9 @@ import {
   CheckSquare,
   Shield,
   ShieldCheck,
+  Gauge,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
