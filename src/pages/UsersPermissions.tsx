@@ -366,6 +366,28 @@ export default function UsersPermissions() {
                                   <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                {(() => {
+                                  const profile = profiles.find((p) => p.id === user.id);
+                                  const userId = profile?.user_id;
+                                  if (!userId) return null;
+                                  const isAdmin = adminUserIds.has(userId);
+                                  return (
+                                    <DropdownMenuItem
+                                      onClick={async () => {
+                                        await toggleAdmin(userId, isAdmin);
+                                        await logAudit(
+                                          isAdmin ? "Admin removido" : "Admin concedido",
+                                          `Usuário ${user.name} ${isAdmin ? "removido de" : "promovido a"} administrador`
+                                        );
+                                      }}
+                                      className={`text-xs focus:bg-white/[0.06] ${isAdmin ? "text-amber-400 focus:text-amber-400" : "text-emerald-400 focus:text-emerald-400"}`}
+                                    >
+                                      {isAdmin ? <ShieldOff className="h-3.5 w-3.5 mr-2" /> : <ShieldCheck className="h-3.5 w-3.5 mr-2" />}
+                                      {isAdmin ? "Remover Admin" : "Promover a Admin"}
+                                    </DropdownMenuItem>
+                                  );
+                                })()}
+                                <DropdownMenuSeparator className="bg-white/[0.06]" />
                                 {user.status === "ativo" ? (
                                   <>
                                     <DropdownMenuItem onClick={() => handleToggleStatus(user, "inativo")} className="text-xs focus:bg-white/[0.06]">
