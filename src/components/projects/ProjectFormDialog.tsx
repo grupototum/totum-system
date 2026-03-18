@@ -39,7 +39,20 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
       });
-      setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
+      if (initialData) {
+        setForm({
+          name: initialData.name || "",
+          client_id: initialData.client_id || "",
+          contract_id: initialData.contract_id || "",
+          project_type_id: initialData.project_type_id || "",
+          responsible_id: initialData.responsible_id || "",
+          description: initialData.description || "",
+          start_date: initialData.start_date || "",
+          due_date: initialData.due_date || "",
+        });
+      } else {
+        setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
+      }
     }
   }, [open]);
 
