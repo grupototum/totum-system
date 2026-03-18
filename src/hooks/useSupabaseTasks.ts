@@ -76,7 +76,8 @@ export function useSupabaseTasks() {
       })),
       comments: (t.task_comments || []).map((c: any) => ({
         id: c.id,
-        author: profileMap.get(c.user_id) || "Usuário",
+        author: profileMap.get(c.user_id)?.name || "Usuário",
+        authorAvatarUrl: profileMap.get(c.user_id)?.avatar || undefined,
         text: c.content,
         createdAt: c.created_at,
       })),
