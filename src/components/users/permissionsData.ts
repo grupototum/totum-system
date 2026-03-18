@@ -193,6 +193,7 @@ export const permissionTree: PermCategory[] = [
       { key: "cfg_automacoes", label: "Automações", actions: ["visualizar", "editar"] },
       { key: "cfg_visual", label: "Identidade Visual", actions: ["visualizar", "editar"] },
       { key: "cfg_parametros", label: "Parâmetros Globais", actions: ["visualizar", "editar"] },
+      { key: "cfg_modo_demo", label: "Modo Demo", actions: ["visualizar"] },
     ],
   },
 ];
