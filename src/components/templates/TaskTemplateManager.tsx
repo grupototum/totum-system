@@ -38,14 +38,20 @@ export function TaskTemplateManager() {
   const fetch = async () => {
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTemplates([]);
+        return;
+      }
       const { data, error } = await supabase
         .from("task_templates")
         .select("*, task_template_items(*)")
         .order("name");
       if (error) throw error;
       setTemplates((data as any) || []);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao carregar templates:", err);
+      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
