@@ -69,7 +69,7 @@ export default function Tasks() {
       due_date: updatedTask.dueDate || null,
       is_recurring: updatedTask.isRecurring || false,
       recurrence_type: updatedTask.recurrenceType || null,
-      recurrence_config: updatedTask.recurrenceConfig || null,
+      recurrence_config: (updatedTask.recurrenceConfig as any) || null,
       recurrence_end_date: updatedTask.recurrenceEndDate || null,
     });
   };
