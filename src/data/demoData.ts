@@ -333,6 +333,41 @@ export const demoDeliveryChecklists = [
   },
 ];
 
+// ── Profiles (demo) ──
+export const demoProfilesList = [
+  { id: "demo-profile-1", user_id: "demo-user-1", full_name: "Ana Silva", email: "ana.silva@demo.com", phone: "(11) 99999-1001", status: "ativo", role_id: "demo-role-1", department_id: "demo-dept-1", avatar_url: null, salary: 5500, commission_type: null, commission_value: null, last_access: daysAgo(0) + "T14:30:00", created_at: daysAgo(200), updated_at: daysAgo(0), roles: { name: "Administrador", permissions: {} }, departments: { name: "Criação" } },
+  { id: "demo-profile-2", user_id: "demo-user-2", full_name: "Carlos Mendes", email: "carlos.mendes@demo.com", phone: "(11) 99999-1002", status: "ativo", role_id: "demo-role-2", department_id: "demo-dept-2", avatar_url: null, salary: 4500, commission_type: null, commission_value: null, last_access: daysAgo(0) + "T11:00:00", created_at: daysAgo(150), updated_at: daysAgo(0), roles: { name: "Gestor", permissions: {} }, departments: { name: "Marketing" } },
+  { id: "demo-profile-3", user_id: "demo-user-3", full_name: "Juliana Costa", email: "juliana.costa@demo.com", phone: "(11) 99999-1003", status: "ativo", role_id: "demo-role-3", department_id: "demo-dept-2", avatar_url: null, salary: 4000, commission_type: null, commission_value: null, last_access: daysAgo(1) + "T16:00:00", created_at: daysAgo(120), updated_at: daysAgo(1), roles: { name: "Analista", permissions: {} }, departments: { name: "Marketing" } },
+  { id: "demo-profile-4", user_id: "demo-user-4", full_name: "Rafael Lima", email: "rafael.lima@demo.com", phone: "(11) 99999-1004", status: "ativo", role_id: "demo-role-3", department_id: "demo-dept-1", avatar_url: null, salary: 3800, commission_type: null, commission_value: null, last_access: daysAgo(2) + "T09:00:00", created_at: daysAgo(90), updated_at: daysAgo(2), roles: { name: "Analista", permissions: {} }, departments: { name: "Criação" } },
+  { id: "demo-profile-5", user_id: "demo-user-5", full_name: "Marina Souza", email: "marina.souza@demo.com", phone: "(11) 99999-1005", status: "ativo", role_id: "demo-role-2", department_id: "demo-dept-3", avatar_url: null, salary: 5000, commission_type: null, commission_value: null, last_access: daysAgo(0) + "T10:00:00", created_at: daysAgo(180), updated_at: daysAgo(0), roles: { name: "Gestor", permissions: {} }, departments: { name: "Atendimento" } },
+  { id: "demo-profile-6", user_id: "demo-user-6", full_name: "Lucas Pereira", email: "lucas.pereira@demo.com", phone: "(11) 99999-1006", status: "inativo", role_id: "demo-role-4", department_id: "demo-dept-1", avatar_url: null, salary: 2500, commission_type: null, commission_value: null, last_access: daysAgo(30) + "T08:00:00", created_at: daysAgo(60), updated_at: daysAgo(30), roles: { name: "Estagiário", permissions: {} }, departments: { name: "Criação" } },
+];
+
+// ── Roles (demo) ──
+export const demoRolesList = [
+  { id: "demo-role-1", name: "Administrador", description: "Acesso total ao sistema", permissions: {}, is_system: true, created_at: daysAgo(365), updated_at: daysAgo(30) },
+  { id: "demo-role-2", name: "Gestor", description: "Gerencia equipe e projetos", permissions: {}, is_system: false, created_at: daysAgo(300), updated_at: daysAgo(10) },
+  { id: "demo-role-3", name: "Analista", description: "Executa tarefas e cria relatórios", permissions: {}, is_system: false, created_at: daysAgo(300), updated_at: daysAgo(10) },
+  { id: "demo-role-4", name: "Estagiário", description: "Acesso limitado a tarefas atribuídas", permissions: {}, is_system: false, created_at: daysAgo(100), updated_at: daysAgo(50) },
+];
+
+// ── Audit Logs (demo) ──
+export const demoAuditLogsList = [
+  { id: uuid(801), user_id: "demo-user-1", action: "Usuário criado", entity_type: "usuario", detail: "Usuário Lucas Pereira criado", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(60) + "T09:00:00" },
+  { id: uuid(802), user_id: "demo-user-1", action: "Cargo criado", entity_type: "cargo", detail: "Cargo Estagiário criado", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(100) + "T10:00:00" },
+  { id: uuid(803), user_id: "demo-user-5", action: "Status alterado", entity_type: "usuario", detail: "Usuário Lucas Pereira → Inativo", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(30) + "T14:00:00" },
+  { id: uuid(804), user_id: "demo-user-1", action: "Admin concedido", entity_type: "usuario", detail: "Usuário Marina Souza promovida a administrador", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(15) + "T11:30:00" },
+  { id: uuid(805), user_id: "demo-user-2", action: "Cargo editado", entity_type: "cargo", detail: "Cargo Analista atualizado", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(10) + "T16:00:00" },
+  { id: uuid(806), user_id: "demo-user-1", action: "Senha redefinida", entity_type: "usuario", detail: "Senha de Rafael Lima redefinida", entity_id: null, ip_address: null, old_data: null, new_data: null, created_at: daysAgo(5) + "T08:45:00" },
+];
+
+// ── Departments (demo) ──
+export const demoDepartmentsList = [
+  { id: "demo-dept-1", name: "Criação", is_active: true, created_at: daysAgo(365), updated_at: daysAgo(30) },
+  { id: "demo-dept-2", name: "Marketing", is_active: true, created_at: daysAgo(365), updated_at: daysAgo(30) },
+  { id: "demo-dept-3", name: "Atendimento", is_active: true, created_at: daysAgo(365), updated_at: daysAgo(30) },
+];
+
 // ── Client observations (timeline) ──
 export const demoClientObservations = [
   { id: uuid(601), client_id: uuid(1), user_id: "demo-user-1", content: "Cliente solicitou ajuste na paleta de cores das artes de março", created_at: daysAgo(3) + "T14:30:00" },

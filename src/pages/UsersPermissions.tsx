@@ -22,6 +22,7 @@ import { PermissionMatrix } from "@/components/users/PermissionMatrix";
 import { AuditLog } from "@/components/users/AuditLog";
 import { useProfiles, useRoles, useAuditLogs, useDepartments, useUserRoles, ProfileRow, RoleRow } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -85,6 +86,7 @@ function roleRowToRole(r: RoleRow, profileCount: number): Role {
 
 export default function UsersPermissions() {
   const [tab, setTab] = useState<Tab>("users");
+  const { isDemoMode } = useDemo();
   
   const { profiles, loading: profilesLoading, refetch: refetchProfiles, updateProfile } = useProfiles();
   const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
@@ -125,6 +127,7 @@ export default function UsersPermissions() {
   }, [logs, profiles]);
 
   const logAudit = async (action: string, detail: string) => {
+    if (isDemoMode) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.rpc("log_audit", {
