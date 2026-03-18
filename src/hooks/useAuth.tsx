@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(async () => {
             const { data } = await supabase
               .from("profiles")
-              .select("*, roles(name, permissions)")
+              .select("*, roles(name, permissions), departments(name)")
               .eq("user_id", session.user.id)
               .single();
             

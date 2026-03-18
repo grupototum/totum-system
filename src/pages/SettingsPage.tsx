@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { User, Shield, Puzzle, Camera, Loader2, CheckCircle2, AlertCircle, Clock, LogOut } from "lucide-react";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,11 +18,13 @@ function ProfileTab() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setPhone(profile.phone || "");
+      setAvatarUrl(profile.avatar_url || null);
     }
   }, [profile]);
 
@@ -36,7 +39,6 @@ function ProfileTab() {
     if (error) {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
     } else {
-      // Log audit
       await supabase.rpc("log_audit", {
         _user_id: user!.id,
         _action: "update",
@@ -49,29 +51,17 @@ function ProfileTab() {
     setSaving(false);
   };
 
-  const initials = (profile?.full_name || "U")
-    .split(" ")
-    .map((w: string) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-
   return (
     <div className="space-y-6">
-      {/* Avatar */}
-      <div className="flex items-center gap-5">
-        <div className="relative group">
-          <div className="h-20 w-20 rounded-2xl gradient-primary flex items-center justify-center text-2xl font-heading font-bold">
-            {initials}
-          </div>
-          <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
-            <Camera className="h-5 w-5 text-white/80" />
-          </div>
-        </div>
-        <div>
-          <h3 className="font-heading font-semibold text-lg">{profile?.full_name}</h3>
-          <p className="text-sm text-muted-foreground">{profile?.email}</p>
-        </div>
+      {/* Avatar Upload */}
+      <AvatarUpload
+        avatarUrl={avatarUrl}
+        fullName={profile?.full_name}
+        onUploaded={(url) => setAvatarUrl(url)}
+      />
+      <div>
+        <h3 className="font-heading font-semibold text-lg">{profile?.full_name}</h3>
+        <p className="text-sm text-muted-foreground">{profile?.email}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

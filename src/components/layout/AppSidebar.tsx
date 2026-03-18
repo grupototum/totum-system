@@ -17,6 +17,8 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
+import { useAuth } from "@/hooks/useAuth";
+import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
   SidebarContent,
@@ -58,7 +60,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-
+  const { profile } = useAuth();
   const renderItems = (items: typeof mainNav) =>
     items.map((item) => (
       <SidebarMenuItem key={item.title}>
@@ -119,13 +121,15 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 border-t border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-xs font-bold">
-            GT
-          </div>
+          <UserAvatar
+            avatarUrl={profile?.avatar_url}
+            fullName={profile?.full_name || "Grupo Totum"}
+            size="sm"
+          />
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Grupo Totum</span>
-              <span className="text-xs text-white/40">Admin</span>
+              <span className="text-sm font-medium">{profile?.full_name || "Grupo Totum"}</span>
+              <span className="text-xs text-white/40">{profile?.roles?.name || "Usuário"}</span>
             </div>
           )}
         </div>
