@@ -63,11 +63,26 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   const isAdmin =
     profile?.roles?.name?.toLowerCase() === "administrador" ||
     profile?.roles?.name?.toLowerCase() === "admin";
+
+  // Check executive dashboard permission
+  useEffect(() => {
+    if (!user) return;
+    if (isAdmin) {
+      setHasExecDashboard(true);
+      return;
+    }
+    // Check permission from roles.permissions JSON
+    const perms = profile?.roles?.permissions as Record<string, boolean> | null;
+    if (perms?.acessar_dashboard_executivo) {
+      setHasExecDashboard(true);
+    }
+  }, [user, isAdmin, profile]);
 
   const filteredSystemNav = systemNav.filter(
     (item) => item.url !== "/admin" || isAdmin
