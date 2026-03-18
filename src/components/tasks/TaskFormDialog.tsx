@@ -90,6 +90,7 @@ export function TaskFormDialog({
     setDueDate("");
     setChecklistItems([]);
     setNewCheckItem("");
+    setSubtaskItems([]);
     setShowTemplates(false);
   };
 
