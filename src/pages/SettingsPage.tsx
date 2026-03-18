@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { User, Shield, Puzzle, Camera, Loader2, CheckCircle2, AlertCircle, Clock, LogOut } from "lucide-react";
+import { AvatarUpload } from "@/components/shared/AvatarUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
