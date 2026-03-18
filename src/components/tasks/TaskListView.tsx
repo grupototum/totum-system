@@ -1,5 +1,5 @@
 import { Task, statusConfig, priorityConfig } from "./taskData";
-import { Clock, User, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TaskListViewProps {
   tasks: Task[];
