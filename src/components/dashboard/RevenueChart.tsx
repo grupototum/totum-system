@@ -41,8 +41,8 @@ export function RevenueChart() {
           .gte("due_date", monthStart)
           .lt("due_date", monthEnd);
 
-        const receita = (entries || []).filter(e => e.type === "receita").reduce((s, e) => s + Number(e.value), 0);
-        const custo = (entries || []).filter(e => e.type === "despesa").reduce((s, e) => s + Number(e.value), 0);
+        const receita = (entries || []).filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
+        const custo = (entries || []).filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
         const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
         results.push({ month: label.charAt(0).toUpperCase() + label.slice(1), receita, custo });
       }
