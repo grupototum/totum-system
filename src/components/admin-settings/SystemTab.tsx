@@ -37,6 +37,7 @@ export function SystemTab() {
       setTimezone(settings.timezone || "America/Sao_Paulo");
       setDefaultStatus(settings.default_task_status || "pendente");
       setDefaultPriority(settings.default_task_priority || "media");
+      setArchiveDays((settings as any).archive_after_days ?? 30);
     }
   }, [settings]);
 
