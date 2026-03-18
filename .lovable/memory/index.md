@@ -9,3 +9,11 @@ User approval flow: new signups get status 'pendente', master must approve via U
 Master admin: israelassislemos@gmail.com with user_roles 'admin'
 Auto-confirm email enabled (approval flow replaces email verification)
 Edge functions: generate-checklists, generate-tasks, bootstrap-admin
+
+Architecture: Client-centric HUB model (/clientes/:id → ClientHub with tabs)
+Tables added: client_observations, task_templates, task_template_items, project_templates, project_template_tasks, task_dependencies
+Field added: clients.marketing_analysis (TEXT)
+Menu: Central do Cliente, Tarefas, Projetos, Financeiro, Dashboard Executivo, Equipe, Configurações
+Header includes: TaskSearch (Ctrl+K) and NotificationCenter (realtime bell icon)
+Financial: supports installment (parcelamento) auto-generation
+TaskFormDialog: supports checklist creation and task templates
