@@ -173,7 +173,7 @@ export function ProjectTemplateManager() {
             title: t.title,
             description: t.description || null,
             sort_order: idx,
-            subtasks: t.subtasks,
+            subtasks: t.subtasks as unknown as Json,
           }))
         );
         toast({ title: "Template criado" });
