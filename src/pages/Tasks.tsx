@@ -232,11 +232,19 @@ export default function Tasks() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-bold tracking-tight">Tarefas</h1>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">
+            {showArchived ? "Tarefas Arquivadas" : "Tarefas"}
+          </h1>
           <p className="text-sm text-white/50 mt-1">
-            {tasks.length} tarefas · {pendingTasks} pendentes
-            {overdueTasks > 0 && (
-              <span className="text-red-400 ml-2">· {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
+            {showArchived ? (
+              <span>{archivedCount} tarefa{archivedCount !== 1 ? "s" : ""} arquivada{archivedCount !== 1 ? "s" : ""}</span>
+            ) : (
+              <>
+                {activeTasks.length} tarefas · {pendingTasks} pendentes
+                {overdueTasks > 0 && (
+                  <span className="text-red-400 ml-2">· {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
+                )}
+              </>
             )}
           </p>
         </div>
