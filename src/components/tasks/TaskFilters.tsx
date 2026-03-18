@@ -48,7 +48,7 @@ export function TaskFilters({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
         {/* Busca */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Buscar</label>
