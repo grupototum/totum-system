@@ -33,77 +33,81 @@ export function useDashboard() {
       return;
     }
     setLoading(true);
+    try {
+      // Active contracts → MRR
+      const { data: contracts } = await supabase
+        .from("contracts")
+        .select("value, client_id")
+        .eq("status", "ativo");
 
-    // Active contracts → MRR
-    const { data: contracts } = await supabase
-      .from("contracts")
-      .select("value, client_id")
-      .eq("status", "ativo");
+      const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
+      const uniqueClients = new Set((contracts || []).map(c => c.client_id));
 
-    const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
-    const uniqueClients = new Set((contracts || []).map(c => c.client_id));
+      const { count: activeClients } = await supabase
+        .from("clients")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "ativo");
 
-    const { count: activeClients } = await supabase
-      .from("clients")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "ativo");
+      const now = new Date();
+      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, "0")}-01`;
 
-    const now = new Date();
-    const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, "0")}-01`;
+      const { data: entries } = await supabase
+        .from("financial_entries")
+        .select("type, value, status")
+        .gte("due_date", monthStart)
+        .lt("due_date", monthEnd);
 
-    const { data: entries } = await supabase
-      .from("financial_entries")
-      .select("type, value, status")
-      .gte("due_date", monthStart)
-      .lt("due_date", monthEnd);
+      const income = (entries || []).filter(e => e.type === "receber" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
+      const expense = (entries || []).filter(e => e.type === "pagar" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
+      const overdue = (entries || []).filter(e => e.status === "atrasado").length;
 
-    const income = (entries || []).filter(e => e.type === "receber" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
-    const expense = (entries || []).filter(e => e.type === "pagar" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
-    const overdue = (entries || []).filter(e => e.status === "atrasado").length;
+      const { data: checklists } = await supabase
+        .from("delivery_checklists")
+        .select("fulfillment_pct")
+        .limit(100);
 
-    const { data: checklists } = await supabase
-      .from("delivery_checklists")
-      .select("fulfillment_pct")
-      .limit(100);
+      const avgFulfillment = checklists && checklists.length > 0
+        ? Math.round(checklists.reduce((s, c) => s + (Number(c.fulfillment_pct) || 0), 0) / checklists.length)
+        : 0;
 
-    const avgFulfillment = checklists && checklists.length > 0
-      ? Math.round(checklists.reduce((s, c) => s + (Number(c.fulfillment_pct) || 0), 0) / checklists.length)
-      : 0;
+      const { count: pendingUsers } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pendente" as any);
 
-    const { count: pendingUsers } = await supabase
-      .from("profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "pendente" as any);
+      const { data: recentTasks } = await supabase
+        .from("task_history")
+        .select("action, detail, created_at, tasks(title, clients(name))")
+        .order("created_at", { ascending: false })
+        .limit(5);
 
-    const { data: recentTasks } = await supabase
-      .from("task_history")
-      .select("action, detail, created_at, tasks(title, clients(name))")
-      .order("created_at", { ascending: false })
-      .limit(5);
+      const recentActivity = (recentTasks || []).map((t: any) => ({
+        action: t.action,
+        client: t.tasks?.clients?.name || t.tasks?.title || "—",
+        time: formatTimeAgo(new Date(t.created_at)),
+        type: t.action.includes("conclu") ? "success" as const : t.action.includes("pendente") ? "warning" as const : "info" as const,
+      }));
 
-    const recentActivity = (recentTasks || []).map((t: any) => ({
-      action: t.action,
-      client: t.tasks?.clients?.name || t.tasks?.title || "—",
-      time: formatTimeAgo(new Date(t.created_at)),
-      type: t.action.includes("conclu") ? "success" as const : t.action.includes("pendente") ? "warning" as const : "info" as const,
-    }));
-
-    setData({
-      mrr,
-      activeClients: activeClients || 0,
-      fulfillmentPct: avgFulfillment,
-      profit: income - expense,
-      mrrChange: "+0%",
-      clientsChange: `${uniqueClients.size}`,
-      profitChange: income - expense >= 0 ? "Positivo" : "Negativo",
-      recentActivity,
-      pendingUsers: pendingUsers || 0,
-      overdueEntries: overdue,
-      pendingChecklists: 0,
-    });
-    setLoading(false);
+      setData({
+        mrr,
+        activeClients: activeClients || 0,
+        fulfillmentPct: avgFulfillment,
+        profit: income - expense,
+        mrrChange: "+0%",
+        clientsChange: `${uniqueClients.size}`,
+        profitChange: income - expense >= 0 ? "Positivo" : "Negativo",
+        recentActivity,
+        pendingUsers: pendingUsers || 0,
+        overdueEntries: overdue,
+        pendingChecklists: 0,
+      });
+    } catch (err) {
+      console.error("[Dashboard] Erro ao carregar dados:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
