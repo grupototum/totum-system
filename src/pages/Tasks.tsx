@@ -227,6 +227,12 @@ export default function Tasks() {
         </div>
         <div className="flex items-center gap-2">
           <Button
+            onClick={() => setCreateOpen(true)}
+            className="gap-2 rounded-full px-4 text-sm"
+          >
+            <Plus className="h-4 w-4" /> Nova Tarefa
+          </Button>
+          <Button
             onClick={() => setGenerateOpen(true)}
             variant="outline"
             className="gap-2 rounded-full px-4 text-sm border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
