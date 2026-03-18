@@ -219,29 +219,61 @@ export default function ExecutiveDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5">
-          {/* Revenue by Client */}
+          {/* Revenue by Client - Donut Chart */}
           <div className="glass-card rounded-xl p-5">
             <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <BarChart3 className="h-3.5 w-3.5" /> Receita por Cliente
+              <PieChart className="h-3.5 w-3.5" /> Receita por Cliente
             </h3>
-            <div className="space-y-2.5 max-h-[220px] overflow-y-auto scrollbar-thin">
-              {data.revenueByClient.length === 0 ? (
-                <p className="text-xs text-white/30 text-center py-4">Sem dados no período</p>
-              ) : (
-                data.revenueByClient.map((c) => {
-                  const pct = data.totalRevenue > 0 ? Math.round((c.value / data.totalRevenue) * 100) : 0;
-                  return (
-                    <div key={c.name} className="flex items-center gap-3">
-                      <span className="text-xs truncate flex-1 min-w-0">{c.name}</span>
-                      <div className="w-24 h-1.5 rounded-full bg-white/[0.06] overflow-hidden shrink-0">
-                        <div className="h-full rounded-full bg-emerald-500/50" style={{ width: `${pct}%` }} />
+            {data.revenueByClient.length === 0 ? (
+              <p className="text-xs text-white/30 text-center py-4">Sem dados no período</p>
+            ) : (
+              <div className="flex items-start gap-5">
+                {/* Donut */}
+                <div className="relative h-32 w-32 shrink-0">
+                  <svg viewBox="0 0 36 36" className="h-32 w-32 -rotate-90">
+                    {(() => {
+                      let offset = 0;
+                      const colors = ["#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#ef4444", "#f97316"];
+                      return data.revenueByClient.slice(0, 8).map((c, i) => {
+                        const pct = data.totalRevenue > 0 ? (c.value / data.totalRevenue) * 100 : 0;
+                        const el = (
+                          <circle
+                            key={c.name}
+                            r="15.9"
+                            cx="18"
+                            cy="18"
+                            fill="transparent"
+                            stroke={colors[i % colors.length]}
+                            strokeWidth="3"
+                            strokeDasharray={`${pct} ${100 - pct}`}
+                            strokeDashoffset={`${-offset}`}
+                            className="opacity-70"
+                          />
+                        );
+                        offset += pct;
+                        return el;
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs font-heading font-bold">{formatCurrency(data.totalRevenue)}</span>
+                  </div>
+                </div>
+                {/* Legend */}
+                <div className="space-y-1.5 flex-1 min-w-0 max-h-[180px] overflow-y-auto scrollbar-thin">
+                  {data.revenueByClient.slice(0, 8).map((c, i) => {
+                    const pct = data.totalRevenue > 0 ? Math.round((c.value / data.totalRevenue) * 100) : 0;
+                    return (
+                      <div key={c.name} className="flex items-center gap-2">
+                        <span className={`h-2.5 w-2.5 rounded-sm shrink-0 ${COLORS[i % COLORS.length]}`} />
+                        <span className="text-[10px] text-white/60 truncate flex-1">{c.name}</span>
+                        <span className="text-[10px] text-white/40 font-mono shrink-0">{pct}%</span>
                       </div>
-                      <span className="text-[10px] text-white/40 font-mono shrink-0 w-16 text-right">{formatCurrency(c.value)}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Expenses by Category (Pie) */}
