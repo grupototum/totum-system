@@ -110,10 +110,6 @@ export function ClientHubDeliveries({ clientId }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar entregas..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-white/[0.05] border-border" />
         </div>
-        <div className="flex gap-1">
-          <Button variant={viewMode === "cards" ? "default" : "ghost"} size="icon" onClick={() => setViewMode("cards")}><LayoutGrid className="h-4 w-4" /></Button>
-          <Button variant={viewMode === "list" ? "default" : "ghost"} size="icon" onClick={() => setViewMode("list")}><List className="h-4 w-4" /></Button>
-        </div>
       </div>
 
       {filtered.length === 0 ? (
