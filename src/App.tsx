@@ -97,6 +97,13 @@ function AuthRoutes() {
   return <AuthPage />;
 }
 
+function SetupRoute() {
+  const hasAdmin = useHasAdmin();
+  if (hasAdmin === null) return null;
+  if (hasAdmin) return <Navigate to="/login" replace />;
+  return <SetupPage />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
