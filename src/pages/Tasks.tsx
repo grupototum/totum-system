@@ -27,23 +27,23 @@ export default function Tasks() {
 
   // Filters
   const [search, setSearch] = useState("");
-  const [clientFilter, setClientFilter] = useState("all");
-  const [responsibleFilter, setResponsibleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [clientFilter, setClientFilter] = useState<string[]>([]);
+  const [responsibleFilter, setResponsibleFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string[]>([]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
-      if (clientFilter !== "all" && t.clientId !== clientFilter) return false;
-      if (responsibleFilter !== "all") {
-        if (responsibleFilter === "unassigned" && t.responsible) return false;
-        if (responsibleFilter !== "unassigned" && t.responsible !== responsibleFilter) return false;
+      if (clientFilter.length > 0 && !clientFilter.includes(t.clientId)) return false;
+      if (responsibleFilter.length > 0) {
+        if (responsibleFilter.includes("unassigned") && !t.responsible) return true;
+        if (!t.responsible || !responsibleFilter.includes(t.responsible)) return false;
       }
-      if (statusFilter !== "all" && t.status !== statusFilter) return false;
-      if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
-      if (typeFilter !== "all" && t.type !== typeFilter) return false;
+      if (statusFilter.length > 0 && !statusFilter.includes(t.status)) return false;
+      if (priorityFilter.length > 0 && !priorityFilter.includes(t.priority)) return false;
+      if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
       return true;
     });
   }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
