@@ -85,7 +85,7 @@ export function useSupabaseTasks() {
         id: h.id,
         action: h.action,
         detail: h.detail || "",
-        user: h.user_id ? profileMap.get(h.user_id) || "Sistema" : "Sistema",
+        user: h.user_id ? profileMap.get(h.user_id)?.name || "Sistema" : "Sistema",
         createdAt: h.created_at,
       })),
     }));
