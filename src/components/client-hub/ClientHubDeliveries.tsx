@@ -28,7 +28,6 @@ export function ClientHubDeliveries({ clientId }: Props) {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [search, setSearch] = useState("");
 
   const fetch = useCallback(async () => {
