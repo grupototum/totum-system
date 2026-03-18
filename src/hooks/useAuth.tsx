@@ -8,11 +8,12 @@ interface AuthContextType {
   user: User | null;
   profile: any | null;
   loading: boolean;
+  isPending: boolean;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  session: null, user: null, profile: null, loading: true, signOut: async () => {},
+  session: null, user: null, profile: null, loading: true, isPending: false, signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -30,17 +32,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Fetch profile with setTimeout to avoid Supabase deadlock
           setTimeout(async () => {
             const { data } = await supabase
               .from("profiles")
               .select("*, roles(name, permissions)")
               .eq("user_id", session.user.id)
               .single();
-            setProfile(data);
+            
+            if (data) {
+              const status = data.status as string;
+              if (status === "pendente" || status === "inativo" || status === "bloqueado") {
+                setIsPending(true);
+                setProfile(null);
+                // Sign out the user - they can't access the system
+                await supabase.auth.signOut();
+                setSession(null);
+                setUser(null);
+                setLoading(false);
+                return;
+              }
+              setIsPending(false);
+              setProfile(data);
+            }
           }, 0);
         } else {
           setProfile(null);
+          setIsPending(false);
         }
         setLoading(false);
       }
@@ -60,10 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setUser(null);
     setProfile(null);
+    setIsPending(false);
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, loading, isPending, signOut }}>
       {children}
     </AuthContext.Provider>
   );
