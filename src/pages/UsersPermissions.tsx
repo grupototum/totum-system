@@ -90,6 +90,7 @@ export default function UsersPermissions() {
   const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
   const { logs, loading: auditLoading } = useAuditLogs();
   const departments = useDepartments();
+  const { adminUserIds, toggleAdmin } = useUserRoles();
 
   // Dialogs
   const [userFormOpen, setUserFormOpen] = useState(false);
