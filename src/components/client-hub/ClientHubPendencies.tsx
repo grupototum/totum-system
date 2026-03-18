@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, AlertTriangle, Clock, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoTasks, demoDeliveryChecklists } from "@/data/demoData";
 import { format } from "date-fns";
 
 interface Props { clientId: string; }
 
 export function ClientHubPendencies({ clientId }: Props) {
+  const { isDemoMode } = useDemo();
   const [lateTasks, setLateTasks] = useState<any[]>([]);
   const [incompleteDeliveries, setIncompleteDeliveries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +16,21 @@ export function ClientHubPendencies({ clientId }: Props) {
   const fetch = useCallback(async () => {
     setLoading(true);
     const today = new Date().toISOString().split("T")[0];
+
+    if (isDemoMode) {
+      const late = demoTasks
+        .filter(t => t.clientId === clientId && t.status !== "concluido" && t.dueDate && t.dueDate < today)
+        .map(t => ({ id: t.id, title: t.title, due_date: t.dueDate, priority: t.priority, status: t.status }));
+
+      const incomplete = demoDeliveryChecklists
+        .filter(c => c.client_id === clientId && !c.completed_at)
+        .map(c => ({ id: c.id, period: c.period, frequency: c.frequency, fulfillment_pct: c.fulfillment_pct, plans: c.plans }));
+
+      setLateTasks(late);
+      setIncompleteDeliveries(incomplete);
+      setLoading(false);
+      return;
+    }
 
     // Late tasks
     const { data: tasks } = await supabase
@@ -34,7 +52,7 @@ export function ClientHubPendencies({ clientId }: Props) {
     setLateTasks(tasks || []);
     setIncompleteDeliveries(checklists || []);
     setLoading(false);
-  }, [clientId]);
+  }, [clientId, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
