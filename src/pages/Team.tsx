@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Briefcase, Loader2, Users, Filter } from "lucide-react";
-import { useProfiles, useRoles } from "@/hooks/useProfiles";
+import { useProfiles, useRoles, useDepartments } from "@/hooks/useProfiles";
 import { UserDetailSheet } from "@/components/users/UserDetailSheet";
 import { ProfileRow } from "@/hooks/useProfiles";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -18,9 +19,11 @@ const statusColors: Record<string, string> = {
 };
 
 export default function Team() {
+  const { isDemoMode } = useDemo();
   const { profiles, loading, refetch } = useProfiles();
   const { roles } = useRoles();
-  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const deptsList = useDepartments();
+  const departments = deptsList.map(d => ({ id: d.id, name: d.name }));
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<ProfileRow | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -30,15 +33,16 @@ export default function Team() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
-    supabase.from("departments").select("id, name").eq("is_active", true).order("name")
-      .then(({ data }) => setDepartments(data || []));
-
+    if (isDemoMode) {
+      setIsAdmin(true);
+      return;
+    }
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         supabase.rpc("is_admin", { _user_id: user.id }).then(({ data }) => setIsAdmin(!!data));
       }
     });
-  }, []);
+  }, [isDemoMode]);
 
   const filtered = profiles.filter((p) => {
     if (statusFilter !== "all" && p.status !== statusFilter) return false;
@@ -147,8 +151,7 @@ export default function Team() {
         departments={departments}
         onRefresh={() => {
           refetch();
-          // Re-fetch updated profile
-          if (selectedProfile) {
+          if (selectedProfile && !isDemoMode) {
             supabase.from("profiles")
               .select("*, roles(name, permissions), departments(name)")
               .eq("id", selectedProfile.id)

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoDeliveryChecklists } from "@/data/demoData";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export type ChecklistRow = Tables<"delivery_checklists"> & {
@@ -9,12 +11,20 @@ export type ChecklistRow = Tables<"delivery_checklists"> & {
   delivery_checklist_items?: Tables<"delivery_checklist_items">[];
 };
 
+const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
+
 export function useDeliveryChecklists() {
+  const { isDemoMode } = useDemo();
   const [checklists, setChecklists] = useState<ChecklistRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      setChecklists(demoDeliveryChecklists as unknown as ChecklistRow[]);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("delivery_checklists")
       .select("*, clients(name), plans(name), delivery_checklist_items(*)")
@@ -24,7 +34,7 @@ export function useDeliveryChecklists() {
     if (error) console.error("Error fetching checklists:", error);
     else setChecklists((data as ChecklistRow[]) || []);
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -33,6 +43,7 @@ export function useDeliveryChecklists() {
     status: Enums<"delivery_item_status">,
     justification?: string
   ) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const updates: any = { status };
     if (justification !== undefined) updates.justification = justification;
     if (status === "entregue") updates.completed_at = new Date().toISOString();
@@ -51,6 +62,7 @@ export function useDeliveryChecklists() {
   };
 
   const updateItemJustification = async (itemId: string, justification: string) => {
+    if (isDemoMode) { return true; }
     const { error } = await supabase
       .from("delivery_checklist_items")
       .update({ justification })
@@ -65,6 +77,7 @@ export function useDeliveryChecklists() {
   };
 
   const finalizeChecklist = async (checklistId: string) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const checklist = checklists.find(c => c.id === checklistId);
     if (!checklist) return false;
 
