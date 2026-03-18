@@ -246,6 +246,93 @@ export const demoExecutiveDashboardData = {
   revenueConcentration: 1642,
 };
 
+// ── Delivery Checklists (demo) ──
+export const demoDeliveryChecklists = [
+  // TechVentures - current month
+  {
+    id: uuid(701), client_id: uuid(1), contract_id: uuid(101), plan_id: null,
+    period: "2026-03", frequency: "mensal" as const, fulfillment_pct: 75,
+    completed_at: null, completed_by: null,
+    created_at: daysAgo(15), updated_at: daysAgo(1),
+    clients: { name: "TechVentures S.A." }, plans: { name: "Premium" },
+    delivery_checklist_items: [
+      { id: uuid(7011), checklist_id: uuid(701), name: "8 artes para Instagram", sort_order: 0, status: "entregue" as const, completed_at: daysAgo(3), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(15) },
+      { id: uuid(7012), checklist_id: uuid(701), name: "Gestão de tráfego Google Ads", sort_order: 1, status: "entregue" as const, completed_at: daysAgo(2), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(15) },
+      { id: uuid(7013), checklist_id: uuid(701), name: "Relatório mensal de performance", sort_order: 2, status: "entregue" as const, completed_at: daysAgo(1), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(15) },
+      { id: uuid(7014), checklist_id: uuid(701), name: "Reunião de alinhamento mensal", sort_order: 3, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(15), completed_at: null },
+    ],
+  },
+  // TechVentures - previous month (finalized)
+  {
+    id: uuid(702), client_id: uuid(1), contract_id: uuid(101), plan_id: null,
+    period: "2026-02", frequency: "mensal" as const, fulfillment_pct: 100,
+    completed_at: daysAgo(20), completed_by: "demo-user-5",
+    created_at: daysAgo(45), updated_at: daysAgo(20),
+    clients: { name: "TechVentures S.A." }, plans: { name: "Premium" },
+    delivery_checklist_items: [
+      { id: uuid(7021), checklist_id: uuid(702), name: "8 artes para Instagram", sort_order: 0, status: "entregue" as const, completed_at: daysAgo(25), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(45) },
+      { id: uuid(7022), checklist_id: uuid(702), name: "Gestão de tráfego Google Ads", sort_order: 1, status: "entregue" as const, completed_at: daysAgo(22), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(45) },
+      { id: uuid(7023), checklist_id: uuid(702), name: "Relatório mensal de performance", sort_order: 2, status: "entregue" as const, completed_at: daysAgo(21), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(45) },
+      { id: uuid(7024), checklist_id: uuid(702), name: "Reunião de alinhamento mensal", sort_order: 3, status: "entregue" as const, completed_at: daysAgo(20), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(45) },
+    ],
+  },
+  // Nova Digital
+  {
+    id: uuid(703), client_id: uuid(2), contract_id: uuid(102), plan_id: null,
+    period: "2026-03", frequency: "mensal" as const, fulfillment_pct: 50,
+    completed_at: null, completed_by: null,
+    created_at: daysAgo(12), updated_at: daysAgo(1),
+    clients: { name: "Nova Digital LTDA" }, plans: { name: "Essencial" },
+    delivery_checklist_items: [
+      { id: uuid(7031), checklist_id: uuid(703), name: "6 artes para feed", sort_order: 0, status: "entregue" as const, completed_at: daysAgo(3), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(12) },
+      { id: uuid(7032), checklist_id: uuid(703), name: "Configurar remarketing dinâmico", sort_order: 1, status: "entregue_parcialmente" as const, completed_at: null, justification: "Pixel instalado, falta catálogo de produtos", observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(12) },
+      { id: uuid(7033), checklist_id: uuid(703), name: "Otimização de landing page", sort_order: 2, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(12), completed_at: null },
+      { id: uuid(7034), checklist_id: uuid(703), name: "Relatório de conversão", sort_order: 3, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(12), completed_at: null },
+    ],
+  },
+  // Startup Labs
+  {
+    id: uuid(704), client_id: uuid(3), contract_id: uuid(103), plan_id: null,
+    period: "2026-03", frequency: "mensal" as const, fulfillment_pct: 33,
+    completed_at: null, completed_by: null,
+    created_at: daysAgo(10), updated_at: daysAgo(1),
+    clients: { name: "Startup Labs" }, plans: { name: "Lançamento" },
+    delivery_checklist_items: [
+      { id: uuid(7041), checklist_id: uuid(704), name: "Identidade visual do app", sort_order: 0, status: "entregue_parcialmente" as const, completed_at: null, justification: "Logo aprovado, faltam aplicações", observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10) },
+      { id: uuid(7042), checklist_id: uuid(704), name: "Vídeo de lançamento", sort_order: 1, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10), completed_at: null },
+      { id: uuid(7043), checklist_id: uuid(704), name: "Campanhas TikTok Ads", sort_order: 2, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10), completed_at: null },
+    ],
+  },
+  // Innova Corp
+  {
+    id: uuid(705), client_id: uuid(4), contract_id: uuid(104), plan_id: null,
+    period: "2026-03", frequency: "mensal" as const, fulfillment_pct: 0,
+    completed_at: null, completed_by: null,
+    created_at: daysAgo(8), updated_at: daysAgo(1),
+    clients: { name: "Innova Corp" }, plans: { name: "Pro" },
+    delivery_checklist_items: [
+      { id: uuid(7051), checklist_id: uuid(705), name: "4 artigos LinkedIn", sort_order: 0, status: "nao_entregue" as const, completed_at: null, justification: "Cliente não aprovou pautas", observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(8) },
+      { id: uuid(7052), checklist_id: uuid(705), name: "LinkedIn Ads - Campanha de leads", sort_order: 1, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(8), completed_at: null },
+      { id: uuid(7053), checklist_id: uuid(705), name: "Relatório de performance", sort_order: 2, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(8), completed_at: null },
+    ],
+  },
+  // Saúde Mais
+  {
+    id: uuid(706), client_id: uuid(7), contract_id: uuid(107), plan_id: null,
+    period: "2026-03", frequency: "mensal" as const, fulfillment_pct: 60,
+    completed_at: null, completed_by: null,
+    created_at: daysAgo(10), updated_at: daysAgo(1),
+    clients: { name: "Saúde Mais Clínicas" }, plans: { name: "SEO + Ads" },
+    delivery_checklist_items: [
+      { id: uuid(7061), checklist_id: uuid(706), name: "SEO local - 5 unidades", sort_order: 0, status: "entregue_parcialmente" as const, completed_at: null, justification: "3 de 5 unidades otimizadas", observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10) },
+      { id: uuid(7062), checklist_id: uuid(706), name: "Google Ads por especialidade", sort_order: 1, status: "entregue" as const, completed_at: daysAgo(4), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10) },
+      { id: uuid(7063), checklist_id: uuid(706), name: "12 posts para Instagram", sort_order: 2, status: "entregue" as const, completed_at: daysAgo(2), justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10) },
+      { id: uuid(7064), checklist_id: uuid(706), name: "Relatório de agendamentos", sort_order: 3, status: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10), completed_at: null },
+      { id: uuid(7065), checklist_id: uuid(706), name: "Reunião com gerentes das unidades", sort_order: 4, status: "nao_aplicavel" as const, completed_at: null, justification: null, observation: null, responsible_id: null, task_id: null, delivery_model_item_id: null, created_at: daysAgo(10) },
+    ],
+  },
+];
+
 // ── Client observations (timeline) ──
 export const demoClientObservations = [
   { id: uuid(601), client_id: uuid(1), user_id: "demo-user-1", content: "Cliente solicitou ajuste na paleta de cores das artes de março", created_at: daysAgo(3) + "T14:30:00" },
