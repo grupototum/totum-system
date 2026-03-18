@@ -49,27 +49,51 @@ export interface ReportsData {
   forecastNext3: number;
 }
 
-export function useReports() {
+export interface ReportsFilters {
+  startDate: Date;
+  endDate: Date;
+}
+
+function toDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function getMonthsBetween(start: Date, end: Date): Date[] {
+  const months: Date[] = [];
+  const current = new Date(start.getFullYear(), start.getMonth(), 1);
+  const last = new Date(end.getFullYear(), end.getMonth(), 1);
+  while (current <= last) {
+    months.push(new Date(current));
+    current.setMonth(current.getMonth() + 1);
+  }
+  return months;
+}
+
+export function useReports(filters?: ReportsFilters) {
   const [data, setData] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const startKey = filters ? toDateStr(filters.startDate) : "";
+  const endKey = filters ? toDateStr(filters.endDate) : "";
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
 
     const now = new Date();
+    const rangeStart = filters?.startDate || new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const rangeEnd = filters?.endDate || new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const months = getMonthsBetween(rangeStart, rangeEnd);
 
-    // ── 1. MRR History (last 6 months) ──
+    // ── 1. MRR History ──
     const mrrHistory: MrrHistoryItem[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    for (const d of months) {
       const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-      const endStr = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, "0")}-${String(endOfMonth.getDate()).padStart(2, "0")}`;
+      const endStr = toDateStr(endOfMonth);
 
       const { data: contracts } = await supabase
         .from("contracts")
         .select("value, client_id, start_date, end_date, status")
-        .or(`end_date.is.null,end_date.gte.${d.toISOString().slice(0, 10)}`)
+        .or(`end_date.is.null,end_date.gte.${toDateStr(d)}`)
         .lte("start_date", endStr)
         .in("status", ["ativo", "pausado"]);
 
@@ -82,19 +106,26 @@ export function useReports() {
     // ── 2. Churn ──
     const { data: allContracts } = await supabase
       .from("contracts")
-      .select("status, client_id, start_date, end_date");
+      .select("status, client_id, start_date, end_date, value");
 
     const activeContracts = (allContracts || []).filter(c => c.status === "ativo").length;
     const cancelledContracts = (allContracts || []).filter(c => c.status === "cancelado" || c.status === "encerrado").length;
     const totalContracts = (allContracts || []).length;
     const churnRate = totalContracts > 0 ? Math.round((cancelledContracts / totalContracts) * 100) : 0;
-
     const activeClientIds = new Set((allContracts || []).filter(c => c.status === "ativo").map(c => c.client_id));
 
-    // ── 3. Fulfillment by Client ──
-    const { data: checklists } = await supabase
+    // ── 3. Fulfillment by Client (filtered by period) ──
+    let checklistQuery = supabase
       .from("delivery_checklists")
-      .select("client_id, fulfillment_pct, clients(name)");
+      .select("client_id, fulfillment_pct, period, clients(name)");
+
+    if (filters) {
+      const startPeriod = `${rangeStart.getFullYear()}-${String(rangeStart.getMonth() + 1).padStart(2, "0")}`;
+      const endPeriod = `${rangeEnd.getFullYear()}-${String(rangeEnd.getMonth() + 1).padStart(2, "0")}`;
+      checklistQuery = checklistQuery.gte("period", startPeriod).lte("period", endPeriod);
+    }
+
+    const { data: checklists } = await checklistQuery;
 
     const clientFulfillmentMap = new Map<string, { name: string; total: number; count: number }>();
     (checklists || []).forEach((cl: any) => {
@@ -121,22 +152,30 @@ export function useReports() {
       }))
       .sort((a, b) => a.avgFulfillment - b.avgFulfillment);
 
-    // ── 4. Profitability by Client ──
-    const { data: financialEntries } = await supabase
+    // ── 4. Profitability by Client (filtered by date range) ──
+    let financialQuery = supabase
       .from("financial_entries")
-      .select("client_id, type, value, status, clients(name)");
+      .select("client_id, type, value, status, due_date, clients(name)");
+
+    if (filters) {
+      financialQuery = financialQuery
+        .gte("due_date", toDateStr(filters.startDate))
+        .lte("due_date", toDateStr(filters.endDate));
+    }
+
+    const { data: financialEntries } = await financialQuery;
 
     const profitMap = new Map<string, { name: string; revenue: number; cost: number }>();
     (financialEntries || []).forEach((e: any) => {
       if (!e.client_id) return;
       const existing = profitMap.get(e.client_id) || { name: e.clients?.name || "—", revenue: 0, cost: 0 };
       const val = Number(e.value) || 0;
-      if (e.type === "receita") existing.revenue += val;
-      else if (e.type === "despesa") existing.cost += val;
+      // DB uses "receber" for revenue, "pagar" for expenses
+      if (e.type === "receber") existing.revenue += val;
+      else if (e.type === "pagar") existing.cost += val;
       profitMap.set(e.client_id, existing);
     });
 
-    // Add contract value
     const contractsByClient = new Map<string, number>();
     (allContracts || []).forEach(c => {
       const prev = contractsByClient.get(c.client_id) || 0;
@@ -158,10 +197,9 @@ export function useReports() {
       })
       .sort((a, b) => b.profit - a.profit);
 
-    // ── 5. Revenue by Month (last 6 months) ──
+    // ── 5. Revenue by Month (filtered range) ──
     const revenueByMonth: RevenueByMonth[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    for (const d of months) {
       const monthStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
       const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       const monthEnd = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
@@ -172,8 +210,9 @@ export function useReports() {
         .gte("due_date", monthStart)
         .lt("due_date", monthEnd);
 
-      const receita = (entries || []).filter(e => e.type === "receita").reduce((s, e) => s + Number(e.value), 0);
-      const despesa = (entries || []).filter(e => e.type === "despesa").reduce((s, e) => s + Number(e.value), 0);
+      // DB uses "receber" / "pagar"
+      const receita = (entries || []).filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
+      const despesa = (entries || []).filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
       const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
       revenueByMonth.push({ month: monthLabel, receita, despesa, lucro: receita - despesa });
     }
@@ -197,7 +236,8 @@ export function useReports() {
     });
 
     setLoading(false);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startKey, endKey]);
 
   useEffect(() => { fetchReports(); }, [fetchReports]);
 

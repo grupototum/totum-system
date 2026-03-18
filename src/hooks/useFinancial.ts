@@ -37,10 +37,10 @@ export function useFinancialEntries(month?: string) {
 
   const summary = useMemo(() => {
     const income = entries
-      .filter((e) => e.type === "receita" && (e.status === "pago"))
+      .filter((e) => e.type === "receber" && (e.status === "pago"))
       .reduce((s, e) => s + Number(e.value), 0);
     const expense = entries
-      .filter((e) => e.type === "despesa" && (e.status === "pago"))
+      .filter((e) => e.type === "pagar" && (e.status === "pago"))
       .reduce((s, e) => s + Number(e.value), 0);
     const overdue = entries
       .filter((e) => e.status === "atrasado")
