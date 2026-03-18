@@ -25,6 +25,8 @@ export interface FormField {
   placeholder?: string;
   required?: boolean;
   options?: { label: string; value: string }[];
+  /** When set, options are loaded dynamically from this Supabase table */
+  sourceTable?: string;
 }
 
 interface RegistryFormDialogProps {

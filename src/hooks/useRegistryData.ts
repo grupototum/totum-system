@@ -20,7 +20,8 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
   tipos_cliente: { table: "client_types", columns: { name: "name", descricao: "description" } },
   tipos_contrato: { table: "contract_types", columns: { name: "name", descricao: "description" } },
   planos_recorrentes: { table: "plans", columns: { name: "name", valor: "value", entregas: "description" } },
-  tipos_projeto: { table: "project_types", columns: { name: "name", descricao: "description" } },
+  tipos_projeto: { table: "project_types", columns: { name: "name", descricao: "description", tipo_servico: "service_type_id", tipo_receita: "revenue_type_id" } },
+  tipos_receita: { table: "revenue_types", columns: { name: "name", descricao: "description" } },
   tipos_servico: { table: "service_types", columns: { name: "name", descricao: "description" } },
   tipos_produto: { table: "product_types", columns: { name: "name", descricao: "description" } },
   categorias_gerais: { table: "general_categories", columns: { name: "name", modulo: "module", cor: "color", descricao: "description" } },
@@ -39,7 +40,8 @@ type ValidTable =
   | "expense_types" | "client_types" | "contract_types" | "plans"
   | "project_types" | "service_types" | "product_types" | "general_categories"
   | "suppliers" | "partners" | "departments" | "tags"
-  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons";
+  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons"
+  | "revenue_types";
 
 export interface RegistryRow {
   id: string;
