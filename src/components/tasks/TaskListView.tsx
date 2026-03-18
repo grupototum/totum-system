@@ -1,10 +1,13 @@
 import { Task, statusConfig, priorityConfig, recurrenceLabels } from "./taskData";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TaskListViewProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  showUnarchive?: boolean;
+  onUnarchive?: (taskId: string) => void;
 }
 
 export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
