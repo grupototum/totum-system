@@ -80,17 +80,19 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <GlobalLoadingProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              <Route path="/login" element={<AuthRoutes />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/*" element={<ProtectedRoutes />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
+        <DemoProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/login" element={<AuthRoutes />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/*" element={<ProtectedRoutes />} />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </DemoProvider>
       </GlobalLoadingProvider>
     </TooltipProvider>
   </QueryClientProvider>
