@@ -32,6 +32,12 @@ export function useDashboard() {
       setLoading(false);
       return;
     }
+    // Guard: ensure we have an auth session before querying
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       // Active contracts → MRR
