@@ -88,6 +88,12 @@ export default function Projects() {
       )}
 
       <ProjectFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addProject} />
+      <ProjectFormDialog
+        open={!!editingProject}
+        onOpenChange={(open) => { if (!open) setEditingProject(null); }}
+        onSubmit={(values) => updateProject(editingProject.id, values)}
+        initialData={editingProject}
+      />
     </div>
   );
 }
