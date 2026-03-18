@@ -66,7 +66,7 @@ export function useSupabaseTasks() {
         id: s.id,
         title: s.title,
         status: s.status as TaskStatus,
-        responsible: s.responsible_id ? profileMap.get(s.responsible_id) : undefined,
+        responsible: s.responsible_id ? profileMap.get(s.responsible_id)?.name : undefined,
         dueDate: s.due_date || undefined,
       })),
       checklist: (t.task_checklist_items || []).map((c: any) => ({
