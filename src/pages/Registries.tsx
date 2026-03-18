@@ -29,6 +29,57 @@ export default function Registries() {
   // Use Supabase data if table mapping exists, otherwise fallback to mock
   const { data: supabaseData, loading, hasTable, addItem, updateItem, deleteItem, toggleStatus } = useRegistryData(activeRegistry.key);
 
+  // Load dynamic options for fields with sourceTable
+  const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string; value: string }[]>>({});
+  const [fkNames, setFkNames] = useState<Record<string, Record<string, string>>>({});
+
+  useEffect(() => {
+    const sourceTables = activeRegistry.formFields
+      .filter((f) => f.sourceTable)
+      .map((f) => ({ key: f.key, table: f.sourceTable! }));
+
+    if (sourceTables.length === 0) return;
+
+    const loadOptions = async () => {
+      const opts: Record<string, { label: string; value: string }[]> = {};
+      const names: Record<string, Record<string, string>> = {};
+      await Promise.all(
+        sourceTables.map(async ({ key, table }) => {
+          const { data } = await supabase.from(table as any).select("id, name").eq("is_active", true).order("name");
+          if (data) {
+            opts[key] = data.map((r: any) => ({ label: r.name, value: r.id }));
+            names[key] = {};
+            data.forEach((r: any) => { names[key][r.id] = r.name; });
+          }
+        })
+      );
+      setDynamicOptions(opts);
+      setFkNames(names);
+    };
+    loadOptions();
+  }, [activeRegistry.key]);
+
+  // Enrich data with resolved FK names
+  const enrichedData = hasTable
+    ? supabaseData.map((row) => {
+        const enriched = { ...row };
+        activeRegistry.formFields.forEach((f) => {
+          if (f.sourceTable && fkNames[f.key] && row[f.key]) {
+            enriched[`${f.key}_nome`] = fkNames[f.key][row[f.key]] || "";
+          }
+        });
+        return enriched;
+      })
+    : undefined;
+
+  // Merge dynamic options into form fields
+  const resolvedFields: FormField[] = activeRegistry.formFields.map((f) => {
+    if (f.sourceTable && dynamicOptions[f.key]) {
+      return { ...f, options: dynamicOptions[f.key] };
+    }
+    return f;
+  });
+
   // Fallback local state for registries without DB tables
   const [localStore, setLocalStore] = useState<Record<string, RegistryItem[]>>(() => {
     const store: Record<string, RegistryItem[]> = {};
@@ -45,7 +96,7 @@ export default function Registries() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<RegistryItem | null>(null);
 
-  const currentData = hasTable ? supabaseData : (localStore[activeRegistry.key] || []);
+  const currentData = hasTable ? (enrichedData || supabaseData) : (localStore[activeRegistry.key] || []);
 
   const setGroup = (groupKey: string) => {
     const group = registryGroups.find((g) => g.key === groupKey)!;
