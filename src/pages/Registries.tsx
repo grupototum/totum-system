@@ -269,7 +269,7 @@ export default function Registries() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         title={editItem ? `Editar ${activeRegistry.label}` : `Novo ${activeRegistry.label}`}
-        fields={activeRegistry.formFields}
+        fields={resolvedFields}
         initialValues={editItem || undefined}
         onSubmit={handleSubmit}
       />
