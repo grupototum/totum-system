@@ -14,8 +14,9 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function Clients() {
-  const { clients, loading } = useClients();
+  const { clients, loading, addClient } = useClients();
   const [search, setSearch] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
   const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
