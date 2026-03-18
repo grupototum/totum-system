@@ -42,6 +42,8 @@ export interface Task {
   planName?: string;
   projectId?: string;
   responsible?: string;
+  responsibleAvatarUrl?: string;
+  responsibleId?: string;
   priority: TaskPriority;
   status: TaskStatus;
   type: TaskType;
