@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, LayoutGrid, List, Search } from "lucide-react";
+import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,6 @@ export function ClientHubDeliveries({ clientId }: Props) {
   const [checklists, setChecklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [search, setSearch] = useState("");
 
   const fetch = useCallback(async () => {
@@ -111,16 +110,12 @@ export function ClientHubDeliveries({ clientId }: Props) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar entregas..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 bg-white/[0.05] border-border" />
         </div>
-        <div className="flex gap-1">
-          <Button variant={viewMode === "cards" ? "default" : "ghost"} size="icon" onClick={() => setViewMode("cards")}><LayoutGrid className="h-4 w-4" /></Button>
-          <Button variant={viewMode === "list" ? "default" : "ghost"} size="icon" onClick={() => setViewMode("list")}><List className="h-4 w-4" /></Button>
-        </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">Nenhuma entrega encontrada</div>
       ) : (
-        <div className={viewMode === "cards" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "space-y-3"}>
+        <div className="space-y-3">
           {filtered.map(checklist => {
             const pct = getPct(checklist);
             const isExpanded = expanded.has(checklist.id);
