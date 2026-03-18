@@ -317,7 +317,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </div>
               <p className="text-xl font-heading font-bold">{m.value}</p>
-              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{m.label}</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">{m.label}<InfoTip label={m.label} /></p>
             </div>
           ))}
         </div>
