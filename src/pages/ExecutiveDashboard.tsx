@@ -416,7 +416,7 @@ export default function ExecutiveDashboard() {
                 ? `${Math.round(data.contractFulfillment.reduce((s, c) => s + c.pct, 0) / data.contractFulfillment.length)}%`
                 : "—"}
             </p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Cumprimento médio</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">Cumprimento médio<InfoTip label="Cumprimento médio" /></p>
           </div>
         </div>
 
