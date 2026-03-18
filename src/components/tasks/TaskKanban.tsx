@@ -1,6 +1,6 @@
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { Task, TaskStatus, statusConfig, statusColumns, priorityConfig } from "./taskData";
-import { Clock } from "lucide-react";
+import { Task, TaskStatus, statusConfig, statusColumns, priorityConfig, recurrenceLabels } from "./taskData";
+import { Clock, RefreshCw } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TaskKanbanProps {
@@ -57,7 +57,12 @@ export function TaskKanban({ tasks, onStatusChange, onTaskClick }: TaskKanbanPro
                         >
                           <div className="flex items-center gap-1.5 mb-2">
                             <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
-                            <span className="text-[10px] text-white/30">{task.clientName}</span>
+                            <span className="text-[10px] text-white/30 flex-1 truncate">{task.clientName}</span>
+                            {(task.isRecurring || task.parentTaskId) && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? recurrenceLabels[task.recurrenceType] : ''}` : 'Ocorrência de tarefa recorrente'}>
+                                <RefreshCw className="h-3 w-3" />
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm font-medium mb-2 line-clamp-2">{task.title}</p>
                           <div className="flex items-center justify-between">

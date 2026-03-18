@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Task, Subtask, ChecklistItem, TaskComment, TaskStatus, TaskPriority,
   statusConfig, priorityConfig, typeLabels, teamMembers, TaskType,
+  RecurrenceType, recurrenceLabels, weekDayLabels, RecurrenceConfig,
 } from "./taskData";
 import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
-  MessageSquare, History, ChevronDown, Send,
+  MessageSquare, History, ChevronDown, Send, RefreshCw,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -27,7 +29,7 @@ interface TaskDetailDialogProps {
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<"detail" | "comments" | "history">("detail");
+  const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
@@ -89,12 +91,22 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
     setNewComment("");
   };
 
+  const toggleWeekDay = (day: number) => {
+    const config = task.recurrenceConfig || {};
+    const currentDays = config.week_days || [];
+    const newDays = currentDays.includes(day)
+      ? currentDays.filter((d) => d !== day)
+      : [...currentDays, day].sort();
+    update({ recurrenceConfig: { ...config, week_days: newDays } });
+  };
+
   const selectClasses = "bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs focus:border-primary/50";
   const selectContentClasses = "bg-[#271c1d] border-white/[0.1] text-white";
   const selectItemClasses = "text-xs focus:bg-white/[0.06] focus:text-white";
 
   const tabs = [
     { key: "detail", label: "Detalhes", icon: ChevronDown },
+    { key: "recurrence", label: "Recorrência", icon: RefreshCw },
     { key: "comments", label: `Comentários (${task.comments.length})`, icon: MessageSquare },
     { key: "history", label: `Histórico (${task.history.length})`, icon: History },
   ] as const;
@@ -103,7 +115,20 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
-          <DialogTitle className="font-heading text-lg pr-8">{task.title}</DialogTitle>
+          <DialogTitle className="font-heading text-lg pr-8 flex items-center gap-2">
+            {task.title}
+            {task.isRecurring && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                <RefreshCw className="h-3 w-3" />
+                {task.recurrenceType ? recurrenceLabels[task.recurrenceType] : "Recorrente"}
+              </span>
+            )}
+            {task.parentTaskId && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.06] text-white/50">
+                Ocorrência
+              </span>
+            )}
+          </DialogTitle>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-white/40">{task.clientName}</span>
             {task.planName && (
@@ -317,6 +342,130 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
                 </Button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Recurrence Tab */}
+        {activeTab === "recurrence" && (
+          <div className="space-y-5 mt-3">
+            {task.parentTaskId ? (
+              <div className="p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                <p className="text-xs text-white/50">
+                  Esta é uma <strong>ocorrência</strong> de uma tarefa recorrente. 
+                  As configurações de recorrência ficam na tarefa modelo.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Toggle */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03]">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Tarefa periódica</span>
+                  </div>
+                  <Switch
+                    checked={task.isRecurring || false}
+                    onCheckedChange={(v) => update({ isRecurring: v })}
+                  />
+                </div>
+
+                {task.isRecurring && (
+                  <>
+                    {/* Recurrence Type */}
+                    <div>
+                      <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Tipo de recorrência</label>
+                      <Select
+                        value={task.recurrenceType || "semanal"}
+                        onValueChange={(v) => update({ recurrenceType: v as RecurrenceType })}
+                      >
+                        <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
+                        <SelectContent className={selectContentClasses}>
+                          {(Object.keys(recurrenceLabels) as RecurrenceType[]).map((r) => (
+                            <SelectItem key={r} value={r} className={selectItemClasses}>{recurrenceLabels[r]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Weekly: select days */}
+                    {(task.recurrenceType === "semanal") && (
+                      <div>
+                        <label className="text-[10px] text-white/40 uppercase tracking-wider mb-2 block">Dias da semana</label>
+                        <div className="flex gap-1.5">
+                          {weekDayLabels.map((label, i) => {
+                            const active = (task.recurrenceConfig?.week_days || []).includes(i);
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => toggleWeekDay(i)}
+                                className={`h-8 w-10 rounded-lg text-[10px] font-medium transition-all ${
+                                  active
+                                    ? "bg-primary/20 text-primary border border-primary/30"
+                                    : "bg-white/[0.04] text-white/40 border border-white/[0.06] hover:bg-white/[0.08]"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Monthly: select day */}
+                    {task.recurrenceType === "mensal" && (
+                      <div>
+                        <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Dia do mês</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={31}
+                          value={task.recurrenceConfig?.month_day || 1}
+                          onChange={(e) => update({
+                            recurrenceConfig: { ...task.recurrenceConfig, month_day: parseInt(e.target.value) || 1 },
+                          })}
+                          className="bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs w-20 focus:border-primary/50"
+                        />
+                      </div>
+                    )}
+
+                    {/* Custom: every X days */}
+                    {task.recurrenceType === "personalizada" && (
+                      <div>
+                        <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">A cada X dias</label>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={task.recurrenceConfig?.interval_days || 7}
+                          onChange={(e) => update({
+                            recurrenceConfig: { ...task.recurrenceConfig, interval_days: parseInt(e.target.value) || 7 },
+                          })}
+                          className="bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs w-20 focus:border-primary/50"
+                        />
+                      </div>
+                    )}
+
+                    {/* End date */}
+                    <div>
+                      <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Encerrar em (opcional)</label>
+                      <Input
+                        type="date"
+                        value={task.recurrenceEndDate || ""}
+                        onChange={(e) => update({ recurrenceEndDate: e.target.value || undefined })}
+                        className="bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs w-48 focus:border-primary/50"
+                      />
+                    </div>
+
+                    {/* Info */}
+                    {task.lastGeneratedAt && (
+                      <p className="text-[10px] text-white/30">
+                        Última geração: {new Date(task.lastGeneratedAt).toLocaleDateString("pt-BR")}
+                      </p>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </div>
         )}
 
