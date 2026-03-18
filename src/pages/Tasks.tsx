@@ -15,7 +15,7 @@ import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, refetch } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
