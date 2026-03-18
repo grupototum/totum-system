@@ -453,7 +453,7 @@ export default function ExecutiveDashboard() {
             <p className="text-[10px] text-white/30 mt-1">Baseado nos contratos ativos</p>
           </div>
           <div className="glass-card rounded-xl p-4">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Concentração de receita (HHI)</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center">Concentração de receita (HHI)<InfoTip label="Concentração de receita (HHI)" /></p>
             <p className={`text-xl font-heading font-bold ${data.revenueConcentration > 2500 ? "text-red-400" : data.revenueConcentration > 1500 ? "text-amber-400" : "text-emerald-400"}`}>
               {data.revenueConcentration}
             </p>
