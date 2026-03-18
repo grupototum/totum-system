@@ -109,10 +109,11 @@ export function TaskFormDialog({
       .sort((a: any, b: any) => a.sort_order - b.sort_order)
       .map((i: any) => i.title);
     setChecklistItems(items);
+    setSubtaskItems(items);
     if (!title && template.name) setTitle(template.name);
     if (!description && template.description) setDescription(template.description);
     setShowTemplates(false);
-    toast({ title: "Template aplicado", description: `${items.length} itens adicionados` });
+    toast({ title: "Template aplicado", description: `${items.length} itens adicionados como checklist e subtarefas` });
   };
 
   const handleSave = async () => {
