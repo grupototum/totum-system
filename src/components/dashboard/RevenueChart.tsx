@@ -1,17 +1,7 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const data = [
-  { month: "Jul", receita: 82000, custo: 48000 },
-  { month: "Ago", receita: 91000, custo: 52000 },
-  { month: "Set", receita: 88000, custo: 49000 },
-  { month: "Out", receita: 105000, custo: 55000 },
-  { month: "Nov", receita: 112000, custo: 58000 },
-  { month: "Dez", receita: 118000, custo: 61000 },
-  { month: "Jan", receita: 124000, custo: 63000 },
-  { month: "Fev", receita: 131000, custo: 65000 },
-  { month: "Mar", receita: 138000, custo: 68000 },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
@@ -32,6 +22,35 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function RevenueChart() {
+  const [data, setData] = useState<{ month: string; receita: number; custo: number }[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      const now = new Date();
+      const results: { month: string; receita: number; custo: number }[] = [];
+
+      for (let i = 8; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+        const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        const monthEnd = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
+
+        const { data: entries } = await supabase
+          .from("financial_entries")
+          .select("type, value")
+          .gte("due_date", monthStart)
+          .lt("due_date", monthEnd);
+
+        const receita = (entries || []).filter(e => e.type === "receita").reduce((s, e) => s + Number(e.value), 0);
+        const custo = (entries || []).filter(e => e.type === "despesa").reduce((s, e) => s + Number(e.value), 0);
+        const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
+        results.push({ month: label.charAt(0).toUpperCase() + label.slice(1), receita, custo });
+      }
+      setData(results);
+    }
+    load();
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
