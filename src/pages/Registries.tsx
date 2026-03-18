@@ -3,11 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   DollarSign, Users, Grid3X3, Database,
-  ChevronRight,
+  ChevronRight, Loader2,
 } from "lucide-react";
 import { RegistryTable, RegistryItem } from "@/components/registries/RegistryTable";
 import { RegistryFormDialog, FormField } from "@/components/registries/RegistryFormDialog";
 import { registryGroups, RegistryConfig } from "@/components/registries/registryData";
+import { useRegistryData, registryTableMap } from "@/hooks/useRegistryData";
 import { toast } from "@/hooks/use-toast";
 
 const groupIcons: Record<string, typeof DollarSign> = {
@@ -24,12 +25,17 @@ export default function Registries() {
     ? activeGroup.registries.find((r) => r.key === activeRegistryKey) || activeGroup.registries[0]
     : activeGroup.registries[0];
 
-  // Local state per registry
-  const [dataStore, setDataStore] = useState<Record<string, RegistryItem[]>>(() => {
+  // Use Supabase data if table mapping exists, otherwise fallback to mock
+  const { data: supabaseData, loading, hasTable, addItem, updateItem, deleteItem, toggleStatus } = useRegistryData(activeRegistry.key);
+
+  // Fallback local state for registries without DB tables
+  const [localStore, setLocalStore] = useState<Record<string, RegistryItem[]>>(() => {
     const store: Record<string, RegistryItem[]> = {};
     registryGroups.forEach((g) =>
       g.registries.forEach((r) => {
-        store[r.key] = [...r.initialData];
+        if (!registryTableMap[r.key]) {
+          store[r.key] = [...r.initialData];
+        }
       })
     );
     return store;
@@ -38,7 +44,7 @@ export default function Registries() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editItem, setEditItem] = useState<RegistryItem | null>(null);
 
-  const currentData = dataStore[activeRegistry.key] || [];
+  const currentData = hasTable ? supabaseData : (localStore[activeRegistry.key] || []);
 
   const setGroup = (groupKey: string) => {
     const group = registryGroups.find((g) => g.key === groupKey)!;
@@ -59,60 +65,73 @@ export default function Registries() {
     setDialogOpen(true);
   };
 
-  const handleDelete = (item: RegistryItem) => {
-    setDataStore((prev) => ({
-      ...prev,
-      [activeRegistry.key]: prev[activeRegistry.key].filter((i) => i.id !== item.id),
-    }));
-    toast({ title: "Registro excluído", description: `"${item.name}" foi removido.` });
-  };
-
-  const handleToggleStatus = (item: RegistryItem) => {
-    setDataStore((prev) => ({
-      ...prev,
-      [activeRegistry.key]: prev[activeRegistry.key].map((i) =>
-        i.id === item.id ? { ...i, status: i.status === "ativo" ? "inativo" : "ativo" } : i
-      ),
-    }));
-    toast({
-      title: item.status === "ativo" ? "Desativado" : "Ativado",
-      description: `"${item.name}" foi ${item.status === "ativo" ? "desativado" : "ativado"}.`,
-    });
-  };
-
-  const handleSubmit = (values: Record<string, any>) => {
-    const key = activeRegistry.key;
-
-    if (editItem) {
-      setDataStore((prev) => ({
-        ...prev,
-        [key]: prev[key].map((i) => (i.id === editItem.id ? { ...i, ...values } : i)),
-      }));
-      toast({ title: "Registro atualizado", description: `"${values.name}" salvo com sucesso.` });
+  const handleDelete = async (item: RegistryItem) => {
+    if (hasTable) {
+      await deleteItem(item.id, item.name);
     } else {
-      // Check duplicity
-      const exists = currentData.some(
-        (i) => i.name.toLowerCase() === (values.name || "").toLowerCase()
-      );
-      if (exists) {
-        toast({
-          title: "Duplicidade detectada",
-          description: `Já existe um registro com o nome "${values.name}".`,
-          variant: "destructive",
-        });
-        return;
-      }
-      const newItem: RegistryItem = {
-        id: crypto.randomUUID(),
-        name: values.name || "",
-        status: "ativo" as const,
-        ...values,
-      };
-      setDataStore((prev) => ({
+      setLocalStore((prev) => ({
         ...prev,
-        [key]: [...prev[key], newItem],
+        [activeRegistry.key]: prev[activeRegistry.key].filter((i) => i.id !== item.id),
       }));
-      toast({ title: "Registro criado", description: `"${values.name}" adicionado com sucesso.` });
+      toast({ title: "Registro excluído", description: `"${item.name}" foi removido.` });
+    }
+  };
+
+  const handleToggleStatus = async (item: RegistryItem) => {
+    if (hasTable) {
+      await toggleStatus(item.id, item.status || "ativo", item.name);
+    } else {
+      setLocalStore((prev) => ({
+        ...prev,
+        [activeRegistry.key]: prev[activeRegistry.key].map((i) =>
+          i.id === item.id ? { ...i, status: i.status === "ativo" ? "inativo" : "ativo" } : i
+        ),
+      }));
+      toast({
+        title: item.status === "ativo" ? "Desativado" : "Ativado",
+        description: `"${item.name}" foi ${item.status === "ativo" ? "desativado" : "ativado"}.`,
+      });
+    }
+  };
+
+  const handleSubmit = async (values: Record<string, any>) => {
+    if (hasTable) {
+      if (editItem) {
+        const ok = await updateItem(editItem.id, values);
+        if (ok) setDialogOpen(false);
+      } else {
+        const ok = await addItem(values);
+        if (ok) setDialogOpen(false);
+      }
+    } else {
+      const key = activeRegistry.key;
+      if (editItem) {
+        setLocalStore((prev) => ({
+          ...prev,
+          [key]: prev[key].map((i) => (i.id === editItem.id ? { ...i, ...values } : i)),
+        }));
+        toast({ title: "Registro atualizado", description: `"${values.name}" salvo com sucesso.` });
+      } else {
+        const exists = (localStore[key] || []).some(
+          (i) => i.name.toLowerCase() === (values.name || "").toLowerCase()
+        );
+        if (exists) {
+          toast({ title: "Duplicidade detectada", description: `Já existe um registro com o nome "${values.name}".`, variant: "destructive" });
+          return;
+        }
+        const newItem: RegistryItem = {
+          id: crypto.randomUUID(),
+          name: values.name || "",
+          status: "ativo" as const,
+          ...values,
+        };
+        setLocalStore((prev) => ({
+          ...prev,
+          [key]: [...(prev[key] || []), newItem],
+        }));
+        toast({ title: "Registro criado", description: `"${values.name}" adicionado com sucesso.` });
+      }
+      setDialogOpen(false);
     }
   };
 
@@ -162,6 +181,7 @@ export default function Registries() {
                         }`}
                       >
                         {reg.label}
+                        {!registryTableMap[reg.key] && <span className="text-[9px] text-white/20 ml-1">(local)</span>}
                       </button>
                     ))}
                   </motion.div>
@@ -174,16 +194,22 @@ export default function Registries() {
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-6 lg:p-8">
-        <RegistryTable
-          title={activeRegistry.label}
-          description={activeRegistry.description}
-          columns={activeRegistry.columns}
-          data={currentData}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggleStatus={handleToggleStatus}
-        />
+        {loading && hasTable ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : (
+          <RegistryTable
+            title={activeRegistry.label}
+            description={activeRegistry.description}
+            columns={activeRegistry.columns}
+            data={currentData}
+            onAdd={handleAdd}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onToggleStatus={handleToggleStatus}
+          />
+        )}
       </div>
 
       {/* Form Dialog */}

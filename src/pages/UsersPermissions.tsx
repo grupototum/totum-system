@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Shield, History, Search, Plus, MoreHorizontal, Copy,
-  Pencil, Trash2, Lock, Unlock, KeyRound, Eye,
+  Pencil, Trash2, Lock, Unlock, KeyRound, Eye, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,23 +13,83 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AppUser, Role, AuditEntry,
-  initialUsers, initialRoles, initialAudit,
-  userStatusConfig, permissionTree, permKey, buildFullAccess,
+  permissionTree, permKey, buildFullAccess,
+  userStatusConfig, PermissionsMap,
 } from "@/components/users/permissionsData";
 import { UserFormDialog } from "@/components/users/UserFormDialog";
 import { RoleFormDialog } from "@/components/users/RoleFormDialog";
 import { PermissionMatrix } from "@/components/users/PermissionMatrix";
 import { AuditLog } from "@/components/users/AuditLog";
+import { useProfiles, useRoles, useAuditLogs, useDepartments, ProfileRow, RoleRow } from "@/hooks/useProfiles";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 type Tab = "users" | "roles" | "audit";
 
+// Adapter types for existing components
+interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  roleId: string;
+  department: string;
+  status: "ativo" | "inativo" | "bloqueado";
+  createdAt: string;
+  lastAccess?: string;
+}
+
+interface Role {
+  id: string;
+  name: string;
+  description: string;
+  permissions: PermissionsMap;
+  isSystem: boolean;
+  usersCount: number;
+}
+
+interface AuditEntry {
+  id: string;
+  userId: string;
+  userName: string;
+  action: string;
+  detail: string;
+  createdAt: string;
+}
+
+function profileToAppUser(p: ProfileRow): AppUser {
+  return {
+    id: p.id,
+    name: p.full_name,
+    email: p.email,
+    phone: p.phone || "",
+    roleId: p.role_id || "",
+    department: (p.departments as any)?.name || "—",
+    status: p.status as any,
+    createdAt: p.created_at,
+    lastAccess: p.last_access || undefined,
+  };
+}
+
+function roleRowToRole(r: RoleRow, profileCount: number): Role {
+  return {
+    id: r.id,
+    name: r.name,
+    description: r.description || "",
+    permissions: (r.permissions as PermissionsMap) || {},
+    isSystem: r.is_system,
+    usersCount: profileCount,
+  };
+}
+
 export default function UsersPermissions() {
   const [tab, setTab] = useState<Tab>("users");
-  const [users, setUsers] = useState<AppUser[]>(initialUsers);
-  const [roles, setRoles] = useState<Role[]>(initialRoles);
-  const [audit, setAudit] = useState<AuditEntry[]>(initialAudit);
+  
+  const { profiles, loading: profilesLoading, refetch: refetchProfiles, updateProfile } = useProfiles();
+  const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
+  const { logs, loading: auditLoading } = useAuditLogs();
+  const departments = useDepartments();
 
   // Dialogs
   const [userFormOpen, setUserFormOpen] = useState(false);
@@ -43,13 +103,36 @@ export default function UsersPermissions() {
   const [userSearch, setUserSearch] = useState("");
   const [roleSearch, setRoleSearch] = useState("");
 
-  const addAudit = (action: string, detail: string) => {
-    setAudit((prev) => [{
-      id: crypto.randomUUID(),
-      userId: "u1", userName: "Gustavo Torres",
-      action, detail,
-      createdAt: new Date().toISOString(),
-    }, ...prev]);
+  // Adapt data
+  const users: AppUser[] = useMemo(() => profiles.map(profileToAppUser), [profiles]);
+  const roles: Role[] = useMemo(() => {
+    return roleRows.map((r) => {
+      const count = profiles.filter((p) => p.role_id === r.id).length;
+      return roleRowToRole(r, count);
+    });
+  }, [roleRows, profiles]);
+
+  const audit: AuditEntry[] = useMemo(() => {
+    return logs.map((l) => ({
+      id: l.id,
+      userId: l.user_id || "",
+      userName: l.user_id ? profiles.find((p) => p.user_id === l.user_id)?.full_name || "Sistema" : "Sistema",
+      action: l.action,
+      detail: l.detail || "",
+      createdAt: l.created_at,
+    }));
+  }, [logs, profiles]);
+
+  const logAudit = async (action: string, detail: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.rpc("log_audit", {
+        _user_id: user.id,
+        _action: action,
+        _entity_type: "usuario",
+        _detail: detail,
+      });
+    }
   };
 
   // ─── Users ────
@@ -61,32 +144,36 @@ export default function UsersPermissions() {
     );
   }, [users, userSearch]);
 
-  const handleSaveUser = (user: AppUser) => {
-    const exists = users.find((u) => u.id === user.id);
+  const handleSaveUser = async (user: AppUser) => {
+    const exists = profiles.find((p) => p.id === user.id);
     if (exists) {
-      setUsers((prev) => prev.map((u) => u.id === user.id ? user : u));
-      addAudit("Usuário editado", `Usuário ${user.name} atualizado`);
-    } else {
-      setUsers((prev) => [...prev, user]);
-      addAudit("Usuário criado", `Usuário ${user.name} criado com cargo ${roles.find((r) => r.id === user.roleId)?.name || user.roleId}`);
+      await updateProfile(user.id, {
+        full_name: user.name,
+        phone: user.phone || null,
+        role_id: user.roleId || null,
+      });
+      await logAudit("Usuário editado", `Usuário ${user.name} atualizado`);
+      toast({ title: "Usuário atualizado", description: user.name });
     }
-    toast({ title: exists ? "Usuário atualizado" : "Usuário criado", description: user.name });
+    await refetchProfiles();
   };
 
-  const handleDeleteUser = (user: AppUser) => {
-    setUsers((prev) => prev.filter((u) => u.id !== user.id));
-    addAudit("Usuário excluído", `Usuário ${user.name} removido`);
-    toast({ title: "Usuário removido", description: user.name });
+  const handleDeleteUser = async (user: AppUser) => {
+    await updateProfile(user.id, { status: "inativo" as any });
+    await logAudit("Usuário desativado", `Usuário ${user.name} desativado`);
+    toast({ title: "Usuário desativado", description: user.name });
+    await refetchProfiles();
   };
 
-  const handleToggleStatus = (user: AppUser, status: "ativo" | "inativo" | "bloqueado") => {
-    setUsers((prev) => prev.map((u) => u.id === user.id ? { ...u, status } : u));
-    addAudit("Status alterado", `Usuário ${user.name} → ${userStatusConfig[status].label}`);
+  const handleToggleStatus = async (user: AppUser, status: "ativo" | "inativo" | "bloqueado") => {
+    await updateProfile(user.id, { status: status as any });
+    await logAudit("Status alterado", `Usuário ${user.name} → ${userStatusConfig[status].label}`);
     toast({ title: "Status atualizado", description: `${user.name} → ${userStatusConfig[status].label}` });
+    await refetchProfiles();
   };
 
-  const handleResetPassword = (user: AppUser) => {
-    addAudit("Senha redefinida", `Senha de ${user.name} redefinida`);
+  const handleResetPassword = async (user: AppUser) => {
+    await logAudit("Senha redefinida", `Senha de ${user.name} redefinida`);
     toast({ title: "Senha redefinida", description: `Link de redefinição enviado para ${user.email}` });
   };
 
@@ -97,37 +184,28 @@ export default function UsersPermissions() {
     return roles.filter((r) => r.name.toLowerCase().includes(q));
   }, [roles, roleSearch]);
 
-  const handleSaveRole = (role: Role) => {
-    const exists = roles.find((r) => r.id === role.id);
-    if (exists) {
-      setRoles((prev) => prev.map((r) => r.id === role.id ? role : r));
-      addAudit("Cargo editado", `Cargo ${role.name} atualizado`);
-    } else {
-      setRoles((prev) => [...prev, role]);
-      addAudit("Cargo criado", `Cargo ${role.name} criado`);
+  const handleSaveRole = async (role: Role) => {
+    await saveRole({
+      id: role.id || undefined,
+      name: role.name,
+      description: role.description,
+      permissions: role.permissions as any,
+    });
+    await logAudit(role.id ? "Cargo editado" : "Cargo criado", `Cargo ${role.name}`);
+  };
+
+  const handleDuplicateRole = async (role: Role) => {
+    const dbRole = roleRows.find((r) => r.id === role.id);
+    if (dbRole) {
+      await duplicateRoleDb(dbRole);
+      await logAudit("Perfil duplicado", `Cargo ${role.name} duplicado`);
     }
-    toast({ title: exists ? "Cargo atualizado" : "Cargo criado", description: role.name });
   };
 
-  const handleDuplicateRole = (role: Role) => {
-    const newRole: Role = {
-      ...role,
-      id: crypto.randomUUID(),
-      name: `${role.name} (cópia)`,
-      permissions: { ...role.permissions },
-      isSystem: false,
-      usersCount: 0,
-    };
-    setRoles((prev) => [...prev, newRole]);
-    addAudit("Perfil duplicado", `Cargo ${role.name} duplicado como ${newRole.name}`);
-    toast({ title: "Perfil duplicado", description: newRole.name });
-  };
-
-  const handleDeleteRole = (role: Role) => {
+  const handleDeleteRole = async (role: Role) => {
     if (role.isSystem) return;
-    setRoles((prev) => prev.filter((r) => r.id !== role.id));
-    addAudit("Cargo excluído", `Cargo ${role.name} removido`);
-    toast({ title: "Cargo removido", description: role.name });
+    await deleteRoleDb(role.id, role.name);
+    await logAudit("Cargo excluído", `Cargo ${role.name} removido`);
   };
 
   const handleViewPermissions = (user: AppUser) => {
@@ -135,7 +213,7 @@ export default function UsersPermissions() {
     setViewPermsOpen(true);
   };
 
-  const getRoleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name || roleId;
+  const getRoleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name || "—";
   const getRolePermissions = (roleId: string) => roles.find((r) => r.id === roleId)?.permissions || {};
 
   const permCount = (roleId: string) => {
@@ -150,6 +228,8 @@ export default function UsersPermissions() {
     { key: "roles", label: "Cargos e Perfis", icon: Shield },
     { key: "audit", label: "Auditoria", icon: History },
   ];
+
+  const isLoading = tab === "users" ? profilesLoading : tab === "roles" ? rolesLoading : auditLoading;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
@@ -191,197 +271,197 @@ export default function UsersPermissions() {
         ))}
       </div>
 
-      {/* Content */}
-      <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
-        {/* ─── USERS TAB ─── */}
-        {tab === "users" && (
-          <div className="space-y-3">
-            <div className="relative w-64">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
-              <Input
-                placeholder="Buscar usuário..."
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
-              />
-            </div>
+      {/* Loading */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
+          {/* ─── USERS TAB ─── */}
+          {tab === "users" && (
+            <div className="space-y-3">
+              <div className="relative w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <Input
+                  placeholder="Buscar usuário..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
+                />
+              </div>
 
-            <div className="glass-card rounded-xl overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Usuário</th>
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Cargo</th>
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Departamento</th>
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Permissões</th>
-                    <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Último Acesso</th>
-                    <th className="p-3.5 w-10"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user) => {
-                    const st = userStatusConfig[user.status];
-                    const pc = permCount(user.roleId);
-                    return (
-                      <tr key={user.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                        <td className="p-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-[10px] font-bold shrink-0">
-                              {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{user.name}</p>
-                              <p className="text-[11px] text-white/40">{user.email}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3.5 text-xs text-white/60">{getRoleName(user.roleId)}</td>
-                        <td className="p-3.5 text-xs text-white/50">{user.department}</td>
-                        <td className="p-3.5">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${st.bg} ${st.color}`}>
-                            {st.label}
-                          </span>
-                        </td>
-                        <td className="p-3.5">
-                          <button
-                            onClick={() => handleViewPermissions(user)}
-                            className="text-[10px] text-white/30 hover:text-primary transition-colors font-mono"
-                          >
-                            {pc}/{totalPermsCount}
-                          </button>
-                        </td>
-                        <td className="p-3.5 text-xs text-white/40 font-mono">
-                          {user.lastAccess
-                            ? new Date(user.lastAccess).toLocaleDateString("pt-BR")
-                            : "—"}
-                        </td>
-                        <td className="p-3.5">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-white/30 hover:text-white hover:bg-white/[0.06]">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
-                              <DropdownMenuItem onClick={() => { setEditingUser(user); setUserFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
-                                <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleViewPermissions(user)} className="text-xs focus:bg-white/[0.06]">
-                                <Eye className="h-3.5 w-3.5 mr-2" /> Ver Permissões
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleResetPassword(user)} className="text-xs focus:bg-white/[0.06]">
-                                <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-white/[0.06]" />
-                              {user.status === "ativo" ? (
-                                <>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(user, "inativo")} className="text-xs focus:bg-white/[0.06]">
-                                    <Unlock className="h-3.5 w-3.5 mr-2" /> Desativar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(user, "bloqueado")} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
-                                    <Lock className="h-3.5 w-3.5 mr-2" /> Bloquear
-                                  </DropdownMenuItem>
-                                </>
-                              ) : (
-                                <DropdownMenuItem onClick={() => handleToggleStatus(user, "ativo")} className="text-xs text-emerald-400 focus:bg-white/[0.06] focus:text-emerald-400">
-                                  <Unlock className="h-3.5 w-3.5 mr-2" /> Ativar
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator className="bg-white/[0.06]" />
-                              <DropdownMenuItem onClick={() => handleDeleteUser(user)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
-                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+              <div className="glass-card rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Usuário</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Cargo</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Departamento</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Permissões</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Último Acesso</th>
+                      <th className="p-3.5 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="p-8 text-center text-white/30 text-sm">
+                          Nenhum usuário encontrado
                         </td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    ) : filteredUsers.map((user) => {
+                      const st = userStatusConfig[user.status];
+                      const pc = permCount(user.roleId);
+                      return (
+                        <tr key={user.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                          <td className="p-3.5">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-[10px] font-bold shrink-0">
+                                {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{user.name}</p>
+                                <p className="text-[11px] text-white/40">{user.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3.5 text-xs text-white/60">{getRoleName(user.roleId)}</td>
+                          <td className="p-3.5 text-xs text-white/50">{user.department}</td>
+                          <td className="p-3.5">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${st.bg} ${st.color}`}>
+                              {st.label}
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <button
+                              onClick={() => handleViewPermissions(user)}
+                              className="text-[10px] text-white/30 hover:text-primary transition-colors font-mono"
+                            >
+                              {pc}/{totalPermsCount}
+                            </button>
+                          </td>
+                          <td className="p-3.5 text-xs text-white/40 font-mono">
+                            {user.lastAccess
+                              ? new Date(user.lastAccess).toLocaleDateString("pt-BR")
+                              : "—"}
+                          </td>
+                          <td className="p-3.5">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-white/30 hover:text-white hover:bg-white/[0.06]">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
+                                <DropdownMenuItem onClick={() => { setEditingUser(user); setUserFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
+                                  <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleViewPermissions(user)} className="text-xs focus:bg-white/[0.06]">
+                                  <Eye className="h-3.5 w-3.5 mr-2" /> Ver Permissões
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleResetPassword(user)} className="text-xs focus:bg-white/[0.06]">
+                                  <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                {user.status === "ativo" ? (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleToggleStatus(user, "inativo")} className="text-xs focus:bg-white/[0.06]">
+                                      <Unlock className="h-3.5 w-3.5 mr-2" /> Desativar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleToggleStatus(user, "bloqueado")} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
+                                      <Lock className="h-3.5 w-3.5 mr-2" /> Bloquear
+                                    </DropdownMenuItem>
+                                  </>
+                                ) : (
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(user, "ativo")} className="text-xs text-emerald-400 focus:bg-white/[0.06] focus:text-emerald-400">
+                                    <Unlock className="h-3.5 w-3.5 mr-2" /> Ativar
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                <DropdownMenuItem onClick={() => handleDeleteUser(user)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
+                                  <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ─── ROLES TAB ─── */}
-        {tab === "roles" && (
-          <div className="space-y-3">
-            <div className="relative w-64">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
-              <Input
-                placeholder="Buscar cargo..."
-                value={roleSearch}
-                onChange={(e) => setRoleSearch(e.target.value)}
-                className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
-              />
-            </div>
+          {/* ─── ROLES TAB ─── */}
+          {tab === "roles" && (
+            <div className="space-y-3">
+              <div className="relative w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <Input
+                  placeholder="Buscar cargo..."
+                  value={roleSearch}
+                  onChange={(e) => setRoleSearch(e.target.value)}
+                  className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
+                />
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {filteredRoles.map((role) => {
-                const pc = Object.values(role.permissions).filter(Boolean).length;
-                return (
-                  <div key={role.id} className="glass-card rounded-xl p-4 hover:bg-white/[0.03] transition-colors group">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                          {role.name}
-                          {role.isSystem && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">Sistema</span>}
-                        </h3>
-                        <p className="text-[11px] text-white/40 mt-0.5">{role.description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {filteredRoles.map((role) => {
+                  const pc = Object.values(role.permissions).filter(Boolean).length;
+                  return (
+                    <div key={role.id} className="glass-card rounded-xl p-4 hover:bg-white/[0.03] transition-colors group">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-sm font-semibold flex items-center gap-2">
+                            {role.name}
+                            {role.isSystem && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">Sistema</span>}
+                          </h3>
+                          <p className="text-[11px] text-white/40 mt-0.5">{role.description}</p>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/20 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
+                            <DropdownMenuItem onClick={() => { setEditingRole(role); setRoleFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
+                              <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicateRole(role)} className="text-xs focus:bg-white/[0.06]">
+                              <Copy className="h-3.5 w-3.5 mr-2" /> Duplicar
+                            </DropdownMenuItem>
+                            {!role.isSystem && (
+                              <>
+                                <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                <DropdownMenuItem onClick={() => handleDeleteRole(role)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
+                                  <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/20 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
-                          <DropdownMenuItem onClick={() => { setEditingRole(role); setRoleFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
-                            <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDuplicateRole(role)} className="text-xs focus:bg-white/[0.06]">
-                            <Copy className="h-3.5 w-3.5 mr-2" /> Duplicar
-                          </DropdownMenuItem>
-                          {!role.isSystem && (
-                            <>
-                              <DropdownMenuSeparator className="bg-white/[0.06]" />
-                              <DropdownMenuItem onClick={() => handleDeleteRole(role)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
-                                <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-white/30">{role.usersCount} usuário{role.usersCount !== 1 ? "s" : ""}</span>
+                        <span className="font-mono text-white/20">{pc}/{totalPermsCount} perms</span>
+                      </div>
                     </div>
-
-                    <div className="flex items-center gap-4 text-[11px] text-white/30">
-                      <span className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        {users.filter((u) => u.roleId === role.id).length} usuário(s)
-                      </span>
-                      <span className="font-mono">{pc}/{totalPermsCount} permissões</span>
-                    </div>
-
-                    {/* Mini progress */}
-                    <div className="mt-3 h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary/50 transition-all"
-                        style={{ width: `${(pc / totalPermsCount) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ─── AUDIT TAB ─── */}
-        {tab === "audit" && <AuditLog entries={audit} />}
-      </motion.div>
+          {/* ─── AUDIT TAB ─── */}
+          {tab === "audit" && <AuditLog entries={audit} />}
+        </motion.div>
+      )}
 
-      {/* ─── DIALOGS ─── */}
+      {/* Dialogs */}
       <UserFormDialog
         open={userFormOpen}
         onOpenChange={setUserFormOpen}
@@ -397,24 +477,23 @@ export default function UsersPermissions() {
         onSave={handleSaveRole}
       />
 
-      {/* View user permissions */}
-      <Dialog open={viewPermsOpen} onOpenChange={setViewPermsOpen}>
-        <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-3xl max-h-[85vh] overflow-y-auto scrollbar-thin">
-          <DialogHeader>
-            <DialogTitle className="font-heading text-lg">
-              Permissões — {viewPermsUser?.name}
-            </DialogTitle>
-            <p className="text-xs text-white/40">Cargo: {viewPermsUser && getRoleName(viewPermsUser.roleId)}</p>
-          </DialogHeader>
-          {viewPermsUser && (
+      {viewPermsUser && (
+        <Dialog open={viewPermsOpen} onOpenChange={setViewPermsOpen}>
+          <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="font-heading">
+                Permissões de {viewPermsUser.name}
+                <span className="text-xs text-white/30 font-normal ml-2">({getRoleName(viewPermsUser.roleId)})</span>
+              </DialogTitle>
+            </DialogHeader>
             <PermissionMatrix
               permissions={getRolePermissions(viewPermsUser.roleId)}
               onChange={() => {}}
               readOnly
             />
-          )}
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

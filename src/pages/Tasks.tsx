@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, Plus } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -9,11 +9,16 @@ import { TaskCalendar } from "@/components/tasks/TaskCalendar";
 import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
+import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 
 type ViewMode = "kanban" | "list" | "calendar";
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const { tasks: supabaseTasks, loading, updateTaskStatus, refetch } = useSupabaseTasks();
+  
+  // Use Supabase tasks if available, otherwise fallback to mock data
+  const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
+  
   const [view, setView] = useState<ViewMode>("kanban");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -41,27 +46,8 @@ export default function Tasks() {
     });
   }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter]);
 
-  const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              status: newStatus,
-              history: [
-                ...t.history,
-                {
-                  id: crypto.randomUUID(),
-                  action: "Status",
-                  detail: `${t.status} → ${newStatus}`,
-                  user: "Você",
-                  createdAt: new Date().toISOString(),
-                },
-              ],
-            }
-          : t
-      )
-    );
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    await updateTaskStatus(taskId, newStatus);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -70,12 +56,13 @@ export default function Tasks() {
   };
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
     setSelectedTask(updatedTask);
+    refetch();
   };
 
   const handleGenerateTasks = (newTasks: Task[]) => {
-    setTasks((prev) => [...prev, ...newTasks]);
+    // After generating, refetch from DB
+    refetch();
   };
 
   const viewButtons: { key: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
@@ -140,31 +127,37 @@ export default function Tasks() {
       </div>
 
       {/* Content */}
-      <motion.div
-        key={view}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-      >
-        {view === "kanban" && (
-          <TaskKanban
-            tasks={filteredTasks}
-            onStatusChange={handleStatusChange}
-            onTaskClick={handleTaskClick}
-          />
-        )}
-        {view === "list" && (
-          <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />
-        )}
-        {view === "calendar" && (
-          <TaskCalendar
-            tasks={filteredTasks}
-            onTaskClick={handleTaskClick}
-            currentMonth={calendarMonth}
-            onMonthChange={setCalendarMonth}
-          />
-        )}
-      </motion.div>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <motion.div
+          key={view}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          {view === "kanban" && (
+            <TaskKanban
+              tasks={filteredTasks}
+              onStatusChange={handleStatusChange}
+              onTaskClick={handleTaskClick}
+            />
+          )}
+          {view === "list" && (
+            <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />
+          )}
+          {view === "calendar" && (
+            <TaskCalendar
+              tasks={filteredTasks}
+              onTaskClick={handleTaskClick}
+              currentMonth={calendarMonth}
+              onMonthChange={setCalendarMonth}
+            />
+          )}
+        </motion.div>
+      )}
 
       {/* Task Detail Dialog */}
       <TaskDetailDialog
