@@ -10,11 +10,13 @@ import {
   ShieldCheck,
   Database,
   Shield,
+  Monitor,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
