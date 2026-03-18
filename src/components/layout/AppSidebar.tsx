@@ -60,7 +60,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-
+  const { profile } = useAuth();
   const renderItems = (items: typeof mainNav) =>
     items.map((item) => (
       <SidebarMenuItem key={item.title}>
