@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, LayoutGrid, List, Search } from "lucide-react";
+import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
