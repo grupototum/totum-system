@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, X, FileText } from "lucide-react";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -63,6 +63,20 @@ export function TaskFormDialog({
   const [taskType, setTaskType] = useState("outro");
   const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [checklistItems, setChecklistItems] = useState<string[]>([]);
+  const [newCheckItem, setNewCheckItem] = useState("");
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
+
+  // Fetch templates
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from("task_templates")
+      .select("*, task_template_items(*)")
+      .order("name")
+      .then(({ data }) => setTemplates(data || []));
+  }, [open]);
 
   const resetForm = () => {
     setTitle("");
@@ -73,6 +87,30 @@ export function TaskFormDialog({
     setTaskType("outro");
     setStartDate("");
     setDueDate("");
+    setChecklistItems([]);
+    setNewCheckItem("");
+    setShowTemplates(false);
+  };
+
+  const addCheckItem = () => {
+    if (!newCheckItem.trim()) return;
+    setChecklistItems(prev => [...prev, newCheckItem.trim()]);
+    setNewCheckItem("");
+  };
+
+  const removeCheckItem = (idx: number) => {
+    setChecklistItems(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const applyTemplate = (template: any) => {
+    const items = (template.task_template_items || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((i: any) => i.title);
+    setChecklistItems(items);
+    if (!title && template.name) setTitle(template.name);
+    if (!description && template.description) setDescription(template.description);
+    setShowTemplates(false);
+    toast({ title: "Template aplicado", description: `${items.length} itens adicionados` });
   };
 
   const handleSave = async () => {
@@ -87,7 +125,7 @@ export function TaskFormDialog({
 
     setSaving(true);
 
-    const { error } = await supabase.from("tasks").insert({
+    const { data: taskData, error } = await supabase.from("tasks").insert({
       title: title.trim(),
       description: description.trim() || null,
       client_id: clientId,
@@ -97,19 +135,26 @@ export function TaskFormDialog({
       status: "pendente" as any,
       start_date: startDate || null,
       due_date: dueDate || null,
-    });
-
-    setSaving(false);
+    }).select("id").single();
 
     if (error) {
-      toast({
-        title: "Erro ao criar tarefa",
-        description: error.message,
-        variant: "destructive",
-      });
+      setSaving(false);
+      toast({ title: "Erro ao criar tarefa", description: error.message, variant: "destructive" });
       return;
     }
 
+    // Insert checklist items
+    if (checklistItems.length > 0 && taskData) {
+      const items = checklistItems.map((text, i) => ({
+        task_id: taskData.id,
+        text,
+        sort_order: i,
+        completed: false,
+      }));
+      await supabase.from("task_checklist_items").insert(items);
+    }
+
+    setSaving(false);
     toast({ title: "Tarefa criada com sucesso" });
     resetForm();
     onOpenChange(false);
@@ -118,10 +163,10 @@ export function TaskFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg bg-[#1e1516] border-white/[0.1] text-white">
+      <DialogContent className="max-w-lg bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
-          <DialogDescription className="text-white/50">
+          <DialogDescription className="text-muted-foreground">
             Preencha os campos para criar uma nova tarefa.
           </DialogDescription>
         </DialogHeader>
@@ -130,24 +175,13 @@ export function TaskFormDialog({
           {/* Title */}
           <div className="space-y-1.5">
             <Label>Título *</Label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Criar post para Instagram"
-              className="bg-white/[0.04] border-white/[0.1]"
-            />
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Criar post para Instagram" className="bg-white/[0.04] border-border" />
           </div>
 
           {/* Description */}
           <div className="space-y-1.5">
             <Label>Descrição</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Detalhes da tarefa..."
-              rows={3}
-              className="bg-white/[0.04] border-white/[0.1] resize-none"
-            />
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalhes da tarefa..." rows={3} className="bg-white/[0.04] border-border resize-none" />
           </div>
 
           {/* Client + Responsible */}
@@ -155,30 +189,18 @@ export function TaskFormDialog({
             <div className="space-y-1.5">
               <Label>Cliente *</Label>
               <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger className="bg-white/[0.04] border-white/[0.1]">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Responsável</Label>
               <Select value={responsibleId} onValueChange={setResponsibleId}>
-                <SelectTrigger className="bg-white/[0.04] border-white/[0.1]">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.user_id} value={p.user_id}>
-                      {p.full_name}
-                    </SelectItem>
-                  ))}
+                  {profiles.map((p) => <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -189,30 +211,18 @@ export function TaskFormDialog({
             <div className="space-y-1.5">
               <Label>Prioridade</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger className="bg-white/[0.04] border-white/[0.1]">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {PRIORITIES.map((p) => (
-                    <SelectItem key={p.value} value={p.value}>
-                      {p.label}
-                    </SelectItem>
-                  ))}
+                  {PRIORITIES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Tipo</Label>
               <Select value={taskType} onValueChange={setTaskType}>
-                <SelectTrigger className="bg-white/[0.04] border-white/[0.1]">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {TASK_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      {t.label}
-                    </SelectItem>
-                  ))}
+                  {TASK_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -222,31 +232,66 @@ export function TaskFormDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Data Início</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-white/[0.04] border-white/[0.1]"
-              />
+              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-white/[0.04] border-border" />
             </div>
             <div className="space-y-1.5">
               <Label>Data Entrega</Label>
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-white/[0.04] border-border" />
+            </div>
+          </div>
+
+          {/* Checklist */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Checklist</Label>
+              {templates.length > 0 && (
+                <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => setShowTemplates(!showTemplates)}>
+                  <FileText className="h-3 w-3" /> Templates
+                </Button>
+              )}
+            </div>
+
+            {showTemplates && templates.length > 0 && (
+              <div className="border border-border rounded-lg p-2 space-y-1 bg-white/[0.02]">
+                {templates.map(t => (
+                  <button key={t.id} onClick={() => applyTemplate(t)}
+                    className="w-full text-left px-2 py-1.5 rounded hover:bg-white/[0.04] text-sm transition-colors">
+                    <span className="font-medium">{t.name}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {(t.task_template_items || []).length} itens
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {checklistItems.map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 pl-2">
+                <span className="text-xs text-muted-foreground">{idx + 1}.</span>
+                <span className="flex-1 text-sm">{item}</span>
+                <button onClick={() => removeCheckItem(idx)} className="p-1 hover:bg-white/[0.06] rounded">
+                  <X className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </div>
+            ))}
+
+            <div className="flex gap-2">
               <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="bg-white/[0.04] border-white/[0.1]"
+                value={newCheckItem}
+                onChange={e => setNewCheckItem(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCheckItem())}
+                placeholder="Adicionar item..."
+                className="bg-white/[0.04] border-border text-sm h-8"
               />
+              <Button variant="ghost" size="sm" onClick={addCheckItem} className="h-8 px-2">
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border bg-white/[0.04] hover:bg-white/[0.08]">
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={saving}>
