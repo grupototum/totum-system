@@ -57,6 +57,7 @@ function ProtectedRoutes() {
         <Route path="/usuarios" element={<UsersPermissions />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
         <Route path="/admin" element={<AdminSettings />} />
+        <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

@@ -118,6 +118,20 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
+        {/* Executive Dashboard - conditional */}
+        {hasExecDashboard && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
+              Estratégico
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge }])}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
             Principal
