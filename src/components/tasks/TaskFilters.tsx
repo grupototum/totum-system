@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { clientPlans, teamMembers, statusConfig, priorityConfig, TaskStatus, TaskPriority } from "./taskData";
+import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
