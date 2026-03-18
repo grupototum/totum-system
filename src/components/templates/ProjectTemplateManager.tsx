@@ -119,10 +119,17 @@ export function ProjectTemplateManager() {
   };
 
   const deleteTemplate = async (id: string) => {
-    await supabase.from("project_template_tasks").delete().eq("template_id", id);
-    await supabase.from("project_templates").delete().eq("id", id);
-    toast({ title: "Template removido" });
-    fetchTemplates();
+    try {
+      const { error: tasksErr } = await supabase.from("project_template_tasks").delete().eq("template_id", id);
+      if (tasksErr) throw tasksErr;
+      const { error } = await supabase.from("project_templates").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "Template removido" });
+      fetchTemplates();
+    } catch (err: any) {
+      console.error("Erro ao remover template:", err);
+      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+    }
   };
 
   const addTask = () => {

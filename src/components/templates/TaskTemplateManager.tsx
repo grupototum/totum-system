@@ -105,10 +105,17 @@ export function TaskTemplateManager() {
   };
 
   const deleteTemplate = async (id: string) => {
-    await supabase.from("task_template_items").delete().eq("template_id", id);
-    await supabase.from("task_templates").delete().eq("id", id);
-    toast({ title: "Template removido" });
-    fetch();
+    try {
+      const { error: itemsErr } = await supabase.from("task_template_items").delete().eq("template_id", id);
+      if (itemsErr) throw itemsErr;
+      const { error } = await supabase.from("task_templates").delete().eq("id", id);
+      if (error) throw error;
+      toast({ title: "Template removido" });
+      fetch();
+    } catch (err: any) {
+      console.error("Erro ao remover template:", err);
+      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+    }
   };
 
   const addItem = () => {
