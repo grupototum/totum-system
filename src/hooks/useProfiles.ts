@@ -27,23 +27,37 @@ export function useProfiles() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*, roles(name, permissions), departments(name)")
-      .order("full_name");
 
-    if (error) {
-      console.error("Error fetching profiles:", error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*, roles(name, permissions), departments(name)")
+        .order("full_name");
+
+      if (error) {
+        console.error("Error fetching profiles:", error);
+        setProfiles([]);
+        return;
+      }
+
       setProfiles((data as ProfileRow[]) || []);
+    } catch (error) {
+      console.error("Error fetching profiles:", error);
+      setProfiles([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   const updateProfile = async (id: string, updates: Partial<Tables<"profiles">>) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     const { error } = await supabase.from("profiles").update(updates).eq("id", id);
     if (error) {
       toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
@@ -54,7 +68,10 @@ export function useProfiles() {
   };
 
   const deleteProfile = async (id: string) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     const { error } = await supabase.from("profiles").update({ status: "inativo" as any }).eq("id", id);
     if (error) {
       toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
@@ -79,23 +96,37 @@ export function useRoles() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("roles")
-      .select("*")
-      .order("name");
 
-    if (error) {
-      console.error("Error fetching roles:", error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("roles")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching roles:", error);
+        setRoles([]);
+        return;
+      }
+
       setRoles(data || []);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      setRoles([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   const saveRole = async (role: Partial<RoleRow> & { name: string; permissions: any }) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     if (role.id) {
       const { error } = await supabase.from("roles").update({
         name: role.name,
@@ -124,7 +155,10 @@ export function useRoles() {
   };
 
   const deleteRole = async (id: string, name: string) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     const { error } = await supabase.from("roles").delete().eq("id", id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -136,7 +170,10 @@ export function useRoles() {
   };
 
   const duplicateRole = async (role: RoleRow) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     const { error } = await supabase.from("roles").insert({
       name: `${role.name} (cópia)`,
       description: role.description,
@@ -167,21 +204,32 @@ export function useAuditLogs() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("audit_logs")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200);
 
-    if (error) {
-      console.error("Error fetching audit logs:", error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("audit_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (error) {
+        console.error("Error fetching audit logs:", error);
+        setLogs([]);
+        return;
+      }
+
       setLogs(data || []);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      setLogs([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   return { logs, loading, refetch: fetch };
 }
@@ -195,8 +243,24 @@ export function useDepartments() {
       setDepartments(demoDepartmentsList as unknown as Tables<"departments">[]);
       return;
     }
-    supabase.from("departments").select("*").eq("is_active", true).order("name")
-      .then(({ data }) => setDepartments(data || []));
+
+    supabase
+      .from("departments")
+      .select("*")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Error fetching departments:", error);
+          setDepartments([]);
+          return;
+        }
+        setDepartments(data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching departments:", error);
+        setDepartments([]);
+      });
   }, [isDemoMode]);
 
   return departments;
@@ -215,21 +279,37 @@ export function useUserRoles() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("user_id, role")
-      .eq("role", "admin");
 
-    if (!error && data) {
-      setAdminUserIds(new Set(data.map((r) => r.user_id)));
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .eq("role", "admin");
+
+      if (error) {
+        console.error("Error fetching user roles:", error);
+        setAdminUserIds(new Set());
+        return;
+      }
+
+      setAdminUserIds(new Set((data || []).map((r) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching user roles:", error);
+      setAdminUserIds(new Set());
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
-  useEffect(() => { fetch(); }, [fetch]);
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
 
   const toggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
-    if (isDemoMode) { toast(DEMO_TOAST); return true; }
+    if (isDemoMode) {
+      toast(DEMO_TOAST);
+      return true;
+    }
     if (isCurrentlyAdmin) {
       const { error } = await supabase
         .from("user_roles")
