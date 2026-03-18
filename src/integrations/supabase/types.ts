@@ -1058,6 +1058,8 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          commission_type: string | null
+          commission_value: number | null
           created_at: string
           department_id: string | null
           email: string
@@ -1066,12 +1068,15 @@ export type Database = {
           last_access: string | null
           phone: string | null
           role_id: string | null
+          salary: number | null
           status: Database["public"]["Enums"]["user_status"]
           updated_at: string
           user_id: string
         }
         Insert: {
           avatar_url?: string | null
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string
           department_id?: string | null
           email: string
@@ -1080,12 +1085,15 @@ export type Database = {
           last_access?: string | null
           phone?: string | null
           role_id?: string | null
+          salary?: number | null
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
           user_id: string
         }
         Update: {
           avatar_url?: string | null
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string
           department_id?: string | null
           email?: string
@@ -1094,6 +1102,7 @@ export type Database = {
           last_access?: string | null
           phone?: string | null
           role_id?: string | null
+          salary?: number | null
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
           user_id?: string
