@@ -304,23 +304,22 @@ export const registryGroups: RegistryGroup[] = [
       {
         key: "tipos_projeto",
         label: "Tipos de Projeto",
-        description: "Categorias de projetos",
+        description: "Categorias de projetos com tipo de serviço e receita",
         icon: "Briefcase",
         columns: [
           { key: "name", label: "Nome" },
           { key: "descricao", label: "Descrição" },
+          { key: "tipo_servico_nome", label: "Tipo de Serviço" },
+          { key: "tipo_receita_nome", label: "Tipo de Receita" },
           statusColumn,
         ],
         formFields: [
           { key: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Landing Page" },
           { key: "descricao", label: "Descrição", type: "textarea" },
+          { key: "tipo_servico", label: "Tipo de Serviço *", type: "select", required: true, sourceTable: "service_types", placeholder: "Selecione o tipo de serviço" },
+          { key: "tipo_receita", label: "Tipo de Receita *", type: "select", required: true, sourceTable: "revenue_types", placeholder: "Selecione o tipo de receita" },
         ],
-        initialData: [
-          { id: "tp1", name: "Landing Page", descricao: "Páginas de conversão", status: "ativo" },
-          { id: "tp2", name: "Identidade Visual", descricao: "Branding completo", status: "ativo" },
-          { id: "tp3", name: "Website Institucional", descricao: "Sites corporativos", status: "ativo" },
-          { id: "tp4", name: "E-commerce", descricao: "Lojas virtuais", status: "ativo" },
-        ],
+        initialData: [],
       },
       {
         key: "tipos_servico",
