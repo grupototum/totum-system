@@ -1,4 +1,4 @@
-export type TaskStatus = "pendente" | "em_andamento" | "pausado" | "concluido";
+export type TaskStatus = "pendente" | "em_andamento" | "pausado" | "concluido" | "arquivado";
 export type TaskPriority = "baixa" | "media" | "alta" | "urgente";
 export type TaskType = "conteudo" | "trafego" | "reuniao" | "relatorio" | "design" | "desenvolvimento" | "outro";
 export type RecurrenceType = "diaria" | "semanal" | "mensal" | "personalizada";
