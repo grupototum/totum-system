@@ -26,7 +26,7 @@ function AuditSection() {
     entityType: entityType === "all" ? undefined : entityType,
     limit: 200,
   });
-  const { data: profiles } = useProfiles();
+  const { profiles } = useProfiles();
 
   const getProfileName = (userId: string | null) => {
     if (!userId || !profiles) return "Sistema";
