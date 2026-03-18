@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Shield, History, Search, Plus, MoreHorizontal, Copy,
-  Pencil, Trash2, Lock, Unlock, KeyRound, Eye, Loader2,
+  Pencil, Trash2, Lock, Unlock, KeyRound, Eye, Loader2, ShieldCheck, ShieldOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { UserFormDialog } from "@/components/users/UserFormDialog";
 import { RoleFormDialog } from "@/components/users/RoleFormDialog";
 import { PermissionMatrix } from "@/components/users/PermissionMatrix";
 import { AuditLog } from "@/components/users/AuditLog";
-import { useProfiles, useRoles, useAuditLogs, useDepartments, ProfileRow, RoleRow } from "@/hooks/useProfiles";
+import { useProfiles, useRoles, useAuditLogs, useDepartments, useUserRoles, ProfileRow, RoleRow } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -90,6 +90,7 @@ export default function UsersPermissions() {
   const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
   const { logs, loading: auditLoading } = useAuditLogs();
   const departments = useDepartments();
+  const { adminUserIds, toggleAdmin } = useUserRoles();
 
   // Dialogs
   const [userFormOpen, setUserFormOpen] = useState(false);
@@ -322,7 +323,17 @@ export default function UsersPermissions() {
                                 {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                               </div>
                               <div>
-                                <p className="text-sm font-medium">{user.name}</p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="text-sm font-medium">{user.name}</p>
+                                  {(() => {
+                                    const profile = profiles.find((p) => p.id === user.id);
+                                    return profile && adminUserIds.has(profile.user_id) ? (
+                                      <span className="inline-flex items-center px-1.5 py-0 rounded text-[9px] font-semibold bg-primary/20 text-primary">
+                                        ADMIN
+                                      </span>
+                                    ) : null;
+                                  })()}
+                                </div>
                                 <p className="text-[11px] text-white/40">{user.email}</p>
                               </div>
                             </div>
@@ -364,6 +375,28 @@ export default function UsersPermissions() {
                                 <DropdownMenuItem onClick={() => handleResetPassword(user)} className="text-xs focus:bg-white/[0.06]">
                                   <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
                                 </DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                {(() => {
+                                  const profile = profiles.find((p) => p.id === user.id);
+                                  const userId = profile?.user_id;
+                                  if (!userId) return null;
+                                  const isAdmin = adminUserIds.has(userId);
+                                  return (
+                                    <DropdownMenuItem
+                                      onClick={async () => {
+                                        await toggleAdmin(userId, isAdmin);
+                                        await logAudit(
+                                          isAdmin ? "Admin removido" : "Admin concedido",
+                                          `Usuário ${user.name} ${isAdmin ? "removido de" : "promovido a"} administrador`
+                                        );
+                                      }}
+                                      className={`text-xs focus:bg-white/[0.06] ${isAdmin ? "text-amber-400 focus:text-amber-400" : "text-emerald-400 focus:text-emerald-400"}`}
+                                    >
+                                      {isAdmin ? <ShieldOff className="h-3.5 w-3.5 mr-2" /> : <ShieldCheck className="h-3.5 w-3.5 mr-2" />}
+                                      {isAdmin ? "Remover Admin" : "Promover a Admin"}
+                                    </DropdownMenuItem>
+                                  );
+                                })()}
                                 <DropdownMenuSeparator className="bg-white/[0.06]" />
                                 {user.status === "ativo" ? (
                                   <>
