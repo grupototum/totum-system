@@ -13,6 +13,7 @@ import {
   Shield,
   Monitor,
   LogOut,
+  Package,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
