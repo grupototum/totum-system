@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Clock, User, Loader2, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useProjects } from "@/hooks/useProjects";
+import { useProjects, ProjectRow } from "@/hooks/useProjects";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
+import { ProjectDetailSheet } from "@/components/projects/ProjectDetailSheet";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
@@ -24,6 +25,7 @@ export default function Projects() {
   const { projects, loading, addProject, updateProject } = useProjects();
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
+  const [detailProject, setDetailProject] = useState<ProjectRow | null>(null);
 
   const inProgressCount = projects.filter((p) => p.status === "em_andamento").length;
 
@@ -53,6 +55,7 @@ export default function Projects() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               className="glass-card rounded-xl p-5 hover:bg-white/[0.04] transition-colors cursor-pointer"
+              onClick={() => setDetailProject(project)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="h-10 w-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
@@ -91,8 +94,13 @@ export default function Projects() {
       <ProjectFormDialog
         open={!!editingProject}
         onOpenChange={(open) => { if (!open) setEditingProject(null); }}
-        onSubmit={(values) => updateProject(editingProject.id, values)}
+        onSubmit={(values, tasks) => updateProject(editingProject.id, values, tasks)}
         initialData={editingProject}
+      />
+      <ProjectDetailSheet
+        project={detailProject}
+        open={!!detailProject}
+        onOpenChange={(open) => { if (!open) setDetailProject(null); }}
       />
     </div>
   );

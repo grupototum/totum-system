@@ -24,24 +24,24 @@ export function useFinancialEntries(month?: string) {
       return;
     }
     setLoading(true);
+    try {
+      let query = supabase
+        .from("financial_entries")
+        .select("*, clients(name)")
+        .order("due_date", { ascending: false });
 
-    let query = supabase
-      .from("financial_entries")
-      .select("*, clients(name)")
-      .order("due_date", { ascending: false });
+      if (month) {
+        query = query.gte("due_date", `${month}-01`).lte("due_date", `${month}-31`);
+      }
 
-    if (month) {
-      query = query.gte("due_date", `${month}-01`).lte("due_date", `${month}-31`);
-    }
-
-    const { data, error } = await query.limit(200);
-
-    if (error) {
-      console.error("Error fetching financial entries:", error);
-    } else {
+      const { data, error } = await query.limit(200);
+      if (error) throw error;
       setEntries((data as FinancialEntryRow[]) || []);
+    } catch (err) {
+      console.error("Error fetching financial entries:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [month, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);

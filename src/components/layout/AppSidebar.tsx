@@ -13,6 +13,8 @@ import {
   Shield,
   Monitor,
   LogOut,
+  Package,
+  LayoutTemplate,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -38,12 +40,14 @@ const mainNav = [
   { title: "Central do Cliente", url: "/clientes", icon: Users },
   { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
   { title: "Projetos", url: "/projetos", icon: Briefcase },
+  { title: "Produtos", url: "/produtos", icon: Package },
   { title: "Financeiro", url: "/financeiro", icon: DollarSign },
 ];
 
 const systemNav = [
   { title: "Equipe", url: "/equipe", icon: UserCog },
   { title: "Cadastros", url: "/cadastros", icon: Database },
+  { title: "Templates", url: "/templates", icon: LayoutTemplate },
   { title: "Permissões", url: "/usuarios", icon: Shield },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
   { title: "Admin", url: "/admin", icon: ShieldCheck },
