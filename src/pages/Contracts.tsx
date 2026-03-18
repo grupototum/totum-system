@@ -84,6 +84,8 @@ export default function Contracts() {
           ))}
         </div>
       )}
+
+      <ContractFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addContract} />
     </div>
   );
 }

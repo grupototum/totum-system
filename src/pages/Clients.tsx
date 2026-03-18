@@ -117,6 +117,8 @@ export default function Clients() {
           </div>
         </motion.div>
       )}
+
+      <ClientFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addClient} />
     </div>
   );
 }

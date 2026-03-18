@@ -75,6 +75,8 @@ export default function Projects() {
           ))}
         </div>
       )}
+
+      <ProjectFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addProject} />
     </div>
   );
 }
