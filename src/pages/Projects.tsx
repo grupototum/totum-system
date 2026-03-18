@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Clock, User, Loader2 } from "lucide-react";
+import { Briefcase, Clock, User, Loader2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useProjects } from "@/hooks/useProjects";
+import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
