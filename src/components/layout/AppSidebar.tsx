@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard,
   Users,
-  ClipboardCheck,
-  FileText,
-  DollarSign,
-  Briefcase,
-  Package,
-  BarChart3,
-  Settings,
-  UserCog,
-  Database,
   CheckSquare,
-  Shield,
-  ShieldCheck,
+  Briefcase,
+  DollarSign,
   Gauge,
+  UserCog,
+  Settings,
+  ShieldCheck,
+  Database,
+  Shield,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
@@ -37,18 +31,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainNav = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Clientes", url: "/clientes", icon: Users },
+  { title: "Central do Cliente", url: "/clientes", icon: Users },
   { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
-  { title: "Entregas", url: "/entregas", icon: ClipboardCheck },
-  { title: "Contratos", url: "/contratos", icon: FileText },
   { title: "Projetos", url: "/projetos", icon: Briefcase },
-];
-
-const financeNav = [
   { title: "Financeiro", url: "/financeiro", icon: DollarSign },
-  { title: "Produtos", url: "/produtos", icon: Package },
-  { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
 ];
 
 const systemNav = [
@@ -62,7 +48,6 @@ const systemNav = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
   const { profile, user } = useAuth();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
@@ -70,18 +55,11 @@ export function AppSidebar() {
     profile?.roles?.name?.toLowerCase() === "administrador" ||
     profile?.roles?.name?.toLowerCase() === "admin";
 
-  // Check executive dashboard permission
   useEffect(() => {
     if (!user) return;
-    if (isAdmin) {
-      setHasExecDashboard(true);
-      return;
-    }
-    // Check permission from roles.permissions JSON
+    if (isAdmin) { setHasExecDashboard(true); return; }
     const perms = profile?.roles?.permissions as Record<string, boolean> | null;
-    if (perms?.acessar_dashboard_executivo) {
-      setHasExecDashboard(true);
-    }
+    if (perms?.acessar_dashboard_executivo) setHasExecDashboard(true);
   }, [user, isAdmin, profile]);
 
   const filteredSystemNav = systemNav.filter(
@@ -106,22 +84,17 @@ export function AppSidebar() {
     ));
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/[0.08]">
+    <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="p-4 pb-6">
         <div className="flex items-center gap-3">
-          <img
-            src={logoWhite}
-            alt="Totum"
-            className={collapsed ? "h-6" : "h-7"}
-          />
+          <img src={logoWhite} alt="Totum" className={collapsed ? "h-6" : "h-7"} />
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-2">
-        {/* Executive Dashboard - conditional */}
         {hasExecDashboard && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
               Estratégico
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -133,7 +106,7 @@ export function AppSidebar() {
         )}
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
             Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -142,16 +115,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1 mt-4">
-            Financeiro
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(financeNav)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-3 mb-1 mt-4">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1 mt-4">
             Sistema
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -160,17 +124,13 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-white/[0.06]">
+      <SidebarFooter className="p-4 border-t border-border">
         <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-white/[0.06]">
-          <UserAvatar
-            avatarUrl={profile?.avatar_url}
-            fullName={profile?.full_name || "Grupo Totum"}
-            size="sm"
-          />
+          <UserAvatar avatarUrl={profile?.avatar_url} fullName={profile?.full_name || "Grupo Totum"} size="sm" />
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-medium">{profile?.full_name || "Grupo Totum"}</span>
-              <span className="text-xs text-white/40">{profile?.roles?.name || "Usuário"}</span>
+              <span className="text-xs text-muted-foreground">{profile?.roles?.name || "Usuário"}</span>
             </div>
           )}
         </Link>

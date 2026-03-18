@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Search, Plus, MoreHorizontal, ArrowUpDown, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ const statusConfig: Record<string, string> = {
 };
 
 export default function Clients() {
+  const navigate = useNavigate();
   const { clients, loading, addClient, updateClient, deleteClient } = useClients();
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -113,8 +115,9 @@ export default function Clients() {
                     <tr
                       key={client.id}
                       className="border-b border-border/50 hover:bg-white/[0.03] transition-colors cursor-pointer"
-                      onClick={() => handleEdit(client)}
+                      onClick={() => navigate(`/clientes/${client.id}`)}
                     >
+                      <td className="p-4 font-medium text-primary hover:underline">{client.name}</td>
                       <td className="p-4 font-medium">{client.name}</td>
                       <td className="p-4 text-muted-foreground text-xs">{(client.client_types as any)?.name || "—"}</td>
                       <td className="p-4">{getActivePlan(client)}</td>
