@@ -51,6 +51,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { profile, user } = useAuth();
+  const { isDemoMode, toggleDemo } = useDemo();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   const isAdmin =
