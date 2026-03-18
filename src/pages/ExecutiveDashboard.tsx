@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { useExecutiveDashboard } from "@/hooks/useExecutiveDashboard";
+import { useExecutiveDashboard, PeriodFilter } from "@/hooks/useExecutiveDashboard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Users, FileText,
-  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, ChevronDown,
+  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, CalendarIcon,
 } from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const formatCurrency = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -19,10 +25,23 @@ const COLORS = [
 
 export default function ExecutiveDashboard() {
   const now = new Date();
-  const [period, setPeriod] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  );
-  const { data, loading } = useExecutiveDashboard(period);
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const [selectValue, setSelectValue] = useState(currentMonth);
+  const [customStart, setCustomStart] = useState<Date | undefined>();
+  const [customEnd, setCustomEnd] = useState<Date | undefined>();
+
+  const isCustom = selectValue === "custom";
+
+  const periodFilter: PeriodFilter = isCustom && customStart && customEnd
+    ? {
+        type: "custom",
+        startDate: format(customStart, "yyyy-MM-dd"),
+        endDate: format(customEnd, "yyyy-MM-dd"),
+      }
+    : { type: "month", month: selectValue === "custom" ? currentMonth : selectValue };
+
+  const { data, loading } = useExecutiveDashboard(periodFilter);
 
   const months = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -63,23 +82,82 @@ export default function ExecutiveDashboard() {
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Dashboard Executivo</h1>
           <p className="text-sm text-white/50 mt-1">Visão estratégica, financeira e operacional</p>
         </div>
-        <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-48 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
-            {months.map((m) => (
-              <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.06] focus:text-white capitalize">
-                {m.label}
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={selectValue} onValueChange={setSelectValue}>
+            <SelectTrigger className="w-48 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+              {months.map((m) => (
+                <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.06] focus:text-white capitalize">
+                  {m.label}
+                </SelectItem>
+              ))}
+              <SelectItem value="custom" className="text-xs focus:bg-white/[0.06] focus:text-white">
+                📅 Personalizado
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            </SelectContent>
+          </Select>
+
+          {isCustom && (
+            <>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-9 w-[140px] justify-start text-left text-xs bg-white/[0.05] border-white/[0.1]",
+                      !customStart && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                    {customStart ? format(customStart, "dd/MM/yyyy") : "De"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customStart}
+                    onSelect={setCustomStart}
+                    locale={ptBR}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "h-9 w-[140px] justify-start text-left text-xs bg-white/[0.05] border-white/[0.1]",
+                      !customEnd && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                    {customEnd ? format(customEnd, "dd/MM/yyyy") : "Até"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customEnd}
+                    onSelect={setCustomEnd}
+                    locale={ptBR}
+                    disabled={(date) => customStart ? date < customStart : false}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
+        </div>
       </div>
 
       {/* FINANCIAL SECTION */}

@@ -30,7 +30,14 @@ interface ExecutiveDashboardData {
   revenueConcentration: number;
 }
 
-export function useExecutiveDashboard(period?: string) {
+export interface PeriodFilter {
+  type: "month" | "custom";
+  month?: string; // YYYY-MM
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
+}
+
+export function useExecutiveDashboard(periodFilter: PeriodFilter) {
   const { isDemoMode } = useDemo();
   const [data, setData] = useState<ExecutiveDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,12 +51,19 @@ export function useExecutiveDashboard(period?: string) {
     setLoading(true);
     const now = new Date();
 
-    const periodStart = period
-      ? `${period}-01`
-      : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-    const pDate = new Date(periodStart);
-    const nextMonth = new Date(pDate.getFullYear(), pDate.getMonth() + 1, 1);
-    const periodEnd = nextMonth.toISOString().split("T")[0];
+    let periodStart: string;
+    let periodEnd: string;
+
+    if (periodFilter.type === "custom" && periodFilter.startDate && periodFilter.endDate) {
+      periodStart = periodFilter.startDate;
+      periodEnd = periodFilter.endDate;
+    } else {
+      const month = periodFilter.month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      periodStart = `${month}-01`;
+      const pDate = new Date(periodStart);
+      const nextMonth = new Date(pDate.getFullYear(), pDate.getMonth() + 1, 1);
+      periodEnd = nextMonth.toISOString().split("T")[0];
+    }
 
     const { data: entries } = await supabase
       .from("financial_entries")
@@ -173,7 +187,7 @@ export function useExecutiveDashboard(period?: string) {
       revenueForecast, topClients, revenueConcentration,
     });
     setLoading(false);
-  }, [period, isDemoMode]);
+  }, [periodFilter, isDemoMode]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
