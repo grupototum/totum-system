@@ -19,6 +19,7 @@ export interface Subtask {
 export interface TaskComment {
   id: string;
   author: string;
+  authorAvatarUrl?: string;
   text: string;
   createdAt: string;
 }
