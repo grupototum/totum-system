@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "dev": "NAPI_RS_FORCE_WASI=1 vite",
+    "build": "NAPI_RS_FORCE_WASI=1 vite build",
+    "build:dev": "NAPI_RS_FORCE_WASI=1 vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "NAPI_RS_FORCE_WASI=1 vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
