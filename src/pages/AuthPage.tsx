@@ -25,7 +25,10 @@ export default function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro no login", description: error.message, variant: "destructive" });
+      const msg = error.message.toLowerCase().includes("invalid login credentials")
+        ? "Usuário ou senha incorretos."
+        : error.message;
+      toast({ title: "Erro no login", description: msg, variant: "destructive" });
     }
     // If user is pending, useAuth will sign them out and set isPending
     // We detect this via a small delay
