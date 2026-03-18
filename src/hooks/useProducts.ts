@@ -23,13 +23,18 @@ export function useProducts() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("products")
-      .select("*, product_types(name)")
-      .order("name");
-    if (error) console.error("Error fetching products:", error);
-    else setProducts((data as ProductRow[]) || []);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*, product_types(name)")
+        .order("name");
+      if (error) throw error;
+      setProducts((data as ProductRow[]) || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);

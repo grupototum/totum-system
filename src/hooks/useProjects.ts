@@ -22,17 +22,18 @@ export function useProjects() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase
-      .from("projects")
-      .select("*, clients(name), project_types(name)")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching projects:", error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*, clients(name), project_types(name)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
       setProjects((data as ProjectRow[]) || []);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);

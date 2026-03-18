@@ -23,17 +23,18 @@ export function useContracts() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase
-      .from("contracts")
-      .select("*, clients(name), plans(name), contract_types(name)")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching contracts:", error);
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("contracts")
+        .select("*, clients(name), plans(name), contract_types(name)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
       setContracts((data as ContractRow[]) || []);
+    } catch (err) {
+      console.error("Error fetching contracts:", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
