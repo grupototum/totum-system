@@ -42,7 +42,7 @@ export default function Clients() {
           <h1 className="text-2xl font-heading font-bold tracking-tight">Clientes</h1>
           <p className="text-sm text-white/50 mt-1">{activeCount} ativos · {clients.length} total</p>
         </div>
-        <Button className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+        <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
           <Plus className="h-4 w-4" /> Novo Cliente
         </Button>
       </div>
