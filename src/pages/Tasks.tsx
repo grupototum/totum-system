@@ -43,9 +43,10 @@ export default function Tasks() {
       }
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
+      if (typeFilter !== "all" && t.type !== typeFilter) return false;
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter]);
+  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     await updateTaskStatus(taskId, newStatus);
