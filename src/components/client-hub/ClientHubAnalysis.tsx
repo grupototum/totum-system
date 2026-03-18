@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
 import { Save, Loader2 } from "lucide-react";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function ClientHubAnalysis({ clientId, initialAnalysis }: Props) {
+  const { isDemoMode } = useDemo();
   const [content, setContent] = useState(initialAnalysis);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(initialAnalysis);
@@ -17,6 +19,7 @@ export function ClientHubAnalysis({ clientId, initialAnalysis }: Props) {
 
   useEffect(() => {
     if (content === lastSaved) return;
+    if (isDemoMode) return;
 
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
@@ -34,14 +37,16 @@ export function ClientHubAnalysis({ clientId, initialAnalysis }: Props) {
     }, 2000);
 
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [content, clientId, lastSaved]);
+  }, [content, clientId, lastSaved, isDemoMode]);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium">Análise de Marketing</h3>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {saving ? (
+          {isDemoMode ? (
+            "🎭 Modo Demo"
+          ) : saving ? (
             <><Loader2 className="h-3 w-3 animate-spin" /> Salvando...</>
           ) : content !== lastSaved ? (
             "Alterações não salvas"

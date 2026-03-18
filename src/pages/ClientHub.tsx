@@ -5,6 +5,8 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoClients } from "@/data/demoData";
 import { ClientHubDeliveries } from "@/components/client-hub/ClientHubDeliveries";
 import { ClientHubContracts } from "@/components/client-hub/ClientHubContracts";
 import { ClientHubTimeline } from "@/components/client-hub/ClientHubTimeline";
@@ -14,12 +16,19 @@ import { ClientHubPendencies } from "@/components/client-hub/ClientHubPendencies
 export default function ClientHub() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isDemoMode } = useDemo();
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchClient = useCallback(async () => {
     if (!id) return;
     setLoading(true);
+    if (isDemoMode) {
+      const found = demoClients.find(c => c.id === id);
+      setClient(found ? { ...found, client_types: null } : null);
+      setLoading(false);
+      return;
+    }
     const { data } = await supabase
       .from("clients")
       .select("*, client_types(name)")
@@ -27,7 +36,7 @@ export default function ClientHub() {
       .single();
     setClient(data);
     setLoading(false);
-  }, [id]);
+  }, [id, isDemoMode]);
 
   useEffect(() => { fetchClient(); }, [fetchClient]);
 

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoClientObservations, demoProfilesList } from "@/data/demoData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -18,6 +20,7 @@ interface TimelineEntry {
 }
 
 export function ClientHubTimeline({ clientId }: Props) {
+  const { isDemoMode } = useDemo();
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [newObs, setNewObs] = useState("");
@@ -25,6 +28,22 @@ export function ClientHubTimeline({ clientId }: Props) {
 
   const fetch = useCallback(async () => {
     setLoading(true);
+
+    if (isDemoMode) {
+      const profileMap = new Map(demoProfilesList.map(p => [p.user_id, p.full_name]));
+      const obs = demoClientObservations
+        .filter(o => o.client_id === clientId)
+        .map(o => ({
+          id: o.id,
+          type: "observation" as const,
+          content: o.content,
+          userName: profileMap.get(o.user_id) || "Usuário",
+          createdAt: o.created_at,
+        }));
+      setEntries(obs);
+      setLoading(false);
+      return;
+    }
 
     // Fetch observations
     const { data: obs } = await supabase
@@ -68,12 +87,17 @@ export function ClientHubTimeline({ clientId }: Props) {
 
     setEntries(combined);
     setLoading(false);
-  }, [clientId]);
+  }, [clientId, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const handleAddObs = async () => {
     if (!newObs.trim()) return;
+    if (isDemoMode) {
+      toast({ title: "🎭 Modo Demonstração", description: "Observação simulada — nenhuma alteração foi salva." });
+      setNewObs("");
+      return;
+    }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.from("client_observations").insert({

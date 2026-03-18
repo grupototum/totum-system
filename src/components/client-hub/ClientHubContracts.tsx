@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, FileText, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoContracts } from "@/data/demoData";
 import { format } from "date-fns";
 
 interface Props { clientId: string; }
@@ -14,11 +15,17 @@ const statusCls: Record<string, string> = {
 };
 
 export function ClientHubContracts({ clientId }: Props) {
+  const { isDemoMode } = useDemo();
   const [contracts, setContracts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      setContracts(demoContracts.filter(c => c.client_id === clientId));
+      setLoading(false);
+      return;
+    }
     const { data } = await supabase
       .from("contracts")
       .select("*, plans(name), contract_types(name)")
@@ -26,7 +33,7 @@ export function ClientHubContracts({ clientId }: Props) {
       .order("created_at", { ascending: false });
     setContracts(data || []);
     setLoading(false);
-  }, [clientId]);
+  }, [clientId, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
