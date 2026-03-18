@@ -1,6 +1,7 @@
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { Task, TaskStatus, statusConfig, statusColumns, priorityConfig } from "./taskData";
-import { Clock, User } from "lucide-react";
+import { Clock } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TaskKanbanProps {
   tasks: Task[];
