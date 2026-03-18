@@ -1,13 +1,16 @@
 import { Task, statusConfig, priorityConfig, recurrenceLabels } from "./taskData";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface TaskListViewProps {
   tasks: Task[];
   onTaskClick: (task: Task) => void;
+  showUnarchive?: boolean;
+  onUnarchive?: (taskId: string) => void;
 }
 
-export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
+export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }: TaskListViewProps) {
   return (
     <div className="glass-card rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
@@ -20,7 +23,7 @@ export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prioridade</th>
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prazo</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Progresso</th>
+              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">{showUnarchive ? "Ação" : "Progresso"}</th>
             </tr>
           </thead>
           <tbody>
@@ -82,7 +85,20 @@ export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
                       )}
                     </td>
                     <td className="p-3.5">
-                      {checkProgress !== null ? (
+                      {showUnarchive ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUnarchive?.(task.id);
+                          }}
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Restaurar
+                        </Button>
+                      ) : checkProgress !== null ? (
                         <div className="flex items-center gap-2">
                           <div className="w-12 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                             <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${checkProgress}%` }} />

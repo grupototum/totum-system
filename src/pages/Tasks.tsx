@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -29,6 +29,7 @@ export default function Tasks() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
+  const [showArchived, setShowArchived] = useState(false);
 
   // Completion dialog state
   const [completionTask, setCompletionTask] = useState<Task | null>(null);
@@ -44,6 +45,12 @@ export default function Tasks() {
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
+      // Archive filter: if not showing archived, hide them; if showing archived, ONLY show archived
+      if (showArchived) {
+        if (t.status !== "arquivado") return false;
+      } else {
+        if (t.status === "arquivado") return false;
+      }
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (clientFilter.length > 0 && !clientFilter.includes(t.clientId)) return false;
       if (responsibleFilter.length > 0) {
@@ -55,7 +62,14 @@ export default function Tasks() {
       if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
+  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter, showArchived]);
+
+  const archivedCount = useMemo(() => tasks.filter(t => t.status === "arquivado").length, [tasks]);
+
+  const handleUnarchive = async (taskId: string) => {
+    await updateTaskStatus(taskId, "concluido");
+    toast({ title: "Tarefa restaurada", description: "A tarefa foi movida de volta para Concluído." });
+  };
 
   // Intercept status changes to "concluido" — open completion dialog
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
@@ -208,37 +222,62 @@ export default function Tasks() {
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
   ];
 
-  // Stats
-  const overdueTasks = tasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "concluido").length;
-  const pendingTasks = tasks.filter((t) => t.status === "pendente").length;
+  // Stats (exclude archived)
+  const activeTasks = tasks.filter(t => t.status !== "arquivado");
+  const overdueTasks = activeTasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "concluido").length;
+  const pendingTasks = activeTasks.filter((t) => t.status === "pendente").length;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-heading font-bold tracking-tight">Tarefas</h1>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">
+            {showArchived ? "Tarefas Arquivadas" : "Tarefas"}
+          </h1>
           <p className="text-sm text-white/50 mt-1">
-            {tasks.length} tarefas · {pendingTasks} pendentes
-            {overdueTasks > 0 && (
-              <span className="text-red-400 ml-2">· {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
+            {showArchived ? (
+              <span>{archivedCount} tarefa{archivedCount !== 1 ? "s" : ""} arquivada{archivedCount !== 1 ? "s" : ""}</span>
+            ) : (
+              <>
+                {activeTasks.length} tarefas · {pendingTasks} pendentes
+                {overdueTasks > 0 && (
+                  <span className="text-red-400 ml-2">· {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
+                )}
+              </>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setCreateOpen(true)}
-            className="gap-2 rounded-full px-4 text-sm"
-          >
-            <Plus className="h-4 w-4" /> Nova Tarefa
-          </Button>
-          <Button
-            onClick={() => setGenerateOpen(true)}
+            onClick={() => setShowArchived(!showArchived)}
             variant="outline"
-            className="gap-2 rounded-full px-4 text-sm border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
+            className={`gap-2 rounded-full px-4 text-sm border-white/[0.1] ${
+              showArchived 
+                ? "bg-primary/10 text-primary border-primary/20" 
+                : "bg-white/[0.04] hover:bg-white/[0.08] text-white"
+            }`}
           >
-            <Sparkles className="h-4 w-4 text-primary" /> Gerar do Plano
+            <Archive className="h-4 w-4" />
+            {showArchived ? "Ver Ativas" : `Arquivadas${archivedCount > 0 ? ` (${archivedCount})` : ""}`}
           </Button>
+          {!showArchived && (
+            <>
+              <Button
+                onClick={() => setCreateOpen(true)}
+                className="gap-2 rounded-full px-4 text-sm"
+              >
+                <Plus className="h-4 w-4" /> Nova Tarefa
+              </Button>
+              <Button
+                onClick={() => setGenerateOpen(true)}
+                variant="outline"
+                className="gap-2 rounded-full px-4 text-sm border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
+              >
+                <Sparkles className="h-4 w-4 text-primary" /> Gerar do Plano
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -286,16 +325,23 @@ export default function Tasks() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
-          {view === "dashboard" && <TaskDashboard tasks={tasks} />}
-          {view === "kanban" && (
+          {view === "dashboard" && !showArchived && <TaskDashboard tasks={activeTasks} />}
+          {view === "kanban" && !showArchived && (
             <TaskKanban
               tasks={filteredTasks}
               onStatusChange={handleStatusChange}
               onTaskClick={handleTaskClick}
             />
           )}
-          {view === "list" && <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />}
-          {view === "calendar" && (
+          {(view === "list" || showArchived) && (
+            <TaskListView 
+              tasks={filteredTasks} 
+              onTaskClick={handleTaskClick}
+              showUnarchive={showArchived}
+              onUnarchive={handleUnarchive}
+            />
+          )}
+          {view === "calendar" && !showArchived && (
             <TaskCalendar
               tasks={filteredTasks}
               onTaskClick={handleTaskClick}

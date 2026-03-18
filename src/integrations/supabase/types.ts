@@ -1525,6 +1525,7 @@ export type Database = {
       }
       system_settings: {
         Row: {
+          archive_after_days: number
           created_at: string
           currency: string
           date_format: string
@@ -1538,6 +1539,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archive_after_days?: number
           created_at?: string
           currency?: string
           date_format?: string
@@ -1551,6 +1553,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archive_after_days?: number
           created_at?: string
           currency?: string
           date_format?: string
@@ -1995,7 +1998,12 @@ export type Database = {
       expense_recurrence: "recorrente" | "unica" | "parcelada"
       financial_entry_status: "pendente" | "pago" | "atrasado" | "cancelado"
       task_priority: "baixa" | "media" | "alta" | "urgente"
-      task_status: "pendente" | "em_andamento" | "pausado" | "concluido"
+      task_status:
+        | "pendente"
+        | "em_andamento"
+        | "pausado"
+        | "concluido"
+        | "arquivado"
       task_type:
         | "conteudo"
         | "trafego"
@@ -2156,7 +2164,13 @@ export const Constants = {
       expense_recurrence: ["recorrente", "unica", "parcelada"],
       financial_entry_status: ["pendente", "pago", "atrasado", "cancelado"],
       task_priority: ["baixa", "media", "alta", "urgente"],
-      task_status: ["pendente", "em_andamento", "pausado", "concluido"],
+      task_status: [
+        "pendente",
+        "em_andamento",
+        "pausado",
+        "concluido",
+        "arquivado",
+      ],
       task_type: [
         "conteudo",
         "trafego",

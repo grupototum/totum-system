@@ -28,6 +28,7 @@ export function SystemTab() {
   const [timezone, setTimezone] = useState("America/Sao_Paulo");
   const [defaultStatus, setDefaultStatus] = useState("pendente");
   const [defaultPriority, setDefaultPriority] = useState("media");
+  const [archiveDays, setArchiveDays] = useState(30);
 
   useEffect(() => {
     if (settings) {
@@ -36,6 +37,7 @@ export function SystemTab() {
       setTimezone(settings.timezone || "America/Sao_Paulo");
       setDefaultStatus(settings.default_task_status || "pendente");
       setDefaultPriority(settings.default_task_priority || "media");
+      setArchiveDays((settings as any).archive_after_days ?? 30);
     }
   }, [settings]);
 
@@ -55,6 +57,7 @@ export function SystemTab() {
       timezone,
       default_task_status: defaultStatus,
       default_task_priority: defaultPriority,
+      archive_after_days: archiveDays,
     });
   };
 
@@ -121,6 +124,19 @@ export function SystemTab() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Arquivar tarefas após (dias)</Label>
+          <Input
+            type="number"
+            min={1}
+            max={365}
+            value={archiveDays}
+            onChange={(e) => setArchiveDays(Number(e.target.value) || 30)}
+            className="bg-white/[0.05] border-white/[0.1]"
+          />
+          <p className="text-[10px] text-white/30">Tarefas concluídas serão arquivadas após este período</p>
         </div>
       </div>
 

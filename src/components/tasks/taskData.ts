@@ -1,4 +1,4 @@
-export type TaskStatus = "pendente" | "em_andamento" | "pausado" | "concluido";
+export type TaskStatus = "pendente" | "em_andamento" | "pausado" | "concluido" | "arquivado";
 export type TaskPriority = "baixa" | "media" | "alta" | "urgente";
 export type TaskType = "conteudo" | "trafego" | "reuniao" | "relatorio" | "design" | "desenvolvimento" | "outro";
 export type RecurrenceType = "diaria" | "semanal" | "mensal" | "personalizada";
@@ -92,6 +92,7 @@ export const statusConfig: Record<TaskStatus, { label: string; color: string; bg
   em_andamento: { label: "Em andamento", color: "text-blue-400", bgColor: "bg-blue-500/10" },
   pausado: { label: "Pausado", color: "text-amber-400", bgColor: "bg-amber-500/10" },
   concluido: { label: "Concluído", color: "text-emerald-400", bgColor: "bg-emerald-500/10" },
+  arquivado: { label: "Arquivada", color: "text-white/25", bgColor: "bg-white/[0.03]" },
 };
 
 export const priorityConfig: Record<TaskPriority, { label: string; color: string; dot: string }> = {
