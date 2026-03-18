@@ -3,8 +3,11 @@ import { useExecutiveDashboard, PeriodFilter } from "@/hooks/useExecutiveDashboa
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Users, FileText,
-  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, CalendarIcon,
+  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, CalendarIcon, HelpCircle,
 } from "lucide-react";
+import {
+  Tooltip, TooltipTrigger, TooltipContent, TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
