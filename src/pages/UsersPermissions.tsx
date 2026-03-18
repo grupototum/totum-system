@@ -323,7 +323,17 @@ export default function UsersPermissions() {
                                 {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                               </div>
                               <div>
-                                <p className="text-sm font-medium">{user.name}</p>
+                                <div className="flex items-center gap-1.5">
+                                  <p className="text-sm font-medium">{user.name}</p>
+                                  {(() => {
+                                    const profile = profiles.find((p) => p.id === user.id);
+                                    return profile && adminUserIds.has(profile.user_id) ? (
+                                      <span className="inline-flex items-center px-1.5 py-0 rounded text-[9px] font-semibold bg-primary/20 text-primary">
+                                        ADMIN
+                                      </span>
+                                    ) : null;
+                                  })()}
+                                </div>
                                 <p className="text-[11px] text-white/40">{user.email}</p>
                               </div>
                             </div>
