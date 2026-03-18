@@ -39,6 +39,7 @@ export function TaskFilters({
     onResponsibleFilterChange("all");
     onStatusFilterChange("all");
     onPriorityFilterChange("all");
+    onTypeFilterChange("all");
   };
 
   const selectTriggerClass = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50 focus:ring-primary/20 w-full";
