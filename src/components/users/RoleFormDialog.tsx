@@ -35,7 +35,7 @@ export function RoleFormDialog({ open, onOpenChange, role, onSave }: RoleFormDia
   const handleSave = () => {
     if (!name.trim()) return;
     const saved: Role = {
-      id: role?.id || crypto.randomUUID(),
+      id: role?.id || "",
       name,
       description,
       permissions,
