@@ -31,6 +31,7 @@ export default function Tasks() {
   const [responsibleFilter, setResponsibleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
@@ -42,9 +43,10 @@ export default function Tasks() {
       }
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
+      if (typeFilter !== "all" && t.type !== typeFilter) return false;
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter]);
+  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     await updateTaskStatus(taskId, newStatus);
@@ -126,7 +128,8 @@ export default function Tasks() {
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
             responsibleFilter={responsibleFilter} onResponsibleFilterChange={setResponsibleFilter}
             statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
-            priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
+             priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
+            typeFilter={typeFilter} onTypeFilterChange={setTypeFilter}
           />
         )}
       </div>

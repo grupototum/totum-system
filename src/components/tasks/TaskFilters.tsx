@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { clientPlans, teamMembers, statusConfig, priorityConfig, TaskStatus, TaskPriority } from "./taskData";
+import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
@@ -20,6 +20,8 @@ interface TaskFiltersProps {
   onStatusFilterChange: (v: string) => void;
   priorityFilter: string;
   onPriorityFilterChange: (v: string) => void;
+  typeFilter: string;
+  onTypeFilterChange: (v: string) => void;
 }
 
 export function TaskFilters({
@@ -28,14 +30,16 @@ export function TaskFilters({
   responsibleFilter, onResponsibleFilterChange,
   statusFilter, onStatusFilterChange,
   priorityFilter, onPriorityFilterChange,
+  typeFilter, onTypeFilterChange,
 }: TaskFiltersProps) {
-  const hasFilters = clientFilter !== "all" || responsibleFilter !== "all" || statusFilter !== "all" || priorityFilter !== "all";
+  const hasFilters = clientFilter !== "all" || responsibleFilter !== "all" || statusFilter !== "all" || priorityFilter !== "all" || typeFilter !== "all";
 
   const clearAll = () => {
     onClientFilterChange("all");
     onResponsibleFilterChange("all");
     onStatusFilterChange("all");
     onPriorityFilterChange("all");
+    onTypeFilterChange("all");
   };
 
   const selectTriggerClass = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50 focus:ring-primary/20 w-full";
@@ -44,7 +48,7 @@ export function TaskFilters({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
         {/* Busca */}
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Buscar</label>
@@ -96,6 +100,20 @@ export function TaskFilters({
               <SelectItem value="all" className={selectItemClass}>Todas</SelectItem>
               {(Object.keys(priorityConfig) as TaskPriority[]).map((p) => (
                 <SelectItem key={p} value={p} className={selectItemClass}>{priorityConfig[p].label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Tipo */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Tipo</label>
+          <Select value={typeFilter} onValueChange={onTypeFilterChange}>
+            <SelectTrigger className={selectTriggerClass}><SelectValue placeholder="Todos" /></SelectTrigger>
+            <SelectContent className={selectContentClass}>
+              <SelectItem value="all" className={selectItemClass}>Todos os tipos</SelectItem>
+              {(Object.keys(typeLabels) as TaskType[]).map((t) => (
+                <SelectItem key={t} value={t} className={selectItemClass}>{typeLabels[t]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
