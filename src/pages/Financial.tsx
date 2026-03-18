@@ -28,8 +28,8 @@ export default function Financial() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Receita Recebida" value={`R$ ${summary.income.toLocaleString("pt-BR")}`} change={`${entries.filter(e => e.type === "receita").length} lançamentos`} changeType="positive" icon={TrendingUp} />
-        <MetricCard title="Despesas Pagas" value={`R$ ${summary.expense.toLocaleString("pt-BR")}`} change={`${entries.filter(e => e.type === "despesa").length} lançamentos`} changeType="negative" icon={TrendingDown} />
+        <MetricCard title="Receita Recebida" value={`R$ ${summary.income.toLocaleString("pt-BR")}`} change={`${entries.filter(e => e.type === "receber").length} lançamentos`} changeType="positive" icon={TrendingUp} />
+        <MetricCard title="Despesas Pagas" value={`R$ ${summary.expense.toLocaleString("pt-BR")}`} change={`${entries.filter(e => e.type === "pagar").length} lançamentos`} changeType="negative" icon={TrendingDown} />
         <MetricCard title="Resultado" value={`R$ ${summary.profit.toLocaleString("pt-BR")}`} change={summary.profit >= 0 ? "Positivo" : "Negativo"} changeType={summary.profit >= 0 ? "positive" : "negative"} icon={DollarSign} />
         <MetricCard title="Inadimplência" value={`R$ ${summary.overdue.toLocaleString("pt-BR")}`} change={`${summary.overdueCount} atrasado(s)`} changeType="negative" icon={TrendingDown} pulse={summary.overdueCount > 0} />
       </div>
