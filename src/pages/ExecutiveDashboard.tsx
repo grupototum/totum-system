@@ -3,8 +3,11 @@ import { useExecutiveDashboard, PeriodFilter } from "@/hooks/useExecutiveDashboa
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Users, FileText,
-  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, CalendarIcon,
+  CheckCircle2, Clock, ListTodo, BarChart3, PieChart, Target, Loader2, CalendarIcon, HelpCircle,
 } from "lucide-react";
+import {
+  Tooltip, TooltipTrigger, TooltipContent, TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -22,6 +25,41 @@ const COLORS = [
   "bg-primary/60", "bg-blue-500/60", "bg-emerald-500/60", "bg-amber-500/60",
   "bg-purple-500/60", "bg-pink-500/60", "bg-cyan-500/60", "bg-orange-500/60",
 ];
+
+const TOOLTIPS: Record<string, string> = {
+  "Faturamento": "Soma dos valores recebidos no período selecionado",
+  "MRR": "Receita Mensal Recorrente baseada nos contratos ativos",
+  "A receber": "Valores pendentes de pagamento pelos clientes",
+  "Em atraso": "Valores vencidos e ainda não pagos",
+  "Despesas": "Total de custos e despesas pagas no período",
+  "Lucro bruto": "Faturamento menos despesas no período",
+  "Margem": "Percentual de lucro em relação ao faturamento",
+  "Total tarefas": "Quantidade total de tarefas cadastradas no período",
+  "Pendentes": "Tarefas que ainda não foram iniciadas",
+  "Concluídas": "Tarefas finalizadas no período",
+  "Atrasadas": "Tarefas com prazo vencido e não concluídas",
+  "Taxa conclusão": "Percentual de tarefas concluídas sobre o total",
+  "Contratos ativos": "Número de contratos vigentes no momento",
+  "Inadimplentes": "Contratos com parcelas em atraso",
+  "Cumprimento médio": "Média de entregas realizadas vs planejadas nos contratos",
+  "Previsão de faturamento": "Estimativa baseada no MRR dos contratos ativos",
+  "Concentração de receita (HHI)": "Índice Herfindahl-Hirschman: mede dependência de poucos clientes. < 1.500 = diversificada, 1.500–2.500 = moderada, > 2.500 = alta concentração/risco",
+};
+
+const InfoTip = ({ label }: { label: string }) => {
+  const tip = TOOLTIPS[label];
+  if (!tip) return null;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3 w-3 text-white/20 hover:text-white/50 cursor-help inline-block ml-1 shrink-0" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[240px] text-xs bg-[hsl(var(--popover))] text-popover-foreground">
+        {tip}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 export default function ExecutiveDashboard() {
   const now = new Date();
@@ -80,6 +118,7 @@ export default function ExecutiveDashboard() {
   const totalExpenses = data.expensesByCategory.reduce((s, c) => s + c.value, 0);
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -174,7 +213,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </div>
               <p className="text-lg font-heading font-bold truncate">{m.value}</p>
-              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{m.label}</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">{m.label}<InfoTip label={m.label} /></p>
             </div>
           ))}
         </div>
@@ -278,7 +317,7 @@ export default function ExecutiveDashboard() {
                 </div>
               </div>
               <p className="text-xl font-heading font-bold">{m.value}</p>
-              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{m.label}</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">{m.label}<InfoTip label={m.label} /></p>
             </div>
           ))}
         </div>
@@ -359,14 +398,14 @@ export default function ExecutiveDashboard() {
               <div className="p-1.5 rounded-lg bg-emerald-500/10"><FileText className="h-3.5 w-3.5 text-emerald-400" /></div>
             </div>
             <p className="text-xl font-heading font-bold">{data.activeContracts}</p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Contratos ativos</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">Contratos ativos<InfoTip label="Contratos ativos" /></p>
           </div>
           <div className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="p-1.5 rounded-lg bg-red-500/10"><AlertTriangle className="h-3.5 w-3.5 text-red-400" /></div>
             </div>
             <p className="text-xl font-heading font-bold">{data.defaultingContracts}</p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Inadimplentes</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">Inadimplentes<InfoTip label="Inadimplentes" /></p>
           </div>
           <div className="glass-card rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -377,7 +416,7 @@ export default function ExecutiveDashboard() {
                 ? `${Math.round(data.contractFulfillment.reduce((s, c) => s + c.pct, 0) / data.contractFulfillment.length)}%`
                 : "—"}
             </p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">Cumprimento médio</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">Cumprimento médio<InfoTip label="Cumprimento médio" /></p>
           </div>
         </div>
 
@@ -409,12 +448,12 @@ export default function ExecutiveDashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="glass-card rounded-xl p-4">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Previsão de faturamento</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center">Previsão de faturamento<InfoTip label="Previsão de faturamento" /></p>
             <p className="text-xl font-heading font-bold text-primary">{formatCurrency(data.revenueForecast)}</p>
             <p className="text-[10px] text-white/30 mt-1">Baseado nos contratos ativos</p>
           </div>
           <div className="glass-card rounded-xl p-4">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Concentração de receita (HHI)</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center">Concentração de receita (HHI)<InfoTip label="Concentração de receita (HHI)" /></p>
             <p className={`text-xl font-heading font-bold ${data.revenueConcentration > 2500 ? "text-red-400" : data.revenueConcentration > 1500 ? "text-amber-400" : "text-emerald-400"}`}>
               {data.revenueConcentration}
             </p>
@@ -437,5 +476,6 @@ export default function ExecutiveDashboard() {
         </div>
       </section>
     </div>
+    </TooltipProvider>
   );
 }
