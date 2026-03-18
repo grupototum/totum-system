@@ -48,15 +48,17 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       setLoading(false);
       return;
     }
-    // Guard: ensure we have an auth session before querying
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      setLoading(false);
-      return;
-    }
+
     setLoading(true);
     try {
-    const now = new Date();
+      // Guard: ensure we have an auth session before querying
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setData(null);
+        return;
+      }
+
+      const now = new Date();
 
     let periodStart: string;
     let periodEnd: string;

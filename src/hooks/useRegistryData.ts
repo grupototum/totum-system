@@ -108,19 +108,28 @@ export function useRegistryData(registryKey: string) {
       setLoading(false);
       return;
     }
-    
-    const { data: rows, error } = await supabase
-      .from(config.table as ValidTable)
-      .select("*")
-      .order("name");
-      
-    if (error) {
-      console.error(`Error fetching ${config.table}:`, error);
-      toast({ title: "Erro ao carregar dados", description: error.message, variant: "destructive" });
-    } else {
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setData([]);
+        return;
+      }
+
+      const { data: rows, error } = await supabase
+        .from(config.table as ValidTable)
+        .select("*")
+        .order("name");
+
+      if (error) throw error;
       setData((rows || []).map((r: any) => dbToFrontend(r, config)));
+    } catch (error: any) {
+      console.error(`Error fetching ${config.table}:`, error);
+      toast({ title: "Erro ao carregar dados", description: error.message || "Falha ao carregar", variant: "destructive" });
+      setData([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [config, isDemoMode, registryKey]);
   
   useEffect(() => {

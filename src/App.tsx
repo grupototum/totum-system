@@ -37,9 +37,14 @@ function useHasAdmin() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    (supabase.rpc as any)("has_any_admin").then(({ data }: { data: boolean }) => {
-      setHasAdmin(data === true);
-    });
+    (supabase.rpc as any)("has_any_admin")
+      .then(({ data }: { data: boolean }) => {
+        setHasAdmin(data === true);
+      })
+      .catch((err: any) => {
+        console.error("[App] Erro ao verificar admin:", err);
+        setHasAdmin(false);
+      });
   }, []);
 
   return hasAdmin;

@@ -25,15 +25,28 @@ export function useDeliveryChecklists() {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase
-      .from("delivery_checklists")
-      .select("*, clients(name), plans(name), delivery_checklist_items(*)")
-      .order("created_at", { ascending: false })
-      .limit(50);
 
-    if (error) console.error("Error fetching checklists:", error);
-    else setChecklists((data as ChecklistRow[]) || []);
-    setLoading(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setChecklists([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("delivery_checklists")
+        .select("*, clients(name), plans(name), delivery_checklist_items(*)")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setChecklists((data as ChecklistRow[]) || []);
+    } catch (error) {
+      console.error("Error fetching checklists:", error);
+      setChecklists([]);
+    } finally {
+      setLoading(false);
+    }
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);

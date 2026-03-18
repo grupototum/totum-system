@@ -12,7 +12,12 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  session: null, user: null, profile: null, loading: true, isPending: false, signOut: async () => {},
+  session: null,
+  user: null,
+  profile: null,
+  loading: true,
+  isPending: false,
+  signOut: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -24,65 +29,80 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*, roles(name, permissions), departments(name)")
-        .eq("user_id", userId)
-        .single();
-
-      if (data) {
-        const status = data.status as string;
-        if (status === "pendente" || status === "inativo" || status === "bloqueado") {
-          setIsPending(true);
-          setProfile(null);
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          return;
-        }
-        setIsPending(false);
-        setProfile(data);
-      }
-    } catch (err) {
-      console.error("[Auth] Error fetching profile:", err);
-    }
-  };
-
   useEffect(() => {
     let mounted = true;
+    let initialized = false;
 
-    // 1. Restore session from storage first — this is the source of truth
-    supabase.auth.getSession().then(async ({ data: { session: restoredSession } }) => {
-      if (!mounted) return;
-
-      setSession(restoredSession);
-      setUser(restoredSession?.user ?? null);
-
-      if (restoredSession?.user) {
-        await fetchProfile(restoredSession.user.id);
+    const finishInit = () => {
+      if (!initialized && mounted) {
+        initialized = true;
+        setLoading(false);
       }
+    };
 
-      if (mounted) setLoading(false);
-    });
+    const loadProfile = async (userId: string) => {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*, roles(name, permissions), departments(name)")
+          .eq("user_id", userId)
+          .single();
 
-    // 2. Listen for subsequent auth changes (sign in, sign out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
         if (!mounted) return;
 
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
+        if (data) {
+          const status = data.status as string;
+          if (status === "pendente" || status === "inativo" || status === "bloqueado") {
+            setIsPending(true);
+            setProfile(null);
+            // fire-and-forget to avoid blocking auth event processing
+            supabase.auth.signOut();
+            return;
+          }
 
-        if (newSession?.user) {
-          await fetchProfile(newSession.user.id);
-        } else {
-          setProfile(null);
           setIsPending(false);
+          setProfile(data);
+        } else {
+          setIsPending(false);
+          setProfile(null);
         }
+      } catch (err) {
+        if (!mounted) return;
+        console.error("[Auth] Error fetching profile:", err);
+        setProfile(null);
       }
-    );
+    };
+
+    const applySession = (nextSession: Session | null) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        // fire-and-forget to avoid deadlocks in auth callback
+        void loadProfile(nextSession.user.id);
+      } else {
+        setProfile(null);
+        setIsPending(false);
+      }
+    };
+
+    // IMPORTANT: subscribe first, then restore session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      applySession(nextSession);
+      finishInit();
+    });
+
+    supabase.auth.getSession()
+      .then(({ data: { session: restoredSession } }) => {
+        applySession(restoredSession);
+      })
+      .catch((err) => {
+        console.error("[Auth] Error restoring session:", err);
+      })
+      .finally(() => {
+        finishInit();
+      });
 
     return () => {
       mounted = false;

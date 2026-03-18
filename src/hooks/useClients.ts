@@ -21,18 +21,28 @@ export function useClients() {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("clients")
-      .select("*, client_types(name), contracts(value, plan_id, status, plans(name))")
-      .order("name");
 
-    if (error) {
-      console.error("Error fetching clients:", error);
-    } else {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setClients([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*, client_types(name), contracts(value, plan_id, status, plans(name))")
+        .order("name");
+
+      if (error) throw error;
       setClients((data as ClientRow[]) || []);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      setClients([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
