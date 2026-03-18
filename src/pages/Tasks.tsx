@@ -27,6 +27,7 @@ export default function Tasks() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
 
   // Completion dialog state
