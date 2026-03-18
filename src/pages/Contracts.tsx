@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Calendar, RefreshCw, Loader2, Plus } from "lucide-react";
+import { FileText, Calendar, RefreshCw, Loader2, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useContracts } from "@/hooks/useContracts";
+import { useContracts, ContractRow } from "@/hooks/useContracts";
 import { ContractFormDialog } from "@/components/contracts/ContractFormDialog";
 import { format } from "date-fns";
 
@@ -21,19 +21,37 @@ const freqLabels: Record<string, string> = {
 };
 
 export default function Contracts() {
-  const { contracts, loading, addContract } = useContracts();
+  const { contracts, loading, addContract, updateContract } = useContracts();
   const [showForm, setShowForm] = useState(false);
+  const [editingContract, setEditingContract] = useState<ContractRow | null>(null);
 
   const activeCount = contracts.filter((c) => c.status === "ativo").length;
+
+  const handleEdit = (contract: ContractRow) => {
+    setEditingContract(contract);
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (values: any) => {
+    if (editingContract) {
+      return updateContract(editingContract.id, values);
+    }
+    return addContract(values);
+  };
+
+  const handleClose = (open: boolean) => {
+    setShowForm(open);
+    if (!open) setEditingContract(null);
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Contratos</h1>
-          <p className="text-sm text-white/50 mt-1">{activeCount} ativos · {contracts.length} total</p>
+          <p className="text-sm text-muted-foreground mt-1">{activeCount} ativos · {contracts.length} total</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+        <Button onClick={() => { setEditingContract(null); setShowForm(true); }} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
           <Plus className="h-4 w-4" /> Novo Contrato
         </Button>
       </div>
@@ -43,7 +61,7 @@ export default function Contracts() {
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : contracts.length === 0 ? (
-        <div className="text-center py-20 text-white/30">Nenhum contrato encontrado</div>
+        <div className="text-center py-20 text-muted-foreground">Nenhum contrato encontrado</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {contracts.map((contract) => (
@@ -51,8 +69,12 @@ export default function Contracts() {
               key={contract.id}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass-card rounded-xl p-5 hover:bg-white/[0.04] transition-colors cursor-pointer"
+              onClick={() => handleEdit(contract)}
+              className="glass-card rounded-xl p-5 hover:bg-white/[0.04] transition-colors cursor-pointer group relative"
             >
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
               <div className="flex items-start justify-between mb-4">
                 <div className="h-10 w-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
                   <FileText className="h-5 w-5 text-primary" />
@@ -62,9 +84,9 @@ export default function Contracts() {
                 </span>
               </div>
               <h3 className="font-semibold mb-1">{(contract.clients as any)?.name || "—"}</h3>
-              <p className="text-sm text-white/50 mb-1">{contract.title}</p>
-              <p className="text-xs text-white/30 mb-4">{(contract.plans as any)?.name || (contract.contract_types as any)?.name || ""}</p>
-              <div className="space-y-2 text-xs text-white/40">
+              <p className="text-sm text-muted-foreground mb-1">{contract.title}</p>
+              <p className="text-xs text-muted-foreground/60 mb-4">{(contract.plans as any)?.name || (contract.contract_types as any)?.name || ""}</p>
+              <div className="space-y-2 text-xs text-muted-foreground">
                 {contract.start_date && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3.5 w-3.5" /> Início: {format(new Date(contract.start_date), "dd/MM/yyyy")}
@@ -74,18 +96,18 @@ export default function Contracts() {
                   <RefreshCw className="h-3.5 w-3.5" /> {freqLabels[contract.billing_frequency || "mensal"] || contract.billing_frequency}
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/[0.06]">
+              <div className="mt-4 pt-4 border-t border-border">
                 <span className="font-mono text-lg font-bold">
                   {contract.value ? `R$ ${Number(contract.value).toLocaleString("pt-BR")}` : "—"}
                 </span>
-                <span className="text-xs text-white/30 ml-1">/mês</span>
+                <span className="text-xs text-muted-foreground ml-1">/mês</span>
               </div>
             </motion.div>
           ))}
         </div>
       )}
 
-      <ContractFormDialog open={showForm} onOpenChange={setShowForm} onSubmit={addContract} />
+      <ContractFormDialog open={showForm} onOpenChange={handleClose} onSubmit={handleSubmit} editData={editingContract} />
     </div>
   );
 }
