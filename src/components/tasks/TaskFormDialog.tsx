@@ -65,6 +65,7 @@ export function TaskFormDialog({
   const [dueDate, setDueDate] = useState("");
   const [checklistItems, setChecklistItems] = useState<string[]>([]);
   const [newCheckItem, setNewCheckItem] = useState("");
+  const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
 
