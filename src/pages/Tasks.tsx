@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2 } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -10,6 +10,7 @@ import { TaskDashboard } from "@/components/tasks/TaskDashboard";
 import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
+import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
