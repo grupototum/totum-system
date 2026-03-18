@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Users, Shield, History, Search, Plus, MoreHorizontal, Copy,
-  Pencil, Trash2, Lock, Unlock, KeyRound, Eye, Loader2,
+  Pencil, Trash2, Lock, Unlock, KeyRound, Eye, Loader2, ShieldCheck, ShieldOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
