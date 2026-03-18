@@ -123,7 +123,7 @@ export function AppSidebar() {
             Sistema
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(systemNav)}</SidebarMenu>
+            <SidebarMenu>{renderItems(filteredSystemNav)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
