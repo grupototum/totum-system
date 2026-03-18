@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoRegistryData } from "@/data/demoData";
 
 // Maps frontend registry keys to Supabase table names and column mappings
-// Frontend field key → DB column name
 export interface RegistryTableConfig {
   table: string;
-  columns: Record<string, string>; // frontendKey → dbColumn
-  statusField?: string; // default "is_active"
+  columns: Record<string, string>;
+  statusField?: string;
 }
 
-// Registry key → table config
 export const registryTableMap: Record<string, RegistryTableConfig> = {
   bancos: { table: "banks", columns: { name: "name", codigo: "code" } },
   contas_bancarias: { table: "bank_accounts", columns: { name: "name", agencia: "agency", conta: "account_number", tipo_conta: "account_type" } },
@@ -34,7 +34,6 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
   motivos_nao_entrega: { table: "delay_reasons", columns: { name: "name", descricao: "description" } },
 };
 
-// Valid table names for type safety
 type ValidTable = 
   | "banks" | "bank_accounts" | "cost_centers" | "financial_categories"
   | "expense_types" | "client_types" | "contract_types" | "plans"
@@ -49,6 +48,8 @@ export interface RegistryRow {
   status: "ativo" | "inativo";
   [key: string]: any;
 }
+
+const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
 
 function dbToFrontend(dbRow: any, config: RegistryTableConfig): RegistryRow {
   const result: RegistryRow = {
@@ -82,6 +83,7 @@ function frontendToDb(frontRow: Record<string, any>, config: RegistryTableConfig
 }
 
 export function useRegistryData(registryKey: string) {
+  const { isDemoMode } = useDemo();
   const [data, setData] = useState<RegistryRow[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -93,8 +95,20 @@ export function useRegistryData(registryKey: string) {
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
+
+    if (isDemoMode) {
+      const demoItems = demoRegistryData[registryKey] || [
+        { id: `demo-reg-1`, name: "Exemplo 1", status: "ativo" },
+        { id: `demo-reg-2`, name: "Exemplo 2", status: "ativo" },
+        { id: `demo-reg-3`, name: "Exemplo 3", status: "inativo" },
+      ];
+      setData(demoItems as RegistryRow[]);
+      setLoading(false);
+      return;
+    }
+    
     const { data: rows, error } = await supabase
       .from(config.table as ValidTable)
       .select("*")
@@ -107,23 +121,22 @@ export function useRegistryData(registryKey: string) {
       setData((rows || []).map((r: any) => dbToFrontend(r, config)));
     }
     setLoading(false);
-  }, [config]);
+  }, [config, isDemoMode, registryKey]);
   
   useEffect(() => {
     fetchData();
   }, [fetchData]);
   
   const addItem = async (values: Record<string, any>): Promise<boolean> => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
     const dbValues = frontendToDb(values, config);
     dbValues.is_active = true;
     
-    // For financial_categories, type is required
     if (config.table === "financial_categories" && !dbValues.type) {
       dbValues.type = "despesa";
     }
-    // For general_categories, module is required
     if (config.table === "general_categories" && !dbValues.module) {
       dbValues.module = "geral";
     }
@@ -147,6 +160,7 @@ export function useRegistryData(registryKey: string) {
   };
   
   const updateItem = async (id: string, values: Record<string, any>): Promise<boolean> => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
     const dbValues = frontendToDb(values, config);
@@ -167,6 +181,7 @@ export function useRegistryData(registryKey: string) {
   };
   
   const deleteItem = async (id: string, name: string): Promise<boolean> => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
     const { error } = await supabase
@@ -185,6 +200,7 @@ export function useRegistryData(registryKey: string) {
   };
   
   const toggleStatus = async (id: string, currentStatus: string, name: string): Promise<boolean> => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
     const newActive = currentStatus !== "ativo";

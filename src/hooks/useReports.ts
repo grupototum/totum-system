@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoReportsData } from "@/data/demoData";
 
 export interface MrrHistoryItem {
   month: string;
@@ -70,6 +72,7 @@ function getMonthsBetween(start: Date, end: Date): Date[] {
 }
 
 export function useReports(filters?: ReportsFilters) {
+  const { isDemoMode } = useDemo();
   const [data, setData] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -78,6 +81,12 @@ export function useReports(filters?: ReportsFilters) {
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
+
+    if (isDemoMode) {
+      setData(demoReportsData as ReportsData);
+      setLoading(false);
+      return;
+    }
 
     const now = new Date();
     const rangeStart = filters?.startDate || new Date(now.getFullYear(), now.getMonth() - 5, 1);
@@ -114,7 +123,7 @@ export function useReports(filters?: ReportsFilters) {
     const churnRate = totalContracts > 0 ? Math.round((cancelledContracts / totalContracts) * 100) : 0;
     const activeClientIds = new Set((allContracts || []).filter(c => c.status === "ativo").map(c => c.client_id));
 
-    // ── 3. Fulfillment by Client (filtered by period) ──
+    // ── 3. Fulfillment by Client ──
     let checklistQuery = supabase
       .from("delivery_checklists")
       .select("client_id, fulfillment_pct, period, clients(name)");
@@ -152,7 +161,7 @@ export function useReports(filters?: ReportsFilters) {
       }))
       .sort((a, b) => a.avgFulfillment - b.avgFulfillment);
 
-    // ── 4. Profitability by Client (filtered by date range) ──
+    // ── 4. Profitability by Client ──
     let financialQuery = supabase
       .from("financial_entries")
       .select("client_id, type, value, status, due_date, clients(name)");
@@ -170,7 +179,6 @@ export function useReports(filters?: ReportsFilters) {
       if (!e.client_id) return;
       const existing = profitMap.get(e.client_id) || { name: e.clients?.name || "—", revenue: 0, cost: 0 };
       const val = Number(e.value) || 0;
-      // DB uses "receber" for revenue, "pagar" for expenses
       if (e.type === "receber") existing.revenue += val;
       else if (e.type === "pagar") existing.cost += val;
       profitMap.set(e.client_id, existing);
@@ -197,7 +205,7 @@ export function useReports(filters?: ReportsFilters) {
       })
       .sort((a, b) => b.profit - a.profit);
 
-    // ── 5. Revenue by Month (filtered range) ──
+    // ── 5. Revenue by Month ──
     const revenueByMonth: RevenueByMonth[] = [];
     for (const d of months) {
       const monthStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
@@ -210,7 +218,6 @@ export function useReports(filters?: ReportsFilters) {
         .gte("due_date", monthStart)
         .lt("due_date", monthEnd);
 
-      // DB uses "receber" / "pagar"
       const receita = (entries || []).filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
       const despesa = (entries || []).filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
       const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
@@ -237,7 +244,7 @@ export function useReports(filters?: ReportsFilters) {
 
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startKey, endKey]);
+  }, [startKey, endKey, isDemoMode]);
 
   useEffect(() => { fetchReports(); }, [fetchReports]);
 

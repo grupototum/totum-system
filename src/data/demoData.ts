@@ -378,3 +378,123 @@ export const demoClientObservations = [
   { id: uuid(606), client_id: uuid(6), user_id: "demo-user-5", content: "Pagamento da mensalidade atrasado. Entrar em contato", created_at: daysAgo(4) + "T08:30:00" },
   { id: uuid(607), client_id: uuid(7), user_id: "demo-user-2", content: "Reunião com gerente da clínica Pinheiros para definir palavras-chave", created_at: daysAgo(2) + "T15:00:00" },
 ];
+
+// ── Products (demo) ──
+export const demoProducts = [
+  { id: uuid(901), name: "Gestão de Redes Sociais", description: "Gerenciamento completo de redes sociais", price: 2500, cost: 800, is_active: true, product_type_id: "demo-pt-1", created_at: daysAgo(200), updated_at: daysAgo(10), product_types: { name: "Serviço Recorrente" } },
+  { id: uuid(902), name: "Tráfego Pago", description: "Gestão de campanhas Google e Meta Ads", price: 3000, cost: 1000, is_active: true, product_type_id: "demo-pt-1", created_at: daysAgo(200), updated_at: daysAgo(5), product_types: { name: "Serviço Recorrente" } },
+  { id: uuid(903), name: "Identidade Visual", description: "Criação de logo e manual de marca", price: 5000, cost: 2000, is_active: true, product_type_id: "demo-pt-2", created_at: daysAgo(150), updated_at: daysAgo(30), product_types: { name: "Projeto Pontual" } },
+  { id: uuid(904), name: "Landing Page", description: "Desenvolvimento de página de conversão", price: 2000, cost: 600, is_active: true, product_type_id: "demo-pt-2", created_at: daysAgo(100), updated_at: daysAgo(20), product_types: { name: "Projeto Pontual" } },
+  { id: uuid(905), name: "SEO Local", description: "Otimização para buscas regionais", price: 1800, cost: 500, is_active: true, product_type_id: "demo-pt-1", created_at: daysAgo(90), updated_at: daysAgo(15), product_types: { name: "Serviço Recorrente" } },
+  { id: uuid(906), name: "Vídeo Institucional", description: "Produção de vídeo para redes sociais", price: 3500, cost: 1500, is_active: false, product_type_id: "demo-pt-2", created_at: daysAgo(180), updated_at: daysAgo(60), product_types: { name: "Projeto Pontual" } },
+];
+
+export const demoProductTypes = [
+  { id: "demo-pt-1", name: "Serviço Recorrente", description: "Serviços cobrados mensalmente", is_active: true, created_at: daysAgo(365) },
+  { id: "demo-pt-2", name: "Projeto Pontual", description: "Projetos com prazo definido", is_active: true, created_at: daysAgo(365) },
+];
+
+// ── Reports (demo) ──
+export const demoReportsData = {
+  mrrHistory: [
+    { month: "out/25", mrr: 22000, clients: 5 },
+    { month: "nov/25", mrr: 24500, clients: 6 },
+    { month: "dez/25", mrr: 26000, clients: 6 },
+    { month: "jan/26", mrr: 28000, clients: 7 },
+    { month: "fev/26", mrr: 29500, clients: 7 },
+    { month: "mar/26", mrr: 30000, clients: 7 },
+  ],
+  churn: { totalClientsStart: 9, totalClientsEnd: 7, cancelledContracts: 1, churnRate: 11, activeContracts: 7 },
+  fulfillmentByClient: [
+    { clientId: uuid(6), clientName: "Agro Connect", avgFulfillment: 45, totalChecklists: 1 },
+    { clientId: uuid(3), clientName: "Startup Labs", avgFulfillment: 33, totalChecklists: 1 },
+    { clientId: uuid(4), clientName: "Innova Corp", avgFulfillment: 0, totalChecklists: 1 },
+    { clientId: uuid(7), clientName: "Saúde Mais Clínicas", avgFulfillment: 60, totalChecklists: 1 },
+    { clientId: uuid(2), clientName: "Nova Digital LTDA", avgFulfillment: 50, totalChecklists: 1 },
+    { clientId: uuid(1), clientName: "TechVentures S.A.", avgFulfillment: 75, totalChecklists: 2 },
+    { clientId: uuid(5), clientName: "DigitalPlus Agência", avgFulfillment: 90, totalChecklists: 1 },
+  ],
+  profitability: [
+    { clientId: uuid(1), clientName: "TechVentures S.A.", revenue: 8500, cost: 3200, profit: 5300, margin: 62, contractValue: 8500 },
+    { clientId: uuid(7), clientName: "Saúde Mais Clínicas", revenue: 6000, cost: 2500, profit: 3500, margin: 58, contractValue: 6000 },
+    { clientId: uuid(4), clientName: "Innova Corp", revenue: 5500, cost: 2200, profit: 3300, margin: 60, contractValue: 5500 },
+    { clientId: uuid(3), clientName: "Startup Labs", revenue: 5000, cost: 3000, profit: 2000, margin: 40, contractValue: 15000 },
+    { clientId: uuid(5), clientName: "DigitalPlus Agência", revenue: 4000, cost: 1800, profit: 2200, margin: 55, contractValue: 4000 },
+    { clientId: uuid(2), clientName: "Nova Digital LTDA", revenue: 3200, cost: 1500, profit: 1700, margin: 53, contractValue: 3200 },
+    { clientId: uuid(6), clientName: "Agro Connect", revenue: 2800, cost: 1200, profit: 1600, margin: 57, contractValue: 2800 },
+  ],
+  revenueByMonth: [
+    { month: "out/25", receita: 22000, despesa: 18000, lucro: 4000 },
+    { month: "nov/25", receita: 24500, despesa: 19500, lucro: 5000 },
+    { month: "dez/25", receita: 26000, despesa: 21000, lucro: 5000 },
+    { month: "jan/26", receita: 28000, despesa: 22500, lucro: 5500 },
+    { month: "fev/26", receita: 29500, despesa: 23000, lucro: 6500 },
+    { month: "mar/26", receita: 35000, despesa: 34200, lucro: 800 },
+  ],
+  currentMrr: 30000,
+  forecastNext3: 90000,
+};
+
+// ── Registry demo data (generic) ──
+export const demoRegistryData: Record<string, { id: string; name: string; status: string; [k: string]: any }[]> = {
+  bancos: [
+    { id: uuid(1001), name: "Banco do Brasil", status: "ativo", codigo: "001" },
+    { id: uuid(1002), name: "Itaú Unibanco", status: "ativo", codigo: "341" },
+    { id: uuid(1003), name: "Bradesco", status: "ativo", codigo: "237" },
+  ],
+  tipos_cliente: [
+    { id: uuid(1010), name: "Agência", status: "ativo", descricao: "Agências de marketing e publicidade" },
+    { id: uuid(1011), name: "E-commerce", status: "ativo", descricao: "Lojas virtuais" },
+    { id: uuid(1012), name: "SaaS", status: "ativo", descricao: "Software como serviço" },
+  ],
+  tipos_contrato: [
+    { id: uuid(1020), name: "Recorrente Mensal", status: "ativo", descricao: "Contrato com cobrança mensal" },
+    { id: uuid(1021), name: "Projeto Pontual", status: "ativo", descricao: "Projeto com prazo e valor fixo" },
+  ],
+  departamentos: [
+    { id: "demo-dept-1", name: "Criação", status: "ativo" },
+    { id: "demo-dept-2", name: "Marketing", status: "ativo" },
+    { id: "demo-dept-3", name: "Atendimento", status: "ativo" },
+  ],
+  tags: [
+    { id: uuid(1040), name: "Prioridade Alta", status: "ativo", cor: "#ef4444" },
+    { id: uuid(1041), name: "VIP", status: "ativo", cor: "#f59e0b" },
+    { id: uuid(1042), name: "Novo", status: "ativo", cor: "#22c55e" },
+  ],
+  fornecedores: [
+    { id: uuid(1050), name: "Adobe Creative Cloud", status: "ativo", servico: "12.345.678/0001-01", contato: "suporte@adobe.com" },
+    { id: uuid(1051), name: "Freelancer Design", status: "ativo", servico: "123.456.789-00", contato: "designer@email.com" },
+  ],
+  centros_custo: [
+    { id: uuid(1060), name: "Operações", status: "ativo", descricao: "Custos operacionais" },
+    { id: uuid(1061), name: "Comercial", status: "ativo", descricao: "Custos de aquisição" },
+  ],
+};
+
+// ── Company Settings (demo) ──
+export const demoCompanySettings = {
+  id: "demo-company-1",
+  name: "Agência Totum",
+  email: "contato@agenciatotum.com.br",
+  phone: "(11) 3000-0000",
+  address: "Av. Paulista, 1500 - São Paulo/SP",
+  logo_url: null,
+  created_at: daysAgo(365),
+  updated_at: daysAgo(1),
+};
+
+// ── System Settings (demo) ──
+export const demoSystemSettings = {
+  id: "demo-system-1",
+  timezone: "America/Sao_Paulo",
+  currency: "BRL",
+  date_format: "dd/MM/yyyy",
+  default_task_status: "pendente",
+  default_task_priority: "media",
+  archive_after_days: 30,
+  default_contract_rules: {},
+  default_checklist_rules: {},
+  default_recurrence_rules: {},
+  created_at: daysAgo(365),
+  updated_at: daysAgo(1),
+};

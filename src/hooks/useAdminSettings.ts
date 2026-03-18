@@ -3,11 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { handleApiError } from "@/lib/errorHandler";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoCompanySettings, demoSystemSettings, demoAuditLogsList } from "@/data/demoData";
+
+const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
 
 export function useCompanySettings() {
+  const { isDemoMode } = useDemo();
   return useQuery({
-    queryKey: ["company_settings"],
+    queryKey: ["company_settings", isDemoMode],
     queryFn: async () => {
+      if (isDemoMode) return demoCompanySettings;
       const { data, error } = await supabase
         .from("company_settings")
         .select("*")
@@ -22,18 +28,23 @@ export function useCompanySettings() {
 export function useUpdateCompanySettings() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
+      if (isDemoMode) { toast(DEMO_TOAST); return; }
       const { data: existing } = await supabase.from("company_settings").select("id").limit(1).single();
       if (!existing) throw new Error("Configurações não encontradas");
       const { error } = await supabase.from("company_settings").update(updates).eq("id", existing.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["company_settings"] });
-      toast({ title: "Salvo", description: "Configurações da empresa atualizadas." });
+      if (!isDemoMode) {
+        qc.invalidateQueries({ queryKey: ["company_settings"] });
+        toast({ title: "Salvo", description: "Configurações da empresa atualizadas." });
+      }
     },
     onError: (err) => {
+      if (isDemoMode) return;
       const friendly = handleApiError(err, "update_company_settings", user?.id);
       toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     },
@@ -41,9 +52,11 @@ export function useUpdateCompanySettings() {
 }
 
 export function useSystemSettings() {
+  const { isDemoMode } = useDemo();
   return useQuery({
-    queryKey: ["system_settings"],
+    queryKey: ["system_settings", isDemoMode],
     queryFn: async () => {
+      if (isDemoMode) return demoSystemSettings;
       const { data, error } = await supabase
         .from("system_settings")
         .select("*")
@@ -58,18 +71,23 @@ export function useSystemSettings() {
 export function useUpdateSystemSettings() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
+      if (isDemoMode) { toast(DEMO_TOAST); return; }
       const { data: existing } = await supabase.from("system_settings").select("id").limit(1).single();
       if (!existing) throw new Error("Configurações não encontradas");
       const { error } = await supabase.from("system_settings").update(updates).eq("id", existing.id);
       if (error) throw error;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["system_settings"] });
-      toast({ title: "Salvo", description: "Configurações do sistema atualizadas." });
+      if (!isDemoMode) {
+        qc.invalidateQueries({ queryKey: ["system_settings"] });
+        toast({ title: "Salvo", description: "Configurações do sistema atualizadas." });
+      }
     },
     onError: (err) => {
+      if (isDemoMode) return;
       const friendly = handleApiError(err, "update_system_settings", user?.id);
       toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     },
@@ -77,9 +95,11 @@ export function useUpdateSystemSettings() {
 }
 
 export function useAuditLogs(filters?: { entityType?: string; limit?: number }) {
+  const { isDemoMode } = useDemo();
   return useQuery({
-    queryKey: ["audit_logs", filters],
+    queryKey: ["audit_logs", filters, isDemoMode],
     queryFn: async () => {
+      if (isDemoMode) return demoAuditLogsList;
       let query = supabase
         .from("audit_logs")
         .select("*")
@@ -96,9 +116,11 @@ export function useAuditLogs(filters?: { entityType?: string; limit?: number }) 
 }
 
 export function useErrorLogs() {
+  const { isDemoMode } = useDemo();
   return useQuery({
-    queryKey: ["error_logs"],
+    queryKey: ["error_logs", isDemoMode],
     queryFn: async () => {
+      if (isDemoMode) return [];
       const { data, error } = await supabase
         .from("error_logs")
         .select("*")
