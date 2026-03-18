@@ -467,7 +467,6 @@ export default function UsersPermissions() {
         onOpenChange={setUserFormOpen}
         user={editingUser}
         roles={roles}
-        departments={departments.map((d) => d.name)}
         onSave={handleSaveUser}
       />
 
