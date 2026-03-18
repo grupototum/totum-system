@@ -26,6 +26,41 @@ const COLORS = [
   "bg-purple-500/60", "bg-pink-500/60", "bg-cyan-500/60", "bg-orange-500/60",
 ];
 
+const TOOLTIPS: Record<string, string> = {
+  "Faturamento": "Soma dos valores recebidos no período selecionado",
+  "MRR": "Receita Mensal Recorrente baseada nos contratos ativos",
+  "A receber": "Valores pendentes de pagamento pelos clientes",
+  "Em atraso": "Valores vencidos e ainda não pagos",
+  "Despesas": "Total de custos e despesas pagas no período",
+  "Lucro bruto": "Faturamento menos despesas no período",
+  "Margem": "Percentual de lucro em relação ao faturamento",
+  "Total tarefas": "Quantidade total de tarefas cadastradas no período",
+  "Pendentes": "Tarefas que ainda não foram iniciadas",
+  "Concluídas": "Tarefas finalizadas no período",
+  "Atrasadas": "Tarefas com prazo vencido e não concluídas",
+  "Taxa conclusão": "Percentual de tarefas concluídas sobre o total",
+  "Contratos ativos": "Número de contratos vigentes no momento",
+  "Inadimplentes": "Contratos com parcelas em atraso",
+  "Cumprimento médio": "Média de entregas realizadas vs planejadas nos contratos",
+  "Previsão de faturamento": "Estimativa baseada no MRR dos contratos ativos",
+  "Concentração de receita (HHI)": "Índice Herfindahl-Hirschman: mede dependência de poucos clientes. < 1.500 = diversificada, 1.500–2.500 = moderada, > 2.500 = alta concentração/risco",
+};
+
+const InfoTip = ({ label }: { label: string }) => {
+  const tip = TOOLTIPS[label];
+  if (!tip) return null;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3 w-3 text-white/20 hover:text-white/50 cursor-help inline-block ml-1 shrink-0" />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[240px] text-xs bg-[hsl(var(--popover))] text-popover-foreground">
+        {tip}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
 export default function ExecutiveDashboard() {
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
