@@ -476,5 +476,6 @@ export default function ExecutiveDashboard() {
         </div>
       </section>
     </div>
+    </TooltipProvider>
   );
 }
