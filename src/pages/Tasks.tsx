@@ -1,22 +1,22 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, Plus, Loader2 } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { TaskCalendar } from "@/components/tasks/TaskCalendar";
+import { TaskDashboard } from "@/components/tasks/TaskDashboard";
 import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 
-type ViewMode = "kanban" | "list" | "calendar";
+type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
 
 export default function Tasks() {
   const { tasks: supabaseTasks, loading, updateTaskStatus, refetch } = useSupabaseTasks();
   
-  // Use Supabase tasks if available, otherwise fallback to mock data
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
   const [view, setView] = useState<ViewMode>("kanban");
@@ -61,11 +61,11 @@ export default function Tasks() {
   };
 
   const handleGenerateTasks = (newTasks: Task[]) => {
-    // After generating, refetch from DB
     refetch();
   };
 
   const viewButtons: { key: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
+    { key: "dashboard", icon: BarChart3, label: "Dashboard" },
     { key: "kanban", icon: LayoutGrid, label: "Kanban" },
     { key: "list", icon: List, label: "Lista" },
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
@@ -100,23 +100,17 @@ export default function Tasks() {
       </div>
 
       {/* View Toggle + Filters */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <TaskFilters
-          search={search} onSearchChange={setSearch}
-          clientFilter={clientFilter} onClientFilterChange={setClientFilter}
-          responsibleFilter={responsibleFilter} onResponsibleFilterChange={setResponsibleFilter}
-          statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
-          priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
-        />
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-white/[0.04]">
+      <div className="flex flex-col gap-4">
+        {/* View mode selector - vertical style */}
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
           {viewButtons.map((v) => (
             <button
               key={v.key}
               onClick={() => setView(v.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
                 view === v.key
-                  ? "bg-white/[0.1] text-white"
-                  : "text-white/40 hover:text-white/60"
+                  ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
+                  : "text-white/40 hover:text-white/60 hover:bg-white/[0.04] border border-transparent"
               }`}
             >
               <v.icon className="h-3.5 w-3.5" />
@@ -124,6 +118,17 @@ export default function Tasks() {
             </button>
           ))}
         </div>
+
+        {/* Filters - only show when not on dashboard */}
+        {view !== "dashboard" && (
+          <TaskFilters
+            search={search} onSearchChange={setSearch}
+            clientFilter={clientFilter} onClientFilterChange={setClientFilter}
+            responsibleFilter={responsibleFilter} onResponsibleFilterChange={setResponsibleFilter}
+            statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
+            priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
+          />
+        )}
       </div>
 
       {/* Content */}
@@ -138,6 +143,9 @@ export default function Tasks() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
+          {view === "dashboard" && (
+            <TaskDashboard tasks={tasks} />
+          )}
           {view === "kanban" && (
             <TaskKanban
               tasks={filteredTasks}
@@ -159,7 +167,6 @@ export default function Tasks() {
         </motion.div>
       )}
 
-      {/* Task Detail Dialog */}
       <TaskDetailDialog
         task={selectedTask}
         open={detailOpen}
@@ -167,7 +174,6 @@ export default function Tasks() {
         onUpdate={handleTaskUpdate}
       />
 
-      {/* Generate Tasks Dialog */}
       <GenerateTasksDialog
         open={generateOpen}
         onOpenChange={setGenerateOpen}
