@@ -57,6 +57,7 @@ export function SystemTab() {
       timezone,
       default_task_status: defaultStatus,
       default_task_priority: defaultPriority,
+      archive_after_days: archiveDays,
     });
   };
 
