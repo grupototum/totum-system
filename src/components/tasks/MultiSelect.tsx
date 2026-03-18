@@ -92,6 +92,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                     {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
                   <span className={checked ? "text-white font-medium" : "text-white/60"}>{opt.label}</span>
+                  {opt.count !== undefined && (
+                    <span className="ml-auto text-[10px] text-white/30 tabular-nums">{opt.count}</span>
+                  )}
                 </button>
               );
             })}
