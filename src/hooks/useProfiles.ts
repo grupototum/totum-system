@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoProfilesList, demoRolesList, demoAuditLogsList, demoDepartmentsList } from "@/data/demoData";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type ProfileRow = Tables<"profiles"> & {
@@ -11,12 +13,20 @@ export type ProfileRow = Tables<"profiles"> & {
 export type RoleRow = Tables<"roles">;
 export type AuditRow = Tables<"audit_logs">;
 
+const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
+
 export function useProfiles() {
+  const { isDemoMode } = useDemo();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      setProfiles(demoProfilesList as unknown as ProfileRow[]);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("profiles")
       .select("*, roles(name, permissions), departments(name)")
@@ -28,11 +38,12 @@ export function useProfiles() {
       setProfiles((data as ProfileRow[]) || []);
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const updateProfile = async (id: string, updates: Partial<Tables<"profiles">>) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const { error } = await supabase.from("profiles").update(updates).eq("id", id);
     if (error) {
       toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
@@ -43,7 +54,7 @@ export function useProfiles() {
   };
 
   const deleteProfile = async (id: string) => {
-    // We can't delete auth users from client, but we can set status
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const { error } = await supabase.from("profiles").update({ status: "inativo" as any }).eq("id", id);
     if (error) {
       toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
@@ -57,11 +68,17 @@ export function useProfiles() {
 }
 
 export function useRoles() {
+  const { isDemoMode } = useDemo();
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      setRoles(demoRolesList as unknown as RoleRow[]);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("roles")
       .select("*")
@@ -73,11 +90,12 @@ export function useRoles() {
       setRoles(data || []);
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const saveRole = async (role: Partial<RoleRow> & { name: string; permissions: any }) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (role.id) {
       const { error } = await supabase.from("roles").update({
         name: role.name,
@@ -106,6 +124,7 @@ export function useRoles() {
   };
 
   const deleteRole = async (id: string, name: string) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const { error } = await supabase.from("roles").delete().eq("id", id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -117,6 +136,7 @@ export function useRoles() {
   };
 
   const duplicateRole = async (role: RoleRow) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     const { error } = await supabase.from("roles").insert({
       name: `${role.name} (cópia)`,
       description: role.description,
@@ -136,11 +156,17 @@ export function useRoles() {
 }
 
 export function useAuditLogs() {
+  const { isDemoMode } = useDemo();
   const [logs, setLogs] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      setLogs(demoAuditLogsList as unknown as AuditRow[]);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("audit_logs")
       .select("*")
@@ -153,7 +179,7 @@ export function useAuditLogs() {
       setLogs(data || []);
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -161,22 +187,34 @@ export function useAuditLogs() {
 }
 
 export function useDepartments() {
+  const { isDemoMode } = useDemo();
   const [departments, setDepartments] = useState<Tables<"departments">[]>([]);
 
   useEffect(() => {
+    if (isDemoMode) {
+      setDepartments(demoDepartmentsList as unknown as Tables<"departments">[]);
+      return;
+    }
     supabase.from("departments").select("*").eq("is_active", true).order("name")
       .then(({ data }) => setDepartments(data || []));
-  }, []);
+  }, [isDemoMode]);
 
   return departments;
 }
 
 export function useUserRoles() {
+  const { isDemoMode } = useDemo();
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     setLoading(true);
+    if (isDemoMode) {
+      // In demo, Ana Silva (demo-user-1) is admin
+      setAdminUserIds(new Set(["demo-user-1"]));
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase
       .from("user_roles")
       .select("user_id, role")
@@ -186,11 +224,12 @@ export function useUserRoles() {
       setAdminUserIds(new Set(data.map((r) => r.user_id)));
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const toggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
+    if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (isCurrentlyAdmin) {
       const { error } = await supabase
         .from("user_roles")

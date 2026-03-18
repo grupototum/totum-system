@@ -22,6 +22,7 @@ import { PermissionMatrix } from "@/components/users/PermissionMatrix";
 import { AuditLog } from "@/components/users/AuditLog";
 import { useProfiles, useRoles, useAuditLogs, useDepartments, useUserRoles, ProfileRow, RoleRow } from "@/hooks/useProfiles";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
