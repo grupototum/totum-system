@@ -15,7 +15,7 @@ import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, refetch } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
@@ -57,9 +57,21 @@ export default function Tasks() {
     setDetailOpen(true);
   };
 
-  const handleTaskUpdate = (updatedTask: Task) => {
+  const handleTaskUpdate = async (updatedTask: Task) => {
     setSelectedTask(updatedTask);
-    refetch();
+    // Persist recurrence and other changes to DB
+    await updateTask(updatedTask.id, {
+      status: updatedTask.status as any,
+      priority: updatedTask.priority as any,
+      task_type: updatedTask.type as any,
+      description: updatedTask.description || null,
+      start_date: updatedTask.startDate || null,
+      due_date: updatedTask.dueDate || null,
+      is_recurring: updatedTask.isRecurring || false,
+      recurrence_type: updatedTask.recurrenceType || null,
+      recurrence_config: (updatedTask.recurrenceConfig as any) || null,
+      recurrence_end_date: updatedTask.recurrenceEndDate || null,
+    });
   };
 
   const handleGenerateTasks = (newTasks: Task[]) => {

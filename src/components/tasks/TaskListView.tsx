@@ -1,5 +1,6 @@
-import { Task, statusConfig, priorityConfig } from "./taskData";
+import { Task, statusConfig, priorityConfig, recurrenceLabels } from "./taskData";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { RefreshCw } from "lucide-react";
 
 interface TaskListViewProps {
   tasks: Task[];
@@ -44,6 +45,9 @@ export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
                       <div className="flex items-center gap-2">
                         <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${pr.dot}`} />
                         <span className="font-medium truncate max-w-[250px]">{task.title}</span>
+                        {(task.isRecurring || task.parentTaskId) && (
+                          <RefreshCw className="h-3 w-3 text-primary/60 shrink-0" />
+                        )}
                       </div>
                     </td>
                     <td className="p-3.5 text-white/60 text-xs">{task.clientName}</td>

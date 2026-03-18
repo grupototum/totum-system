@@ -1561,9 +1561,15 @@ export type Database = {
           estimated_minutes: number | null
           generation_period: string | null
           id: string
+          is_recurring: boolean
+          last_generated_at: string | null
+          parent_task_id: string | null
           plan_id: string | null
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string | null
+          recurrence_config: Json | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
           responsible_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["task_status"]
@@ -1582,9 +1588,15 @@ export type Database = {
           estimated_minutes?: number | null
           generation_period?: string | null
           id?: string
+          is_recurring?: boolean
+          last_generated_at?: string | null
+          parent_task_id?: string | null
           plan_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string | null
+          recurrence_config?: Json | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           responsible_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
@@ -1603,9 +1615,15 @@ export type Database = {
           estimated_minutes?: number | null
           generation_period?: string | null
           id?: string
+          is_recurring?: boolean
+          last_generated_at?: string | null
+          parent_task_id?: string | null
           plan_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string | null
+          recurrence_config?: Json | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           responsible_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
@@ -1633,6 +1651,13 @@ export type Database = {
             columns: ["delivery_model_item_id"]
             isOneToOne: false
             referencedRelation: "delivery_model_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
           {

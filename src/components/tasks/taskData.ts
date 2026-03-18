@@ -1,6 +1,13 @@
 export type TaskStatus = "pendente" | "em_andamento" | "pausado" | "concluido";
 export type TaskPriority = "baixa" | "media" | "alta" | "urgente";
 export type TaskType = "conteudo" | "trafego" | "reuniao" | "relatorio" | "design" | "desenvolvimento" | "outro";
+export type RecurrenceType = "diaria" | "semanal" | "mensal" | "personalizada";
+
+export interface RecurrenceConfig {
+  interval_days?: number;
+  week_days?: number[]; // 0=Sun, 1=Mon, ...
+  month_day?: number;
+}
 
 export interface ChecklistItem {
   id: string;
@@ -51,6 +58,13 @@ export interface Task {
   dueDate?: string;
   estimatedTime?: number;
   actualTime?: number;
+  // Recurrence
+  isRecurring?: boolean;
+  recurrenceType?: RecurrenceType;
+  recurrenceConfig?: RecurrenceConfig;
+  recurrenceEndDate?: string;
+  parentTaskId?: string;
+  lastGeneratedAt?: string;
   subtasks: Subtask[];
   checklist: ChecklistItem[];
   comments: TaskComment[];
@@ -96,6 +110,15 @@ export const typeLabels: Record<TaskType, string> = {
   desenvolvimento: "Desenvolvimento",
   outro: "Outro",
 };
+
+export const recurrenceLabels: Record<RecurrenceType, string> = {
+  diaria: "Diária",
+  semanal: "Semanal",
+  mensal: "Mensal",
+  personalizada: "Personalizada",
+};
+
+export const weekDayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export const statusColumns: TaskStatus[] = ["pendente", "em_andamento", "pausado", "concluido"];
 

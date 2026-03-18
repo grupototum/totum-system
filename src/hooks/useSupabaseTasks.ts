@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables, Enums } from "@/integrations/supabase/types";
-import { Task, TaskStatus, Subtask, ChecklistItem, TaskComment, TaskHistoryEntry } from "@/components/tasks/taskData";
+import { Task, TaskStatus, RecurrenceType, RecurrenceConfig } from "@/components/tasks/taskData";
 
 type TaskRow = Tables<"tasks">;
 
@@ -15,7 +15,6 @@ export function useSupabaseTasks() {
   const fetchTasks = useCallback(async () => {
     setLoading(true);
 
-    // Fetch tasks with client name
     const { data: taskRows, error } = await supabase
       .from("tasks")
       .select(`
@@ -35,7 +34,6 @@ export function useSupabaseTasks() {
       return;
     }
 
-    // Also fetch profiles for responsible names
     const { data: profileRows } = await supabase
       .from("profiles")
       .select("user_id, full_name, avatar_url");
@@ -62,6 +60,13 @@ export function useSupabaseTasks() {
       dueDate: t.due_date || undefined,
       estimatedTime: t.estimated_minutes || undefined,
       actualTime: t.actual_minutes || undefined,
+      // Recurrence fields
+      isRecurring: t.is_recurring || false,
+      recurrenceType: t.recurrence_type as RecurrenceType | undefined,
+      recurrenceConfig: t.recurrence_config as RecurrenceConfig | undefined,
+      recurrenceEndDate: t.recurrence_end_date || undefined,
+      parentTaskId: t.parent_task_id || undefined,
+      lastGeneratedAt: t.last_generated_at || undefined,
       subtasks: (t.subtasks || []).map((s: any) => ({
         id: s.id,
         title: s.title,
@@ -121,7 +126,6 @@ export function useSupabaseTasks() {
       return;
     }
 
-    // Log history
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("task_history").insert({
