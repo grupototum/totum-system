@@ -448,7 +448,7 @@ export default function ExecutiveDashboard() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="glass-card rounded-xl p-4">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1">Previsão de faturamento</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center">Previsão de faturamento<InfoTip label="Previsão de faturamento" /></p>
             <p className="text-xl font-heading font-bold text-primary">{formatCurrency(data.revenueForecast)}</p>
             <p className="text-[10px] text-white/30 mt-1">Baseado nos contratos ativos</p>
           </div>
