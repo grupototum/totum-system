@@ -222,9 +222,10 @@ export default function Tasks() {
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
   ];
 
-  // Stats
-  const overdueTasks = tasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "concluido").length;
-  const pendingTasks = tasks.filter((t) => t.status === "pendente").length;
+  // Stats (exclude archived)
+  const activeTasks = tasks.filter(t => t.status !== "arquivado");
+  const overdueTasks = activeTasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== "concluido").length;
+  const pendingTasks = activeTasks.filter((t) => t.status === "pendente").length;
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-5">
