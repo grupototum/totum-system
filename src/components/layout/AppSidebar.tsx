@@ -61,6 +61,15 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { profile } = useAuth();
+
+  const isAdmin =
+    profile?.roles?.name?.toLowerCase() === "administrador" ||
+    profile?.roles?.name?.toLowerCase() === "admin";
+
+  const filteredSystemNav = systemNav.filter(
+    (item) => item.url !== "/admin" || isAdmin
+  );
+
   const renderItems = (items: typeof mainNav) =>
     items.map((item) => (
       <SidebarMenuItem key={item.title}>
@@ -114,7 +123,7 @@ export function AppSidebar() {
             Sistema
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{renderItems(systemNav)}</SidebarMenu>
+            <SidebarMenu>{renderItems(filteredSystemNav)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
