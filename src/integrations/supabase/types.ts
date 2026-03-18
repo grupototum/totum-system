@@ -1621,7 +1621,7 @@ export type Database = {
         | "design"
         | "desenvolvimento"
         | "outro"
-      user_status: "ativo" | "inativo" | "bloqueado"
+      user_status: "ativo" | "inativo" | "bloqueado" | "pendente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1783,7 +1783,7 @@ export const Constants = {
         "desenvolvimento",
         "outro",
       ],
-      user_status: ["ativo", "inativo", "bloqueado"],
+      user_status: ["ativo", "inativo", "bloqueado", "pendente"],
     },
   },
 } as const
