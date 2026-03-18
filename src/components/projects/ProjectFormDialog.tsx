@@ -12,9 +12,10 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: any) => Promise<boolean>;
+  initialData?: any;
 }
 
-export function ProjectFormDialog({ open, onOpenChange, onSubmit }: Props) {
+export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
@@ -38,7 +39,20 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit }: Props) {
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
       });
-      setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
+      if (initialData) {
+        setForm({
+          name: initialData.name || "",
+          client_id: initialData.client_id || "",
+          contract_id: initialData.contract_id || "",
+          project_type_id: initialData.project_type_id || "",
+          responsible_id: initialData.responsible_id || "",
+          description: initialData.description || "",
+          start_date: initialData.start_date || "",
+          due_date: initialData.due_date || "",
+        });
+      } else {
+        setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
+      }
     }
   }, [open]);
 
@@ -70,7 +84,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg bg-card border-border">
         <DialogHeader>
-          <DialogTitle>Novo Projeto</DialogTitle>
+          <DialogTitle>{initialData ? "Editar Projeto" : "Novo Projeto"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
