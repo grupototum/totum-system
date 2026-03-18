@@ -151,8 +151,7 @@ export default function Team() {
         departments={departments}
         onRefresh={() => {
           refetch();
-          // Re-fetch updated profile
-          if (selectedProfile) {
+          if (selectedProfile && !isDemoMode) {
             supabase.from("profiles")
               .select("*, roles(name, permissions), departments(name)")
               .eq("id", selectedProfile.id)
