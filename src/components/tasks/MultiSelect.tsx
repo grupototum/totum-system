@@ -71,6 +71,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                 {isAll && <Check className="h-2.5 w-2.5 text-white" />}
               </div>
               <span className={isAll ? "text-white font-medium" : "text-white/60"}>{allLabel}</span>
+              {totalCount !== undefined && (
+                <span className="ml-auto text-[10px] text-white/30 tabular-nums">{totalCount}</span>
+              )}
             </button>
 
             {options.map((opt) => {
