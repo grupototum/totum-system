@@ -38,10 +38,10 @@ export function useSupabaseTasks() {
     // Also fetch profiles for responsible names
     const { data: profileRows } = await supabase
       .from("profiles")
-      .select("user_id, full_name");
+      .select("user_id, full_name, avatar_url");
 
-    const profileMap = new Map<string, string>();
-    (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, p.full_name));
+    const profileMap = new Map<string, { name: string; avatar: string | null }>();
+    (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
 
     const mapped: Task[] = (taskRows || []).map((t: any) => ({
       id: t.id,
