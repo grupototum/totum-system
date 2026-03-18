@@ -49,7 +49,13 @@ export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
                     <td className="p-3.5 text-white/60 text-xs">{task.clientName}</td>
                     <td className="p-3.5">
                       {task.responsible ? (
-                        <span className="text-xs text-white/60">{task.responsible}</span>
+                        <span className="text-xs text-white/60 flex items-center gap-1.5">
+                          <Avatar className="h-5 w-5">
+                            {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
+                            <AvatarFallback className="text-[7px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
+                          </Avatar>
+                          {task.responsible}
+                        </span>
                       ) : (
                         <span className="text-xs text-white/20">—</span>
                       )}

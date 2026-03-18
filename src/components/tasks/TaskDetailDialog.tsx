@@ -329,9 +329,10 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
             {task.comments.map((comment) => (
               <div key={comment.id} className="p-3 rounded-lg bg-white/[0.03]">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <div className="h-5 w-5 rounded-full gradient-primary flex items-center justify-center text-[8px] font-bold">
-                    {comment.author[0]}
-                  </div>
+                  <Avatar className="h-5 w-5">
+                    {comment.authorAvatarUrl && <AvatarImage src={comment.authorAvatarUrl} />}
+                    <AvatarFallback className="text-[7px] gradient-primary">{comment.author[0]}</AvatarFallback>
+                  </Avatar>
                   <span className="text-xs font-medium">{comment.author}</span>
                   <span className="text-[10px] text-white/20">
                     {new Date(comment.createdAt).toLocaleDateString("pt-BR")} {new Date(comment.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}

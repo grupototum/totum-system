@@ -62,8 +62,12 @@ export function TaskKanban({ tasks, onStatusChange, onTaskClick }: TaskKanbanPro
                           <p className="text-sm font-medium mb-2 line-clamp-2">{task.title}</p>
                           <div className="flex items-center justify-between">
                             {task.responsible ? (
-                              <span className="text-[10px] text-white/40 flex items-center gap-1">
-                                <User className="h-3 w-3" /> {task.responsible.split(" ")[0]}
+                              <span className="text-[10px] text-white/40 flex items-center gap-1.5">
+                                <Avatar className="h-4 w-4">
+                                  {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
+                                  <AvatarFallback className="text-[6px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
+                                </Avatar>
+                                {task.responsible.split(" ")[0]}
                               </span>
                             ) : (
                               <span className="text-[10px] text-white/20">Sem responsável</span>
