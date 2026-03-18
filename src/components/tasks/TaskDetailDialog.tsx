@@ -17,6 +17,7 @@ import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
   MessageSquare, History, ChevronDown, Send,
 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface TaskDetailDialogProps {
   task: Task | null;
