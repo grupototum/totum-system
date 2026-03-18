@@ -9,13 +9,16 @@ import { TaskCalendar } from "@/components/tasks/TaskCalendar";
 import { TaskDashboard } from "@/components/tasks/TaskDashboard";
 import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
+import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
@@ -24,6 +27,10 @@ export default function Tasks() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
+
+  // Completion dialog state
+  const [completionTask, setCompletionTask] = useState<Task | null>(null);
+  const [completionOpen, setCompletionOpen] = useState(false);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -48,7 +55,16 @@ export default function Tasks() {
     });
   }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter]);
 
+  // Intercept status changes to "concluido" — open completion dialog
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    if (newStatus === "concluido") {
+      const task = tasks.find((t) => t.id === taskId);
+      if (task && task.status !== "concluido") {
+        setCompletionTask(task);
+        setCompletionOpen(true);
+        return;
+      }
+    }
     await updateTaskStatus(taskId, newStatus);
   };
 
@@ -58,8 +74,16 @@ export default function Tasks() {
   };
 
   const handleTaskUpdate = async (updatedTask: Task) => {
+    // Intercept if changing to "concluido" from detail dialog
+    if (updatedTask.status === "concluido" && selectedTask && selectedTask.status !== "concluido") {
+      setCompletionTask(updatedTask);
+      setCompletionOpen(true);
+      // Revert the status in the detail dialog
+      setSelectedTask({ ...updatedTask, status: selectedTask.status });
+      return;
+    }
+
     setSelectedTask(updatedTask);
-    // Persist recurrence and other changes to DB
     await updateTask(updatedTask.id, {
       status: updatedTask.status as any,
       priority: updatedTask.priority as any,
@@ -71,6 +95,103 @@ export default function Tasks() {
       recurrence_type: updatedTask.recurrenceType || null,
       recurrence_config: (updatedTask.recurrenceConfig as any) || null,
       recurrence_end_date: updatedTask.recurrenceEndDate || null,
+    });
+  };
+
+  // Handle the completion flow
+  const handleComplete = async (data: {
+    taskId: string;
+    decision: "closed" | "next_action";
+    comment?: string;
+    nextAction?: {
+      title: string;
+      description: string;
+      responsible_id: string;
+      due_date: string;
+      priority: string;
+    };
+  }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
+    const task = tasks.find((t) => t.id === data.taskId);
+
+    if (data.decision === "next_action" && data.nextAction && task) {
+      // Create subtask linked to original task
+      const { error: subErr } = await supabase.from("subtasks").insert({
+        task_id: data.taskId,
+        title: data.nextAction.title,
+        status: "pendente",
+        responsible_id: data.nextAction.responsible_id || null,
+        due_date: data.nextAction.due_date || null,
+      });
+      if (subErr) {
+        toast({ title: "Erro ao criar subtarefa", description: subErr.message, variant: "destructive" });
+        return;
+      }
+
+      // Also create a new standalone task linked as child
+      const { error: taskErr } = await supabase.from("tasks").insert({
+        title: data.nextAction.title,
+        description: data.nextAction.description || null,
+        client_id: task.clientId,
+        parent_task_id: data.taskId,
+        responsible_id: data.nextAction.responsible_id || null,
+        due_date: data.nextAction.due_date || null,
+        priority: data.nextAction.priority as any,
+        status: "pendente",
+        task_type: task.type as any,
+        contract_id: task.contractId || null,
+        project_id: task.projectId || null,
+      });
+      if (taskErr) {
+        toast({ title: "Erro ao criar tarefa", description: taskErr.message, variant: "destructive" });
+        return;
+      }
+
+      // Log history
+      if (userId) {
+        await supabase.from("task_history").insert({
+          task_id: data.taskId,
+          action: "Concluída com próxima ação",
+          detail: `Próxima ação criada: "${data.nextAction.title}"`,
+          user_id: userId,
+        });
+      }
+    } else if (data.decision === "closed") {
+      // Add optional comment
+      if (data.comment && userId) {
+        await supabase.from("task_comments").insert({
+          task_id: data.taskId,
+          content: `[Conclusão] ${data.comment}`,
+          user_id: userId,
+        });
+      }
+
+      // Log history
+      if (userId) {
+        await supabase.from("task_history").insert({
+          task_id: data.taskId,
+          action: "Concluída e encerrada",
+          detail: data.comment ? `Comentário: ${data.comment}` : "Tarefa encerrada sem ações adicionais",
+          user_id: userId,
+        });
+      }
+    }
+
+    // Mark task as completed
+    await updateTaskStatus(data.taskId, "concluido");
+
+    // Close detail dialog if open
+    if (detailOpen) {
+      setDetailOpen(false);
+      setSelectedTask(null);
+    }
+
+    toast({
+      title: "Tarefa concluída",
+      description: data.decision === "next_action"
+        ? `Próxima ação "${data.nextAction?.title}" criada com sucesso.`
+        : "Tarefa encerrada com sucesso.",
     });
   };
 
@@ -115,7 +236,6 @@ export default function Tasks() {
 
       {/* View Toggle + Filters */}
       <div className="flex flex-col gap-4">
-        {/* View mode selector - vertical style */}
         <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
           {viewButtons.map((v) => (
             <button
@@ -133,7 +253,6 @@ export default function Tasks() {
           ))}
         </div>
 
-        {/* Filters - only show when not on dashboard */}
         {view !== "dashboard" && (
           <TaskFilters
             search={search} onSearchChange={setSearch}
@@ -159,9 +278,7 @@ export default function Tasks() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
-          {view === "dashboard" && (
-            <TaskDashboard tasks={tasks} />
-          )}
+          {view === "dashboard" && <TaskDashboard tasks={tasks} />}
           {view === "kanban" && (
             <TaskKanban
               tasks={filteredTasks}
@@ -169,9 +286,7 @@ export default function Tasks() {
               onTaskClick={handleTaskClick}
             />
           )}
-          {view === "list" && (
-            <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />
-          )}
+          {view === "list" && <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />}
           {view === "calendar" && (
             <TaskCalendar
               tasks={filteredTasks}
@@ -194,6 +309,14 @@ export default function Tasks() {
         open={generateOpen}
         onOpenChange={setGenerateOpen}
         onGenerate={handleGenerateTasks}
+      />
+
+      <TaskCompletionDialog
+        task={completionTask}
+        open={completionOpen}
+        onOpenChange={setCompletionOpen}
+        profiles={profiles}
+        onComplete={handleComplete}
       />
     </div>
   );
