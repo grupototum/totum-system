@@ -48,6 +48,7 @@ const financeNav = [
 const systemNav = [
   { title: "Equipe", url: "/equipe", icon: UserCog },
   { title: "Cadastros", url: "/cadastros", icon: Database },
+  { title: "Permissões", url: "/usuarios", icon: Shield },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 

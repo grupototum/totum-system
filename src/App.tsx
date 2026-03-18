@@ -40,6 +40,7 @@ const App = () => (
             <Route path="/relatorios" element={<Reports />} />
             <Route path="/equipe" element={<Team />} />
             <Route path="/cadastros" element={<Registries />} />
+            <Route path="/usuarios" element={<UsersPermissions />} />
             <Route path="/configuracoes" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
