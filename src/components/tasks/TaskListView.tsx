@@ -10,7 +10,7 @@ interface TaskListViewProps {
   onUnarchive?: (taskId: string) => void;
 }
 
-export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
+export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }: TaskListViewProps) {
   return (
     <div className="glass-card rounded-xl overflow-hidden">
       <div className="overflow-x-auto">
@@ -23,7 +23,7 @@ export function TaskListView({ tasks, onTaskClick }: TaskListViewProps) {
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prioridade</th>
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
               <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prazo</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Progresso</th>
+              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">{showUnarchive ? "Ação" : "Progresso"}</th>
             </tr>
           </thead>
           <tbody>
