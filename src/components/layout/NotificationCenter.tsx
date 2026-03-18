@@ -4,15 +4,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoNotifications } from "@/data/demoData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function NotificationCenter() {
   const { user } = useAuth();
+  const { isDemoMode } = useDemo();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      setNotifications(demoNotifications);
+      setUnreadCount(demoNotifications.filter(n => !n.is_read).length);
+      return;
+    }
     if (!user) return;
     const { data } = await supabase
       .from("notifications")
@@ -23,7 +31,7 @@ export function NotificationCenter() {
     const items = data || [];
     setNotifications(items);
     setUnreadCount(items.filter((n: any) => !n.is_read).length);
-  }, [user]);
+  }, [user, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
