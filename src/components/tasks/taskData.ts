@@ -19,6 +19,7 @@ export interface Subtask {
 export interface TaskComment {
   id: string;
   author: string;
+  authorAvatarUrl?: string;
   text: string;
   createdAt: string;
 }
@@ -41,6 +42,8 @@ export interface Task {
   planName?: string;
   projectId?: string;
   responsible?: string;
+  responsibleAvatarUrl?: string;
+  responsibleId?: string;
   priority: TaskPriority;
   status: TaskStatus;
   type: TaskType;

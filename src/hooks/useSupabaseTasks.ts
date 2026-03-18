@@ -38,10 +38,10 @@ export function useSupabaseTasks() {
     // Also fetch profiles for responsible names
     const { data: profileRows } = await supabase
       .from("profiles")
-      .select("user_id, full_name");
+      .select("user_id, full_name, avatar_url");
 
-    const profileMap = new Map<string, string>();
-    (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, p.full_name));
+    const profileMap = new Map<string, { name: string; avatar: string | null }>();
+    (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
 
     const mapped: Task[] = (taskRows || []).map((t: any) => ({
       id: t.id,
@@ -52,7 +52,8 @@ export function useSupabaseTasks() {
       contractId: t.contract_id || undefined,
       planName: t.plans?.name || undefined,
       projectId: t.project_id || undefined,
-      responsible: t.responsible_id ? profileMap.get(t.responsible_id) || undefined : undefined,
+      responsible: t.responsible_id ? profileMap.get(t.responsible_id)?.name || undefined : undefined,
+      responsibleAvatarUrl: t.responsible_id ? profileMap.get(t.responsible_id)?.avatar || undefined : undefined,
       responsibleId: t.responsible_id || undefined,
       priority: t.priority as any,
       status: t.status as TaskStatus,
@@ -65,7 +66,7 @@ export function useSupabaseTasks() {
         id: s.id,
         title: s.title,
         status: s.status as TaskStatus,
-        responsible: s.responsible_id ? profileMap.get(s.responsible_id) : undefined,
+        responsible: s.responsible_id ? profileMap.get(s.responsible_id)?.name : undefined,
         dueDate: s.due_date || undefined,
       })),
       checklist: (t.task_checklist_items || []).map((c: any) => ({
@@ -75,7 +76,8 @@ export function useSupabaseTasks() {
       })),
       comments: (t.task_comments || []).map((c: any) => ({
         id: c.id,
-        author: profileMap.get(c.user_id) || "Usuário",
+        author: profileMap.get(c.user_id)?.name || "Usuário",
+        authorAvatarUrl: profileMap.get(c.user_id)?.avatar || undefined,
         text: c.content,
         createdAt: c.created_at,
       })),
@@ -83,7 +85,7 @@ export function useSupabaseTasks() {
         id: h.id,
         action: h.action,
         detail: h.detail || "",
-        user: h.user_id ? profileMap.get(h.user_id) || "Sistema" : "Sistema",
+        user: h.user_id ? profileMap.get(h.user_id)?.name || "Sistema" : "Sistema",
         createdAt: h.created_at,
       })),
     }));
