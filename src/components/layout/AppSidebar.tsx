@@ -51,6 +51,7 @@ const systemNav = [
   { title: "Cadastros", url: "/cadastros", icon: Database },
   { title: "Permissões", url: "/usuarios", icon: Shield },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
+  { title: "Admin", url: "/admin", icon: ShieldCheck },
 ];
 
 export function AppSidebar() {
