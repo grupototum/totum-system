@@ -10,6 +10,7 @@ import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Index from "./pages/Index";
 import Clients from "./pages/Clients";
+import ClientHub from "./pages/ClientHub";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
@@ -45,6 +46,7 @@ function ProtectedRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/clientes" element={<Clients />} />
+        <Route path="/clientes/:id" element={<ClientHub />} />
         <Route path="/tarefas" element={<Tasks />} />
         <Route path="/entregas" element={<Fulfillment />} />
         <Route path="/contratos" element={<Contracts />} />
