@@ -12,6 +12,7 @@ import {
   Database,
   Shield,
   Monitor,
+  LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
