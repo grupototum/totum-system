@@ -1122,6 +1122,8 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          revenue_type_id: string | null
+          service_type_id: string | null
         }
         Insert: {
           created_at?: string
@@ -1129,6 +1131,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          revenue_type_id?: string | null
+          service_type_id?: string | null
         }
         Update: {
           created_at?: string
@@ -1136,8 +1140,25 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          revenue_type_id?: string | null
+          service_type_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "project_types_revenue_type_id_fkey"
+            columns: ["revenue_type_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_types_service_type_id_fkey"
+            columns: ["service_type_id"]
+            isOneToOne: false
+            referencedRelation: "service_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -1205,6 +1226,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      revenue_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
       }
       roles: {
         Row: {
