@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface MultiSelectOption {
   value: string;
   label: string;
+  count?: number;
 }
 
 interface MultiSelectProps {
