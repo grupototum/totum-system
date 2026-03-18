@@ -325,16 +325,23 @@ export default function Tasks() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
-          {view === "dashboard" && <TaskDashboard tasks={tasks} />}
-          {view === "kanban" && (
+          {view === "dashboard" && !showArchived && <TaskDashboard tasks={activeTasks} />}
+          {view === "kanban" && !showArchived && (
             <TaskKanban
               tasks={filteredTasks}
               onStatusChange={handleStatusChange}
               onTaskClick={handleTaskClick}
             />
           )}
-          {view === "list" && <TaskListView tasks={filteredTasks} onTaskClick={handleTaskClick} />}
-          {view === "calendar" && (
+          {(view === "list" || showArchived) && (
+            <TaskListView 
+              tasks={filteredTasks} 
+              onTaskClick={handleTaskClick}
+              showUnarchive={showArchived}
+              onUnarchive={handleUnarchive}
+            />
+          )}
+          {view === "calendar" && !showArchived && (
             <TaskCalendar
               tasks={filteredTasks}
               onTaskClick={handleTaskClick}

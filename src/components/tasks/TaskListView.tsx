@@ -85,7 +85,20 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                       )}
                     </td>
                     <td className="p-3.5">
-                      {checkProgress !== null ? (
+                      {showUnarchive ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onUnarchive?.(task.id);
+                          }}
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Restaurar
+                        </Button>
+                      ) : checkProgress !== null ? (
                         <div className="flex items-center gap-2">
                           <div className="w-12 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                             <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${checkProgress}%` }} />

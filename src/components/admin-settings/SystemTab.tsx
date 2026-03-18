@@ -125,6 +125,19 @@ export function SystemTab() {
             </SelectContent>
           </Select>
         </div>
+
+        <div className="space-y-2">
+          <Label>Arquivar tarefas após (dias)</Label>
+          <Input
+            type="number"
+            min={1}
+            max={365}
+            value={archiveDays}
+            onChange={(e) => setArchiveDays(Number(e.target.value) || 30)}
+            className="bg-white/[0.05] border-white/[0.1]"
+          />
+          <p className="text-[10px] text-white/30">Tarefas concluídas serão arquivadas após este período</p>
+        </div>
       </div>
 
       <div className="flex justify-end">
