@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoExecutiveDashboardData } from "@/data/demoData";
 
 interface ExecutiveDashboardData {
-  // Financial
   totalRevenue: number;
   mrr: number;
   receivables: number;
@@ -14,7 +15,6 @@ interface ExecutiveDashboardData {
   revenueByClient: { name: string; value: number }[];
   revenueByService: { name: string; value: number }[];
   expensesByCategory: { name: string; value: number }[];
-  // Operational
   totalTasks: number;
   pendingTasks: number;
   completedTasks: number;
@@ -22,25 +22,28 @@ interface ExecutiveDashboardData {
   completionRate: number;
   productivityByUser: { name: string; avatar?: string; total: number; completed: number; overdue: number }[];
   criticalTasks: { id: string; title: string; client: string; dueDate: string; responsible?: string }[];
-  // Contracts
   activeContracts: number;
   defaultingContracts: number;
   contractFulfillment: { client: string; pct: number }[];
-  // Strategic
   revenueForecast: number;
   topClients: { name: string; revenue: number; pct: number }[];
-  revenueConcentration: number; // HHI-like
+  revenueConcentration: number;
 }
 
 export function useExecutiveDashboard(period?: string) {
+  const { isDemoMode } = useDemo();
   const [data, setData] = useState<ExecutiveDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
+    if (isDemoMode) {
+      setData(demoExecutiveDashboardData);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const now = new Date();
 
-    // Determine date range
     const periodStart = period
       ? `${period}-01`
       : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
@@ -48,7 +51,6 @@ export function useExecutiveDashboard(period?: string) {
     const nextMonth = new Date(pDate.getFullYear(), pDate.getMonth() + 1, 1);
     const periodEnd = nextMonth.toISOString().split("T")[0];
 
-    // Financial entries
     const { data: entries } = await supabase
       .from("financial_entries")
       .select("*, clients(name), financial_categories(name)")
@@ -63,10 +65,9 @@ export function useExecutiveDashboard(period?: string) {
     const paidExpenses = allEntries.filter(e => e.type === "pagar" && e.status === "pago");
     const totalExpenses = paidExpenses.reduce((s, e) => s + Number(e.value), 0);
     const grossProfit = totalRevenue - totalExpenses;
-    const netProfit = grossProfit; // simplified
+    const netProfit = grossProfit;
     const margin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
 
-    // Revenue by client
     const revClientMap: Record<string, number> = {};
     income.forEach(e => {
       const name = (e as any).clients?.name || "Sem cliente";
@@ -76,7 +77,6 @@ export function useExecutiveDashboard(period?: string) {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    // Expenses by category
     const expCatMap: Record<string, number> = {};
     paidExpenses.forEach(e => {
       const name = (e as any).financial_categories?.name || "Sem categoria";
@@ -86,7 +86,6 @@ export function useExecutiveDashboard(period?: string) {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    // MRR from active contracts
     const { data: contracts } = await supabase
       .from("contracts")
       .select("value, client_id, clients(name), status")
@@ -94,10 +93,8 @@ export function useExecutiveDashboard(period?: string) {
     const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
     const activeContracts = (contracts || []).length;
 
-    // Defaulting contracts (with overdue entries)
     const defaultingContracts = allEntries.filter(e => e.type === "receber" && e.status === "atrasado" && e.contract_id).length;
 
-    // Contract fulfillment
     const { data: checklists } = await supabase
       .from("delivery_checklists")
       .select("fulfillment_pct, clients(name)")
@@ -112,7 +109,6 @@ export function useExecutiveDashboard(period?: string) {
       .map(([client, pcts]) => ({ client, pct: Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) }))
       .sort((a, b) => a.pct - b.pct);
 
-    // Tasks
     const { data: tasks } = await supabase
       .from("tasks")
       .select("id, title, status, priority, due_date, responsible_id, clients(name)");
@@ -130,7 +126,6 @@ export function useExecutiveDashboard(period?: string) {
     const overdueTasks = allTasks.filter(t => t.due_date && new Date(t.due_date) < now && t.status !== "concluido").length;
     const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-    // Productivity by user
     const userMap: Record<string, { name: string; avatar?: string; total: number; completed: number; overdue: number }> = {};
     allTasks.forEach(t => {
       const key = t.responsible_id || "unassigned";
@@ -144,7 +139,6 @@ export function useExecutiveDashboard(period?: string) {
     });
     const productivityByUser = Object.values(userMap).sort((a, b) => b.total - a.total);
 
-    // Critical tasks
     const criticalTasks = allTasks
       .filter(t => (t.priority === "urgente" || t.priority === "alta") && t.status !== "concluido")
       .slice(0, 10)
@@ -156,7 +150,6 @@ export function useExecutiveDashboard(period?: string) {
         responsible: t.responsible_id ? profileMap.get(t.responsible_id)?.name : undefined,
       }));
 
-    // Strategic - top clients & concentration
     const topClients = revenueByClient.slice(0, 5).map(c => ({
       name: c.name,
       revenue: c.value,
@@ -166,12 +159,8 @@ export function useExecutiveDashboard(period?: string) {
       const share = totalRevenue > 0 ? c.value / totalRevenue : 0;
       return s + share * share;
     }, 0);
-    const revenueConcentration = Math.round(hhi * 10000); // basis points
-
-    // Revenue forecast (simple: MRR projection)
+    const revenueConcentration = Math.round(hhi * 10000);
     const revenueForecast = mrr;
-
-    // Revenue by service (using categories for now)
     const revenueByService = revenueByClient.slice(0, 5);
 
     setData({
@@ -184,7 +173,7 @@ export function useExecutiveDashboard(period?: string) {
       revenueForecast, topClients, revenueConcentration,
     });
     setLoading(false);
-  }, [period]);
+  }, [period, isDemoMode]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

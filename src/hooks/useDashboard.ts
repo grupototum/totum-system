@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoDashboardData } from "@/data/demoData";
 
 interface DashboardData {
   mrr: number;
@@ -16,6 +18,7 @@ interface DashboardData {
 }
 
 export function useDashboard() {
+  const { isDemoMode } = useDemo();
   const [data, setData] = useState<DashboardData>({
     mrr: 0, activeClients: 0, fulfillmentPct: 0, profit: 0,
     mrrChange: "+0%", clientsChange: "+0", profitChange: "+0%",
@@ -24,6 +27,11 @@ export function useDashboard() {
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      setData(demoDashboardData);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
 
     // Active contracts → MRR
@@ -35,13 +43,11 @@ export function useDashboard() {
     const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
     const uniqueClients = new Set((contracts || []).map(c => c.client_id));
 
-    // Active clients count
     const { count: activeClients } = await supabase
       .from("clients")
       .select("id", { count: "exact", head: true })
       .eq("status", "ativo");
 
-    // Financial summary (current month)
     const now = new Date();
     const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -57,7 +63,6 @@ export function useDashboard() {
     const expense = (entries || []).filter(e => e.type === "pagar" && e.status === "pago").reduce((s, e) => s + Number(e.value), 0);
     const overdue = (entries || []).filter(e => e.status === "atrasado").length;
 
-    // Fulfillment
     const { data: checklists } = await supabase
       .from("delivery_checklists")
       .select("fulfillment_pct")
@@ -67,13 +72,11 @@ export function useDashboard() {
       ? Math.round(checklists.reduce((s, c) => s + (Number(c.fulfillment_pct) || 0), 0) / checklists.length)
       : 0;
 
-    // Pending users
     const { count: pendingUsers } = await supabase
       .from("profiles")
       .select("id", { count: "exact", head: true })
       .eq("status", "pendente" as any);
 
-    // Recent tasks activity
     const { data: recentTasks } = await supabase
       .from("task_history")
       .select("action, detail, created_at, tasks(title, clients(name))")
@@ -101,7 +104,7 @@ export function useDashboard() {
       pendingChecklists: 0,
     });
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 

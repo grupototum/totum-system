@@ -1,16 +1,28 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoFinancialEntries } from "@/data/demoData";
 
 export type FinancialEntryRow = Tables<"financial_entries"> & {
   clients?: { name: string } | null;
 };
 
 export function useFinancialEntries(month?: string) {
+  const { isDemoMode } = useDemo();
   const [entries, setEntries] = useState<FinancialEntryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      let filtered = demoFinancialEntries as FinancialEntryRow[];
+      if (month) {
+        filtered = filtered.filter(e => e.due_date.startsWith(month));
+      }
+      setEntries(filtered);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
 
     let query = supabase
@@ -19,7 +31,6 @@ export function useFinancialEntries(month?: string) {
       .order("due_date", { ascending: false });
 
     if (month) {
-      // month format: "2026-03"
       query = query.gte("due_date", `${month}-01`).lte("due_date", `${month}-31`);
     }
 
@@ -31,7 +42,7 @@ export function useFinancialEntries(month?: string) {
       setEntries((data as FinancialEntryRow[]) || []);
     }
     setLoading(false);
-  }, [month]);
+  }, [month, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 

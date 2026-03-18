@@ -10,11 +10,13 @@ import {
   ShieldCheck,
   Database,
   Shield,
+  Monitor,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
 import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
@@ -49,6 +51,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { profile, user } = useAuth();
+  const { isDemoMode, toggleDemo } = useDemo();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   const isAdmin =
@@ -122,6 +125,27 @@ export function AppSidebar() {
             <SidebarMenu>{renderItems(filteredSystemNav)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={toggleDemo}>
+                    <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      isDemoMode 
+                        ? "bg-amber-500/15 text-amber-400" 
+                        : "hover:bg-white/[0.06] text-muted-foreground"
+                    }`}>
+                      <Monitor className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{isDemoMode ? "Sair do Demo" : "Modo Demo"}</span>}
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border">

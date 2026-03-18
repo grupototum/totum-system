@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoClients } from "@/data/demoData";
 
 export type ClientRow = Tables<"clients"> & {
   client_types?: { name: string } | null;
@@ -9,10 +11,16 @@ export type ClientRow = Tables<"clients"> & {
 };
 
 export function useClients() {
+  const { isDemoMode } = useDemo();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      setClients(demoClients as ClientRow[]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase
       .from("clients")
@@ -25,11 +33,12 @@ export function useClients() {
       setClients((data as ClientRow[]) || []);
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const addClient = async (values: Partial<Tables<"clients">>) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
     const { error } = await supabase.from("clients").insert(values as any);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -41,6 +50,7 @@ export function useClients() {
   };
 
   const updateClient = async (id: string, values: Partial<Tables<"clients">>) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
     const { error } = await supabase.from("clients").update(values).eq("id", id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -51,6 +61,7 @@ export function useClients() {
   };
 
   const deleteClient = async (id: string) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
     const { error } = await supabase.from("clients").delete().eq("id", id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
+import { useDemo } from "@/contexts/DemoContext";
+import { demoContracts } from "@/data/demoData";
 
 export type ContractRow = Tables<"contracts"> & {
   clients?: { name: string } | null;
@@ -10,10 +12,16 @@ export type ContractRow = Tables<"contracts"> & {
 };
 
 export function useContracts() {
+  const { isDemoMode } = useDemo();
   const [contracts, setContracts] = useState<ContractRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
+    if (isDemoMode) {
+      setContracts(demoContracts as ContractRow[]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase
       .from("contracts")
@@ -26,11 +34,12 @@ export function useContracts() {
       setContracts((data as ContractRow[]) || []);
     }
     setLoading(false);
-  }, []);
+  }, [isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const addContract = async (values: Partial<Tables<"contracts">>) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
     const { error } = await supabase.from("contracts").insert(values as any);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -42,6 +51,7 @@ export function useContracts() {
   };
 
   const updateContract = async (id: string, values: Partial<Tables<"contracts">>) => {
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
     const { error } = await supabase.from("contracts").update(values).eq("id", id);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
