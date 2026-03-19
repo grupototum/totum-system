@@ -13,7 +13,7 @@ interface Piece {
 
 export function Confetti({ active }: { active: boolean }) {
   const [pieces, setPieces] = useState<Piece[]>([]);
-  const colors = ["#ff3b3b", "#ff5e5e", "#cf2027", "#ffffff", "#ff8a8a"];
+  const colors = ["#D4AF37", "#002B5B", "#F5F5F7", "#C5A028", "#001F44"];
 
   useEffect(() => {
     if (active) {
