@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Copy, Trash2, X, Loader2, FileText, GripVertical } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, X, Loader2, FileText, GripVertical, LayoutGrid, List } from "lucide-react";
 
 interface TemplateItem {
   id?: string;
@@ -28,6 +28,7 @@ export function TaskTemplateManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<TaskTemplate | null>(null);
   const [saving, setSaving] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Form state
   const [name, setName] = useState("");
@@ -176,14 +177,30 @@ export function TaskTemplateManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-semibold">Templates de Tarefa</h3>
           <p className="text-sm text-muted-foreground">Modelos reutilizáveis com subtarefas padrão</p>
         </div>
-        <Button onClick={openNew} size="sm" className="gap-1.5">
-          <Plus className="h-3.5 w-3.5" /> Novo Template
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white"}`}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white"}`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+          <Button onClick={openNew} size="sm" className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> Novo Template
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -191,7 +208,7 @@ export function TaskTemplateManager() {
       ) : templates.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-sm">Nenhum template de tarefa cadastrado</div>
       ) : (
-        <div className="grid gap-3">
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "flex flex-col gap-3"}>
           {templates.map(t => (
             <div key={t.id} className="glass-card rounded-xl p-4 flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">

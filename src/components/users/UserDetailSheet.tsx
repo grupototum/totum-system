@@ -15,7 +15,7 @@ import { PermissionsMap, buildEmptyAccess } from "./permissionsData";
 import {
   User, Mail, Phone, Shield, Building2, Calendar, Clock,
   Edit2, Save, X, Lock, Unlock, Key, DollarSign, Percent,
-  Loader2, History,
+  Loader2, History, Trash2,
 } from "lucide-react";
 
 interface UserDetailSheetProps {
@@ -331,6 +331,17 @@ export function UserDetailSheet({
                         else toast({ title: "Email enviado", description: "Link de redefinição enviado para " + profile.email });
                       }}>
                       <Key className="h-3 w-3 mr-1" /> Redefinir Senha
+                    </Button>
+                    <div className="w-px h-6 bg-white/[0.06] mx-1 self-center" />
+                    <Button size="sm" variant="outline" className="text-xs border-white/[0.1] bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
+                      onClick={async () => {
+                        if (!confirm("Tem certeza que deseja excluir/desativar este membro?")) return;
+                        await supabase.from("profiles").update({ status: "inativo" as any, role_id: null }).eq("id", profile.id);
+                        toast({ title: "Membro excluído" });
+                        onOpenChange(false);
+                        onRefresh();
+                      }}>
+                      <Trash2 className="h-3 w-3 mr-1" /> Excluir
                     </Button>
                   </div>
                 </div>

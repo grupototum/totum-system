@@ -39,6 +39,11 @@ interface AppUser {
   status: "ativo" | "inativo" | "bloqueado";
   createdAt: string;
   lastAccess?: string;
+  isAdmin?: boolean;
+  actualUserId?: string;
+  roleName?: string;
+  permCount?: number;
+  initials?: string;
 }
 
 interface Role {
@@ -107,13 +112,30 @@ export default function UsersPermissions() {
   const [roleSearch, setRoleSearch] = useState("");
 
   // Adapt data
-  const users: AppUser[] = useMemo(() => profiles.map(profileToAppUser), [profiles]);
   const roles: Role[] = useMemo(() => {
     return roleRows.map((r) => {
       const count = profiles.filter((p) => p.role_id === r.id).length;
       return roleRowToRole(r, count);
     });
   }, [roleRows, profiles]);
+
+  const users: AppUser[] = useMemo(() => {
+    return profiles.map(p => {
+      const base = profileToAppUser(p);
+      const role = roles.find(r => r.id === base.roleId);
+      const perms = role ? role.permissions : {};
+      const pCount = Object.values(perms).filter(Boolean).length;
+      
+      return {
+        ...base,
+        isAdmin: adminUserIds.has(p.user_id || ""),
+        actualUserId: p.user_id || undefined,
+        roleName: role ? role.name : "—",
+        permCount: pCount,
+        initials: base.name.split(" ").map((n) => n[0]).join("").slice(0, 2),
+      };
+    });
+  }, [profiles, roles, adminUserIds]);
 
   const audit: AuditEntry[] = useMemo(() => {
     return logs.map((l) => ({
@@ -220,11 +242,6 @@ export default function UsersPermissions() {
   const getRoleName = (roleId: string) => roles.find((r) => r.id === roleId)?.name || "—";
   const getRolePermissions = (roleId: string) => roles.find((r) => r.id === roleId)?.permissions || {};
 
-  const permCount = (roleId: string) => {
-    const perms = getRolePermissions(roleId);
-    return Object.values(perms).filter(Boolean).length;
-  };
-
   const totalPermsCount = Object.keys(buildFullAccess()).length;
 
   const tabs: { key: Tab; label: string; icon: typeof Users }[] = [
@@ -317,31 +334,28 @@ export default function UsersPermissions() {
                       </tr>
                     ) : filteredUsers.map((user) => {
                       const st = userStatusConfig[user.status];
-                      const pc = permCount(user.roleId);
+                      const pc = user.permCount || 0;
                       return (
                         <tr key={user.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
                           <td className="p-3.5">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-[10px] font-bold shrink-0">
-                                {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                                {user.initials}
                               </div>
                               <div>
                                 <div className="flex items-center gap-1.5">
                                   <p className="text-sm font-medium">{user.name}</p>
-                                  {(() => {
-                                    const profile = profiles.find((p) => p.id === user.id);
-                                    return profile && adminUserIds.has(profile.user_id) ? (
-                                      <span className="inline-flex items-center px-1.5 py-0 rounded text-[9px] font-semibold bg-primary/20 text-primary">
-                                        ADMIN
-                                      </span>
-                                    ) : null;
-                                  })()}
+                                  {user.isAdmin && (
+                                    <span className="inline-flex items-center px-1.5 py-0 rounded text-[9px] font-semibold bg-primary/20 text-primary">
+                                      ADMIN
+                                    </span>
+                                  )}
                                 </div>
                                 <p className="text-[11px] text-white/40">{user.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3.5 text-xs text-white/60">{getRoleName(user.roleId)}</td>
+                          <td className="p-3.5 text-xs text-white/60">{user.roleName}</td>
                           <td className="p-3.5 text-xs text-white/50">{user.department}</td>
                           <td className="p-3.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${st.bg} ${st.color}`}>
@@ -379,15 +393,12 @@ export default function UsersPermissions() {
                                   <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="bg-white/[0.06]" />
-                                {(() => {
-                                  const profile = profiles.find((p) => p.id === user.id);
-                                  const userId = profile?.user_id;
-                                  if (!userId) return null;
-                                  const isAdmin = adminUserIds.has(userId);
+                                {user.actualUserId && (() => {
+                                  const isAdmin = !!user.isAdmin;
                                   return (
                                     <DropdownMenuItem
                                       onClick={async () => {
-                                        await toggleAdmin(userId, isAdmin);
+                                        await toggleAdmin(user.actualUserId!, isAdmin);
                                         await logAudit(
                                           isAdmin ? "Admin removido" : "Admin concedido",
                                           `Usuário ${user.name} ${isAdmin ? "removido de" : "promovido a"} administrador`
@@ -519,7 +530,7 @@ export default function UsersPermissions() {
             <DialogHeader>
               <DialogTitle className="font-heading">
                 Permissões de {viewPermsUser.name}
-                <span className="text-xs text-white/30 font-normal ml-2">({getRoleName(viewPermsUser.roleId)})</span>
+                <span className="text-xs text-white/30 font-normal ml-2">({viewPermsUser.roleName})</span>
               </DialogTitle>
             </DialogHeader>
             <PermissionMatrix

@@ -12,11 +12,14 @@ import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
+import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
+import { ProjectTemplateManager } from "@/components/templates/ProjectTemplateManager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-type ViewMode = "dashboard" | "kanban" | "list" | "calendar";
+type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "templates";
 
 export default function Tasks() {
   const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles, clients } = useSupabaseTasks();
@@ -215,11 +218,12 @@ export default function Tasks() {
     refetch();
   };
 
-  const viewButtons: { key: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
+  const viewButtons: { key: ViewMode; icon: any; label: string }[] = [
     { key: "dashboard", icon: BarChart3, label: "Dashboard" },
     { key: "kanban", icon: LayoutGrid, label: "Kanban" },
     { key: "list", icon: List, label: "Lista" },
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
+    { key: "templates", icon: LayoutTemplate, label: "Templates" },
   ];
 
   // Stats (exclude archived)
@@ -283,12 +287,12 @@ export default function Tasks() {
 
       {/* View Toggle + Filters */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit overflow-x-auto">
           {viewButtons.map((v) => (
             <button
               key={v.key}
               onClick={() => setView(v.key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
                 view === v.key
                   ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
                   : "text-white/40 hover:text-white/60 hover:bg-white/[0.04] border border-transparent"
@@ -300,7 +304,7 @@ export default function Tasks() {
           ))}
         </div>
 
-        {view !== "dashboard" && (
+        {view !== "dashboard" && view !== "templates" && (
           <TaskFilters
             search={search} onSearchChange={setSearch}
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
@@ -348,6 +352,22 @@ export default function Tasks() {
               currentMonth={calendarMonth}
               onMonthChange={setCalendarMonth}
             />
+          )}
+          {view === "templates" && (
+            <div className="mt-4">
+              <Tabs defaultValue="projects" className="space-y-4">
+                <TabsList className="bg-white/[0.04] border border-white/[0.1]">
+                  <TabsTrigger value="projects">Templates de Projeto</TabsTrigger>
+                  <TabsTrigger value="tasks">Templates de Tarefa</TabsTrigger>
+                </TabsList>
+                <TabsContent value="projects">
+                  <ProjectTemplateManager />
+                </TabsContent>
+                <TabsContent value="tasks">
+                  <TaskTemplateManager />
+                </TabsContent>
+              </Tabs>
+            </div>
           )}
         </motion.div>
       )}

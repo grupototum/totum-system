@@ -136,13 +136,13 @@ export default function Products() {
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
                     <div className="font-mono text-sm font-bold">
-                      {priceVal > 0 ? Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(priceVal) : "—"}
+                      {priceVal > 0 ? `R$ ${(priceVal / 1000).toFixed(1)}k` : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Preço</div>
                   </div>
                   <div>
                     <div className="font-mono text-sm font-bold">
-                      {costVal > 0 ? Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(costVal) : "—"}
+                      {costVal > 0 ? `R$ ${(costVal / 1000).toFixed(1)}k` : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Custo</div>
                   </div>

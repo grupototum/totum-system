@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";  
 import { AppUser, UserStatus, Role, departments, userStatusConfig } from "./permissionsData";
 
 interface UserFormDialogProps {
@@ -23,7 +24,7 @@ const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-white";
 const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50";
 
 export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: UserFormDialogProps) {
-  const [form, setForm] = useState<Partial<AppUser>>({});
+  const [form, setForm] = useState<Partial<AppUser & { notes?: string }>>({});
 
   useEffect(() => {
     if (user) setForm({ ...user });
@@ -103,6 +104,10 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div>
+            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Observações (Opcional)</label>
+            <Textarea value={(form as any).notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-white/[0.05] border-white/[0.1] rounded-lg text-xs focus:border-primary/50 resize-none" placeholder="Adicionar informações extras sobre o usuário..." rows={2} />
           </div>
         </div>
 
