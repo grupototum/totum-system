@@ -1,82 +1,67 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* Totum Design System - Dark Premium */
-    --bg-primary: 12 16% 10%;
-    --bg-secondary: 0 14% 13%;
-    --bg-tertiary: 0 12% 16%;
-    --bg-elevated: 0 12% 19%;
+    /* Totum Design System - Premium Dark */
+    --bg-primary: #1e1516;
+    --bg-secondary: #271c1d;
+    --bg-tertiary: #312324;
+    --bg-elevated: #3a2a2c;
 
     --background: var(--bg-primary);
-    --foreground: 0 0% 100%;
+    --foreground: #ffffff;
 
-    --card: var(--bg-secondary);
-    --card-foreground: 0 0% 100%;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.78);
+    --text-muted: rgba(255, 255, 255, 0.56);
+    --text-disabled: rgba(255, 255, 255, 0.34);
 
-    --popover: var(--bg-secondary);
-    --popover-foreground: 0 0% 100%;
+    --accent-red: #ff3b3b;
+    --accent-red-hover: #ff5757;
+    --accent-red-deep: #cf2027;
+    --accent-red-soft: rgba(255, 59, 59, 0.14);
+    --accent-white: rgba(255, 255, 255, 0.92);
+    --accent-white-soft: rgba(255, 255, 255, 0.14);
 
-    --primary: 0 100% 62%;
-    --primary-foreground: 0 0% 100%;
-    --primary-deep: 0 74% 47%;
-    --primary-hover: 0 100% 67%;
-    --primary-soft: 0 100% 62%;
+    --primary: var(--accent-red);
+    --primary-foreground: #ffffff;
 
-    --secondary: var(--bg-tertiary);
-    --secondary-foreground: 0 0% 100%;
+    --border: rgba(255, 255, 255, 0.08); /* --border-soft */
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.14);
+    --border-strong: rgba(255, 255, 255, 0.22);
 
-    --muted: var(--bg-tertiary);
-    --muted-foreground: 0 0% 100% / 0.56;
+    --glass-fill: rgba(255, 255, 255, 0.06);
+    --glass-fill-strong: rgba(255, 255, 255, 0.10);
+    --glass-highlight: rgba(255, 255, 255, 0.18);
 
-    --accent: var(--bg-elevated);
-    --accent-foreground: 0 0% 100%;
-
-    --accent-success: 142 71% 45%;
-    --accent-success-foreground: 0 0% 100%;
-    --accent-warning: 38 92% 50%;
-    --accent-warning-foreground: 0 0% 100%;
-
-    --destructive: 0 100% 62%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 100% / 0.08;
-    --border-medium: 0 0% 100% / 0.14;
-    --border-strong: 0 0% 100% / 0.22;
-    --input: 0 0% 100% / 0.08;
-    --ring: 0 100% 62%;
-
-    --radius: 0.75rem;
-
-    /* Glass tokens */
-    --glass-fill: 0 0% 100% / 0.06;
-    --glass-fill-strong: 0 0% 100% / 0.10;
-    --glass-highlight: 0 0% 100% / 0.18;
-
-    /* Shadows */
+    --shadow-dark: rgba(0, 0, 0, 0.32);
+    --shadow-red: rgba(255, 59, 59, 0.22);
     --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.18);
     --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.28);
     --shadow-lg: 0 20px 64px rgba(0, 0, 0, 0.36);
     --shadow-accent: 0 14px 36px rgba(255, 59, 59, 0.18);
 
-    /* Sidebar */
-    --sidebar-background: var(--bg-secondary);
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 100% 62%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: var(--bg-elevated);
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.08;
-    --sidebar-ring: 0 100% 62%;
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-pill: 999px;
 
-    /* Typography */
     --font-heading: "Sora", "Manrope", sans-serif;
     --font-body: "Inter", sans-serif;
-    --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+    
+    /* Spacing */
+    --space-8: 0.5rem;
+    --space-12: 0.75rem;
+    --space-16: 1rem;
+    --space-20: 1.25rem;
+    --space-24: 1.5rem;
+    --space-32: 2rem;
+    --space-40: 2.5rem;
+    --space-48: 3rem;
+    --space-64: 4rem;
+    --space-80: 5rem;
+    --space-96: 6rem;
+    --space-128: 8rem;
   }
 }
 
@@ -86,13 +71,13 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-body);
     background:
-      radial-gradient(circle at 10% 10%, rgba(255, 59, 59, 0.06), transparent 28%),
-      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.02), transparent 18%),
-      radial-gradient(circle at 50% 100%, rgba(255, 59, 59, 0.04), transparent 30%),
-      hsl(var(--bg-primary));
+      radial-gradient(circle at 10% 10%, rgba(255, 59, 59, 0.10), transparent 28%),
+      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.04), transparent 18%),
+      radial-gradient(circle at 50% 100%, rgba(255, 59, 59, 0.06), transparent 30%),
+      linear-gradient(180deg, #1e1516 0%, #181112 100%);
+    color: var(--text-primary);
+    font-family: var(--font-body);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -106,20 +91,36 @@
 }
 
 @layer components {
-  .glass-card {
-    background: hsl(var(--glass-fill));
-    border: 1px solid hsl(var(--border-medium));
+  .glass {
+    background: var(--glass-fill);
+    border: 1px solid var(--border-medium);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 12px 40px var(--shadow-dark);
   }
 
-  .glass-card-strong {
-    background: hsl(var(--glass-fill-strong));
-    border: 1px solid hsl(var(--border-strong));
+  .glass-strong {
+    background: var(--glass-fill-strong);
+    border: 1px solid var(--border-strong);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
-    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .liquid-glass {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+      radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 30%),
+      radial-gradient(circle at bottom right, rgba(255,59,59,0.18), transparent 35%);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.18),
+      0 18px 50px rgba(0,0,0,0.28),
+      0 0 45px rgba(255,59,59,0.10);
   }
 
   .metric-value {
@@ -128,33 +129,40 @@
     letter-spacing: -0.03em;
   }
 
-  .text-secondary-custom {
-    color: rgba(255, 255, 255, 0.78);
-  }
-
-  .text-muted-custom {
-    color: rgba(255, 255, 255, 0.56);
-  }
-
-  .text-disabled-custom {
-    color: rgba(255, 255, 255, 0.34);
-  }
-
   .gradient-primary {
     background: linear-gradient(135deg, #ff5e5e 0%, #cf2027 100%);
   }
 
-  .status-active {
-    @apply bg-emerald-500/15 text-emerald-400 border-emerald-500/30;
+  .btn-primary {
+    background: linear-gradient(135deg, #ff5e5e 0%, #cf2027 100%);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 10px 30px rgba(255,59,59,0.22);
+    @apply transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(255,59,59,0.28)];
   }
-  .status-paused {
-    @apply bg-amber-500/15 text-amber-400 border-amber-500/30;
+
+  .btn-liquid {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+      radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 30%),
+      radial-gradient(circle at bottom right, rgba(255,59,59,0.22), transparent 38%);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.16),
+      0 12px 30px rgba(0,0,0,0.28),
+      0 0 32px rgba(255,59,59,0.10);
+    backdrop-filter: blur(20px);
   }
-  .status-cancelled {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+
+  .pulse-red {
+    animation: pulse-red 2s infinite ease-in-out;
   }
-  .status-overdue {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+
+  @keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 59, 59, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0); }
   }
 }
 
