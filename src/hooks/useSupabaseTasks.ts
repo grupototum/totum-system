@@ -233,6 +233,7 @@ export function useSupabaseTasks() {
     clients,
     profiles,
     updateTaskStatus,
+    updateTask,
     addTasks,
     refetch: fetchTasks,
     fetchClients,
