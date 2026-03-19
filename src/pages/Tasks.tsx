@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";

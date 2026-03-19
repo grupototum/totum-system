@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useExecutiveDashboard, PeriodFilter } from "@/hooks/useExecutiveDashboard";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -71,13 +71,16 @@ export default function ExecutiveDashboard() {
 
   const isCustom = selectValue === "custom";
 
-  const periodFilter: PeriodFilter = isCustom && customStart && customEnd
-    ? {
+  const periodFilter: PeriodFilter = useMemo(() => {
+    if (isCustom && customStart && customEnd) {
+      return {
         type: "custom",
         startDate: format(customStart, "yyyy-MM-dd"),
         endDate: format(customEnd, "yyyy-MM-dd"),
-      }
-    : { type: "month", month: selectValue === "custom" ? currentMonth : selectValue };
+      };
+    }
+    return { type: "month", month: selectValue === "custom" ? currentMonth : selectValue };
+  }, [isCustom, customStart, customEnd, selectValue, currentMonth]);
 
   const { data, loading } = useExecutiveDashboard(periodFilter);
 
