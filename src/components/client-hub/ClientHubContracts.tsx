@@ -106,7 +106,7 @@ export function ClientHubContracts({ clientId }: Props) {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Valor</span>
-                  <p className="font-medium font-mono">{c.value ? `R$ ${Number(c.value).toLocaleString("pt-BR")}` : "—"}</p>
+                  <p className="font-medium font-heading">{c.value ? `R$ ${Number(c.value).toLocaleString("pt-BR")}` : "—"}</p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Início</span>

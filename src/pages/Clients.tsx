@@ -239,7 +239,7 @@ export default function Clients() {
                     {client.status}
                   </span>
                   {mrr > 0 ? (
-                    <span className="text-xs font-mono font-semibold text-emerald-400">R$ {mrr.toLocaleString("pt-BR")}<span className="text-muted-foreground font-normal">/mês</span></span>
+                    <span className="text-xs font-heading font-semibold text-emerald-400">R$ {mrr.toLocaleString("pt-BR")}<span className="text-muted-foreground font-normal">/mês</span></span>
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}

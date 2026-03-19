@@ -137,19 +137,19 @@ export default function Products() {
                 {product.description && <p className="text-xs text-white/40 mb-3">{product.description}</p>}
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
-                    <div className="font-mono text-sm font-bold">
+                    <div className="font-heading text-sm font-bold">
                       {priceVal > 0 ? `R$ ${(priceVal / 1000).toFixed(1)}k` : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Preço</div>
                   </div>
                   <div>
-                    <div className="font-mono text-sm font-bold">
+                    <div className="font-heading text-sm font-bold">
                       {costVal > 0 ? `R$ ${(costVal / 1000).toFixed(1)}k` : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Custo</div>
                   </div>
                   <div>
-                    <div className="font-mono text-sm font-bold text-emerald-400 flex items-center justify-center gap-1">
+                    <div className="font-heading text-sm font-bold text-emerald-400 flex items-center justify-center gap-1">
                       {priceVal > 0 ? <><TrendingUp className="h-3 w-3" /> {margin}%</> : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Margem</div>

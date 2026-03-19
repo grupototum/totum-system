@@ -96,7 +96,7 @@ export default function Fulfillment() {
                     <div className="w-24 h-2 rounded-full bg-white/[0.08] overflow-hidden">
                       <div className={`h-full rounded-full transition-all ${pct >= 90 ? "bg-emerald-500" : pct >= 70 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${pct}%` }} />
                     </div>
-                    <span className="text-sm font-mono font-medium w-10 text-right">{pct}%</span>
+                    <span className="text-sm font-heading font-medium w-10 text-right">{pct}%</span>
                   </div>
                 </button>
 

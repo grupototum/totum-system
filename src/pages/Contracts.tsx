@@ -97,7 +97,7 @@ export default function Contracts() {
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-border">
-                <span className="font-mono text-lg font-bold">
+                <span className="font-heading text-lg font-bold">
                   {contract.value ? `R$ ${Number(contract.value).toLocaleString("pt-BR")}` : "—"}
                 </span>
                 <span className="text-xs text-muted-foreground ml-1">/mês</span>

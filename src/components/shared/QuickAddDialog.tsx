@@ -80,7 +80,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-bg-secondary border-white/10 text-white">
+      <DialogContent className="sm:max-w-md bg-[#1e1516] border-white/10 text-white">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

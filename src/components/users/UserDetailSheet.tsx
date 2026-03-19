@@ -446,7 +446,7 @@ export function UserDetailSheet({
                         className={inputCls}
                       />
                     ) : (
-                      <p className="text-sm mt-1 font-mono">
+                      <p className="text-sm mt-1 font-heading">
                         {(profile as any).salary
                           ? `R$ ${Number((profile as any).salary).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
                           : "Não informado"}
@@ -483,7 +483,7 @@ export function UserDetailSheet({
                           className={inputCls}
                         />
                       ) : (
-                        <p className="text-sm mt-1 font-mono">
+                        <p className="text-sm mt-1 font-heading">
                           {(profile as any).commission_value
                             ? (profile as any).commission_type === "percentual"
                               ? `${(profile as any).commission_value}%`
@@ -530,7 +530,7 @@ export function UserDetailSheet({
                   <div key={log.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium">{log.action}</span>
-                      <span className="text-[10px] text-white/30 font-mono">
+                      <span className="text-[10px] text-white/30 font-heading">
                         {new Date(log.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                       </span>
                     </div>

@@ -11,6 +11,7 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ── Profile Tab ──
 function ProfileTab() {
@@ -19,13 +20,27 @@ function ProfileTab() {
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [roleId, setRoleId] = useState("");
+  const [roles, setRoles] = useState<any[]>([]);
+  const [canChangeRole, setCanChangeRole] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setPhone(profile.phone || "");
       setAvatarUrl(profile.avatar_url || null);
+      setRoleId(profile.role_id || "");
+      
+      // Check if user is admin or has specific permission
+      const isAdmin = profile.roles?.name?.toLowerCase().includes("admin") || profile.role_id === "admin";
+      setCanChangeRole(isAdmin);
     }
+    
+    const fetchRoles = async () => {
+      const { data } = await supabase.from("roles").select("id, name").order("name");
+      setRoles(data || []);
+    };
+    fetchRoles();
   }, [profile]);
 
   const handleSave = async () => {
@@ -33,7 +48,7 @@ function ProfileTab() {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone })
+      .update({ full_name: fullName, phone, role_id: roleId })
       .eq("id", profile.id);
 
     if (error) {
@@ -79,7 +94,22 @@ function ProfileTab() {
         </div>
         <div className="space-y-2">
           <Label>Cargo / Papel</Label>
-          <Input value={profile?.roles?.name || "—"} disabled className="opacity-60" />
+          {canChangeRole ? (
+            <Select value={roleId} onValueChange={setRoleId}>
+              <SelectTrigger className="bg-white/[0.05] border-white/[0.1] rounded-lg">
+                <SelectValue placeholder="Selecione o cargo" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+                {roles.map((r) => (
+                  <SelectItem key={r.id} value={r.id} className="text-xs">
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input value={profile?.roles?.name || "—"} disabled className="opacity-60" />
+          )}
         </div>
         <div className="space-y-2">
           <Label>Departamento</Label>

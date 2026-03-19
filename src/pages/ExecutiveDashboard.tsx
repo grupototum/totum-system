@@ -270,7 +270,7 @@ export default function ExecutiveDashboard() {
                       <div key={c.name} className="flex items-center gap-2">
                         <span className={`h-2.5 w-2.5 rounded-sm shrink-0 ${COLORS[i % COLORS.length]}`} />
                         <span className="text-[10px] text-white/60 truncate flex-1">{c.name}</span>
-                        <span className="text-[10px] text-white/40 font-mono shrink-0">{pct}%</span>
+                        <span className="text-[10px] text-white/40 font-heading shrink-0">{pct}%</span>
                       </div>
                     );
                   })}
@@ -327,7 +327,7 @@ export default function ExecutiveDashboard() {
                       <div key={cat.name} className="flex items-center gap-2">
                         <span className={`h-2.5 w-2.5 rounded-sm shrink-0 ${COLORS[i % COLORS.length]}`} />
                         <span className="text-[10px] text-white/60 truncate flex-1">{cat.name}</span>
-                        <span className="text-[10px] text-white/40 font-mono shrink-0">{pct}%</span>
+                        <span className="text-[10px] text-white/40 font-heading shrink-0">{pct}%</span>
                       </div>
                     );
                   })}
@@ -375,14 +375,14 @@ export default function ExecutiveDashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium truncate">{r.name}</span>
-                        <span className="text-[10px] text-white/40 font-mono shrink-0 ml-2">{rate}% · {r.completed}/{r.total}</span>
+                        <span className="text-[10px] text-white/40 font-heading shrink-0 ml-2">{rate}% · {r.completed}/{r.total}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                         <div className="h-full rounded-full bg-emerald-500/50 transition-all" style={{ width: `${rate}%` }} />
                       </div>
                     </div>
                     {r.overdue > 0 && (
-                      <span className="text-[9px] text-red-400 font-mono shrink-0">{r.overdue} atr.</span>
+                      <span className="text-[9px] text-red-400 font-heading shrink-0">{r.overdue} atr.</span>
                     )}
                   </div>
                 );
@@ -409,7 +409,7 @@ export default function ExecutiveDashboard() {
                         <p className="text-[10px] text-white/30">{t.client} · {t.responsible || "Sem responsável"}</p>
                       </div>
                       {t.dueDate && (
-                        <span className={`text-[10px] font-mono shrink-0 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
+                        <span className={`text-[10px] font-heading shrink-0 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
                           {new Date(t.dueDate).toLocaleDateString("pt-BR")}
                         </span>
                       )}
@@ -468,7 +468,7 @@ export default function ExecutiveDashboard() {
                       style={{ width: `${c.pct}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-white/40 font-mono shrink-0 w-10 text-right">{c.pct}%</span>
+                  <span className="text-[10px] text-white/40 font-heading shrink-0 w-10 text-right">{c.pct}%</span>
                 </div>
               ))}
             </div>
@@ -501,9 +501,9 @@ export default function ExecutiveDashboard() {
             <div className="space-y-2">
               {data.topClients.map((c, i) => (
                 <div key={c.name} className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/30 font-mono w-4">{i + 1}.</span>
+                  <span className="text-[10px] text-white/30 font-heading w-4">{i + 1}.</span>
                   <span className="text-xs truncate flex-1">{c.name}</span>
-                  <span className="text-[10px] text-white/40 font-mono">{c.pct}%</span>
+                  <span className="text-[10px] text-white/40 font-heading">{c.pct}%</span>
                 </div>
               ))}
             </div>

@@ -81,8 +81,8 @@ export default function Financial() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 text-muted-foreground font-mono text-xs">{format(new Date(tx.due_date), "dd/MM/yyyy")}</td>
-                      <td className={`p-4 text-right font-mono font-medium ${isIncome ? "text-emerald-400" : "text-red-400"}`}>
+                      <td className="p-4 text-muted-foreground font-heading text-xs">{format(new Date(tx.due_date), "dd/MM/yyyy")}</td>
+                      <td className={`p-4 text-right font-heading font-medium ${isIncome ? "text-emerald-400" : "text-red-400"}`}>
                         {isIncome ? "+" : "-"}R$ {Number(tx.value).toLocaleString("pt-BR")}
                       </td>
                       <td className="p-4">
