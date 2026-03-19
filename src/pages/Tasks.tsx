@@ -14,7 +14,6 @@ import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
 import { ProjectTemplateManager } from "@/components/templates/ProjectTemplateManager";
-import { Confetti } from "@/components/tasks/Confetti";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +37,6 @@ export default function Tasks() {
   // Completion dialog state
   const [completionTask, setCompletionTask] = useState<Task | null>(null);
   const [completionOpen, setCompletionOpen] = useState(false);
-  const [confettiActive, setConfettiActive] = useState(false);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -201,8 +199,6 @@ export default function Tasks() {
 
     // Mark task as completed
     await updateTaskStatus(data.taskId, "concluido");
-    setConfettiActive(true);
-    setTimeout(() => setConfettiActive(false), 3000);
 
     // Close detail dialog if open
     if (detailOpen) {
@@ -247,29 +243,12 @@ export default function Tasks() {
             {showArchived ? (
               <span>{archivedCount} tarefa{archivedCount !== 1 ? "s" : ""} arquivada{archivedCount !== 1 ? "s" : ""}</span>
             ) : (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-white/70 font-medium">
-                    {activeTasks.filter(t => t.status === 'concluido').length} de {activeTasks.length} concluídas
-                  </span>
-                  <span className="text-white/20">·</span>
-                  <span>{pendingTasks} pendentes</span>
-                  {overdueTasks > 0 && (
-                    <>
-                      <span className="text-white/20">·</span>
-                      <span className="text-red-400">{overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
-                    </>
-                  )}
-                </div>
-                <div className="w-48 h-1 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-primary"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(activeTasks.filter(t => t.status === 'concluido').length / Math.max(activeTasks.length, 1)) * 100}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
+              <>
+                {activeTasks.length} tarefas · {pendingTasks} pendentes
+                {overdueTasks > 0 && (
+                  <span className="text-red-400 ml-2">· {overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
+                )}
+              </>
             )}
           </p>
         </div>
@@ -421,7 +400,6 @@ export default function Tasks() {
         profiles={profiles}
         onCreated={refetch}
       />
-      <Confetti active={confettiActive} />
     </div>
   );
 }

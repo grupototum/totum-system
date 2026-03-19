@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from "react";
+import { useState, useMemo } from "react";
 import { Task } from "./taskData";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { CheckCircle2, Clock, AlertTriangle, ListTodo, TrendingUp, Users, User } from "lucide-react";
@@ -10,7 +10,7 @@ interface TaskDashboardProps {
   tasks: Task[];
 }
 
-function TaskDashboardComponent({ tasks }: TaskDashboardProps) {
+export function TaskDashboard({ tasks }: TaskDashboardProps) {
   const now = new Date();
   const [selectedUser, setSelectedUser] = useState("all");
 
@@ -255,5 +255,3 @@ function TaskDashboardComponent({ tasks }: TaskDashboardProps) {
     </div>
   );
 }
-
-export const TaskDashboard = memo(TaskDashboardComponent);

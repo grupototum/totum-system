@@ -7,8 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
-import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
-import { useRegistryData } from "@/hooks/useRegistryData";
 
 interface TaskDef {
   title: string;
@@ -36,25 +34,6 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
   const [tasks, setTasks] = useState<TaskDef[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
-  const [showQuickAddClient, setShowQuickAddClient] = useState(false);
-  const [showQuickAddType, setShowQuickAddType] = useState(false);
-  const { refetch: refetchClients } = useRegistryData("fornecedores"); // Mock/proxy for clients? No, let's use global refresh or direct fetch
-  const { refetch: refetchProjectTypes } = useRegistryData("tipos_projeto");
-
-  const fetchRegistry = async () => {
-    const [c, ct, pt, p, tpl] = await Promise.all([
-      supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
-      supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
-      supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
-      supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name"),
-      supabase.from("project_templates").select("*, project_template_tasks(*)").order("name"),
-    ]);
-    setClients(c.data || []);
-    setContracts((ct.data as any) || []);
-    setProjectTypes(pt.data || []);
-    setProfiles((p.data as any) || []);
-    setProjectTemplates(tpl.data || []);
-  };
 
   useEffect(() => {
     if (open) {
@@ -71,7 +50,6 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setProfiles((p.data as any) || []);
         setProjectTemplates(tpl.data || []);
       });
-      (window as any)._refreshProjectRegistry = fetchRegistry;
       if (initialData) {
         setForm({
           name: initialData.name || "",
@@ -184,17 +162,12 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
             </div>
             <div>
               <Label>Cliente *</Label>
-              <div className="flex gap-2">
-                <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v, contract_id: "" })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setShowQuickAddClient(true)}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v, contract_id: "" })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Contrato</Label>
@@ -207,17 +180,12 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
             </div>
             <div>
               <Label>Tipo de Projeto</Label>
-              <div className="flex gap-2">
-                <Select value={form.project_type_id} onValueChange={(v) => setForm({ ...form, project_type_id: v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    {projectTypes.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setShowQuickAddType(true)}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <Select value={form.project_type_id} onValueChange={(v) => setForm({ ...form, project_type_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {projectTypes.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Responsável</Label>
@@ -296,21 +264,6 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           </div>
         </form>
       </DialogContent>
-
-      <QuickAddDialog 
-        open={showQuickAddClient} 
-        onOpenChange={setShowQuickAddClient} 
-        registryKey="fornecedores" 
-        title="Novo Cliente" 
-        onSuccess={() => (window as any)._refreshProjectRegistry?.()}
-      />
-      <QuickAddDialog 
-        open={showQuickAddType} 
-        onOpenChange={setShowQuickAddType} 
-        registryKey="tipos_projeto" 
-        title="Novo Tipo de Projeto" 
-        onSuccess={() => (window as any)._refreshProjectRegistry?.()}
-      />
     </Dialog>
   );
 }

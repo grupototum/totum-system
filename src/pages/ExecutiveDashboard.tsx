@@ -124,26 +124,23 @@ export default function ExecutiveDashboard() {
     <TooltipProvider delayDuration={200}>
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-heading font-bold tracking-tight text-white mb-1.5">Dashboard Executivo</h1>
-          <p className="text-sm text-white/50 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" />
-            Performance estratégica e financeira em tempo real
-          </p>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">Dashboard Executivo</h1>
+          <p className="text-sm text-white/50 mt-1">Visão estratégica, financeira e operacional</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={selectValue} onValueChange={setSelectValue}>
-            <SelectTrigger className="w-48 bg-white/[0.03] border-white/10 rounded-xl h-10 text-xs hover:bg-white/[0.06] transition-all">
+            <SelectTrigger className="w-48 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+            <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
               {months.map((m) => (
-                <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.08] focus:text-white capitalize cursor-pointer">
+                <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.06] focus:text-white capitalize">
                   {m.label}
                 </SelectItem>
               ))}
-              <SelectItem value="custom" className="text-xs focus:bg-white/[0.08] focus:text-white cursor-pointer">
+              <SelectItem value="custom" className="text-xs focus:bg-white/[0.06] focus:text-white">
                 📅 Personalizado
               </SelectItem>
             </SelectContent>
@@ -212,19 +209,14 @@ export default function ExecutiveDashboard() {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           {finCards.map((m) => (
-            <div key={m.label} className="glass-card-strong rounded-2xl p-5 hover:bg-white/[0.08] transition-all group overflow-hidden relative">
-              <div className="absolute -right-2 -top-2 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <m.icon className="h-12 w-12" />
-              </div>
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className={`p-2 rounded-xl ${m.bg} group-hover:scale-110 transition-transform`}>
+            <div key={m.label} className="glass-card rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`p-1.5 rounded-lg ${m.bg}`}>
                   <m.icon className={`h-3.5 w-3.5 ${m.color}`} />
                 </div>
               </div>
-              <p className="text-xl font-heading font-bold metric-value truncate">{m.value}</p>
-              <p className="text-[10px] text-white/40 font-semibold uppercase tracking-widest mt-1 flex items-center">
-                {m.label}<InfoTip label={m.label} />
-              </p>
+              <p className="text-lg font-heading font-bold truncate">{m.value}</p>
+              <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5 flex items-center">{m.label}<InfoTip label={m.label} /></p>
             </div>
           ))}
         </div>

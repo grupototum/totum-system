@@ -92,17 +92,17 @@ export function AppSidebar() {
     ));
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/5 bg-bg-primary/95 backdrop-blur-xl">
-      <SidebarHeader className="p-6">
+    <Sidebar collapsible="icon" className="border-r border-border">
+      <SidebarHeader className="p-4 pb-6">
         <div className="flex items-center gap-3">
-          <img src={logoWhite} alt="Totum" className={collapsed ? "h-6" : "h-8"} />
+          <img src={logoWhite} alt="Totum" className={collapsed ? "h-6" : "h-7"} />
         </div>
       </SidebarHeader>
-      
-      <SidebarContent className="px-3 gap-1">
+
+      <SidebarContent className="px-2">
         {hasExecDashboard && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-white/30 px-4 mb-2">
+            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
               Estratégico
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -114,7 +114,7 @@ export function AppSidebar() {
         )}
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-white/30 px-4 mb-2">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
             Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -123,7 +123,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-heading font-bold uppercase tracking-[0.2em] text-white/30 px-4 mb-2 mt-4">
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1 mt-4">
             Sistema
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -137,10 +137,10 @@ export function AppSidebar() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton onClick={toggleDemo}>
-                    <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer ${
+                    <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                       isDemoMode 
-                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" 
-                        : "hover:bg-white/[0.05] text-white/40 hover:text-white/60"
+                        ? "bg-amber-500/15 text-amber-400" 
+                        : "hover:bg-white/[0.06] text-muted-foreground"
                     }`}>
                       <Monitor className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{isDemoMode ? "Sair do Demo" : "Modo Demo"}</span>}
@@ -153,25 +153,21 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-white/5 space-y-3 bg-white/[0.02]">
-        <Link to="/configuracoes" className="flex items-center gap-3 rounded-xl p-2 transition-all hover:bg-white/5 group">
+      <SidebarFooter className="p-4 border-t border-border space-y-2">
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-white/[0.06]">
           <UserAvatar avatarUrl={profile?.avatar_url} fullName={profile?.full_name || "Grupo Totum"} size="sm" />
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors">
-                {profile?.full_name || "Grupo Totum"}
-              </span>
-              <span className="text-[11px] text-white/40">
-                {profile?.roles?.name || "Usuário"}
-              </span>
+              <span className="text-sm font-medium">{profile?.full_name || "Grupo Totum"}</span>
+              <span className="text-xs text-muted-foreground">{profile?.roles?.name || "Usuário"}</span>
             </div>
           )}
         </Link>
         <button
           onClick={signOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 transition-all hover:bg-red-500/10 hover:text-red-400 group"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
-          <LogOut className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1" />
+          <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sair</span>}
         </button>
       </SidebarFooter>

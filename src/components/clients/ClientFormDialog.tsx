@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle, Plus } from "lucide-react";
-import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
-import { cn } from "@/lib/utils";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -62,7 +60,6 @@ function formatPhone(value: string) {
 export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Props) {
   const [clientTypes, setClientTypes] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
-  const [showQuickAddType, setShowQuickAddType] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [form, setForm] = useState({
@@ -72,12 +69,8 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
 
   useEffect(() => {
     if (open) {
-      const fetchTypes = () => {
-        supabase.from("client_types").select("id, name").eq("is_active", true).order("name")
-          .then(({ data }) => setClientTypes(data || []));
-      };
-      fetchTypes();
-      (window as any)._refreshClientTypes = fetchTypes;
+      supabase.from("client_types").select("id, name").eq("is_active", true).order("name")
+        .then(({ data }) => setClientTypes(data || []));
 
       if (editData) {
         setForm({
@@ -155,20 +148,20 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-bg-primary/95 backdrop-blur-2xl border-white/10 text-white max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-heading font-bold text-xl tracking-tight">{editData ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
-          <DialogDescription className="text-white/40">Preencha os dados do cliente. Campos com * são obrigatórios.</DialogDescription>
+          <DialogTitle>{editData ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
+          <DialogDescription>Preencha os dados do cliente. Campos com * são obrigatórios.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <Label className={cn("text-[10px] font-heading font-bold uppercase tracking-[0.2em] mb-1.5 block ml-1", errors.name && touched.name ? "text-red-400" : "text-white/30")}>Nome *</Label>
+              <Label className={errors.name && touched.name ? "text-destructive" : ""}>Nome *</Label>
               <Input
                 value={form.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 onBlur={() => handleBlur("name")}
-                className={cn("bg-white/[0.03] border-white/10 rounded-xl h-11 text-xs focus:border-primary/50 transition-all", errors.name && touched.name ? "border-red-400/50" : "")}
+                className={errors.name && touched.name ? "border-destructive" : ""}
                 maxLength={100}
               />
               {errors.name && touched.name && (
@@ -227,26 +220,15 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
               )}
             </div>
             <div>
-              <Label className="text-[10px] font-heading font-bold uppercase tracking-[0.2em] mb-1.5 block ml-1 text-white/30">Tipo de Cliente</Label>
-              <div className="flex gap-2">
-                <Select value={form.client_type_id} onValueChange={(v) => setForm({ ...form, client_type_id: v })}>
-                  <SelectTrigger className="bg-white/[0.03] border-white/10 rounded-xl h-11 text-xs focus:border-primary/50"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
-                    {clientTypes.map((t) => (
-                      <SelectItem key={t.id} value={t.id} className="focus:bg-white/[0.08] cursor-pointer">{t.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-11 w-11 shrink-0 bg-white/[0.03] border-white/10 hover:bg-white/[0.08] rounded-xl"
-                  onClick={() => setShowQuickAddType(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <Label>Tipo de Cliente</Label>
+              <Select value={form.client_type_id} onValueChange={(v) => setForm({ ...form, client_type_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {clientTypes.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="sm:col-span-2">
               <Label>Endereço</Label>
@@ -276,14 +258,6 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
           </div>
         </form>
       </DialogContent>
-
-      <QuickAddDialog
-        open={showQuickAddType}
-        onOpenChange={setShowQuickAddType}
-        registryKey="tipos_cliente"
-        title="Novo Tipo de Cliente"
-        onSuccess={() => (window as any)._refreshClientTypes?.()}
-      />
     </Dialog>
   );
 }

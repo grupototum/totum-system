@@ -50,34 +50,32 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full bg-white/[0.03] border border-white/10 rounded-xl h-11 px-4 text-xs text-left hover:bg-white/[0.05] focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all font-medium"
+        className="flex items-center justify-between w-full bg-white/[0.05] border border-white/[0.1] rounded-lg h-9 px-3 text-xs text-left focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
       >
-        <span className={cn("truncate", isAll ? "text-white/20" : "text-white")}>{displayText}</span>
-        <ChevronDown className={cn("h-4 w-4 shrink-0 ml-2 text-white/20 transition-transform duration-300", open && "rotate-180")} />
+        <span className={cn("truncate", isAll ? "text-white/50" : "text-white")}>{displayText}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 ml-2 text-white/30 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full bg-bg-secondary border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 backdrop-blur-xl">
-          <div className="max-h-60 overflow-y-auto scrollbar-thin py-1.5 px-1.5">
+        <div className="absolute z-50 mt-1 w-full bg-[#271c1d] border border-white/[0.1] rounded-lg shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100">
+          <div className="max-h-48 overflow-y-auto scrollbar-thin py-1">
             {/* All option */}
             <button
               type="button"
               onClick={() => onChange([])}
-              className="flex items-center gap-2.5 w-full px-2.5 py-2.5 text-xs hover:bg-white/[0.08] transition-colors text-left rounded-lg group"
+              className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-white/[0.06] transition-colors text-left"
             >
               <div className={cn(
-                "h-4 w-4 rounded-md border flex items-center justify-center shrink-0 transition-all",
-                isAll ? "bg-primary border-primary shadow-[0_0_10px_rgba(239,68,68,0.3)]" : "border-white/10 group-hover:border-white/20"
+                "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                isAll ? "bg-primary border-primary" : "border-white/20"
               )}>
-                {isAll && <Check className="h-3 w-3 text-white" />}
+                {isAll && <Check className="h-2.5 w-2.5 text-white" />}
               </div>
-              <span className={cn("transition-colors", isAll ? "text-white font-bold" : "text-white/40 group-hover:text-white/60")}>{allLabel}</span>
+              <span className={isAll ? "text-white font-medium" : "text-white/60"}>{allLabel}</span>
               {totalCount !== undefined && (
-                <span className="ml-auto text-[10px] text-white/20 tabular-nums font-mono">{totalCount}</span>
+                <span className="ml-auto text-[10px] text-white/30 tabular-nums">{totalCount}</span>
               )}
             </button>
-
-            <div className="h-px bg-white/5 my-1 mx-2" />
 
             {options.map((opt) => {
               const checked = selected.includes(opt.value);
@@ -86,19 +84,17 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                   key={opt.value}
                   type="button"
                   onClick={() => toggle(opt.value)}
-                  className="flex items-center gap-2.5 w-full px-2.5 py-2.5 text-xs hover:bg-white/[0.08] transition-colors text-left rounded-lg group"
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-white/[0.06] transition-colors text-left"
                 >
                   <div className={cn(
-                    "h-4 w-4 rounded-md border flex items-center justify-center shrink-0 transition-all",
-                    checked ? "bg-primary border-primary shadow-[0_0_10px_rgba(239,68,68,0.3)]" : "border-white/10 group-hover:border-white/20"
+                    "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                    checked ? "bg-primary border-primary" : "border-white/20"
                   )}>
-                    {checked && <Check className="h-3 w-3 text-white" />}
+                    {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
-                  <span className={cn("transition-colors flex-1 truncate", checked ? "text-white font-bold" : "text-white/40 group-hover:text-white/60")}>
-                    {opt.label}
-                  </span>
+                  <span className={checked ? "text-white font-medium" : "text-white/60"}>{opt.label}</span>
                   {opt.count !== undefined && (
-                    <span className="ml-auto text-[10px] text-white/20 tabular-nums font-mono">{opt.count}</span>
+                    <span className="ml-auto text-[10px] text-white/30 tabular-nums">{opt.count}</span>
                   )}
                 </button>
               );

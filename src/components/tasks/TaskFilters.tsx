@@ -70,54 +70,50 @@ export function TaskFilters({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
         {/* Busca */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Buscar</label>
-          <div className="relative group">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/20 group-focus-within:text-primary transition-colors" />
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Buscar</label>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
             <Input
               placeholder="Buscar tarefas..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 bg-white/[0.03] border-white/10 rounded-xl h-11 text-xs placeholder:text-white/20 hover:bg-white/[0.05] focus:border-primary/50 focus:ring-primary/20 transition-all font-medium"
+              className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
         </div>
 
         {/* Cliente */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Cliente</label>
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Cliente</label>
           <MultiSelect options={clientOptions} selected={clientFilter} onChange={onClientFilterChange} allLabel="Todos os clientes" />
         </div>
 
         {/* Status */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Status</label>
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Status</label>
           <MultiSelect options={statusOptions} selected={statusFilter} onChange={onStatusFilterChange} allLabel="Todos os status" />
         </div>
 
         {/* Prioridade */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Prioridade</label>
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Prioridade</label>
           <MultiSelect options={priorityOptions} selected={priorityFilter} onChange={onPriorityFilterChange} allLabel="Todas" />
         </div>
 
         {/* Tipo */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Tipo</label>
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Tipo</label>
           <MultiSelect options={typeOptions} selected={typeFilter} onChange={onTypeFilterChange} allLabel="Todos os tipos" />
         </div>
 
         {/* Responsável */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1 block pl-1">Responsável</label>
+          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Responsável</label>
           <div className="flex items-center gap-2">
             <MultiSelect options={responsibleOptions} selected={responsibleFilter} onChange={onResponsibleFilterChange} allLabel="Todos" />
             {hasFilters && (
-              <button 
-                onClick={clearAll} 
-                className="shrink-0 flex items-center justify-center w-11 h-11 bg-white/[0.03] border border-white/10 text-white/30 hover:text-red-400 hover:bg-red-400/10 hover:border-red-400/20 transition-all rounded-xl" 
-                title="Limpar filtros"
-              >
-                <X className="h-4 w-4" />
+              <button onClick={clearAll} className="shrink-0 flex items-center gap-1 text-[10px] text-white/40 hover:text-white/60 transition-colors p-1.5 rounded-md hover:bg-white/[0.04]" title="Limpar filtros">
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
           </div>

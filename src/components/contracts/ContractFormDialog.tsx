@@ -7,9 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle, Package, Plus } from "lucide-react";
-import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
-import { useRegistryData } from "@/hooks/useRegistryData";
+import { Loader2, AlertCircle, Package } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -41,22 +39,6 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [showQuickAddClient, setShowQuickAddClient] = useState(false);
-  const [showQuickAddPlan, setShowQuickAddPlan] = useState(false);
-  const [showQuickAddType, setShowQuickAddType] = useState(false);
-
-  const fetchRegistry = async () => {
-    const [c, p, ct, pr] = await Promise.all([
-      supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
-      supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
-      supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
-      supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
-    ]);
-    setClients(c.data || []);
-    setPlans((p.data as any) || []);
-    setContractTypes(ct.data || []);
-    setProducts((pr.data as any) || []);
-  };
   const [form, setForm] = useState({
     title: "", client_id: "", plan_id: "", contract_type_id: "",
     value: "", billing_frequency: "mensal" as string,
@@ -76,7 +58,6 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
         setContractTypes(ct.data || []);
         setProducts((pr.data as any) || []);
       });
-      (window as any)._refreshContractRegistry = fetchRegistry;
 
       if (editData) {
         setForm({
@@ -206,20 +187,15 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
               )}
             </div>
             <div>
-                <Label className={errors.client_id && touched.client_id ? "text-destructive" : ""}>Cliente *</Label>
-                <div className="flex gap-2">
-                  <Select value={form.client_id} onValueChange={(v) => { setForm({ ...form, client_id: v }); setTouched({ ...touched, client_id: true }); }}>
-                    <SelectTrigger className={errors.client_id && touched.client_id ? "border-destructive" : ""}>
-                      <SelectValue placeholder="Selecione o cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setShowQuickAddClient(true)}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+              <Label className={errors.client_id && touched.client_id ? "text-destructive" : ""}>Cliente *</Label>
+              <Select value={form.client_id} onValueChange={(v) => { setForm({ ...form, client_id: v }); setTouched({ ...touched, client_id: true }); }}>
+                <SelectTrigger className={errors.client_id && touched.client_id ? "border-destructive" : ""}>
+                  <SelectValue placeholder="Selecione o cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
               {errors.client_id && touched.client_id && (
                 <p className="text-xs text-destructive mt-1 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" /> {errors.client_id}
@@ -227,39 +203,29 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
               )}
             </div>
             <div>
-                <Label>Tipo de Contrato</Label>
-                <div className="flex gap-2">
-                  <Select value={form.contract_type_id} onValueChange={(v) => setForm({ ...form, contract_type_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {contractTypes.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setShowQuickAddType(true)}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
+              <Label>Tipo de Contrato</Label>
+              <Select value={form.contract_type_id} onValueChange={(v) => setForm({ ...form, contract_type_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {contractTypes.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Plan Section */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold">Plano Recorrente</Label>
-            <div className="flex gap-2">
-              <Select value={form.plan_id} onValueChange={handlePlanChange}>
-                <SelectTrigger><SelectValue placeholder="Vincular a um plano (opcional)" /></SelectTrigger>
-                <SelectContent>
-                  {plans.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name} {p.value ? `— R$ ${Number(p.value).toLocaleString("pt-BR")}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button type="button" variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={() => setShowQuickAddPlan(true)}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <Select value={form.plan_id} onValueChange={handlePlanChange}>
+              <SelectTrigger><SelectValue placeholder="Vincular a um plano (opcional)" /></SelectTrigger>
+              <SelectContent>
+                {plans.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} {p.value ? `— R$ ${Number(p.value).toLocaleString("pt-BR")}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {selectedPlan && (
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-xs space-y-1">
                 <p><strong>Plano selecionado:</strong> {selectedPlan.name}</p>
@@ -384,28 +350,6 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
           </div>
         </form>
       </DialogContent>
-
-      <QuickAddDialog
-        open={showQuickAddClient}
-        onOpenChange={setShowQuickAddClient}
-        registryKey="fornecedores"
-        title="Novo Cliente"
-        onSuccess={() => (window as any)._refreshContractRegistry?.()}
-      />
-      <QuickAddDialog
-        open={showQuickAddPlan}
-        onOpenChange={setShowQuickAddPlan}
-        registryKey="planos"
-        title="Novo Plano"
-        onSuccess={() => (window as any)._refreshContractRegistry?.()}
-      />
-      <QuickAddDialog
-        open={showQuickAddType}
-        onOpenChange={setShowQuickAddType}
-        registryKey="tipos_contrato"
-        title="Novo Tipo de Contrato"
-        onSuccess={() => (window as any)._refreshContractRegistry?.()}
-      />
     </Dialog>
   );
 }

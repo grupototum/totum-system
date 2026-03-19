@@ -77,7 +77,7 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                     </td>
                     <td className="p-3.5">
                       {task.dueDate ? (
-                        <span className={`text-xs font-mono px-2 py-0.5 rounded-full ${isOverdue ? "text-red-400 bg-red-500/10 pulse-red" : "text-white/50"}`}>
+                        <span className={`text-xs font-mono ${isOverdue ? "text-red-400" : "text-white/50"}`}>
                           {new Date(task.dueDate).toLocaleDateString("pt-BR")}
                         </span>
                       ) : (

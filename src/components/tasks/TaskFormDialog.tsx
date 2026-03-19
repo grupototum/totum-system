@@ -21,7 +21,6 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, X, FileText } from "lucide-react";
-import { ClientFormDialog } from "@/components/clients/ClientFormDialog";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -69,7 +68,6 @@ export function TaskFormDialog({
   const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
-  const [showAddClient, setShowAddClient] = useState(false);
 
   // Fetch templates
   useEffect(() => {
@@ -180,11 +178,11 @@ export function TaskFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl bg-bg-primary/95 backdrop-blur-2xl border-white/10 text-white max-h-[90vh] overflow-y-auto rounded-[var(--radius-lg)] shadow-2xl">
-        <DialogHeader className="mb-4">
-          <DialogTitle className="font-heading font-bold text-2xl tracking-tight">Nova Tarefa</DialogTitle>
-          <DialogDescription className="text-white/40">
-            Preencha os campos para criar uma nova tarefa estratégica.
+      <DialogContent className="max-w-lg bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Nova Tarefa</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Preencha os campos para criar uma nova tarefa.
           </DialogDescription>
         </DialogHeader>
 
@@ -205,29 +203,18 @@ export function TaskFormDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Cliente *</Label>
-              <div className="flex gap-2">
-                <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger className="bg-white/[0.04] border-border flex-1 inline-flex"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
-                    {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="icon" 
-                  className="h-9 w-9 shrink-0 bg-white/[0.03] border-white/10 hover:bg-white/[0.08] rounded-lg"
-                  onClick={() => setShowAddClient(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label>Responsável</Label>
               <Select value={responsibleId} onValueChange={setResponsibleId}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+                <SelectContent>
                   {profiles.map((p) => <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -240,7 +227,7 @@ export function TaskFormDialog({
               <Label>Prioridade</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+                <SelectContent>
                   {PRIORITIES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -249,9 +236,8 @@ export function TaskFormDialog({
               <Label>Tipo</Label>
               <Select value={taskType} onValueChange={setTaskType}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
-                  {TASK_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                  )}
+                <SelectContent>
+                  {TASK_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -329,21 +315,6 @@ export function TaskFormDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
-
-      <ClientFormDialog 
-        open={showAddClient} 
-        onOpenChange={setShowAddClient} 
-        onSubmit={async (payload) => {
-          const { error } = await supabase.from("clients").insert(payload);
-          if (error) {
-            toast({ title: "Erro ao criar cliente", description: error.message, variant: "destructive" });
-            return false;
-          }
-          toast({ title: "Cliente criado", description: payload.name });
-          onCreated(); // This will refetch clients in the parent Tasks component
-          return true;
-        }}
-      />
     </Dialog>
   );
 }
