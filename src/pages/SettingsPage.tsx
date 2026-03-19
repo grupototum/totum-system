@@ -11,20 +11,28 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { useRoles } from "@/hooks/useProfiles";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ── Profile Tab ──
 function ProfileTab() {
   const { user, profile } = useAuth();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [roleId, setRoleId] = useState("");
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const { roles } = useRoles();
+
+  const canEditRole = profile?.roles?.name?.toLowerCase() === "administrador" || 
+                     profile?.roles?.permissions?.["usr_usuarios.editar"];
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setPhone(profile.phone || "");
       setAvatarUrl(profile.avatar_url || null);
+      setRoleId(profile.role_id || "");
     }
   }, [profile]);
 
@@ -33,7 +41,7 @@ function ProfileTab() {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, phone })
+      .update({ full_name: fullName, phone, role_id: roleId })
       .eq("id", profile.id);
 
     if (error) {
@@ -79,7 +87,22 @@ function ProfileTab() {
         </div>
         <div className="space-y-2">
           <Label>Cargo / Papel</Label>
-          <Input value={profile?.roles?.name || "—"} disabled className="opacity-60" />
+          {canEditRole ? (
+            <Select value={roleId} onValueChange={setRoleId}>
+              <SelectTrigger className="bg-white/[0.04] border-white/10 rounded-lg">
+                <SelectValue placeholder="Selecionar cargo" />
+              </SelectTrigger>
+              <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+                {roles.map((r) => (
+                  <SelectItem key={r.id} value={r.id} className="focus:bg-white/[0.08] cursor-pointer">
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input value={profile?.roles?.name || "—"} disabled className="opacity-60 bg-white/[0.03] border-white/10" />
+          )}
         </div>
         <div className="space-y-2">
           <Label>Departamento</Label>

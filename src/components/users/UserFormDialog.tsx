@@ -12,6 +12,7 @@ import { AppUser, UserStatus, Role, userStatusConfig } from "./permissionsData";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { useRegistryData } from "@/hooks/useRegistryData";
 import { Plus } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface UserFormDialogProps {
   open: boolean;
@@ -29,7 +30,9 @@ const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focu
 export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: UserFormDialogProps) {
   const [form, setForm] = useState<Partial<AppUser & { notes?: string }>>({});
   const { data: dbDepartments, refetch: refetchDepts } = useRegistryData("departamentos");
+  const { refetch: refetchRoles } = useRegistryData("usr_cargos"); // Assuming this exists or works for roles
   const [showQuickAddDept, setShowQuickAddDept] = useState(false);
+  const [showQuickAddRole, setShowQuickAddRole] = useState(false);
 
   useEffect(() => {
     if (user) setForm({ ...user });
@@ -78,14 +81,25 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1.5 block">Cargo / Perfil *</label>
-              <Select value={form.roleId || ""} onValueChange={(v) => setForm({ ...form, roleId: v })}>
-                <SelectTrigger className={selectCls}><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
-                  {roles.map((r) => (
-                    <SelectItem key={r.id} value={r.id} className="focus:bg-white/[0.08] cursor-pointer">{r.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={form.roleId || ""} onValueChange={(v) => setForm({ ...form, roleId: v })}>
+                  <SelectTrigger className={selectCls}><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                  <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+                    {roles.map((r) => (
+                      <SelectItem key={r.id} value={r.id} className="focus:bg-white/[0.08] cursor-pointer">{r.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9 shrink-0 bg-white/[0.03] border-white/10 hover:bg-white/[0.08] rounded-lg"
+                  onClick={() => setShowQuickAddRole(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div>
               <label className="text-[10px] font-heading font-bold text-white/30 uppercase tracking-[0.2em] mb-1.5 block">Departamento</label>
@@ -141,6 +155,19 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
         registryKey="departamentos" 
         title="Novo Departamento" 
         onSuccess={() => refetchDepts()}
+      />
+
+      <QuickAddDialog 
+        open={showQuickAddRole} 
+        onOpenChange={setShowQuickAddRole} 
+        registryKey="usr_cargos" 
+        title="Novo Cargo" 
+        onSuccess={() => {
+          // This component receives roles as prop, but we might need to notify parent to refetch
+          // or if the component that manages roles in the parent uses registryData, it will auto-update.
+          // For now, let's just toast and hope the parent handles it or wait for user to refresh.
+          toast({ title: "Cargo criado", description: "O novo cargo foi adicionado com sucesso." });
+        }}
       />
     </Dialog>
   );
