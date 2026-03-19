@@ -134,16 +134,16 @@ export default function ExecutiveDashboard() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={selectValue} onValueChange={setSelectValue}>
-            <SelectTrigger className="w-48 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs">
+            <SelectTrigger className="w-48 bg-white/[0.03] border-white/10 rounded-xl h-10 text-xs hover:bg-white/[0.06] transition-all">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+            <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
               {months.map((m) => (
-                <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.06] focus:text-white capitalize">
+                <SelectItem key={m.value} value={m.value} className="text-xs focus:bg-white/[0.08] focus:text-white capitalize cursor-pointer">
                   {m.label}
                 </SelectItem>
               ))}
-              <SelectItem value="custom" className="text-xs focus:bg-white/[0.06] focus:text-white">
+              <SelectItem value="custom" className="text-xs focus:bg-white/[0.08] focus:text-white cursor-pointer">
                 📅 Personalizado
               </SelectItem>
             </SelectContent>

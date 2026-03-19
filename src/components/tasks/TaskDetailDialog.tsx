@@ -113,9 +113,9 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-thin">
-        <DialogHeader>
-          <DialogTitle className="font-heading text-lg pr-8 flex items-center gap-2">
+      <DialogContent className="bg-bg-primary/95 backdrop-blur-2xl border-white/10 text-white max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-thin rounded-[var(--radius-lg)] shadow-2xl">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="font-heading font-bold text-2xl tracking-tight pr-8 flex flex-wrap items-center gap-2">
             {task.title}
             {task.isRecurring && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">

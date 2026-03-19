@@ -70,15 +70,23 @@ export function useProducts() {
 export function useProductTypes() {
   const { isDemoMode } = useDemo();
   const [types, setTypes] = useState<Tables<"product_types">[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchTypes = useCallback(async () => {
+    setLoading(true);
     if (isDemoMode) {
       setTypes(demoProductTypes as unknown as Tables<"product_types">[]);
+      setLoading(false);
       return;
     }
-    supabase.from("product_types").select("*").eq("is_active", true).order("name")
-      .then(({ data }) => setTypes(data || []));
+    const { data } = await supabase.from("product_types").select("*").eq("is_active", true).order("name");
+    setTypes(data || []);
+    setLoading(false);
   }, [isDemoMode]);
 
-  return types;
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
+
+  return { types, loading, refetch: fetchTypes };
 }

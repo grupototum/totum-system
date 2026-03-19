@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useProducts, useProductTypes, ProductRow } from "@/hooks/useProducts";
+import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 
 const formatCurrency = (value: string | number | null | undefined) => {
   if (value === null || value === undefined || value === "") return "";
@@ -25,9 +26,10 @@ const parseCurrency = (value: string) => {
 
 export default function Products() {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
-  const productTypes = useProductTypes();
+  const { types: productTypes, refetch: refetchTypes } = useProductTypes();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
+  const [showQuickAddType, setShowQuickAddType] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -120,11 +122,11 @@ export default function Products() {
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
-                        <DropdownMenuItem onClick={() => openEdit(product)} className="text-xs focus:bg-white/[0.06]">
+                      <DropdownMenuContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl" align="end">
+                        <DropdownMenuItem onClick={() => openEdit(product)} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                           <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => deleteProduct(product.id)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
+                        <DropdownMenuItem onClick={() => deleteProduct(product.id)} className="text-xs text-red-400 focus:bg-white/[0.08] focus:text-red-400 cursor-pointer">
                           <Trash2 className="h-3.5 w-3.5 mr-2" /> Desativar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -161,9 +163,9 @@ export default function Products() {
 
       {/* Product Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-md">
+        <DialogContent className="bg-bg-primary/95 backdrop-blur-2xl border-white/10 text-white max-w-md rounded-[var(--radius-lg)] shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="font-heading">{editing ? "Editar Produto" : "Novo Produto"}</DialogTitle>
+            <DialogTitle className="font-heading font-bold text-xl tracking-tight">{editing ? "Editar Produto" : "Novo Produto"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 mt-2">
             <div>
@@ -176,14 +178,25 @@ export default function Products() {
             </div>
             <div>
               <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Tipo</label>
-              <Select value={typeId} onValueChange={setTypeId}>
-                <SelectTrigger className={inputCls}><SelectValue placeholder="Selecionar tipo" /></SelectTrigger>
-                <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
-                  {productTypes.map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={typeId} onValueChange={setTypeId}>
+                  <SelectTrigger className={inputCls}><SelectValue placeholder="Selecionar tipo" /></SelectTrigger>
+                  <SelectContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl">
+                    {productTypes.map(t => (
+                      <SelectItem key={t.id} value={t.id} className="focus:bg-white/[0.08] cursor-pointer">{t.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-9 w-9 shrink-0 bg-white/[0.03] border-white/10 hover:bg-white/[0.08] rounded-lg"
+                  onClick={() => setShowQuickAddType(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -204,6 +217,14 @@ export default function Products() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <QuickAddDialog 
+        open={showQuickAddType} 
+        onOpenChange={setShowQuickAddType} 
+        registryKey="tipos_produto" 
+        title="Novo Tipo de Produto" 
+        onSuccess={() => refetchTypes()}
+      />
     </div>
   );
 }

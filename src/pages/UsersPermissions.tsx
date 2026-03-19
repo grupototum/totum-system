@@ -382,17 +382,17 @@ export default function UsersPermissions() {
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
-                                <DropdownMenuItem onClick={() => { setEditingUser(user); setUserFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
+                              <DropdownMenuContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl" align="end">
+                                <DropdownMenuItem onClick={() => { setEditingUser(user); setUserFormOpen(true); }} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                                   <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleViewPermissions(user)} className="text-xs focus:bg-white/[0.06]">
+                                <DropdownMenuItem onClick={() => handleViewPermissions(user)} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                                   <Eye className="h-3.5 w-3.5 mr-2" /> Ver Permissões
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleResetPassword(user)} className="text-xs focus:bg-white/[0.06]">
+                                <DropdownMenuItem onClick={() => handleResetPassword(user)} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                                   <KeyRound className="h-3.5 w-3.5 mr-2" /> Redefinir Senha
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-white/[0.06]" />
+                                <DropdownMenuSeparator className="bg-white/[0.08]" />
                                 {user.actualUserId && (() => {
                                   const isAdmin = !!user.isAdmin;
                                   return (
@@ -474,17 +474,17 @@ export default function UsersPermissions() {
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
-                            <DropdownMenuItem onClick={() => { setEditingRole(role); setRoleFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
+                          <DropdownMenuContent className="bg-bg-secondary border-white/10 text-white backdrop-blur-xl" align="end">
+                            <DropdownMenuItem onClick={() => { setEditingRole(role); setRoleFormOpen(true); }} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                               <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDuplicateRole(role)} className="text-xs focus:bg-white/[0.06]">
+                            <DropdownMenuItem onClick={() => handleDuplicateRole(role)} className="text-xs focus:bg-white/[0.08] cursor-pointer">
                               <Copy className="h-3.5 w-3.5 mr-2" /> Duplicar
                             </DropdownMenuItem>
                             {!role.isSystem && (
                               <>
-                                <DropdownMenuSeparator className="bg-white/[0.06]" />
-                                <DropdownMenuItem onClick={() => handleDeleteRole(role)} className="text-xs text-red-400 focus:bg-white/[0.06] focus:text-red-400">
+                                <DropdownMenuSeparator className="bg-white/[0.08]" />
+                                <DropdownMenuItem onClick={() => handleDeleteRole(role)} className="text-xs text-red-400 focus:bg-white/[0.08] focus:text-red-400 cursor-pointer">
                                   <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
                                 </DropdownMenuItem>
                               </>
@@ -526,9 +526,9 @@ export default function UsersPermissions() {
 
       {viewPermsUser && (
         <Dialog open={viewPermsOpen} onOpenChange={setViewPermsOpen}>
-          <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="bg-bg-primary/95 backdrop-blur-2xl border-white/10 text-white max-w-3xl max-h-[85vh] overflow-y-auto rounded-[var(--radius-lg)] shadow-2xl">
             <DialogHeader>
-              <DialogTitle className="font-heading">
+              <DialogTitle className="font-heading font-bold text-xl tracking-tight">
                 Permissões de {viewPermsUser.name}
                 <span className="text-xs text-white/30 font-normal ml-2">({viewPermsUser.roleName})</span>
               </DialogTitle>
