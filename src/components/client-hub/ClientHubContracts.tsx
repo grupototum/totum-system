@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoContracts } from "@/data/demoData";
 import { format } from "date-fns";
+import { ContractFormDialog } from "@/components/contracts/ContractFormDialog";
+import { useContracts } from "@/hooks/useContracts";
+import { toast } from "sonner";
 
 interface Props { clientId: string; }
 
@@ -18,6 +21,8 @@ export function ClientHubContracts({ clientId }: Props) {
   const { isDemoMode } = useDemo();
   const [contracts, setContracts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingContract, setEditingContract] = useState<any | null>(null);
+  const { updateContract } = useContracts();
 
   const fetch = useCallback(async () => {
     setLoading(true);
@@ -34,6 +39,20 @@ export function ClientHubContracts({ clientId }: Props) {
     setContracts(data || []);
     setLoading(false);
   }, [clientId, isDemoMode]);
+
+  const handleEdit = (c: any) => {
+    setEditingContract(c);
+  };
+
+  const onUpdate = async (values: any) => {
+    if (!editingContract) return false;
+    const ok = await updateContract(editingContract.id, values);
+    if (ok) {
+      fetch();
+      toast.success("Contrato atualizado com sucesso");
+    }
+    return ok;
+  };
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -57,9 +76,14 @@ export function ClientHubContracts({ clientId }: Props) {
                     <p className="text-xs text-muted-foreground">{(c.contract_types as any)?.name || "Sem tipo"}</p>
                   </div>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${statusCls[c.status] || statusCls.encerrado}`}>
-                  {c.status}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${statusCls[c.status] || statusCls.encerrado}`}>
+                    {c.status}
+                  </span>
+                  <button onClick={() => handleEdit(c)} className="p-1.5 hover:bg-white/[0.08] rounded-md text-muted-foreground hover:text-foreground transition-colors">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
@@ -83,6 +107,13 @@ export function ClientHubContracts({ clientId }: Props) {
           ))}
         </div>
       )}
+
+      <ContractFormDialog
+        open={!!editingContract}
+        onOpenChange={(open) => !open && setEditingContract(null)}
+        onSubmit={onUpdate}
+        editData={editingContract}
+      />
     </div>
   );
 }
