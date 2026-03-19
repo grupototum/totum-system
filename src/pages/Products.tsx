@@ -8,6 +8,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useProducts, useProductTypes, ProductRow } from "@/hooks/useProducts";
 
+const formatCurrency = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined || value === "") return "";
+  let strValue = typeof value === 'number' ? value.toFixed(2) : String(value);
+  const numericValue = strValue.replace(/\D/g, "");
+  if (!numericValue) return "";
+  const floatValue = parseInt(numericValue, 10) / 100;
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(floatValue);
+};
+
+const parseCurrency = (value: string) => {
+  if (!value) return null;
+  const numericValue = value.replace(/\D/g, "");
+  return numericValue ? parseInt(numericValue, 10) / 100 : null;
+};
+
 export default function Products() {
   const { products, loading, addProduct, updateProduct, deleteProduct } = useProducts();
   const productTypes = useProductTypes();
@@ -31,8 +46,8 @@ export default function Products() {
     setEditing(p);
     setName(p.name);
     setDescription(p.description || "");
-    setPrice(p.price?.toString() || "");
-    setCost(p.cost?.toString() || "");
+    setPrice(formatCurrency(p.price));
+    setCost(formatCurrency(p.cost));
     setTypeId(p.product_type_id || "");
     setDialogOpen(true);
   };
@@ -42,8 +57,8 @@ export default function Products() {
     const values = {
       name,
       description: description || null,
-      price: price ? Number(price) : null,
-      cost: cost ? Number(cost) : null,
+      price: parseCurrency(price),
+      cost: parseCurrency(cost),
       product_type_id: typeId || null,
     };
     if (editing) {
@@ -121,13 +136,13 @@ export default function Products() {
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
                     <div className="font-mono text-sm font-bold">
-                      {priceVal > 0 ? `R$ ${(priceVal / 1000).toFixed(1)}k` : "—"}
+                      {priceVal > 0 ? Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(priceVal) : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Preço</div>
                   </div>
                   <div>
                     <div className="font-mono text-sm font-bold">
-                      {costVal > 0 ? `R$ ${(costVal / 1000).toFixed(1)}k` : "—"}
+                      {costVal > 0 ? Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(costVal) : "—"}
                     </div>
                     <div className="text-[10px] text-white/30 mt-0.5">Custo</div>
                   </div>
@@ -172,12 +187,12 @@ export default function Products() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Preço (R$)</label>
-                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className={inputCls} placeholder="0.00" />
+                <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Preço</label>
+                <Input type="text" value={price} onChange={(e) => setPrice(formatCurrency(e.target.value))} className={inputCls} placeholder="R$ 0,00" />
               </div>
               <div>
-                <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Custo (R$)</label>
-                <Input type="number" value={cost} onChange={(e) => setCost(e.target.value)} className={inputCls} placeholder="0.00" />
+                <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Custo</label>
+                <Input type="text" value={cost} onChange={(e) => setCost(formatCurrency(e.target.value))} className={inputCls} placeholder="R$ 0,00" />
               </div>
             </div>
           </div>
