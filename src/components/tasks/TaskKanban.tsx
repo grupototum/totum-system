@@ -128,6 +128,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
             </Droppable>
           </div>
         ))}
+      </div>
     </DragDropContext>
   );
 }
