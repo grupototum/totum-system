@@ -82,7 +82,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
             >
               {day !== null && (
                 <>
-                  <div className={`text-xs font-mono mb-1 px-1 ${
+                  <div className={`text-xs font-heading mb-1 px-1 ${
                     isToday(day)
                       ? "text-primary font-bold"
                       : "text-white/40"

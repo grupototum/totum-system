@@ -12,7 +12,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p key={entry.name} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: entry.color }} />
           <span className="text-white/70">{entry.name === "receita" ? "Receita" : "Custo"}:</span>
-          <span className="font-mono font-medium">
+          <span className="font-heading font-medium">
             R$ {(entry.value / 1000).toFixed(0)}k
           </span>
         </p>

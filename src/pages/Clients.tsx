@@ -141,10 +141,10 @@ export default function Clients() {
                       className="border-b border-border/50 hover:bg-white/[0.03] transition-colors cursor-pointer"
                       onClick={() => navigate(`/clientes/${client.id}`)}
                     >
-                      <td className="p-4 font-medium text-primary hover:underline">{client.name}</td>
+                      <td className="p-4 font-medium text-primary cursor-pointer">{client.name}</td>
                       <td className="p-4 text-muted-foreground text-xs">{(client.client_types as any)?.name || "—"}</td>
                       <td className="p-4">{getActivePlan(client)}</td>
-                      <td className="p-4 font-mono">
+                      <td className="p-4 font-heading">
                         {mrr > 0 ? `R$ ${mrr.toLocaleString("pt-BR")}` : "—"}
                       </td>
                       <td className="p-4">

@@ -78,7 +78,7 @@ export function RiskRanking() {
             key={client.name + i}
             className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-white/[0.04] transition-colors"
           >
-            <span className="text-xs text-white/30 w-4 font-mono">{i + 1}</span>
+            <span className="text-xs text-white/30 w-4 font-heading">{i + 1}</span>
 
             <div className={`h-2 w-2 rounded-full shrink-0 ${
               client.status === "critical" ? "bg-red-500" :
@@ -107,7 +107,7 @@ export function RiskRanking() {
                       style={{ width: `${client.fulfillment}%` }}
                     />
                   </div>
-                  <span className="text-xs font-mono text-white/60 w-8 text-right">
+                  <span className="text-xs font-heading text-white/60 w-8 text-right">
                     {client.fulfillment}%
                   </span>
                 </div>

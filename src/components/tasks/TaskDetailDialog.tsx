@@ -251,7 +251,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[10px] text-white/40 uppercase tracking-wider">Checklist</label>
                 {task.checklist.length > 0 && (
-                  <span className="text-[10px] text-white/30 font-mono">{checkProgress}%</span>
+                  <span className="text-[10px] text-white/30 font-heading">{checkProgress}%</span>
                 )}
               </div>
               {task.checklist.length > 0 && (

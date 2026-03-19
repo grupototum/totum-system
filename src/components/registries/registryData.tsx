@@ -48,7 +48,7 @@ export const registryGroups: RegistryGroup[] = [
         icon: "Building2",
         columns: [
           { key: "name", label: "Nome" },
-          { key: "codigo", label: "Código", className: "font-mono" },
+          { key: "codigo", label: "Código", className: "font-heading" },
           statusColumn,
         ],
         formFields: [
@@ -70,8 +70,8 @@ export const registryGroups: RegistryGroup[] = [
         columns: [
           { key: "name", label: "Apelido" },
           { key: "banco", label: "Banco" },
-          { key: "agencia", label: "Agência", className: "font-mono" },
-          { key: "conta", label: "Conta", className: "font-mono" },
+          { key: "agencia", label: "Agência", className: "font-heading" },
+          { key: "conta", label: "Conta", className: "font-heading" },
           statusColumn,
         ],
         formFields: [
@@ -243,7 +243,7 @@ export const registryGroups: RegistryGroup[] = [
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
-              <span className="font-mono text-xs text-white/50">{v}</span>
+              <span className="font-heading text-xs text-white/50">{v}</span>
             </div>
           )},
           statusColumn,
@@ -286,7 +286,7 @@ export const registryGroups: RegistryGroup[] = [
         icon: "RefreshCw",
         columns: [
           { key: "name", label: "Nome" },
-          { key: "valor", label: "Valor", render: (v: string) => <span className="font-mono">R$ {v}</span> },
+          { key: "valor", label: "Valor", render: (v: string) => <span className="font-heading">R$ {v}</span> },
           { key: "entregas", label: "Entregas" },
           statusColumn,
         ],
@@ -517,7 +517,7 @@ export const registryGroups: RegistryGroup[] = [
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
-              <span className="font-mono text-xs text-white/50">{v}</span>
+              <span className="font-heading text-xs text-white/50">{v}</span>
             </div>
           )},
           statusColumn,
@@ -540,7 +540,7 @@ export const registryGroups: RegistryGroup[] = [
         icon: "AlertTriangle",
         columns: [
           { key: "name", label: "Nome" },
-          { key: "nivel", label: "Nível", className: "font-mono" },
+          { key: "nivel", label: "Nível", className: "font-heading" },
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
           )},

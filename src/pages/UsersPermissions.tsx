@@ -365,12 +365,12 @@ export default function UsersPermissions() {
                           <td className="p-3.5">
                             <button
                               onClick={() => handleViewPermissions(user)}
-                              className="text-[10px] text-white/30 hover:text-primary transition-colors font-mono"
+                              className="text-[10px] text-white/30 hover:text-primary transition-colors font-heading"
                             >
                               {pc}/{totalPermsCount}
                             </button>
                           </td>
-                          <td className="p-3.5 text-xs text-white/40 font-mono">
+                          <td className="p-3.5 text-xs text-white/40 font-heading">
                             {user.lastAccess
                               ? new Date(user.lastAccess).toLocaleDateString("pt-BR")
                               : "—"}
@@ -494,7 +494,7 @@ export default function UsersPermissions() {
                       </div>
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-white/30">{role.usersCount} usuário{role.usersCount !== 1 ? "s" : ""}</span>
-                        <span className="font-mono text-white/20">{pc}/{totalPermsCount} perms</span>
+                        <span className="font-heading text-white/20">{pc}/{totalPermsCount} perms</span>
                       </div>
                     </div>
                   );

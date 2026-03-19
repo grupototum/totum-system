@@ -33,7 +33,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
             <div className="flex items-center gap-2 mb-3 px-1">
               <div className={`h-2 w-2 rounded-full ${col.status === "pendente" ? "bg-white/30" : col.status === "em_andamento" ? "bg-blue-500" : col.status === "pausado" ? "bg-amber-500" : "bg-emerald-500"}`} />
               <span className={`text-xs font-semibold uppercase tracking-wider ${col.color}`}>{col.label}</span>
-              <span className="text-[10px] text-white/20 font-mono">{col.tasks.length}</span>
+              <span className="text-[10px] text-white/20 font-heading">{col.tasks.length}</span>
             </div>
 
             <Droppable droppableId={col.status}>
@@ -93,7 +93,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                               )}
                               
                               {task.dueDate && (
-                                <span className={`text-[10px] flex items-center gap-1 font-mono ${
+                                <span className={`text-[10px] flex items-center gap-1 font-heading ${
                                   isOverdue ? "text-red-400 font-bold" : "text-white/30"
                                 }`}>
                                   <Clock className="h-3 w-3" />
@@ -112,7 +112,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                                     transition={{ duration: 0.5 }}
                                   />
                                 </div>
-                                <span className="text-[10px] text-white/40 font-mono">
+                                <span className="text-[10px] text-white/40 font-heading">
                                   {task.checklist.filter((c) => c.completed).length}/{task.checklist.length}
                                 </span>
                               </div>

@@ -101,7 +101,7 @@ export function RegistryFormDialog({
                   <Input
                     value={values[field.key] || "#ff3b3b"}
                     onChange={(e) => updateValue(field.key, e.target.value)}
-                    className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm font-mono placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
+                    className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm font-heading placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
               ) : field.type === "select" ? (

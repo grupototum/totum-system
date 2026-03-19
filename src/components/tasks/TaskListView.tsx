@@ -77,7 +77,7 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                     </td>
                     <td className="p-3.5">
                       {task.dueDate ? (
-                        <span className={`text-xs font-mono ${isOverdue ? "text-red-400" : "text-white/50"}`}>
+                        <span className={`text-xs font-heading ${isOverdue ? "text-red-400" : "text-white/50"}`}>
                           {new Date(task.dueDate).toLocaleDateString("pt-BR")}
                         </span>
                       ) : (
@@ -103,7 +103,7 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                           <div className="w-12 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                             <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${checkProgress}%` }} />
                           </div>
-                          <span className="text-[10px] text-white/40 font-mono">{checkProgress}%</span>
+                          <span className="text-[10px] text-white/40 font-heading">{checkProgress}%</span>
                         </div>
                       ) : (
                         <span className="text-xs text-white/20">—</span>

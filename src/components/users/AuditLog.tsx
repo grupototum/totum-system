@@ -27,7 +27,7 @@ export function AuditLog({ entries }: AuditLogProps) {
             <tbody>
               {entries.map((entry) => (
                 <tr key={entry.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                  <td className="p-3.5 text-xs text-white/50 font-mono whitespace-nowrap">
+                  <td className="p-3.5 text-xs text-white/50 font-heading whitespace-nowrap">
                     {new Date(entry.createdAt).toLocaleDateString("pt-BR")}{" "}
                     {new Date(entry.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </td>

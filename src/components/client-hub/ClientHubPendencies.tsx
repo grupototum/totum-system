@@ -106,7 +106,7 @@ export function ClientHubPendencies({ clientId }: Props) {
                       <p className="text-sm font-medium">{(d.plans as any)?.name || "Sem plano"}</p>
                       <p className="text-xs text-muted-foreground">{d.period} · {d.frequency}</p>
                     </div>
-                    <span className="text-xs text-amber-400 font-mono">{d.fulfillment_pct || 0}%</span>
+                    <span className="text-xs text-amber-400 font-heading">{d.fulfillment_pct || 0}%</span>
                   </div>
                 ))}
               </div>

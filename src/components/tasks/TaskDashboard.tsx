@@ -178,7 +178,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                     </div>
                   )}
                 </div>
-                <span className="text-[8px] text-white/30 font-mono">{day.label}</span>
+                <span className="text-[8px] text-white/30 font-heading">{day.label}</span>
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#271c1d] border border-white/[0.1] rounded px-2 py-1 text-[9px] text-white/70 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-10">
                   {day.total} tarefa{day.total !== 1 ? "s" : ""}
                 </div>
@@ -208,14 +208,14 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium truncate">{r.name}</span>
-                      <span className="text-[10px] text-white/40 font-mono shrink-0 ml-2">{r.completed}/{r.total}</span>
+                      <span className="text-[10px] text-white/40 font-heading shrink-0 ml-2">{r.completed}/{r.total}</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                       <div className="h-full rounded-full bg-emerald-500/50 transition-all" style={{ width: `${rate}%` }} />
                     </div>
                   </div>
                   {r.overdue > 0 && (
-                    <span className="text-[9px] text-red-400 font-mono shrink-0">{r.overdue} atr.</span>
+                    <span className="text-[9px] text-red-400 font-heading shrink-0">{r.overdue} atr.</span>
                   )}
                 </div>
               );
@@ -242,7 +242,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                     <p className="text-[10px] text-white/30">{t.clientName} · {t.responsible || "Sem responsável"}</p>
                   </div>
                   {t.dueDate && (
-                    <span className={`text-[10px] font-mono shrink-0 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
+                    <span className={`text-[10px] font-heading shrink-0 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
                       {new Date(t.dueDate).toLocaleDateString("pt-BR")}
                     </span>
                   )}

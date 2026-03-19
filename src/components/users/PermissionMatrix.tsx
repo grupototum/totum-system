@@ -94,7 +94,7 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
               >
                 <ChevronRight className={cn("h-3.5 w-3.5 text-white/30 transition-transform", isOpen && "rotate-90")} />
                 <span className="text-sm font-semibold flex-1">{cat.label}</span>
-                <span className="text-[10px] text-white/20 font-mono mr-2">{checked}/{total}</span>
+                <span className="text-[10px] text-white/20 font-heading mr-2">{checked}/{total}</span>
                 {!readOnly && (
                   <Checkbox
                     checked={allChecked}
