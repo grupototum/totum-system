@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle, Package } from "lucide-react";
+import { Loader2, AlertCircle, Package, Plus } from "lucide-react";
+import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 
 interface Props {
   open: boolean;
@@ -39,6 +40,9 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [quickAddClientOpen, setQuickAddClientOpen] = useState(false);
+  const [quickAddPlanOpen, setQuickAddPlanOpen] = useState(false);
+  const [quickAddTypeOpen, setQuickAddTypeOpen] = useState(false);
   const [form, setForm] = useState({
     title: "", client_id: "", plan_id: "", contract_type_id: "",
     value: "", billing_frequency: "mensal" as string,
@@ -187,7 +191,18 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
               )}
             </div>
             <div>
-              <Label className={errors.client_id && touched.client_id ? "text-destructive" : ""}>Cliente *</Label>
+              <Label className={`flex items-center justify-between ${errors.client_id && touched.client_id ? "text-destructive" : ""}`}>
+                Cliente *
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddClientOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </Label>
               <Select value={form.client_id} onValueChange={(v) => { setForm({ ...form, client_id: v }); setTouched({ ...touched, client_id: true }); }}>
                 <SelectTrigger className={errors.client_id && touched.client_id ? "border-destructive" : ""}>
                   <SelectValue placeholder="Selecione o cliente" />
@@ -203,7 +218,18 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
               )}
             </div>
             <div>
-              <Label>Tipo de Contrato</Label>
+              <Label className="flex items-center justify-between">
+                Tipo de Contrato
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddTypeOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </Label>
               <Select value={form.contract_type_id} onValueChange={(v) => setForm({ ...form, contract_type_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
@@ -215,7 +241,18 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
 
           {/* Plan Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Plano Recorrente</Label>
+            <Label className="text-sm font-semibold flex items-center justify-between">
+              Plano Recorrente
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 text-primary"
+                onClick={() => setQuickAddPlanOpen(true)}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </Label>
             <Select value={form.plan_id} onValueChange={handlePlanChange}>
               <SelectTrigger><SelectValue placeholder="Vincular a um plano (opcional)" /></SelectTrigger>
               <SelectContent>
@@ -349,6 +386,36 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
             </Button>
           </div>
         </form>
+        <QuickAddDialog
+          open={quickAddClientOpen}
+          onOpenChange={setQuickAddClientOpen}
+          registryKey="fornecedores"
+          title="Novo Cliente"
+          onSuccess={(id, name) => {
+            setClients([...clients, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, client_id: id });
+          }}
+        />
+        <QuickAddDialog
+          open={quickAddPlanOpen}
+          onOpenChange={setQuickAddPlanOpen}
+          registryKey="planos"
+          title="Novo Plano"
+          onSuccess={(id, name) => {
+            setPlans([...plans, { id, name, value: null, frequency: "mensal" }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, plan_id: id });
+          }}
+        />
+        <QuickAddDialog
+          open={quickAddTypeOpen}
+          onOpenChange={setQuickAddTypeOpen}
+          registryKey="tipos_contrato"
+          title="Novo Tipo de Contrato"
+          onSuccess={(id, name) => {
+            setContractTypes([...contractTypes, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, contract_type_id: id });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";  
 import { AppUser, UserStatus, Role, departments, userStatusConfig } from "./permissionsData";
+import { Plus } from "lucide-react";
+import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 
 interface UserFormDialogProps {
   open: boolean;
@@ -25,11 +27,17 @@ const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focu
 
 export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: UserFormDialogProps) {
   const [form, setForm] = useState<Partial<AppUser & { notes?: string }>>({});
+  const [quickAddRoleOpen, setQuickAddRoleOpen] = useState(false);
+  const [quickAddDeptOpen, setQuickAddDeptOpen] = useState(false);
+  const [localRoles, setLocalRoles] = useState<Role[]>(roles);
+  const [localDepts, setLocalDepts] = useState<string[]>(departments);
 
   useEffect(() => {
     if (user) setForm({ ...user });
     else setForm({ name: "", email: "", phone: "", roleId: "", department: "", status: "ativo" });
-  }, [user, open]);
+    setLocalRoles(roles);
+    setLocalDepts(departments);
+  }, [user, open, roles]);
 
   const handleSave = () => {
     if (!form.name?.trim() || !form.email?.trim() || !form.roleId) return;
@@ -72,22 +80,44 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Cargo / Perfil *</label>
+              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center justify-between">
+                Cargo / Perfil *
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddRoleOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </label>
               <Select value={form.roleId || ""} onValueChange={(v) => setForm({ ...form, roleId: v })}>
                 <SelectTrigger className={selectCls}><SelectValue placeholder="Selecionar" /></SelectTrigger>
                 <SelectContent className={selectContentCls}>
-                  {roles.map((r) => (
+                  {localRoles.map((r) => (
                     <SelectItem key={r.id} value={r.id} className={selectItemCls}>{r.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Departamento</label>
+              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center justify-between">
+                Departamento
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddDeptOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </label>
               <Select value={form.department || ""} onValueChange={(v) => setForm({ ...form, department: v })}>
                 <SelectTrigger className={selectCls}><SelectValue placeholder="Selecionar" /></SelectTrigger>
                 <SelectContent className={selectContentCls}>
-                  {departments.map((d) => (
+                  {localDepts.map((d) => (
                     <SelectItem key={d} value={d} className={selectItemCls}>{d}</SelectItem>
                   ))}
                 </SelectContent>
@@ -118,6 +148,26 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
           </Button>
         </DialogFooter>
       </DialogContent>
+      <QuickAddDialog
+        open={quickAddRoleOpen}
+        onOpenChange={setQuickAddRoleOpen}
+        registryKey="usr_cargos"
+        title="Novo Cargo/Perfil"
+        onSuccess={(id, name) => {
+          setLocalRoles([...localRoles, { id, name, permissions: [], description: "" }].sort((a, b) => a.name.localeCompare(b.name)));
+          setForm({ ...form, roleId: id });
+        }}
+      />
+      <QuickAddDialog
+        open={quickAddDeptOpen}
+        onOpenChange={setQuickAddDeptOpen}
+        registryKey="departamentos"
+        title="Novo Departamento"
+        onSuccess={(id, name) => {
+          setLocalDepts([...localDepts, name].sort());
+          setForm({ ...form, department: name });
+        }}
+      />
     </Dialog>
   );
 }

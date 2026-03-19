@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Plus } from "lucide-react";
+import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 
 interface Props {
   open: boolean;
@@ -62,6 +63,7 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", document: "", address: "",
     client_type_id: "", notes: "",
@@ -220,7 +222,18 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
               )}
             </div>
             <div>
-              <Label>Tipo de Cliente</Label>
+              <Label className="flex items-center justify-between">
+                Tipo de Cliente
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary hover:text-primary/80"
+                  onClick={() => setQuickAddOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </Label>
               <Select value={form.client_type_id} onValueChange={(v) => setForm({ ...form, client_type_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
@@ -257,6 +270,16 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
             </Button>
           </div>
         </form>
+        <QuickAddDialog
+          open={quickAddOpen}
+          onOpenChange={setQuickAddOpen}
+          registryKey="tipos_cliente"
+          title="Novo Tipo de Cliente"
+          onSuccess={(id, name) => {
+            setClientTypes([...clientTypes, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, client_type_id: id });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
+import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 
 interface TaskDef {
   title: string;
@@ -34,6 +35,8 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
   const [tasks, setTasks] = useState<TaskDef[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
+  const [quickAddClientOpen, setQuickAddClientOpen] = useState(false);
+  const [quickAddTypeOpen, setQuickAddTypeOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -161,7 +164,18 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div>
-              <Label>Cliente *</Label>
+              <Label className="flex items-center justify-between">
+                Cliente *
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddClientOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </Label>
               <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v, contract_id: "" })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
@@ -179,7 +193,18 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
               </Select>
             </div>
             <div>
-              <Label>Tipo de Projeto</Label>
+              <Label className="flex items-center justify-between">
+                Tipo de Projeto
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-4 w-4 text-primary"
+                  onClick={() => setQuickAddTypeOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </Label>
               <Select value={form.project_type_id} onValueChange={(v) => setForm({ ...form, project_type_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
@@ -263,6 +288,26 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
             </Button>
           </div>
         </form>
+        <QuickAddDialog
+          open={quickAddClientOpen}
+          onOpenChange={setQuickAddClientOpen}
+          registryKey="fornecedores"
+          title="Novo Cliente"
+          onSuccess={(id, name) => {
+            setClients([...clients, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, client_id: id });
+          }}
+        />
+        <QuickAddDialog
+          open={quickAddTypeOpen}
+          onOpenChange={setQuickAddTypeOpen}
+          registryKey="tipos_projeto"
+          title="Novo Tipo de Projeto"
+          onSuccess={(id, name) => {
+            setProjectTypes([...projectTypes, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setForm({ ...form, project_type_id: id });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
