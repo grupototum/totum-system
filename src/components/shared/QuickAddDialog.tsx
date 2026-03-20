@@ -62,7 +62,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
       });
 
       if (onSuccess) {
-        onSuccess(data.id, data.name || name);
+        onSuccess((data as any).id, (data as any).name || name);
       }
       
       setName("");

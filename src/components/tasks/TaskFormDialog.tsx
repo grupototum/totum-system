@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, X, FileText } from "lucide-react";
+import { Loader2, Plus, X, FileText, BookOpen, Shield } from "lucide-react";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -68,6 +68,10 @@ export function TaskFormDialog({
   const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [pops, setPops] = useState<any[]>([]);
+  const [selectedPopId, setSelectedPopId] = useState("");
+  const [slaRules, setSlaRules] = useState<any[]>([]);
+  const [selectedSlaId, setSelectedSlaId] = useState("");
 
   // Fetch templates
   useEffect(() => {
@@ -77,6 +81,19 @@ export function TaskFormDialog({
       .select("*, task_template_items(*)")
       .order("name")
       .then(({ data }) => setTemplates(data || []));
+    // Fetch POPs
+    (supabase as any)
+      .from("pops")
+      .select("*, pop_steps(*), pop_checklist_items(*)")
+      .order("title")
+      .then(({ data }: any) => setPops(data || []));
+    // Fetch SLA rules
+    (supabase as any)
+      .from("sla_rules")
+      .select("*")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data }: any) => setSlaRules(data || []));
   }, [open]);
 
   const resetForm = () => {
@@ -92,6 +109,8 @@ export function TaskFormDialog({
     setNewCheckItem("");
     setSubtaskItems([]);
     setShowTemplates(false);
+    setSelectedPopId("");
+    setSelectedSlaId("");
   };
 
   const addCheckItem = () => {
@@ -116,6 +135,26 @@ export function TaskFormDialog({
     toast({ title: "Template aplicado", description: `${items.length} itens adicionados como checklist e subtarefas` });
   };
 
+  const applyPop = (popId: string) => {
+    const pop = pops.find((p: any) => p.id === popId);
+    if (!pop) return;
+    setSelectedPopId(popId);
+    // Load checklist from POP
+    const checkItems = (pop.pop_checklist_items || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((c: any) => c.text);
+    // Load steps as subtasks
+    const stepItems = (pop.pop_steps || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((s: any) => s.title);
+    setChecklistItems(checkItems);
+    setSubtaskItems(stepItems);
+    if (!title && pop.title) setTitle(pop.title);
+    if (!description && pop.description) setDescription(pop.description);
+    if (pop.linked_task_type && pop.linked_task_type !== "none") setTaskType(pop.linked_task_type);
+    toast({ title: "POP aplicado", description: `${checkItems.length} itens de checklist e ${stepItems.length} etapas carregados.` });
+  };
+
   const handleSave = async () => {
     if (!title.trim() || !clientId) {
       toast({
@@ -128,17 +167,40 @@ export function TaskFormDialog({
 
     setSaving(true);
 
-    const { data: taskData, error } = await supabase.from("tasks").insert({
+    // Calculate SLA deadlines
+    let slaResponseDeadline: string | null = null;
+    let slaResolutionDeadline: string | null = null;
+    if (selectedSlaId) {
+      const sla = slaRules.find((s: any) => s.id === selectedSlaId);
+      if (sla) {
+        const now = new Date();
+        slaResponseDeadline = new Date(now.getTime() + sla.max_response_minutes * 60000).toISOString();
+        slaResolutionDeadline = new Date(now.getTime() + sla.max_resolution_minutes * 60000).toISOString();
+        // Auto-set due date from SLA if not manually set
+        if (!dueDate) {
+          const resolutionDate = new Date(now.getTime() + sla.max_resolution_minutes * 60000);
+          setDueDate(resolutionDate.toISOString().split("T")[0]);
+        }
+      }
+    }
+
+    const insertPayload: any = {
       title: title.trim(),
       description: description.trim() || null,
       client_id: clientId,
       responsible_id: responsibleId || null,
-      priority: priority as any,
-      task_type: taskType as any,
-      status: "pendente" as any,
+      priority: priority,
+      task_type: taskType,
+      status: "pendente",
       start_date: startDate || null,
       due_date: dueDate || null,
-    }).select("id").single();
+      pop_id: selectedPopId || null,
+      sla_id: selectedSlaId || null,
+      sla_response_deadline: slaResponseDeadline,
+      sla_resolution_deadline: slaResolutionDeadline,
+    };
+
+    const { data: taskData, error } = await (supabase as any).from("tasks").insert(insertPayload).select("id").single();
 
     if (error) {
       setSaving(false);
@@ -252,6 +314,40 @@ export function TaskFormDialog({
             <div className="space-y-1.5">
               <Label>Data Entrega</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-white/[0.04] border-border" />
+            </div>
+          </div>
+
+          {/* POP + SLA Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> POP</Label>
+              <Select value={selectedPopId || "none"} onValueChange={(v) => {
+                if (v === "none") {
+                  setSelectedPopId("");
+                } else {
+                  applyPop(v);
+                }
+              }}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {pops.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> SLA</Label>
+              <Select value={selectedSlaId || "none"} onValueChange={(v) => setSelectedSlaId(v === "none" ? "" : v)}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {slaRules.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} ({Math.floor(s.max_resolution_minutes / 60)}h)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

@@ -29,6 +29,8 @@ import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Templates from "./pages/Templates";
+import PopLibrary from "./pages/PopLibrary";
+import SlaRules from "./pages/SlaRules";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +85,8 @@ function ProtectedRoutes() {
         <Route path="/admin" element={<AdminSettings />} />
         <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
         <Route path="/templates" element={<Templates />} />
+        <Route path="/pops" element={<PopLibrary />} />
+        <Route path="/sla" element={<SlaRules />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
