@@ -81,6 +81,19 @@ export function TaskFormDialog({
       .select("*, task_template_items(*)")
       .order("name")
       .then(({ data }) => setTemplates(data || []));
+    // Fetch POPs
+    (supabase as any)
+      .from("pops")
+      .select("*, pop_steps(*), pop_checklist_items(*)")
+      .order("title")
+      .then(({ data }: any) => setPops(data || []));
+    // Fetch SLA rules
+    (supabase as any)
+      .from("sla_rules")
+      .select("*")
+      .eq("is_active", true)
+      .order("name")
+      .then(({ data }: any) => setSlaRules(data || []));
   }, [open]);
 
   const resetForm = () => {
