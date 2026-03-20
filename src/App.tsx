@@ -29,6 +29,8 @@ import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Templates from "./pages/Templates";
+import PopLibrary from "./pages/PopLibrary";
+import SlaRules from "./pages/SlaRules";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
