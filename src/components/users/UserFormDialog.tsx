@@ -154,7 +154,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
         registryKey="usr_cargos"
         title="Novo Cargo/Perfil"
         onSuccess={(id, name) => {
-          setLocalRoles([...localRoles, { id, name, permissions: [], description: "" }].sort((a, b) => a.name.localeCompare(b.name)));
+          setLocalRoles([...localRoles, { id, name, permissions: {} as any, description: "", isSystem: false, usersCount: 0 }].sort((a, b) => a.name.localeCompare(b.name)));
           setForm({ ...form, roleId: id });
         }}
       />

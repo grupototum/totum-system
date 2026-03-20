@@ -44,6 +44,8 @@ const mainNav = [
   { title: "Projetos", url: "/projetos", icon: Briefcase },
   { title: "Produtos", url: "/produtos", icon: Package },
   { title: "Financeiro", url: "/financeiro", icon: DollarSign },
+  { title: "POPs", url: "/pops", icon: BookOpen },
+  { title: "SLA", url: "/sla", icon: Clock },
 ];
 
 const systemNav = [

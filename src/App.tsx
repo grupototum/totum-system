@@ -85,6 +85,8 @@ function ProtectedRoutes() {
         <Route path="/admin" element={<AdminSettings />} />
         <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
         <Route path="/templates" element={<Templates />} />
+        <Route path="/pops" element={<PopLibrary />} />
+        <Route path="/sla" element={<SlaRules />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
