@@ -1022,6 +1022,106 @@ export type Database = {
         }
         Relationships: []
       }
+      pop_checklist_items: {
+        Row: {
+          created_at: string
+          id: string
+          pop_id: string
+          sort_order: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pop_id: string
+          sort_order?: number
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pop_id?: string
+          sort_order?: number
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pop_checklist_items_pop_id_fkey"
+            columns: ["pop_id"]
+            isOneToOne: false
+            referencedRelation: "pops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pop_steps: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          pop_id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pop_id: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pop_id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pop_steps_pop_id_fkey"
+            columns: ["pop_id"]
+            isOneToOne: false
+            referencedRelation: "pops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pops: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          expected_outcome: string | null
+          id: string
+          linked_task_type: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          expected_outcome?: string | null
+          id?: string
+          linked_task_type?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          expected_outcome?: string | null
+          id?: string
+          linked_task_type?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_types: {
         Row: {
           created_at: string
@@ -1449,6 +1549,42 @@ export type Database = {
           },
         ]
       }
+      sla_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          max_resolution_minutes: number
+          max_response_minutes: number
+          name: string
+          priority: string
+          updated_at: string
+        }
+        Insert: {
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_resolution_minutes?: number
+          max_response_minutes?: number
+          name: string
+          priority?: string
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_resolution_minutes?: number
+          max_response_minutes?: number
+          name?: string
+          priority?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subtasks: {
         Row: {
           created_at: string
@@ -1818,12 +1954,16 @@ export type Database = {
           last_generated_at: string | null
           parent_task_id: string | null
           plan_id: string | null
+          pop_id: string | null
           priority: Database["public"]["Enums"]["task_priority"]
           project_id: string | null
           recurrence_config: Json | null
           recurrence_end_date: string | null
           recurrence_type: string | null
           responsible_id: string | null
+          sla_id: string | null
+          sla_resolution_deadline: string | null
+          sla_response_deadline: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["task_status"]
           task_type: Database["public"]["Enums"]["task_type"]
@@ -1845,12 +1985,16 @@ export type Database = {
           last_generated_at?: string | null
           parent_task_id?: string | null
           plan_id?: string | null
+          pop_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string | null
           recurrence_config?: Json | null
           recurrence_end_date?: string | null
           recurrence_type?: string | null
           responsible_id?: string | null
+          sla_id?: string | null
+          sla_resolution_deadline?: string | null
+          sla_response_deadline?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           task_type?: Database["public"]["Enums"]["task_type"]
@@ -1872,12 +2016,16 @@ export type Database = {
           last_generated_at?: string | null
           parent_task_id?: string | null
           plan_id?: string | null
+          pop_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
           project_id?: string | null
           recurrence_config?: Json | null
           recurrence_end_date?: string | null
           recurrence_type?: string | null
           responsible_id?: string | null
+          sla_id?: string | null
+          sla_resolution_deadline?: string | null
+          sla_response_deadline?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           task_type?: Database["public"]["Enums"]["task_type"]
@@ -1921,10 +2069,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tasks_pop_id_fkey"
+            columns: ["pop_id"]
+            isOneToOne: false
+            referencedRelation: "pops"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_sla_id_fkey"
+            columns: ["sla_id"]
+            isOneToOne: false
+            referencedRelation: "sla_rules"
             referencedColumns: ["id"]
           },
         ]
