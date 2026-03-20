@@ -135,6 +135,26 @@ export function TaskFormDialog({
     toast({ title: "Template aplicado", description: `${items.length} itens adicionados como checklist e subtarefas` });
   };
 
+  const applyPop = (popId: string) => {
+    const pop = pops.find((p: any) => p.id === popId);
+    if (!pop) return;
+    setSelectedPopId(popId);
+    // Load checklist from POP
+    const checkItems = (pop.pop_checklist_items || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((c: any) => c.text);
+    // Load steps as subtasks
+    const stepItems = (pop.pop_steps || [])
+      .sort((a: any, b: any) => a.sort_order - b.sort_order)
+      .map((s: any) => s.title);
+    setChecklistItems(checkItems);
+    setSubtaskItems(stepItems);
+    if (!title && pop.title) setTitle(pop.title);
+    if (!description && pop.description) setDescription(pop.description);
+    if (pop.linked_task_type && pop.linked_task_type !== "none") setTaskType(pop.linked_task_type);
+    toast({ title: "POP aplicado", description: `${checkItems.length} itens de checklist e ${stepItems.length} etapas carregados.` });
+  };
+
   const handleSave = async () => {
     if (!title.trim() || !clientId) {
       toast({
@@ -147,17 +167,40 @@ export function TaskFormDialog({
 
     setSaving(true);
 
-    const { data: taskData, error } = await supabase.from("tasks").insert({
+    // Calculate SLA deadlines
+    let slaResponseDeadline: string | null = null;
+    let slaResolutionDeadline: string | null = null;
+    if (selectedSlaId) {
+      const sla = slaRules.find((s: any) => s.id === selectedSlaId);
+      if (sla) {
+        const now = new Date();
+        slaResponseDeadline = new Date(now.getTime() + sla.max_response_minutes * 60000).toISOString();
+        slaResolutionDeadline = new Date(now.getTime() + sla.max_resolution_minutes * 60000).toISOString();
+        // Auto-set due date from SLA if not manually set
+        if (!dueDate) {
+          const resolutionDate = new Date(now.getTime() + sla.max_resolution_minutes * 60000);
+          setDueDate(resolutionDate.toISOString().split("T")[0]);
+        }
+      }
+    }
+
+    const insertPayload: any = {
       title: title.trim(),
       description: description.trim() || null,
       client_id: clientId,
       responsible_id: responsibleId || null,
-      priority: priority as any,
-      task_type: taskType as any,
-      status: "pendente" as any,
+      priority: priority,
+      task_type: taskType,
+      status: "pendente",
       start_date: startDate || null,
       due_date: dueDate || null,
-    }).select("id").single();
+      pop_id: selectedPopId || null,
+      sla_id: selectedSlaId || null,
+      sla_response_deadline: slaResponseDeadline,
+      sla_resolution_deadline: slaResolutionDeadline,
+    };
+
+    const { data: taskData, error } = await (supabase as any).from("tasks").insert(insertPayload).select("id").single();
 
     if (error) {
       setSaving(false);
