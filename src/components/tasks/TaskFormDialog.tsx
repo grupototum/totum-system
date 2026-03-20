@@ -68,6 +68,10 @@ export function TaskFormDialog({
   const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [pops, setPops] = useState<any[]>([]);
+  const [selectedPopId, setSelectedPopId] = useState("");
+  const [slaRules, setSlaRules] = useState<any[]>([]);
+  const [selectedSlaId, setSelectedSlaId] = useState("");
 
   // Fetch templates
   useEffect(() => {
