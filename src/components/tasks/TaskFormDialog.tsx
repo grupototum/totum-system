@@ -109,6 +109,8 @@ export function TaskFormDialog({
     setNewCheckItem("");
     setSubtaskItems([]);
     setShowTemplates(false);
+    setSelectedPopId("");
+    setSelectedSlaId("");
   };
 
   const addCheckItem = () => {
