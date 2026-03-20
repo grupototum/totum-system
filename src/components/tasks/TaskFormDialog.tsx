@@ -317,6 +317,40 @@ export function TaskFormDialog({
             </div>
           </div>
 
+          {/* POP + SLA Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> POP</Label>
+              <Select value={selectedPopId || "none"} onValueChange={(v) => {
+                if (v === "none") {
+                  setSelectedPopId("");
+                } else {
+                  applyPop(v);
+                }
+              }}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {pops.map((p: any) => <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> SLA</Label>
+              <Select value={selectedSlaId || "none"} onValueChange={(v) => setSelectedSlaId(v === "none" ? "" : v)}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {slaRules.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name} ({Math.floor(s.max_resolution_minutes / 60)}h)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Checklist */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
