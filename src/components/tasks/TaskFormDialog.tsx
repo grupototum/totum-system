@@ -20,7 +20,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, X, FileText } from "lucide-react";
+import { Loader2, Plus, X, FileText, BookOpen, Shield } from "lucide-react";
 
 interface TaskFormDialogProps {
   open: boolean;
