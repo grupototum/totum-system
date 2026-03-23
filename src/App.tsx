@@ -88,6 +88,7 @@ function ProtectedRoutes() {
         <Route path="/templates" element={<Templates />} />
         <Route path="/pops" element={<PopLibrary />} />
         <Route path="/sla" element={<SlaRules />} />
+        <Route path="/importar" element={<DataImport />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>

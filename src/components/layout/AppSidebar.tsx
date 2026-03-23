@@ -52,6 +52,7 @@ const mainNav = [
 const systemNav = [
   { title: "Equipe", url: "/equipe", icon: UserCog },
   { title: "Cadastros", url: "/cadastros", icon: Database },
+  { title: "Importação", url: "/importar", icon: Upload },
   { title: "Permissões", url: "/usuarios", icon: Shield },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
   { title: "Admin", url: "/admin", icon: ShieldCheck },

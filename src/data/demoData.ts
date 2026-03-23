@@ -120,6 +120,7 @@ const mkEntry = (id: number, overrides: Partial<FinancialEntryRow>): FinancialEn
   installment_number: null,
   total_installments: null,
   competence_date: null,
+  import_batch_id: null,
   created_at: daysAgo(30),
   updated_at: daysAgo(0),
   ...overrides,
