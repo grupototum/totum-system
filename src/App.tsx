@@ -31,6 +31,7 @@ import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Templates from "./pages/Templates";
 import PopLibrary from "./pages/PopLibrary";
 import SlaRules from "./pages/SlaRules";
+import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -87,6 +88,7 @@ function ProtectedRoutes() {
         <Route path="/templates" element={<Templates />} />
         <Route path="/pops" element={<PopLibrary />} />
         <Route path="/sla" element={<SlaRules />} />
+        <Route path="/importar" element={<DataImport />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppLayout>
