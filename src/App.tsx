@@ -31,6 +31,7 @@ import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 import Templates from "./pages/Templates";
 import PopLibrary from "./pages/PopLibrary";
 import SlaRules from "./pages/SlaRules";
+import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
