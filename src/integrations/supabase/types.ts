@@ -213,6 +213,7 @@ export type Database = {
           document: string | null
           email: string | null
           id: string
+          import_batch_id: string | null
           marketing_analysis: string | null
           name: string
           notes: string | null
@@ -228,6 +229,7 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           marketing_analysis?: string | null
           name: string
           notes?: string | null
@@ -243,6 +245,7 @@ export type Database = {
           document?: string | null
           email?: string | null
           id?: string
+          import_batch_id?: string | null
           marketing_analysis?: string | null
           name?: string
           notes?: string | null
@@ -256,6 +259,13 @@ export type Database = {
             columns: ["client_type_id"]
             isOneToOne: false
             referencedRelation: "client_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -773,6 +783,7 @@ export type Database = {
           due_date: string
           expense_type_id: string | null
           id: string
+          import_batch_id: string | null
           installment_number: number | null
           notes: string | null
           payment_date: string | null
@@ -797,6 +808,7 @@ export type Database = {
           due_date: string
           expense_type_id?: string | null
           id?: string
+          import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
           payment_date?: string | null
@@ -821,6 +833,7 @@ export type Database = {
           due_date?: string
           expense_type_id?: string | null
           id?: string
+          import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
           payment_date?: string | null
@@ -876,6 +889,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_entries_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "financial_entries_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
@@ -917,6 +937,42 @@ export type Database = {
           module?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      import_batches: {
+        Row: {
+          client_count: number
+          created_at: string
+          entity_types: string[]
+          financial_count: number
+          id: string
+          rolled_back_at: string | null
+          status: string
+          total_records: number
+          user_id: string
+        }
+        Insert: {
+          client_count?: number
+          created_at?: string
+          entity_types?: string[]
+          financial_count?: number
+          id?: string
+          rolled_back_at?: string | null
+          status?: string
+          total_records?: number
+          user_id: string
+        }
+        Update: {
+          client_count?: number
+          created_at?: string
+          entity_types?: string[]
+          financial_count?: number
+          id?: string
+          rolled_back_at?: string | null
+          status?: string
+          total_records?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -2140,6 +2196,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      rollback_import: { Args: { _batch_id: string }; Returns: undefined }
     }
     Enums: {
       app_role:
