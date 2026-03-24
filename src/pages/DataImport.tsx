@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 
 export default function DataImport() {
   const {
@@ -33,11 +34,11 @@ export default function DataImport() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Importação de Dados</h1>
-          <p className="text-sm text-muted-foreground">Importe dados via planilha CSV ou Excel</p>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">Importação de Dados</h1>
+          <p className="text-sm text-muted-foreground mt-1">Importe dados via planilha CSV ou Excel</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setConfirmRollback(true)}>
           <Trash2 className="h-4 w-4 mr-2" />
@@ -46,14 +47,20 @@ export default function DataImport() {
       </div>
 
       {/* Stepper */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {steps.map((s, i) => (
-          <div key={s.num} className="flex items-center gap-2">
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              step === s.num ? "bg-primary text-primary-foreground" :
-              step > s.num ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+          <div key={s.num} className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              step === s.num
+                ? "bg-primary text-primary-foreground shadow-md"
+                : step > s.num
+                  ? "bg-primary/15 text-primary"
+                  : "bg-card text-muted-foreground border border-border"
             }`}>
-              <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">{s.num}</span>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                step === s.num ? "bg-primary-foreground/20" :
+                step > s.num ? "bg-primary/20" : "bg-muted"
+              }`}>{s.num}</span>
               {s.label}
             </div>
             {i < steps.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
@@ -61,27 +68,34 @@ export default function DataImport() {
         ))}
       </div>
 
-      {step === 1 && <UploadStep file={file} parseFile={parseFile} downloadTemplate={downloadTemplate} onNext={() => setStep(2)} />}
-      {step === 2 && (
-        <MappingStep
-          detectedColumns={detectedColumns}
-          mapping={mapping}
-          updateMapping={updateMapping}
-          requiredMapped={requiredMapped}
-          onBack={() => setStep(1)}
-          onNext={() => { validate(); setStep(3); }}
-        />
-      )}
-      {step === 3 && (
-        <ValidationStep
-          validatedRows={validatedRows}
-          stats={stats}
-          importing={importing}
-          progress={progress}
-          onBack={() => setStep(2)}
-          onImport={() => setConfirmImport(true)}
-        />
-      )}
+      <motion.div
+        key={step}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+      >
+        {step === 1 && <UploadStep file={file} parseFile={parseFile} downloadTemplate={downloadTemplate} onNext={() => setStep(2)} />}
+        {step === 2 && (
+          <MappingStep
+            detectedColumns={detectedColumns}
+            mapping={mapping}
+            updateMapping={updateMapping}
+            requiredMapped={requiredMapped}
+            onBack={() => setStep(1)}
+            onNext={() => { validate(); setStep(3); }}
+          />
+        )}
+        {step === 3 && (
+          <ValidationStep
+            validatedRows={validatedRows}
+            stats={stats}
+            importing={importing}
+            progress={progress}
+            onBack={() => setStep(2)}
+            onImport={() => setConfirmImport(true)}
+          />
+        )}
+      </motion.div>
 
       <Dialog open={confirmImport} onOpenChange={setConfirmImport}>
         <DialogContent>
@@ -136,25 +150,30 @@ function UploadStep({ file, parseFile, downloadTemplate, onNext }: {
   });
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader><CardTitle className="text-base">Template de Exemplo</CardTitle></CardHeader>
-        <CardContent>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="border border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-heading">Template de Exemplo</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Baixe o template universal com campos para dados financeiros, clientes e contatos.
+          </p>
           <Button variant="outline" onClick={downloadTemplate}>
             <Download className="h-4 w-4 mr-2" /> Download Planilha Exemplo (.csv)
           </Button>
-          <p className="text-xs text-muted-foreground mt-2">
-            Template universal com campos para dados financeiros, clientes e contatos.
-          </p>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="border border-border lg:row-span-1">
+        <CardHeader>
+          <CardTitle className="text-base font-heading">Enviar Arquivo</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+            className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all ${
+              isDragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-accent/50"
             }`}
           >
             <input {...getInputProps()} />
@@ -177,7 +196,7 @@ function UploadStep({ file, parseFile, downloadTemplate, onNext }: {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="lg:col-span-2 flex justify-end">
         <Button onClick={onNext} disabled={!file}>
           Próximo <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
@@ -196,16 +215,18 @@ function MappingStep({ detectedColumns, mapping, updateMapping, requiredMapped, 
   onNext: () => void;
 }) {
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader><CardTitle className="text-base">Mapeamento de Colunas</CardTitle></CardHeader>
+    <div className="space-y-6">
+      <Card className="border border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-heading">Mapeamento de Colunas</CardTitle>
+        </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {detectedColumns.map(col => (
-              <div key={col} className="flex items-center gap-4">
+              <div key={col} className="flex items-center gap-4 p-3 rounded-lg bg-accent/30 border border-border">
                 <div className="w-1/3 text-sm font-medium truncate" title={col}>{col}</div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                <div className="w-1/2">
+                <div className="flex-1">
                   <Select value={mapping[col] || "__ignore__"} onValueChange={(v) => updateMapping(col, v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -225,7 +246,7 @@ function MappingStep({ detectedColumns, mapping, updateMapping, requiredMapped, 
             ))}
           </div>
           {!requiredMapped && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-destructive">
+            <div className="mt-4 flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
               <AlertTriangle className="h-4 w-4" />
               Mapeie todos os campos obrigatórios: Data, Descrição, Valor, Tipo
             </div>
@@ -253,35 +274,36 @@ function ValidationStep({ validatedRows, stats, importing, progress, onBack, onI
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><CardContent className="pt-4 pb-4">
-          <p className="text-xs text-muted-foreground">Registros Válidos</p>
-          <p className="text-2xl font-bold text-primary">{stats.valid}</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 pb-4">
-          <p className="text-xs text-muted-foreground">Receitas</p>
-          <p className="text-2xl font-bold text-emerald-500">{fmt(stats.totalIncome)}</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 pb-4">
-          <p className="text-xs text-muted-foreground">Despesas</p>
-          <p className="text-2xl font-bold text-rose-500">{fmt(stats.totalExpense)}</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-4 pb-4">
-          <p className="text-xs text-muted-foreground">Saldo Final</p>
-          <p className="text-2xl font-bold">{fmt(stats.totalIncome - stats.totalExpense)}</p>
-        </CardContent></Card>
+        {[
+          { label: "Registros Válidos", value: String(stats.valid), color: "text-primary" },
+          { label: "Receitas", value: fmt(stats.totalIncome), color: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Despesas", value: fmt(stats.totalExpense), color: "text-rose-600 dark:text-rose-400" },
+          { label: "Saldo Final", value: fmt(stats.totalIncome - stats.totalExpense), color: "text-foreground" },
+        ].map(item => (
+          <Card key={item.label} className="border border-border">
+            <CardContent className="pt-5 pb-4">
+              <p className="text-xs text-muted-foreground">{item.label}</p>
+              <p className={`text-2xl font-heading font-bold ${item.color}`}>{item.value}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {stats.invalid > 0 && (
-        <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">
           <AlertTriangle className="h-4 w-4" />
           {stats.invalid} registro(s) com erros. Corrija a planilha e reimporte.
         </div>
       )}
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Pré-visualização ({Math.min(validatedRows.length, 20)} de {validatedRows.length})</CardTitle></CardHeader>
+      <Card className="border border-border">
+        <CardHeader>
+          <CardTitle className="text-base font-heading">
+            Pré-visualização ({Math.min(validatedRows.length, 20)} de {validatedRows.length})
+          </CardTitle>
+        </CardHeader>
         <CardContent>
           <ScrollArea className="h-[400px]">
             <Table>
@@ -321,15 +343,17 @@ function ValidationStep({ validatedRows, stats, importing, progress, onBack, onI
       </Card>
 
       {importing && (
-        <Card><CardContent className="pt-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Importando...</span>
-              <span>{progress}%</span>
+        <Card className="border border-border">
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Importando...</span>
+                <span>{progress}%</span>
+              </div>
+              <Progress value={progress} />
             </div>
-            <Progress value={progress} />
-          </div>
-        </CardContent></Card>
+          </CardContent>
+        </Card>
       )}
 
       <div className="flex justify-between">

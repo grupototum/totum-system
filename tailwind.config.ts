@@ -19,7 +19,11 @@ export default {
         mono: ["Geist Mono", "JetBrains Mono", "monospace"],
       },
       colors: {
-        border: "hsl(var(--border))",
+        border: {
+          DEFAULT: "hsl(var(--border))",
+          medium: "hsl(var(--border-medium))",
+          strong: "hsl(var(--border-strong))",
+        },
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
