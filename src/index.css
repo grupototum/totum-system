@@ -44,10 +44,11 @@
     --destructive: 1 97% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 20 10% 88%;
-    --border-medium: 20 10% 82%;
+    --border: 20 10% 90%;
+    --border-medium: 20 10% 84%;
     --border-strong: 20 10% 74%;
-    --input: 20 10% 88%;
+    --input: 20 10% 86%;
+    --input-hover: 20 10% 74%;
     --ring: 1 97% 58%;
 
     --radius: 0.75rem;
@@ -122,6 +123,7 @@
     --border-medium: 0 0% 100% / 0.14;
     --border-strong: 0 0% 100% / 0.22;
     --input: 0 0% 100% / 0.08;
+    --input-hover: 0 0% 100% / 0.16;
     --ring: 1 97% 58%;
 
     /* Glass tokens (dark) */
