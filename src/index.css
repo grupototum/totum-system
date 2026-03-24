@@ -5,8 +5,82 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
+  /* ========== LIGHT MODE (default) ========== */
   :root {
-    /* Totum Design System - Dark Premium */
+    --bg-primary: 30 20% 97%;
+    --bg-secondary: 30 15% 94%;
+    --bg-tertiary: 30 10% 91%;
+    --bg-elevated: 0 0% 100%;
+
+    --background: var(--bg-primary);
+    --foreground: 20 14% 12%;
+
+    --card: var(--bg-elevated);
+    --card-foreground: 20 14% 12%;
+
+    --popover: var(--bg-elevated);
+    --popover-foreground: 20 14% 12%;
+
+    --primary: 1 97% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 0 74% 47%;
+    --primary-hover: 1 97% 52%;
+    --primary-soft: 1 97% 58%;
+
+    --secondary: var(--bg-tertiary);
+    --secondary-foreground: 20 14% 12%;
+
+    --muted: var(--bg-tertiary);
+    --muted-foreground: 20 10% 44%;
+
+    --accent: var(--bg-secondary);
+    --accent-foreground: 20 14% 12%;
+
+    --accent-success: 142 71% 38%;
+    --accent-success-foreground: 0 0% 100%;
+    --accent-warning: 38 92% 50%;
+    --accent-warning-foreground: 20 14% 12%;
+
+    --destructive: 1 97% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 20 10% 88%;
+    --border-medium: 20 10% 82%;
+    --border-strong: 20 10% 74%;
+    --input: 20 10% 88%;
+    --ring: 1 97% 58%;
+
+    --radius: 0.75rem;
+
+    /* Glass tokens (light) */
+    --glass-fill: 0 0% 100% / 0.7;
+    --glass-fill-strong: 0 0% 100% / 0.85;
+    --glass-highlight: 0 0% 100% / 0.95;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --shadow-accent: 0 8px 24px rgba(252, 49, 46, 0.12);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 20 14% 12%;
+    --sidebar-primary: 1 97% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--bg-secondary);
+    --sidebar-accent-foreground: 20 14% 12%;
+    --sidebar-border: 20 10% 88%;
+    --sidebar-ring: 1 97% 58%;
+
+    /* Typography */
+    --font-heading: "Sora", "Manrope", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+  }
+
+  /* ========== DARK MODE ========== */
+  .dark {
     --bg-primary: 12 16% 10%;
     --bg-secondary: 0 14% 13%;
     --bg-tertiary: 0 12% 16%;
@@ -21,11 +95,11 @@
     --popover: var(--bg-secondary);
     --popover-foreground: 0 0% 100%;
 
-    --primary: 0 100% 62%;
+    --primary: 1 97% 58%;
     --primary-foreground: 0 0% 100%;
     --primary-deep: 0 74% 47%;
-    --primary-hover: 0 100% 67%;
-    --primary-soft: 0 100% 62%;
+    --primary-hover: 1 97% 63%;
+    --primary-soft: 1 97% 58%;
 
     --secondary: var(--bg-tertiary);
     --secondary-foreground: 0 0% 100%;
@@ -41,18 +115,16 @@
     --accent-warning: 38 92% 50%;
     --accent-warning-foreground: 0 0% 100%;
 
-    --destructive: 0 100% 62%;
+    --destructive: 1 97% 58%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 100% / 0.08;
     --border-medium: 0 0% 100% / 0.14;
     --border-strong: 0 0% 100% / 0.22;
     --input: 0 0% 100% / 0.08;
-    --ring: 0 100% 62%;
+    --ring: 1 97% 58%;
 
-    --radius: 0.75rem;
-
-    /* Glass tokens */
+    /* Glass tokens (dark) */
     --glass-fill: 0 0% 100% / 0.06;
     --glass-fill-strong: 0 0% 100% / 0.10;
     --glass-highlight: 0 0% 100% / 0.18;
@@ -61,41 +133,40 @@
     --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.18);
     --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.28);
     --shadow-lg: 0 20px 64px rgba(0, 0, 0, 0.36);
-    --shadow-accent: 0 14px 36px rgba(255, 59, 59, 0.18);
+    --shadow-accent: 0 14px 36px rgba(252, 49, 46, 0.18);
 
     /* Sidebar */
     --sidebar-background: var(--bg-secondary);
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 100% 62%;
+    --sidebar-primary: 1 97% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: var(--bg-elevated);
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.08;
-    --sidebar-ring: 0 100% 62%;
-
-    /* Typography */
-    --font-heading: "Sora", "Manrope", sans-serif;
-    --font-body: "Inter", sans-serif;
-    --font-mono: "Geist Mono", "JetBrains Mono", monospace;
+    --sidebar-ring: 1 97% 58%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-200;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    background:
-      radial-gradient(circle at 10% 10%, rgba(255, 59, 59, 0.06), transparent 28%),
-      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.02), transparent 18%),
-      radial-gradient(circle at 50% 100%, rgba(255, 59, 59, 0.04), transparent 30%),
-      hsl(var(--bg-primary));
-    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark body,
+  body.dark-bg {
+    background:
+      radial-gradient(circle at 10% 10%, rgba(252, 49, 46, 0.06), transparent 28%),
+      radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.02), transparent 18%),
+      radial-gradient(circle at 50% 100%, rgba(252, 49, 46, 0.04), transparent 30%),
+      hsl(var(--bg-primary));
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -129,38 +200,38 @@
   }
 
   .text-secondary-custom {
-    color: rgba(255, 255, 255, 0.78);
+    @apply text-muted-foreground;
   }
 
   .text-muted-custom {
-    color: rgba(255, 255, 255, 0.56);
+    @apply text-muted-foreground;
   }
 
   .text-disabled-custom {
-    color: rgba(255, 255, 255, 0.34);
+    @apply text-muted-foreground opacity-60;
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, #ff5e5e 0%, #cf2027 100%);
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-deep)) 100%);
   }
 
   .status-active {
-    @apply bg-emerald-500/15 text-emerald-400 border-emerald-500/30;
+    @apply bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30;
   }
   .status-paused {
-    @apply bg-amber-500/15 text-amber-400 border-amber-500/30;
+    @apply bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30;
   }
   .status-cancelled {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+    @apply bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30;
   }
   .status-overdue {
-    @apply bg-red-500/15 text-red-400 border-red-500/30;
+    @apply bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30;
   }
 }
 
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.1) transparent;
+    scrollbar-color: hsl(var(--border-strong)) transparent;
   }
 }

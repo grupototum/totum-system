@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { DemoProvider } from "@/contexts/DemoContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import AuthPage from "./pages/AuthPage";
@@ -115,24 +116,26 @@ function SetupRoute() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <GlobalLoadingProvider>
-        <DemoProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <Routes>
-                <Route path="/login" element={<AuthRoutes />} />
-                <Route path="/setup" element={<SetupRoute />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/*" element={<ProtectedRoutes />} />
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
-        </DemoProvider>
-      </GlobalLoadingProvider>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <GlobalLoadingProvider>
+          <DemoProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthProvider>
+                <Routes>
+                  <Route path="/login" element={<AuthRoutes />} />
+                  <Route path="/setup" element={<SetupRoute />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/*" element={<ProtectedRoutes />} />
+                </Routes>
+              </AuthProvider>
+            </BrowserRouter>
+          </DemoProvider>
+        </GlobalLoadingProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
