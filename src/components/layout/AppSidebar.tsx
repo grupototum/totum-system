@@ -22,8 +22,10 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import logoWhite from "@/assets/logo-white.png";
+import logoRed from "@/assets/logo-red.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
@@ -63,6 +65,8 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { profile, user, signOut } = useAuth();
   const { isDemoMode, toggleDemo } = useDemo();
+  const { resolvedTheme } = useTheme();
+  const currentLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   const isAdmin =
@@ -101,7 +105,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="p-4 pb-6">
         <div className="flex items-center gap-3">
-          <img src={logoWhite} alt="Totum" className={collapsed ? "h-6" : "h-7"} />
+          <img src={currentLogo} alt="Totum" className={`${collapsed ? "h-6" : "h-7"} transition-opacity duration-300`} />
         </div>
       </SidebarHeader>
 
