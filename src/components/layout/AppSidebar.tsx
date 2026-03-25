@@ -130,7 +130,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge }])}
+                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge, permKey: null }])}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
