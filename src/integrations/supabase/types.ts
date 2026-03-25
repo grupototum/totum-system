@@ -2196,6 +2196,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_sensitive_access: {
+        Args: {
+          _action?: string
+          _entity_id?: string
+          _entity_type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       rollback_import: { Args: { _batch_id: string }; Returns: undefined }
     }
     Enums: {
