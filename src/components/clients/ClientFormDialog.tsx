@@ -60,6 +60,7 @@ function formatPhone(value: string) {
 }
 
 export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Props) {
+  const { canViewDocuments, maskDocument } = usePermissions();
   const [clientTypes, setClientTypes] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
