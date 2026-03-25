@@ -258,7 +258,7 @@ export default function UsersPermissions() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Usuários e Permissões</h1>
-          <p className="text-sm text-white/50 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {users.filter((u) => u.status === "ativo").length} ativos · {roles.length} cargos · {audit.length} registros de auditoria
           </p>
         </div>
@@ -283,7 +283,7 @@ export default function UsersPermissions() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition-colors ${
-              tab === t.key ? "bg-white/[0.1] text-white" : "text-white/40 hover:text-white/60"
+              tab === t.key ? "bg-accent text-foreground font-medium" : "text-muted-foreground/70 hover:text-muted-foreground"
             }`}
           >
             <t.icon className="h-3.5 w-3.5" />
@@ -303,32 +303,32 @@ export default function UsersPermissions() {
           {tab === "users" && (
             <div className="space-y-3">
               <div className="relative w-64">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                 <Input
                   placeholder="Buscar usuário..."
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
-                  className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
+                  className="pl-8 bg-white/[0.05] border-border rounded-lg h-8 text-xs placeholder:text-muted-foreground/50"
                 />
               </div>
 
               <div className="glass-card rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/[0.06]">
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Usuário</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Cargo</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Departamento</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Permissões</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Último Acesso</th>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Usuário</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Cargo</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Departamento</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Status</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Permissões</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Último Acesso</th>
                       <th className="p-3.5 w-10"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredUsers.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="p-8 text-center text-white/30 text-sm">
+                        <td colSpan={7} className="p-8 text-center text-muted-foreground/50 text-sm">
                           Nenhum usuário encontrado
                         </td>
                       </tr>
@@ -351,12 +351,12 @@ export default function UsersPermissions() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-[11px] text-white/40">{user.email}</p>
+                                <p className="text-[11px] text-muted-foreground/70">{user.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3.5 text-xs text-white/60">{user.roleName}</td>
-                          <td className="p-3.5 text-xs text-white/50">{user.department}</td>
+                          <td className="p-3.5 text-xs text-muted-foreground">{user.roleName}</td>
+                          <td className="p-3.5 text-xs text-muted-foreground">{user.department}</td>
                           <td className="p-3.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${st.bg} ${st.color}`}>
                               {st.label}
@@ -365,12 +365,12 @@ export default function UsersPermissions() {
                           <td className="p-3.5">
                             <button
                               onClick={() => handleViewPermissions(user)}
-                              className="text-[10px] text-white/30 hover:text-primary transition-colors font-heading"
+                              className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors font-heading"
                             >
                               {pc}/{totalPermsCount}
                             </button>
                           </td>
-                          <td className="p-3.5 text-xs text-white/40 font-heading">
+                          <td className="p-3.5 text-xs text-muted-foreground/70 font-heading">
                             {user.lastAccess
                               ? new Date(user.lastAccess).toLocaleDateString("pt-BR")
                               : "—"}
@@ -378,11 +378,11 @@ export default function UsersPermissions() {
                           <td className="p-3.5">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-white/30 hover:text-white hover:bg-white/[0.06]">
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/50 hover:text-foreground hover:bg-white/[0.06]">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
+                              <DropdownMenuContent className="bg-popover border-border text-foreground" align="end">
                                 <DropdownMenuItem onClick={() => { setEditingUser(user); setUserFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
                                   <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                                 </DropdownMenuItem>
@@ -446,12 +446,12 @@ export default function UsersPermissions() {
           {tab === "roles" && (
             <div className="space-y-3">
               <div className="relative w-64">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                 <Input
                   placeholder="Buscar cargo..."
                   value={roleSearch}
                   onChange={(e) => setRoleSearch(e.target.value)}
-                  className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
+                  className="pl-8 bg-white/[0.05] border-border rounded-lg h-8 text-xs placeholder:text-muted-foreground/50"
                 />
               </div>
 
@@ -466,15 +466,15 @@ export default function UsersPermissions() {
                             {role.name}
                             {role.isSystem && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-medium">Sistema</span>}
                           </h3>
-                          <p className="text-[11px] text-white/40 mt-0.5">{role.description}</p>
+                          <p className="text-[11px] text-muted-foreground/70 mt-0.5">{role.description}</p>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-white/20 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/40 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="bg-[#271c1d] border-white/[0.1] text-white" align="end">
+                          <DropdownMenuContent className="bg-popover border-border text-foreground" align="end">
                             <DropdownMenuItem onClick={() => { setEditingRole(role); setRoleFormOpen(true); }} className="text-xs focus:bg-white/[0.06]">
                               <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                             </DropdownMenuItem>
@@ -493,8 +493,8 @@ export default function UsersPermissions() {
                         </DropdownMenu>
                       </div>
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-white/30">{role.usersCount} usuário{role.usersCount !== 1 ? "s" : ""}</span>
-                        <span className="font-heading text-white/20">{pc}/{totalPermsCount} perms</span>
+                        <span className="text-muted-foreground/50">{role.usersCount} usuário{role.usersCount !== 1 ? "s" : ""}</span>
+                        <span className="font-heading text-muted-foreground/40">{pc}/{totalPermsCount} perms</span>
                       </div>
                     </div>
                   );
@@ -526,11 +526,11 @@ export default function UsersPermissions() {
 
       {viewPermsUser && (
         <Dialog open={viewPermsOpen} onOpenChange={setViewPermsOpen}>
-          <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="bg-card border-border text-foreground max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-heading">
                 Permissões de {viewPermsUser.name}
-                <span className="text-xs text-white/30 font-normal ml-2">({viewPermsUser.roleName})</span>
+                <span className="text-xs text-muted-foreground/50 font-normal ml-2">({viewPermsUser.roleName})</span>
               </DialogTitle>
             </DialogHeader>
             <PermissionMatrix

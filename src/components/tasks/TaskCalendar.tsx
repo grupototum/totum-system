@@ -50,7 +50,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
         <div className="flex items-center gap-3">
           <button
             onClick={() => onMonthChange(new Date(year, month - 1, 1))}
-            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-muted-foreground/70 hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -59,7 +59,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
           </span>
           <button
             onClick={() => onMonthChange(new Date(year, month + 1, 1))}
-            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/40 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg hover:bg-white/[0.06] text-muted-foreground/70 hover:text-foreground transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -69,7 +69,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="grid grid-cols-7">
           {weekDays.map((d) => (
-            <div key={d} className="p-2 text-center text-[10px] font-medium text-white/30 uppercase tracking-wider border-b border-white/[0.06]">
+            <div key={d} className="p-2 text-center text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider border-b border-border">
               {d}
             </div>
           ))}
@@ -85,7 +85,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                   <div className={`text-xs font-heading mb-1 px-1 ${
                     isToday(day)
                       ? "text-primary font-bold"
-                      : "text-white/40"
+                      : "text-muted-foreground/70"
                   }`}>
                     {day}
                   </div>
@@ -111,7 +111,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                       </button>
                     ))}
                     {(tasksByDay[day] || []).length > 3 && (
-                      <span className="text-[9px] text-white/20 px-1.5">+{(tasksByDay[day] || []).length - 3}</span>
+                      <span className="text-[9px] text-muted-foreground/40 px-1.5">+{(tasksByDay[day] || []).length - 3}</span>
                     )}
                   </div>
                 </>

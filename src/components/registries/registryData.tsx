@@ -27,7 +27,7 @@ const statusColumn: RegistryColumn = {
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
         value === "ativo"
           ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-          : "bg-white/[0.06] text-white/40 border-white/[0.08]"
+          : "bg-white/[0.06] text-muted-foreground/70 border-border"
       }`}
     >
       {value}
@@ -242,8 +242,8 @@ export const registryGroups: RegistryGroup[] = [
           { key: "name", label: "Nome" },
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
-              <span className="font-heading text-xs text-white/50">{v}</span>
+              <div className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: v }} />
+              <span className="font-heading text-xs text-muted-foreground">{v}</span>
             </div>
           )},
           statusColumn,
@@ -383,7 +383,7 @@ export const registryGroups: RegistryGroup[] = [
           { key: "modulo", label: "Módulo" },
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
+              <div className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: v }} />
             </div>
           )},
           { key: "descricao", label: "Descrição" },
@@ -516,8 +516,8 @@ export const registryGroups: RegistryGroup[] = [
           { key: "name", label: "Nome" },
           { key: "cor", label: "Cor", render: (v: string) => (
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
-              <span className="font-heading text-xs text-white/50">{v}</span>
+              <div className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: v }} />
+              <span className="font-heading text-xs text-muted-foreground">{v}</span>
             </div>
           )},
           statusColumn,
@@ -542,7 +542,7 @@ export const registryGroups: RegistryGroup[] = [
           { key: "name", label: "Nome" },
           { key: "nivel", label: "Nível", className: "font-heading" },
           { key: "cor", label: "Cor", render: (v: string) => (
-            <div className="h-4 w-4 rounded-full border border-white/10" style={{ backgroundColor: v }} />
+            <div className="h-4 w-4 rounded-full border border-border" style={{ backgroundColor: v }} />
           )},
           statusColumn,
         ],

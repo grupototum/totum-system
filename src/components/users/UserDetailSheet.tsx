@@ -32,14 +32,14 @@ type Tab = "resumo" | "acesso" | "financeiro" | "historico";
 
 const statusOptions = [
   { value: "ativo", label: "Ativo", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
-  { value: "inativo", label: "Inativo", color: "bg-white/[0.06] text-white/40 border-white/[0.08]" },
+  { value: "inativo", label: "Inativo", color: "bg-white/[0.06] text-muted-foreground/70 border-border" },
   { value: "bloqueado", label: "Bloqueado", color: "bg-red-500/15 text-red-400 border-red-500/30" },
   { value: "pendente", label: "Pendente", color: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
 ];
 
-const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-sm focus:border-primary/50";
-const selectContentCls = "bg-[#271c1d] border-white/[0.1] text-white";
-const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-white";
+const inputCls = "bg-white/[0.05] border-border rounded-lg h-9 text-sm focus:border-primary/50";
+const selectContentCls = "bg-popover border-border text-foreground";
+const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-foreground";
 
 export function UserDetailSheet({
   profile, open, onOpenChange, roles, departments, onRefresh, isAdmin,
@@ -159,9 +159,9 @@ export function UserDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-[#1a1213] border-white/[0.06] text-white w-full sm:max-w-xl overflow-y-auto scrollbar-thin p-0">
+      <SheetContent className="bg-card border-border text-foreground w-full sm:max-w-xl overflow-y-auto scrollbar-thin p-0">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-white/[0.06]">
+        <div className="p-6 pb-4 border-b border-border">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               {profile.avatar_url && <AvatarImage src={profile.avatar_url} />}
@@ -169,16 +169,16 @@ export function UserDetailSheet({
             </Avatar>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-heading font-bold truncate">{profile.full_name}</h2>
-              <p className="text-sm text-white/40">{roleName}</p>
+              <p className="text-sm text-muted-foreground/70">{roleName}</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline" className={`text-[10px] ${statusCfg.color}`}>
                   {statusCfg.label}
                 </Badge>
-                <span className="text-[10px] text-white/20">{deptName}</span>
+                <span className="text-[10px] text-muted-foreground/40">{deptName}</span>
               </div>
             </div>
             {isAdmin && !editing && (
-              <Button size="sm" variant="ghost" onClick={() => setEditing(true)} className="text-white/40 hover:text-white">
+              <Button size="sm" variant="ghost" onClick={() => setEditing(true)} className="text-muted-foreground/70 hover:text-foreground">
                 <Edit2 className="h-4 w-4" />
               </Button>
             )}
@@ -186,7 +186,7 @@ export function UserDetailSheet({
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center border-b border-white/[0.06] px-6">
+        <div className="flex items-center border-b border-border px-6">
           {tabs.map((t) => (
             <button
               key={t.key}
@@ -194,7 +194,7 @@ export function UserDetailSheet({
               className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-[1px] ${
                 tab === t.key
                   ? "border-primary text-primary"
-                  : "border-transparent text-white/40 hover:text-white/60"
+                  : "border-transparent text-muted-foreground/70 hover:text-muted-foreground"
               }`}
             >
               <t.icon className="h-3.5 w-3.5" />
@@ -210,7 +210,7 @@ export function UserDetailSheet({
             <div className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <Label className="text-[10px] text-white/40 uppercase tracking-wider">Nome completo</Label>
+                  <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Nome completo</Label>
                   {editing ? (
                     <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} className={inputCls} />
                   ) : (
@@ -220,22 +220,22 @@ export function UserDetailSheet({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Label>
-                    <p className="text-sm mt-1 text-white/70 truncate">{profile.email}</p>
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Label>
+                    <p className="text-sm mt-1 text-foreground/70 truncate">{profile.email}</p>
                   </div>
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Phone className="h-3 w-3" /> Telefone</Label>
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Phone className="h-3 w-3" /> Telefone</Label>
                     {editing ? (
                       <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} />
                     ) : (
-                      <p className="text-sm mt-1 text-white/70">{profile.phone || "—"}</p>
+                      <p className="text-sm mt-1 text-foreground/70">{profile.phone || "—"}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Shield className="h-3 w-3" /> Cargo</Label>
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Shield className="h-3 w-3" /> Cargo</Label>
                     {editing ? (
                       <Select value={form.role_id} onValueChange={(v) => setForm({ ...form, role_id: v })}>
                         <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -250,7 +250,7 @@ export function UserDetailSheet({
                     )}
                   </div>
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Building2 className="h-3 w-3" /> Departamento</Label>
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Building2 className="h-3 w-3" /> Departamento</Label>
                     {editing ? (
                       <Select value={form.department_id} onValueChange={(v) => setForm({ ...form, department_id: v })}>
                         <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -268,7 +268,7 @@ export function UserDetailSheet({
 
                 {editing && (
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider">Status</Label>
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Status</Label>
                     <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                       <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
                       <SelectContent className={selectContentCls}>
@@ -284,14 +284,14 @@ export function UserDetailSheet({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Calendar className="h-3 w-3" /> Criado em</Label>
-                    <p className="text-xs mt-1 text-white/50">
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Calendar className="h-3 w-3" /> Criado em</Label>
+                    <p className="text-xs mt-1 text-muted-foreground">
                       {new Date(profile.created_at).toLocaleDateString("pt-BR")}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3" /> Último acesso</Label>
-                    <p className="text-xs mt-1 text-white/50">
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Clock className="h-3 w-3" /> Último acesso</Label>
+                    <p className="text-xs mt-1 text-muted-foreground">
                       {profile.last_access
                         ? new Date(profile.last_access).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })
                         : "Nunca"}
@@ -303,10 +303,10 @@ export function UserDetailSheet({
               {/* Quick admin actions */}
               {isAdmin && !editing && (
                 <div className="space-y-2 pt-2">
-                  <p className="text-[10px] text-white/40 uppercase tracking-wider font-semibold">Ações rápidas</p>
+                  <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider font-semibold">Ações rápidas</p>
                   <div className="flex flex-wrap gap-2">
                     {profile.status === "ativo" ? (
-                      <Button size="sm" variant="outline" className="text-xs border-white/[0.1] bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
+                      <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
                         onClick={async () => {
                           await supabase.from("profiles").update({ status: "bloqueado" as any }).eq("id", profile.id);
                           toast({ title: "Usuário bloqueado" });
@@ -315,7 +315,7 @@ export function UserDetailSheet({
                         <Lock className="h-3 w-3 mr-1" /> Bloquear
                       </Button>
                     ) : (
-                      <Button size="sm" variant="outline" className="text-xs border-white/[0.1] bg-white/[0.03] hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400"
+                      <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400"
                         onClick={async () => {
                           await supabase.from("profiles").update({ status: "ativo" as any }).eq("id", profile.id);
                           toast({ title: "Usuário ativado" });
@@ -324,7 +324,7 @@ export function UserDetailSheet({
                         <Unlock className="h-3 w-3 mr-1" /> Ativar
                       </Button>
                     )}
-                    <Button size="sm" variant="outline" className="text-xs border-white/[0.1] bg-white/[0.03] hover:bg-primary/10 hover:border-primary/30"
+                    <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-primary/10 hover:border-primary/30"
                       onClick={async () => {
                         const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
                         if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
@@ -333,7 +333,7 @@ export function UserDetailSheet({
                       <Key className="h-3 w-3 mr-1" /> Redefinir Senha
                     </Button>
                     <div className="w-px h-6 bg-white/[0.06] mx-1 self-center" />
-                    <Button size="sm" variant="outline" className="text-xs border-white/[0.1] bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
+                    <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
                       onClick={async () => {
                         if (!confirm("Tem certeza que deseja excluir/desativar este membro?")) return;
                         await supabase.from("profiles").update({ status: "inativo" as any, role_id: null }).eq("id", profile.id);
@@ -350,7 +350,7 @@ export function UserDetailSheet({
               {/* Save/Cancel */}
               {editing && (
                 <div className="flex items-center gap-2 pt-2">
-                  <Button variant="ghost" onClick={() => setEditing(false)} className="text-white/40 hover:text-white">
+                  <Button variant="ghost" onClick={() => setEditing(false)} className="text-muted-foreground/70 hover:text-foreground">
                     <X className="h-4 w-4 mr-1" /> Cancelar
                   </Button>
                   <Button onClick={handleSave} disabled={saving} className="gradient-primary border-0 text-white font-semibold rounded-full px-6">
@@ -366,12 +366,12 @@ export function UserDetailSheet({
           {tab === "acesso" && (
             <div className="space-y-4">
               <div>
-                <Label className="text-[10px] text-white/40 uppercase tracking-wider mb-2 block">Perfil de acesso atual</Label>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Perfil de acesso atual</Label>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03] border border-border">
                   <Shield className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-medium">{roleName}</p>
-                    <p className="text-xs text-white/40">
+                    <p className="text-xs text-muted-foreground/70">
                       {roles.find((r) => r.id === profile.role_id)?.description || "Sem descrição"}
                     </p>
                   </div>
@@ -380,7 +380,7 @@ export function UserDetailSheet({
 
               {isAdmin && (
                 <div>
-                  <Label className="text-[10px] text-white/40 uppercase tracking-wider mb-2 block">Alterar perfil</Label>
+                  <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Alterar perfil</Label>
                   <Select
                     value={form.role_id || ""}
                     onValueChange={async (v) => {
@@ -413,7 +413,7 @@ export function UserDetailSheet({
               <Separator className="bg-white/[0.06]" />
 
               <div>
-                <Label className="text-[10px] text-white/40 uppercase tracking-wider mb-2 block">Permissões do perfil</Label>
+                <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Permissões do perfil</Label>
                 <div className="max-h-[400px] overflow-y-auto scrollbar-thin">
                   <PermissionMatrix permissions={permissions} onChange={() => {}} readOnly />
                 </div>
@@ -425,7 +425,7 @@ export function UserDetailSheet({
           {tab === "financeiro" && (
             <div className="space-y-4">
               {!isAdmin ? (
-                <div className="flex flex-col items-center justify-center py-12 text-white/30">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/50">
                   <Lock className="h-8 w-8 mb-3" />
                   <p className="text-sm font-medium">Acesso restrito</p>
                   <p className="text-xs mt-1">Apenas administradores podem ver dados financeiros</p>
@@ -433,7 +433,7 @@ export function UserDetailSheet({
               ) : (
                 <>
                   <div>
-                    <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1 mb-1">
+                    <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1 mb-1">
                       <DollarSign className="h-3 w-3" /> Salário
                     </Label>
                     {editing ? (
@@ -456,7 +456,7 @@ export function UserDetailSheet({
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label className="text-[10px] text-white/40 uppercase tracking-wider flex items-center gap-1 mb-1">
+                      <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1 mb-1">
                         <Percent className="h-3 w-3" /> Tipo de Comissão
                       </Label>
                       {editing ? (
@@ -472,7 +472,7 @@ export function UserDetailSheet({
                       )}
                     </div>
                     <div>
-                      <Label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Valor da Comissão</Label>
+                      <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Valor da Comissão</Label>
                       {editing ? (
                         <Input
                           type="number"
@@ -495,14 +495,14 @@ export function UserDetailSheet({
                   </div>
 
                   {!editing && (
-                    <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="text-xs border-white/[0.1] bg-white/[0.03] mt-2">
+                    <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="text-xs border-border bg-white/[0.03] mt-2">
                       <Edit2 className="h-3 w-3 mr-1" /> Editar dados financeiros
                     </Button>
                   )}
 
                   {editing && (
                     <div className="flex items-center gap-2 pt-2">
-                      <Button variant="ghost" onClick={() => setEditing(false)} className="text-white/40 hover:text-white">
+                      <Button variant="ghost" onClick={() => setEditing(false)} className="text-muted-foreground/70 hover:text-foreground">
                         <X className="h-4 w-4 mr-1" /> Cancelar
                       </Button>
                       <Button onClick={handleSave} disabled={saving} className="gradient-primary border-0 text-white font-semibold rounded-full px-6">
@@ -524,17 +524,17 @@ export function UserDetailSheet({
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 </div>
               ) : auditLogs.length === 0 ? (
-                <div className="text-center py-8 text-white/30 text-sm">Nenhum registro de alteração</div>
+                <div className="text-center py-8 text-muted-foreground/50 text-sm">Nenhum registro de alteração</div>
               ) : (
                 auditLogs.map((log) => (
-                  <div key={log.id} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <div key={log.id} className="p-3 rounded-lg bg-white/[0.02] border border-border">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium">{log.action}</span>
-                      <span className="text-[10px] text-white/30 font-heading">
+                      <span className="text-[10px] text-muted-foreground/50 font-heading">
                         {new Date(log.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                       </span>
                     </div>
-                    {log.detail && <p className="text-xs text-white/50">{log.detail}</p>}
+                    {log.detail && <p className="text-xs text-muted-foreground">{log.detail}</p>}
                   </div>
                 ))
               )}

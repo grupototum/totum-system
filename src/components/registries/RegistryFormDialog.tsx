@@ -66,14 +66,14 @@ export function RegistryFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-md">
+      <DialogContent className="bg-card border-border text-foreground max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">{title}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           {fields.map((field) => (
             <div key={field.key} className="space-y-1.5">
-              <Label className="text-sm text-white/70">{field.label}</Label>
+              <Label className="text-sm text-foreground/70">{field.label}</Label>
               {field.type === "text" || field.type === "number" ? (
                 <Input
                   type={field.type === "number" ? "number" : "text"}
@@ -81,14 +81,14 @@ export function RegistryFormDialog({
                   value={values[field.key] || ""}
                   onChange={(e) => updateValue(field.key, e.target.value)}
                   required={field.required}
-                  className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
+                  className="bg-white/[0.05] border-border rounded-xl h-10 text-sm placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20"
                 />
               ) : field.type === "textarea" ? (
                 <Textarea
                   placeholder={field.placeholder}
                   value={values[field.key] || ""}
                   onChange={(e) => updateValue(field.key, e.target.value)}
-                  className="bg-white/[0.05] border-white/[0.1] rounded-xl text-sm placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20 min-h-[80px] resize-none"
+                  className="bg-white/[0.05] border-border rounded-xl text-sm placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20 min-h-[80px] resize-none"
                 />
               ) : field.type === "color" ? (
                 <div className="flex items-center gap-3">
@@ -96,12 +96,12 @@ export function RegistryFormDialog({
                     type="color"
                     value={values[field.key] || "#ff3b3b"}
                     onChange={(e) => updateValue(field.key, e.target.value)}
-                    className="h-10 w-10 rounded-lg border border-white/[0.1] bg-transparent cursor-pointer"
+                    className="h-10 w-10 rounded-lg border border-border bg-transparent cursor-pointer"
                   />
                   <Input
                     value={values[field.key] || "#ff3b3b"}
                     onChange={(e) => updateValue(field.key, e.target.value)}
-                    className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm font-heading placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
+                    className="bg-white/[0.05] border-border rounded-xl h-10 text-sm font-heading placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20"
                   />
                 </div>
               ) : field.type === "select" ? (
@@ -109,12 +109,12 @@ export function RegistryFormDialog({
                   value={values[field.key] || ""}
                   onValueChange={(v) => updateValue(field.key, v)}
                 >
-                  <SelectTrigger className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm focus:border-primary/50 focus:ring-primary/20">
+                  <SelectTrigger className="bg-white/[0.05] border-border rounded-xl h-10 text-sm focus:border-primary/50 focus:ring-primary/20">
                     <SelectValue placeholder={field.placeholder || "Selecione"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+                  <SelectContent className="bg-popover border-border text-foreground">
                     {field.options?.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value} className="focus:bg-white/[0.06] focus:text-white">
+                      <SelectItem key={opt.value} value={opt.value} className="focus:bg-white/[0.06] focus:text-foreground">
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -128,7 +128,7 @@ export function RegistryFormDialog({
               type="button"
               variant="ghost"
               onClick={() => onOpenChange(false)}
-              className="text-white/60 hover:text-white hover:bg-white/[0.06]"
+              className="text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
             >
               Cancelar
             </Button>

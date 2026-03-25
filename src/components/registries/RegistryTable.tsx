@@ -62,7 +62,7 @@ export function RegistryTable({
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="text-lg font-heading font-semibold">{title}</h2>
-          {description && <p className="text-xs text-white/40 mt-0.5">{description}</p>}
+          {description && <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>}
         </div>
         <Button
           onClick={onAdd}
@@ -75,12 +75,12 @@ export function RegistryTable({
       {/* Search */}
       <div className="mb-4">
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
           <Input
             placeholder="Buscar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-white/[0.05] border-white/[0.1] rounded-xl h-9 text-sm placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
+            className="pl-9 bg-white/[0.05] border-border rounded-xl h-9 text-sm placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -90,11 +90,11 @@ export function RegistryTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06]">
+              <tr className="border-b border-border">
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={`text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider ${col.className || ""}`}
+                    className={`text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider ${col.className || ""}`}
                   >
                     {col.label}
                   </th>
@@ -105,7 +105,7 @@ export function RegistryTable({
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length + 1} className="p-8 text-center text-white/30 text-sm">
+                  <td colSpan={columns.length + 1} className="p-8 text-center text-muted-foreground/50 text-sm">
                     Nenhum registro encontrado
                   </td>
                 </tr>
@@ -123,24 +123,24 @@ export function RegistryTable({
                     <td className="p-3.5">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors">
+                          <button className="p-1.5 rounded-lg hover:bg-white/[0.06] text-muted-foreground/50 hover:text-muted-foreground transition-colors">
                             <MoreHorizontal className="h-4 w-4" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-[#271c1d] border-white/[0.1] text-white min-w-[140px]"
+                          className="bg-popover border-border text-foreground min-w-[140px]"
                         >
                           <DropdownMenuItem
                             onClick={() => onEdit(item)}
-                            className="gap-2 text-sm cursor-pointer focus:bg-white/[0.06] focus:text-white"
+                            className="gap-2 text-sm cursor-pointer focus:bg-white/[0.06] focus:text-foreground"
                           >
                             <Pencil className="h-3.5 w-3.5" /> Editar
                           </DropdownMenuItem>
                           {onToggleStatus && (
                             <DropdownMenuItem
                               onClick={() => onToggleStatus(item)}
-                              className="gap-2 text-sm cursor-pointer focus:bg-white/[0.06] focus:text-white"
+                              className="gap-2 text-sm cursor-pointer focus:bg-white/[0.06] focus:text-foreground"
                             >
                               {item.status === "ativo" ? (
                                 <><ToggleLeft className="h-3.5 w-3.5" /> Desativar</>

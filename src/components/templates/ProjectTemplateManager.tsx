@@ -211,16 +211,16 @@ export function ProjectTemplateManager() {
           <p className="text-sm text-muted-foreground">Projetos pré-definidos com tarefas e subtarefas</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+          <div className="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-border">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white"}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-primary/20 text-primary" : "text-muted-foreground/70 hover:text-foreground"}`}
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-white/40 hover:text-white"}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground/70 hover:text-foreground"}`}
             >
               <List className="h-4 w-4" />
             </button>

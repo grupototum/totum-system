@@ -190,10 +190,10 @@ export default function Registries() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
       {/* Left Sub-Navigation */}
-      <aside className="w-64 shrink-0 border-r border-white/[0.06] overflow-y-auto scrollbar-thin bg-white/[0.01]">
+      <aside className="w-64 shrink-0 border-r border-border overflow-y-auto scrollbar-thin bg-white/[0.01]">
         <div className="p-5">
-          <h2 className="font-heading text-sm font-semibold text-white/80 mb-1">Cadastros & Config</h2>
-          <p className="text-[10px] text-white/30">Base estrutural do ERP</p>
+          <h2 className="font-heading text-sm font-semibold text-foreground mb-1">Cadastros & Config</h2>
+          <p className="text-[10px] text-muted-foreground/50">Base estrutural do ERP</p>
         </div>
 
         <nav className="px-2 pb-4">
@@ -207,8 +207,8 @@ export default function Registries() {
                   onClick={() => setGroup(group.key)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isGroupActive
-                      ? "bg-white/[0.06] text-white"
-                      : "text-white/50 hover:bg-white/[0.04] hover:text-white/70"
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:bg-white/[0.04] hover:text-foreground/70"
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -229,11 +229,11 @@ export default function Registries() {
                         className={`w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors ${
                           activeRegistry.key === reg.key
                             ? "text-primary font-medium bg-primary/[0.08]"
-                            : "text-white/40 hover:text-white/60 hover:bg-white/[0.03]"
+                            : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-white/[0.03]"
                         }`}
                       >
                         {reg.label}
-                        {!registryTableMap[reg.key] && <span className="text-[9px] text-white/20 ml-1">(local)</span>}
+                        {!registryTableMap[reg.key] && <span className="text-[9px] text-muted-foreground/40 ml-1">(local)</span>}
                       </button>
                     ))}
                   </motion.div>

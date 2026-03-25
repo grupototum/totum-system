@@ -78,7 +78,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-lg max-h-[80vh] overflow-y-auto scrollbar-thin">
+      <DialogContent className="bg-card border-border text-foreground max-w-lg max-h-[80vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -89,14 +89,14 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
         {!generated ? (
           <div className="space-y-4 mt-2">
             <div>
-              <label className="text-xs text-white/40 mb-1.5 block">Selecione o cliente</label>
+              <label className="text-xs text-muted-foreground/70 mb-1.5 block">Selecione o cliente</label>
               <Select value={selectedClient} onValueChange={setSelectedClient}>
-                <SelectTrigger className="bg-white/[0.05] border-white/[0.1] rounded-xl h-10 text-sm focus:border-primary/50">
+                <SelectTrigger className="bg-white/[0.05] border-border rounded-xl h-10 text-sm focus:border-primary/50">
                   <SelectValue placeholder="Escolher cliente" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+                <SelectContent className="bg-popover border-border text-foreground">
                   {clientPlans.map((c) => (
-                    <SelectItem key={c.clientId} value={c.clientId} className="focus:bg-white/[0.06] focus:text-white">
+                    <SelectItem key={c.clientId} value={c.clientId} className="focus:bg-white/[0.06] focus:text-foreground">
                       {c.clientName} — {c.planName}
                     </SelectItem>
                   ))}
@@ -108,9 +108,9 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]"
+                className="p-4 rounded-xl bg-white/[0.03] border border-border"
               >
-                <p className="text-xs text-white/50 mb-3">
+                <p className="text-xs text-muted-foreground mb-3">
                   Modelo de entregas do plano <span className="text-white font-medium">{model.planName}</span> — {model.items.length} entregas
                 </p>
                 <div className="space-y-1.5">
@@ -118,7 +118,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                     <div key={item.id} className="flex items-center gap-2 text-xs">
                       <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[item.suggestedPriority].dot}`} />
                       <span className="flex-1">{item.name}</span>
-                      <span className="text-white/20 text-[10px]">{item.type}</span>
+                      <span className="text-muted-foreground/40 text-[10px]">{item.type}</span>
                     </div>
                   ))}
                 </div>
@@ -142,7 +142,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 <span className="text-sm font-medium text-emerald-400">{previewTasks.length} tarefas prontas para criar</span>
               </div>
-              <p className="text-xs text-white/50">
+              <p className="text-xs text-muted-foreground">
                 As tarefas serão criadas como "Pendente", sem datas definidas. O gestor pode ajustar responsáveis, datas e títulos após a criação.
               </p>
             </div>
@@ -153,7 +153,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                   <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
                   <span className="flex-1 font-medium">{task.title}</span>
                   {task.responsible && (
-                    <span className="text-white/30">{task.responsible.split(" ")[0]}</span>
+                    <span className="text-muted-foreground/50">{task.responsible.split(" ")[0]}</span>
                   )}
                 </div>
               ))}
@@ -163,7 +163,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
               <Button
                 variant="ghost"
                 onClick={() => setGenerated(false)}
-                className="text-white/60 hover:text-white hover:bg-white/[0.06]"
+                className="text-muted-foreground hover:text-foreground hover:bg-white/[0.06]"
               >
                 Voltar
               </Button>

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const statusColors: Record<string, string> = {
   ativo: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  inativo: "bg-white/[0.06] text-white/40 border-white/[0.08]",
+  inativo: "bg-white/[0.06] text-muted-foreground/70 border-border",
   bloqueado: "bg-red-500/15 text-red-400 border-red-500/30",
   pendente: "bg-amber-500/15 text-amber-400 border-amber-500/30",
 };
@@ -62,7 +62,7 @@ export default function Team() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Equipe</h1>
-          <p className="text-sm text-white/50 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {profiles.length} membros · {activeCount} ativos
           </p>
         </div>
@@ -75,15 +75,15 @@ export default function Team() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome ou email..."
-            className="bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-sm pl-9 focus:border-primary/50"
+            className="bg-white/[0.05] border-border rounded-lg h-9 text-sm pl-9 focus:border-primary/50"
           />
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs w-[140px]">
+          <SelectTrigger className="bg-white/[0.05] border-border rounded-lg h-9 text-xs w-[140px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+          <SelectContent className="bg-popover border-border text-foreground">
             <SelectItem value="all" className="text-xs">Todos</SelectItem>
             <SelectItem value="ativo" className="text-xs">Ativos</SelectItem>
             <SelectItem value="inativo" className="text-xs">Inativos</SelectItem>
@@ -98,7 +98,7 @@ export default function Team() {
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-white/30">Nenhum membro encontrado</div>
+        <div className="text-center py-20 text-muted-foreground/50">Nenhum membro encontrado</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((member) => {
@@ -124,17 +124,17 @@ export default function Team() {
                     <h3 className="font-semibold group-hover:text-primary transition-colors truncate">
                       {member.full_name}
                     </h3>
-                    <p className="text-sm text-white/40">{roleName}</p>
+                    <p className="text-sm text-muted-foreground/70">{roleName}</p>
                   </div>
                   <Badge variant="outline" className={`text-[10px] shrink-0 ${statusCls}`}>
                     {member.status}
                   </Badge>
                 </div>
-                <div className="space-y-2 text-xs text-white/40">
+                <div className="space-y-2 text-xs text-muted-foreground/70">
                   <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{member.email}</span></div>
                   <div className="flex items-center gap-2"><Briefcase className="h-3.5 w-3.5 shrink-0" /> {deptName}</div>
                   {member.phone && (
-                    <div className="flex items-center gap-2 text-white/30">{member.phone}</div>
+                    <div className="flex items-center gap-2 text-muted-foreground/50">{member.phone}</div>
                   )}
                 </div>
               </motion.div>

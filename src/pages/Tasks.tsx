@@ -243,20 +243,20 @@ export default function Tasks() {
           <h1 className="text-2xl font-heading font-bold tracking-tight">
             {showArchived ? "Tarefas Arquivadas" : "Tarefas"}
           </h1>
-          <p className="text-sm text-white/50 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {showArchived ? (
               <span>{archivedCount} tarefa{archivedCount !== 1 ? "s" : ""} arquivada{archivedCount !== 1 ? "s" : ""}</span>
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-white/70 font-medium">
+                  <span className="text-foreground/70 font-medium">
                     {activeTasks.filter(t => t.status === 'concluido').length} de {activeTasks.length} concluídas
                   </span>
-                  <span className="text-white/20">·</span>
+                  <span className="text-muted-foreground/40">·</span>
                   <span>{pendingTasks} pendentes</span>
                   {overdueTasks > 0 && (
                     <>
-                      <span className="text-white/20">·</span>
+                      <span className="text-muted-foreground/40">·</span>
                       <span className="text-red-400">{overdueTasks} atrasada{overdueTasks > 1 ? "s" : ""}</span>
                     </>
                   )}
@@ -277,10 +277,10 @@ export default function Tasks() {
           <Button
             onClick={() => setShowArchived(!showArchived)}
             variant="outline"
-            className={`gap-2 rounded-full px-4 text-sm border-white/[0.1] ${
+            className={`gap-2 rounded-full px-4 text-sm border-border ${
               showArchived 
                 ? "bg-primary/10 text-primary border-primary/20" 
-                : "bg-white/[0.04] hover:bg-white/[0.08] text-white"
+                : "bg-muted/40 hover:bg-muted/80 text-foreground"
             }`}
           >
             <Archive className="h-4 w-4" />
@@ -297,7 +297,7 @@ export default function Tasks() {
               <Button
                 onClick={() => setGenerateOpen(true)}
                 variant="outline"
-                className="gap-2 rounded-full px-4 text-sm border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-white"
+                className="gap-2 rounded-full px-4 text-sm border-border bg-muted/40 hover:bg-muted/80 text-foreground"
               >
                 <Sparkles className="h-4 w-4 text-primary" /> Gerar do Plano
               </Button>
@@ -308,7 +308,7 @@ export default function Tasks() {
 
       {/* View Toggle + Filters */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit overflow-x-auto">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-border w-fit overflow-x-auto">
           {viewButtons.map((v) => (
             <button
               key={v.key}
@@ -316,7 +316,7 @@ export default function Tasks() {
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
                 view === v.key
                   ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
-                  : "text-white/40 hover:text-white/60 hover:bg-white/[0.04] border border-transparent"
+                  : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-white/[0.04] border border-transparent"
               }`}
             >
               <v.icon className="h-3.5 w-3.5" />
@@ -377,7 +377,7 @@ export default function Tasks() {
           {view === "templates" && (
             <div className="mt-4">
               <Tabs defaultValue="projects" className="space-y-4">
-                <TabsList className="bg-white/[0.04] border border-white/[0.1]">
+                <TabsList className="bg-white/[0.04] border border-border">
                   <TabsTrigger value="projects">Templates de Projeto</TabsTrigger>
                   <TabsTrigger value="tasks">Templates de Tarefa</TabsTrigger>
                 </TabsList>

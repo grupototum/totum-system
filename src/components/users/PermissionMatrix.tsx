@@ -66,16 +66,16 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
           <Input
             placeholder="Buscar permissão..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-8 text-xs placeholder:text-white/30"
+            className="pl-8 bg-white/[0.05] border-border rounded-lg h-8 text-xs placeholder:text-muted-foreground/50"
           />
         </div>
-        <button onClick={expandAll} className="text-[10px] text-white/30 hover:text-white/50 px-2">Expandir tudo</button>
-        <button onClick={collapseAll} className="text-[10px] text-white/30 hover:text-white/50 px-2">Recolher</button>
+        <button onClick={expandAll} className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground px-2">Expandir tudo</button>
+        <button onClick={collapseAll} className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground px-2">Recolher</button>
       </div>
 
       <div className="space-y-1">
@@ -92,9 +92,9 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
                 onClick={() => toggle(cat.key)}
                 className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.03] transition-colors"
               >
-                <ChevronRight className={cn("h-3.5 w-3.5 text-white/30 transition-transform", isOpen && "rotate-90")} />
+                <ChevronRight className={cn("h-3.5 w-3.5 text-muted-foreground/50 transition-transform", isOpen && "rotate-90")} />
                 <span className="text-sm font-semibold flex-1">{cat.label}</span>
-                <span className="text-[10px] text-white/20 font-heading mr-2">{checked}/{total}</span>
+                <span className="text-[10px] text-muted-foreground/40 font-heading mr-2">{checked}/{total}</span>
                 {!readOnly && (
                   <Checkbox
                     checked={allChecked}
@@ -112,7 +112,7 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
                 <div className="border-t border-white/[0.04]">
                   {cat.subcategories.map((sub) => (
                     <div key={sub.key} className="flex items-center gap-3 px-4 py-2.5 border-b border-white/[0.03] last:border-0 hover:bg-white/[0.02]">
-                      <span className="text-xs text-white/70 min-w-[180px]">{sub.label}</span>
+                      <span className="text-xs text-foreground/70 min-w-[180px]">{sub.label}</span>
                       <div className="flex items-center gap-3 flex-wrap flex-1">
                         {sub.actions.map((act) => {
                           const key = permKey(sub.key, act);
@@ -123,7 +123,7 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
                               className={cn(
                                 "flex items-center gap-1.5 text-[11px] cursor-pointer select-none transition-colors",
                                 readOnly && "pointer-events-none",
-                                isChecked ? "text-white/70" : "text-white/25"
+                                isChecked ? "text-foreground/70" : "text-muted-foreground/30"
                               )}
                             >
                               <Checkbox

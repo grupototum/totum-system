@@ -10,7 +10,7 @@ import { format } from "date-fns";
 const statusColors: Record<string, string> = {
   pendente: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   em_andamento: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  pausado: "bg-white/10 text-white/50 border-white/20",
+  pausado: "bg-white/10 text-muted-foreground border-white/20",
   concluido: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
 };
 
@@ -34,7 +34,7 @@ export default function Projects() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Projetos</h1>
-          <p className="text-sm text-white/50 mt-1">{inProgressCount} em andamento · {projects.length} total</p>
+          <p className="text-sm text-muted-foreground mt-1">{inProgressCount} em andamento · {projects.length} total</p>
         </div>
         <Button onClick={() => setShowForm(true)} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
           <Plus className="h-4 w-4" /> Novo Projeto
@@ -46,7 +46,7 @@ export default function Projects() {
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-20 text-white/30">Nenhum projeto encontrado</div>
+        <div className="text-center py-20 text-muted-foreground/50">Nenhum projeto encontrado</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {projects.map((project) => (
@@ -62,7 +62,7 @@ export default function Projects() {
                   <Briefcase className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[project.status] || "bg-white/10 text-white/50"}`}>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusColors[project.status] || "bg-white/10 text-muted-foreground"}`}>
                     {statusLabels[project.status] || project.status}
                   </span>
                   <Button
@@ -76,8 +76,8 @@ export default function Projects() {
                 </div>
               </div>
               <h3 className="font-semibold mb-1">{project.name}</h3>
-              <p className="text-sm text-white/50 mb-4">{(project.clients as any)?.name || "—"}</p>
-              <div className="flex items-center gap-4 text-xs text-white/40">
+              <p className="text-sm text-muted-foreground mb-4">{(project.clients as any)?.name || "—"}</p>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground/70">
                 {(project.project_types as any)?.name && (
                   <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {(project.project_types as any).name}</span>
                 )}

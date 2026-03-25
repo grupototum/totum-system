@@ -50,14 +50,14 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-between w-full bg-white/[0.05] border border-white/[0.1] rounded-lg h-9 px-3 text-xs text-left focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
+        className="flex items-center justify-between w-full bg-white/[0.05] border border-border rounded-lg h-9 px-3 text-xs text-left focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-colors"
       >
-        <span className={cn("truncate", isAll ? "text-white/50" : "text-white")}>{displayText}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 ml-2 text-white/30 transition-transform", open && "rotate-180")} />
+        <span className={cn("truncate", isAll ? "text-muted-foreground" : "text-foreground")}>{displayText}</span>
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 ml-2 text-muted-foreground/50 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-[#271c1d] border border-white/[0.1] rounded-lg shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100">
+        <div className="absolute z-50 mt-1 w-full bg-popover border border-border rounded-lg shadow-xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-100">
           <div className="max-h-48 overflow-y-auto scrollbar-thin py-1">
             {/* All option */}
             <button
@@ -71,9 +71,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
               )}>
                 {isAll && <Check className="h-2.5 w-2.5 text-white" />}
               </div>
-              <span className={isAll ? "text-white font-medium" : "text-white/60"}>{allLabel}</span>
+              <span className={isAll ? "text-white font-medium" : "text-muted-foreground"}>{allLabel}</span>
               {totalCount !== undefined && (
-                <span className="ml-auto text-[10px] text-white/30 tabular-nums">{totalCount}</span>
+                <span className="ml-auto text-[10px] text-muted-foreground/50 tabular-nums">{totalCount}</span>
               )}
             </button>
 
@@ -92,9 +92,9 @@ export function MultiSelect({ options, selected, onChange, placeholder = "Todos"
                   )}>
                     {checked && <Check className="h-2.5 w-2.5 text-white" />}
                   </div>
-                  <span className={checked ? "text-white font-medium" : "text-white/60"}>{opt.label}</span>
+                  <span className={checked ? "text-white font-medium" : "text-muted-foreground"}>{opt.label}</span>
                   {opt.count !== undefined && (
-                    <span className="ml-auto text-[10px] text-white/30 tabular-nums">{opt.count}</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground/50 tabular-nums">{opt.count}</span>
                   )}
                 </button>
               );

@@ -46,11 +46,11 @@ export function RoleFormDialog({ open, onOpenChange, role, onSave }: RoleFormDia
     onOpenChange(false);
   };
 
-  const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50";
+  const inputCls = "bg-white/[0.05] border-border rounded-lg h-9 text-xs focus:border-primary/50";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-3xl max-h-[85vh] overflow-y-auto scrollbar-thin">
+      <DialogContent className="bg-card border-border text-foreground max-w-3xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">{role ? "Editar Cargo" : "Novo Cargo"}</DialogTitle>
         </DialogHeader>
@@ -58,23 +58,23 @@ export function RoleFormDialog({ open, onOpenChange, role, onSave }: RoleFormDia
         <div className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Nome do Cargo *</label>
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Nome do Cargo *</label>
               <Input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Ex: Gestor de Projetos" />
             </div>
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Descrição</label>
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} placeholder="Breve descrição do cargo" />
             </div>
           </div>
 
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-2 block">Permissões</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Permissões</label>
             <PermissionMatrix permissions={permissions} onChange={setPermissions} />
           </div>
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white/50 hover:text-white hover:bg-white/[0.06]">Cancelar</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-foreground hover:bg-white/[0.06]">Cancelar</Button>
           <Button onClick={handleSave} disabled={!name.trim()} className="gradient-primary border-0 text-white font-semibold rounded-full px-6">
             {role ? "Salvar" : "Criar Cargo"}
           </Button>

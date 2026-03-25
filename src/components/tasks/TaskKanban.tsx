@@ -33,7 +33,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
             <div className="flex items-center gap-2 mb-3 px-1">
               <div className={`h-2 w-2 rounded-full ${col.status === "pendente" ? "bg-white/30" : col.status === "em_andamento" ? "bg-blue-500" : col.status === "pausado" ? "bg-amber-500" : "bg-emerald-500"}`} />
               <span className={`text-xs font-semibold uppercase tracking-wider ${col.color}`}>{col.label}</span>
-              <span className="text-[10px] text-white/20 font-heading">{col.tasks.length}</span>
+              <span className="text-[10px] text-muted-foreground/40 font-heading">{col.tasks.length}</span>
             </div>
 
             <Droppable droppableId={col.status}>
@@ -69,7 +69,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                             
                             <div className="flex items-center gap-1.5 mb-2 pl-1">
                               <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
-                              <span className="text-[10px] text-white/30 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
+                              <span className="text-[10px] text-muted-foreground/50 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
                               {(task.isRecurring || task.parentTaskId) && (
                                 <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? recurrenceLabels[task.recurrenceType] : ''}` : 'Ocorrência de tarefa recorrente'}>
                                   <RefreshCw className="h-3 w-3" />
@@ -77,24 +77,24 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                               )}
                             </div>
                             
-                            <p className="text-sm font-semibold mb-2 line-clamp-2 pl-1 text-white/90 group-hover:text-white transition-colors">{task.title}</p>
+                            <p className="text-sm font-semibold mb-2 line-clamp-2 pl-1 text-foreground group-hover:text-foreground transition-colors">{task.title}</p>
                             
                             <div className="flex items-center justify-between pl-1">
                               {task.responsible ? (
-                                <span className="text-[10px] text-white/40 flex items-center gap-1.5">
-                                  <Avatar className="h-4 w-4 border border-white/10">
+                                <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1.5">
+                                  <Avatar className="h-4 w-4 border border-border">
                                     {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
-                                    <AvatarFallback className="text-[6px] bg-white/[0.1] text-white/50">{task.responsible[0]}</AvatarFallback>
+                                    <AvatarFallback className="text-[6px] bg-white/[0.1] text-muted-foreground">{task.responsible[0]}</AvatarFallback>
                                   </Avatar>
                                   {task.responsible.split(" ")[0]}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-white/20">Sem responsável</span>
+                                <span className="text-[10px] text-muted-foreground/40">Sem responsável</span>
                               )}
                               
                               {task.dueDate && (
                                 <span className={`text-[10px] flex items-center gap-1 font-heading ${
-                                  isOverdue ? "text-red-400 font-bold" : "text-white/30"
+                                  isOverdue ? "text-red-400 font-bold" : "text-muted-foreground/50"
                                 }`}>
                                   <Clock className="h-3 w-3" />
                                   {new Date(task.dueDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
@@ -112,7 +112,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                                     transition={{ duration: 0.5 }}
                                   />
                                 </div>
-                                <span className="text-[10px] text-white/40 font-heading">
+                                <span className="text-[10px] text-muted-foreground/70 font-heading">
                                   {task.checklist.filter((c) => c.completed).length}/{task.checklist.length}
                                 </span>
                               </div>

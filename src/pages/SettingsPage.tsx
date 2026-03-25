@@ -96,10 +96,10 @@ function ProfileTab() {
           <Label>Cargo / Papel</Label>
           {canChangeRole ? (
             <Select value={roleId} onValueChange={setRoleId}>
-              <SelectTrigger className="bg-white/[0.05] border-white/[0.1] rounded-lg">
+              <SelectTrigger className="bg-white/[0.05] border-border rounded-lg">
                 <SelectValue placeholder="Selecione o cargo" />
               </SelectTrigger>
-              <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
+              <SelectContent className="bg-popover border-border text-foreground">
                 {roles.map((r) => (
                   <SelectItem key={r.id} value={r.id} className="text-xs">
                     {r.name}

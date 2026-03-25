@@ -70,49 +70,49 @@ export function TaskFilters({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
         {/* Busca */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Buscar</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Buscar</label>
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
             <Input
               placeholder="Buscar tarefas..."
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-8 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs placeholder:text-white/30 focus:border-primary/50 focus:ring-primary/20"
+              className="pl-8 bg-white/[0.05] border-border rounded-lg h-9 text-xs placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
         </div>
 
         {/* Cliente */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Cliente</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Cliente</label>
           <MultiSelect options={clientOptions} selected={clientFilter} onChange={onClientFilterChange} allLabel="Todos os clientes" />
         </div>
 
         {/* Status */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Status</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Status</label>
           <MultiSelect options={statusOptions} selected={statusFilter} onChange={onStatusFilterChange} allLabel="Todos os status" />
         </div>
 
         {/* Prioridade */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Prioridade</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Prioridade</label>
           <MultiSelect options={priorityOptions} selected={priorityFilter} onChange={onPriorityFilterChange} allLabel="Todas" />
         </div>
 
         {/* Tipo */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Tipo</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Tipo</label>
           <MultiSelect options={typeOptions} selected={typeFilter} onChange={onTypeFilterChange} allLabel="Todos os tipos" />
         </div>
 
         {/* Responsável */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Responsável</label>
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Responsável</label>
           <div className="flex items-center gap-2">
             <MultiSelect options={responsibleOptions} selected={responsibleFilter} onChange={onResponsibleFilterChange} allLabel="Todos" />
             {hasFilters && (
-              <button onClick={clearAll} className="shrink-0 flex items-center gap-1 text-[10px] text-white/40 hover:text-white/60 transition-colors p-1.5 rounded-md hover:bg-white/[0.04]" title="Limpar filtros">
+              <button onClick={clearAll} className="shrink-0 flex items-center gap-1 text-[10px] text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1.5 rounded-md hover:bg-white/[0.04]" title="Limpar filtros">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}

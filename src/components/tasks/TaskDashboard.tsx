@@ -94,7 +94,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
   const maxDayTasks = Math.max(...byDay.map((d) => d.total), 1);
 
   const metricCards = [
-    { label: "Total", value: stats.total, icon: ListTodo, color: "text-white/70", bg: "bg-white/[0.06]" },
+    { label: "Total", value: stats.total, icon: ListTodo, color: "text-foreground/70", bg: "bg-white/[0.06]" },
     { label: "Pendentes", value: stats.pending, icon: Clock, color: "text-amber-400", bg: "bg-amber-500/10" },
     { label: "Em andamento", value: stats.inProgress, icon: TrendingUp, color: "text-blue-400", bg: "bg-blue-500/10" },
     { label: "Concluídas", value: stats.completed, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/10" },
@@ -111,18 +111,18 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
       {/* User Selector */}
       <div className="glass-card rounded-xl p-4 flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-white/40" />
-          <label className="text-xs font-medium text-white/50">Filtrar por usuário:</label>
+          <User className="h-4 w-4 text-muted-foreground/70" />
+          <label className="text-xs font-medium text-muted-foreground">Filtrar por usuário:</label>
         </div>
         <Select value={selectedUser} onValueChange={setSelectedUser}>
-          <SelectTrigger className="w-56 bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs">
+          <SelectTrigger className="w-56 bg-white/[0.05] border-border rounded-lg h-9 text-xs">
             <SelectValue placeholder="Todos os usuários" />
           </SelectTrigger>
-          <SelectContent className="bg-[#271c1d] border-white/[0.1] text-white">
-            <SelectItem value="all" className="text-xs focus:bg-white/[0.06] focus:text-white">Todos os usuários</SelectItem>
-            <SelectItem value="unassigned" className="text-xs focus:bg-white/[0.06] focus:text-white">Sem responsável</SelectItem>
+          <SelectContent className="bg-popover border-border text-foreground">
+            <SelectItem value="all" className="text-xs focus:bg-white/[0.06] focus:text-foreground">Todos os usuários</SelectItem>
+            <SelectItem value="unassigned" className="text-xs focus:bg-white/[0.06] focus:text-foreground">Sem responsável</SelectItem>
             {responsibles.map((r) => (
-              <SelectItem key={r.id} value={r.id} className="text-xs focus:bg-white/[0.06] focus:text-white">
+              <SelectItem key={r.id} value={r.id} className="text-xs focus:bg-white/[0.06] focus:text-foreground">
                 {r.name}
               </SelectItem>
             ))}
@@ -149,7 +149,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
               </div>
             </div>
             <p className="text-xl font-heading font-bold">{m.value}</p>
-            <p className="text-[10px] text-white/40 uppercase tracking-wider mt-0.5">{m.label}</p>
+            <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mt-0.5">{m.label}</p>
           </div>
         ))}
       </div>
@@ -157,7 +157,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Timeline Chart */}
         <div className="glass-card rounded-xl p-5">
-          <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <Clock className="h-3.5 w-3.5" /> Tarefas por Dia
           </h3>
           <div className="flex items-end gap-1 h-32">
@@ -178,14 +178,14 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                     </div>
                   )}
                 </div>
-                <span className="text-[8px] text-white/30 font-heading">{day.label}</span>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#271c1d] border border-white/[0.1] rounded px-2 py-1 text-[9px] text-white/70 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-10">
+                <span className="text-[8px] text-muted-foreground/50 font-heading">{day.label}</span>
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover border border-border rounded px-2 py-1 text-[9px] text-foreground/70 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-10">
                   {day.total} tarefa{day.total !== 1 ? "s" : ""}
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex items-center gap-4 mt-3 text-[9px] text-white/30">
+          <div className="flex items-center gap-4 mt-3 text-[9px] text-muted-foreground/50">
             <span className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-primary/40" /> Total</span>
             <span className="flex items-center gap-1"><span className="h-2 w-2 rounded bg-red-500/50" /> Atrasadas</span>
           </div>
@@ -193,7 +193,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
 
         {/* By Responsible (always shows all users) */}
         <div className="glass-card rounded-xl p-5">
-          <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <Users className="h-3.5 w-3.5" /> Ranking por Responsável
           </h3>
           <div className="space-y-2.5 max-h-[200px] overflow-y-auto scrollbar-thin">
@@ -208,7 +208,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium truncate">{r.name}</span>
-                      <span className="text-[10px] text-white/40 font-heading shrink-0 ml-2">{r.completed}/{r.total}</span>
+                      <span className="text-[10px] text-muted-foreground/70 font-heading shrink-0 ml-2">{r.completed}/{r.total}</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                       <div className="h-full rounded-full bg-emerald-500/50 transition-all" style={{ width: `${rate}%` }} />
@@ -227,9 +227,9 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
       {/* Critical Tasks */}
       {criticalTasks.length > 0 && (
         <div className="glass-card rounded-xl p-5">
-          <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <AlertTriangle className="h-3.5 w-3.5" /> Tarefas Críticas
-            {selectedUser !== "all" && <span className="text-white/30 normal-case font-normal">— {selectedUserInfo?.name || "Sem responsável"}</span>}
+            {selectedUser !== "all" && <span className="text-muted-foreground/50 normal-case font-normal">— {selectedUserInfo?.name || "Sem responsável"}</span>}
           </h3>
           <div className="space-y-2 max-h-[180px] overflow-y-auto scrollbar-thin">
             {criticalTasks.map((t) => {
@@ -239,10 +239,10 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
                   <div className={`h-1.5 w-1.5 rounded-full shrink-0 ${isOverdue ? "bg-red-500" : "bg-amber-500"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{t.title}</p>
-                    <p className="text-[10px] text-white/30">{t.clientName} · {t.responsible || "Sem responsável"}</p>
+                    <p className="text-[10px] text-muted-foreground/50">{t.clientName} · {t.responsible || "Sem responsável"}</p>
                   </div>
                   {t.dueDate && (
-                    <span className={`text-[10px] font-heading shrink-0 ${isOverdue ? "text-red-400" : "text-white/30"}`}>
+                    <span className={`text-[10px] font-heading shrink-0 ${isOverdue ? "text-red-400" : "text-muted-foreground/50"}`}>
                       {new Date(t.dueDate).toLocaleDateString("pt-BR")}
                     </span>
                   )}

@@ -136,7 +136,7 @@ export function ClientHubContracts({ clientId }: Props) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-white/40 hover:text-primary hover:bg-primary/10"
+                    className="h-7 w-7 text-muted-foreground/70 hover:text-primary hover:bg-primary/10"
                     onClick={() => handleOpenEdit(c)}
                   >
                     <Pencil className="h-3.5 w-3.5" />

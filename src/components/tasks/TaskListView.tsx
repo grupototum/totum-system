@@ -16,19 +16,19 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.06]">
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Tarefa</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Cliente</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Responsável</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prioridade</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Status</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Prazo</th>
-              <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">{showUnarchive ? "Ação" : "Progresso"}</th>
+            <tr className="border-b border-border">
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Tarefa</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Cliente</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Responsável</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Prioridade</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Status</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Prazo</th>
+              <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">{showUnarchive ? "Ação" : "Progresso"}</th>
             </tr>
           </thead>
           <tbody>
             {tasks.length === 0 ? (
-              <tr><td colSpan={7} className="p-8 text-center text-white/30">Nenhuma tarefa encontrada</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-muted-foreground/50">Nenhuma tarefa encontrada</td></tr>
             ) : (
               tasks.map((task) => {
                 const st = statusConfig[task.status];
@@ -53,10 +53,10 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                         )}
                       </div>
                     </td>
-                    <td className="p-3.5 text-white/60 text-xs">{task.clientName}</td>
+                    <td className="p-3.5 text-muted-foreground text-xs">{task.clientName}</td>
                     <td className="p-3.5">
                       {task.responsible ? (
-                        <span className="text-xs text-white/60 flex items-center gap-1.5">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                           <Avatar className="h-5 w-5">
                             {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
                             <AvatarFallback className="text-[7px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
@@ -64,7 +64,7 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                           {task.responsible}
                         </span>
                       ) : (
-                        <span className="text-xs text-white/20">—</span>
+                        <span className="text-xs text-muted-foreground/40">—</span>
                       )}
                     </td>
                     <td className="p-3.5">
@@ -77,11 +77,11 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                     </td>
                     <td className="p-3.5">
                       {task.dueDate ? (
-                        <span className={`text-xs font-heading ${isOverdue ? "text-red-400" : "text-white/50"}`}>
+                        <span className={`text-xs font-heading ${isOverdue ? "text-red-400" : "text-muted-foreground"}`}>
                           {new Date(task.dueDate).toLocaleDateString("pt-BR")}
                         </span>
                       ) : (
-                        <span className="text-xs text-white/20">—</span>
+                        <span className="text-xs text-muted-foreground/40">—</span>
                       )}
                     </td>
                     <td className="p-3.5">
@@ -89,7 +89,7 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                         <Button
                           size="sm"
                           variant="outline"
-                          className="gap-1.5 text-xs border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08]"
+                          className="gap-1.5 text-xs border-border bg-white/[0.04] hover:bg-white/[0.08]"
                           onClick={(e) => {
                             e.stopPropagation();
                             onUnarchive?.(task.id);
@@ -103,10 +103,10 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
                           <div className="w-12 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                             <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${checkProgress}%` }} />
                           </div>
-                          <span className="text-[10px] text-white/40 font-heading">{checkProgress}%</span>
+                          <span className="text-[10px] text-muted-foreground/70 font-heading">{checkProgress}%</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-white/20">—</span>
+                        <span className="text-xs text-muted-foreground/40">—</span>
                       )}
                     </td>
                   </tr>

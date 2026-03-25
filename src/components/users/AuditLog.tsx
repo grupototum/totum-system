@@ -10,24 +10,24 @@ export function AuditLog({ entries }: AuditLogProps) {
     <div className="space-y-2">
       {entries.length === 0 ? (
         <div className="glass-card rounded-xl p-12 flex flex-col items-center text-center">
-          <History className="h-10 w-10 text-white/15 mb-3" />
-          <p className="text-sm text-white/30">Nenhum registro de auditoria</p>
+          <History className="h-10 w-10 text-muted-foreground/20 mb-3" />
+          <p className="text-sm text-muted-foreground/50">Nenhum registro de auditoria</p>
         </div>
       ) : (
         <div className="glass-card rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06]">
-                <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Data/Hora</th>
-                <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Usuário</th>
-                <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Ação</th>
-                <th className="text-left p-3.5 text-xs font-medium text-white/40 uppercase tracking-wider">Detalhes</th>
+              <tr className="border-b border-border">
+                <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Data/Hora</th>
+                <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Usuário</th>
+                <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Ação</th>
+                <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Detalhes</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry) => (
                 <tr key={entry.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                  <td className="p-3.5 text-xs text-white/50 font-heading whitespace-nowrap">
+                  <td className="p-3.5 text-xs text-muted-foreground font-heading whitespace-nowrap">
                     {new Date(entry.createdAt).toLocaleDateString("pt-BR")}{" "}
                     {new Date(entry.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                   </td>
@@ -42,7 +42,7 @@ export function AuditLog({ entries }: AuditLogProps) {
                   <td className="p-3.5">
                     <span className="text-xs font-medium text-primary">{entry.action}</span>
                   </td>
-                  <td className="p-3.5 text-xs text-white/60 max-w-[400px] truncate">{entry.detail}</td>
+                  <td className="p-3.5 text-xs text-muted-foreground max-w-[400px] truncate">{entry.detail}</td>
                 </tr>
               ))}
             </tbody>

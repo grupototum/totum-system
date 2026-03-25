@@ -95,13 +95,13 @@ export function TaskCompletionDialog({
 
   if (!task) return null;
 
-  const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-sm focus:border-primary/50";
-  const selectContentCls = "bg-[#271c1d] border-white/[0.1] text-white";
+  const inputCls = "bg-white/[0.05] border-border rounded-lg h-9 text-sm focus:border-primary/50";
+  const selectContentCls = "bg-popover border-border text-foreground";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="bg-[#1e1516] border-white/[0.1] text-white max-w-lg"
+        className="bg-card border-border text-foreground max-w-lg"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => {
           if (decision === null) e.preventDefault();
@@ -113,8 +113,8 @@ export function TaskCompletionDialog({
             <span className="text-[10px] text-primary font-semibold uppercase tracking-wider">Etapa obrigatória</span>
           </div>
           <DialogTitle className="font-heading text-lg">Concluir Tarefa</DialogTitle>
-          <DialogDescription className="text-white/50 text-sm">
-            <span className="font-medium text-white/70">{task.title}</span>
+          <DialogDescription className="text-muted-foreground text-sm">
+            <span className="font-medium text-foreground/70">{task.title}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -128,33 +128,33 @@ export function TaskCompletionDialog({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-4 mt-2"
             >
-              <p className="text-sm text-white/70 font-medium">
+              <p className="text-sm text-foreground/70 font-medium">
                 Existe uma próxima ação para essa tarefa?
               </p>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   onClick={() => setDecision("next_action")}
-                  className="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-primary/[0.06] hover:border-primary/30 transition-all text-left group"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-border bg-white/[0.02] hover:bg-primary/[0.06] hover:border-primary/30 transition-all text-left group"
                 >
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                     <ArrowRight className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">Sim, existe próxima ação</p>
-                    <p className="text-xs text-white/40 mt-0.5">Criar uma subtarefa vinculada antes de concluir</p>
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">Criar uma subtarefa vinculada antes de concluir</p>
                   </div>
                 </button>
 
                 <button
                   onClick={() => setDecision("closed")}
-                  className="flex items-center gap-3 p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-emerald-500/[0.06] hover:border-emerald-500/30 transition-all text-left group"
+                  className="flex items-center gap-3 p-4 rounded-xl border border-border bg-white/[0.02] hover:bg-emerald-500/[0.06] hover:border-emerald-500/30 transition-all text-left group"
                 >
                   <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
                     <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold">Não, está concluída e encerrada</p>
-                    <p className="text-xs text-white/40 mt-0.5">A tarefa será finalizada sem ações adicionais</p>
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">A tarefa será finalizada sem ações adicionais</p>
                   </div>
                 </button>
               </div>
@@ -171,19 +171,19 @@ export function TaskCompletionDialog({
               className="space-y-4 mt-2"
             >
               <div>
-                <Label className="text-xs text-white/50 mb-1.5 block">
+                <Label className="text-xs text-muted-foreground mb-1.5 block">
                   Descreva brevemente como a tarefa foi resolvida
-                  <span className="text-white/30 ml-1">(opcional)</span>
+                  <span className="text-muted-foreground/50 ml-1">(opcional)</span>
                 </Label>
                 <Textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Ex: Cliente aprovou o material final..."
-                  className="bg-white/[0.05] border-white/[0.1] rounded-lg text-sm min-h-[80px] resize-none focus:border-primary/50 placeholder:text-white/20"
+                  className="bg-white/[0.05] border-border rounded-lg text-sm min-h-[80px] resize-none focus:border-primary/50 placeholder:text-muted-foreground/40"
                 />
               </div>
               <div className="flex items-center justify-between pt-2">
-                <Button variant="ghost" onClick={handleBack} className="text-white/40 hover:text-white hover:bg-white/[0.06] text-sm">
+                <Button variant="ghost" onClick={handleBack} className="text-muted-foreground/70 hover:text-foreground hover:bg-white/[0.06] text-sm">
                   ← Voltar
                 </Button>
                 <Button
@@ -207,10 +207,10 @@ export function TaskCompletionDialog({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-3 mt-2"
             >
-              <p className="text-xs text-white/40 uppercase tracking-wider font-semibold">Nova subtarefa vinculada</p>
+              <p className="text-xs text-muted-foreground/70 uppercase tracking-wider font-semibold">Nova subtarefa vinculada</p>
 
               <div>
-                <Label className="text-xs text-white/50 mb-1 block">Título *</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">Título *</Label>
                 <Input
                   value={nextAction.title}
                   onChange={(e) => setNextAction({ ...nextAction, title: e.target.value })}
@@ -221,18 +221,18 @@ export function TaskCompletionDialog({
               </div>
 
               <div>
-                <Label className="text-xs text-white/50 mb-1 block">Descrição</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">Descrição</Label>
                 <Textarea
                   value={nextAction.description}
                   onChange={(e) => setNextAction({ ...nextAction, description: e.target.value })}
                   placeholder="Opcional"
-                  className="bg-white/[0.05] border-white/[0.1] rounded-lg text-sm min-h-[60px] resize-none focus:border-primary/50 placeholder:text-white/20"
+                  className="bg-white/[0.05] border-border rounded-lg text-sm min-h-[60px] resize-none focus:border-primary/50 placeholder:text-muted-foreground/40"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-white/50 mb-1 block">Responsável</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Responsável</Label>
                   <Select
                     value={nextAction.responsible_id || "none"}
                     onValueChange={(v) => setNextAction({ ...nextAction, responsible_id: v === "none" ? "" : v })}
@@ -247,7 +247,7 @@ export function TaskCompletionDialog({
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-white/50 mb-1 block">Prioridade</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Prioridade</Label>
                   <Select
                     value={nextAction.priority}
                     onValueChange={(v) => setNextAction({ ...nextAction, priority: v as TaskPriority })}
@@ -263,7 +263,7 @@ export function TaskCompletionDialog({
               </div>
 
               <div>
-                <Label className="text-xs text-white/50 mb-1 block">Data de entrega</Label>
+                <Label className="text-xs text-muted-foreground mb-1 block">Data de entrega</Label>
                 <Input
                   type="date"
                   value={nextAction.due_date}
@@ -273,7 +273,7 @@ export function TaskCompletionDialog({
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <Button variant="ghost" onClick={handleBack} className="text-white/40 hover:text-white hover:bg-white/[0.06] text-sm">
+                <Button variant="ghost" onClick={handleBack} className="text-muted-foreground/70 hover:text-foreground hover:bg-white/[0.06] text-sm">
                   ← Voltar
                 </Button>
                 <Button

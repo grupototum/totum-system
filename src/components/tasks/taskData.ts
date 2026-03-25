@@ -88,7 +88,7 @@ export interface DeliveryModel {
 
 // Status config
 export const statusConfig: Record<TaskStatus, { label: string; color: string; bgColor: string }> = {
-  pendente: { label: "Pendente", color: "text-white/50", bgColor: "bg-white/[0.06]" },
+  pendente: { label: "Pendente", color: "text-muted-foreground", bgColor: "bg-white/[0.06]" },
   em_andamento: { label: "Em andamento", color: "text-blue-400", bgColor: "bg-blue-500/10" },
   pausado: { label: "Pausado", color: "text-amber-400", bgColor: "bg-amber-500/10" },
   concluido: { label: "Concluído", color: "text-emerald-400", bgColor: "bg-emerald-500/10" },
@@ -96,7 +96,7 @@ export const statusConfig: Record<TaskStatus, { label: string; color: string; bg
 };
 
 export const priorityConfig: Record<TaskPriority, { label: string; color: string; dot: string }> = {
-  baixa: { label: "Baixa", color: "text-white/40", dot: "bg-white/30" },
+  baixa: { label: "Baixa", color: "text-muted-foreground/70", dot: "bg-white/30" },
   media: { label: "Média", color: "text-blue-400", dot: "bg-blue-500" },
   alta: { label: "Alta", color: "text-amber-400", dot: "bg-amber-500" },
   urgente: { label: "Urgente", color: "text-red-400", dot: "bg-red-500" },

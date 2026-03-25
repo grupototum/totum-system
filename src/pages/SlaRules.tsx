@@ -10,7 +10,7 @@ import { useSlaRules, SlaRule } from "@/hooks/useSlaRules";
 import { SlaFormDialog } from "@/components/pop-sla/SlaFormDialog";
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
-  baixa: { label: "Baixa", color: "bg-white/10 text-white/50" },
+  baixa: { label: "Baixa", color: "bg-white/10 text-muted-foreground" },
   media: { label: "Média", color: "bg-blue-500/15 text-blue-400" },
   alta: { label: "Alta", color: "bg-amber-500/15 text-amber-400" },
   urgente: { label: "Urgente", color: "bg-red-500/15 text-red-400" },

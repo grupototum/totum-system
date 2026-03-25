@@ -80,7 +80,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-[#1e1516] border-white/10 text-white">
+      <DialogContent className="sm:max-w-md bg-card border-border text-foreground">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -92,7 +92,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Digite o nome..."
-              className="bg-white/[0.03] border-white/10"
+              className="bg-white/[0.03] border-border"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleSave();

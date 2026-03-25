@@ -20,10 +20,10 @@ interface UserFormDialogProps {
   onSave: (user: AppUser) => void;
 }
 
-const selectCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50";
-const selectContentCls = "bg-[#271c1d] border-white/[0.1] text-white";
-const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-white";
-const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-lg h-9 text-xs focus:border-primary/50";
+const selectCls = "bg-white/[0.05] border-border rounded-lg h-9 text-xs focus:border-primary/50";
+const selectContentCls = "bg-popover border-border text-foreground";
+const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-foreground";
+const inputCls = "bg-white/[0.05] border-border rounded-lg h-9 text-xs focus:border-primary/50";
 
 export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: UserFormDialogProps) {
   const [form, setForm] = useState<Partial<AppUser & { notes?: string }>>({});
@@ -58,29 +58,29 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1e1516] border-white/[0.1] text-white max-w-md">
+      <DialogContent className="bg-card border-border text-foreground max-w-md">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">{user ? "Editar Usuário" : "Novo Usuário"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3 mt-2">
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Nome completo *</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Nome completo *</label>
             <Input value={form.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputCls} placeholder="Nome do usuário" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Email *</label>
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Email *</label>
               <Input type="email" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputCls} placeholder="email@empresa.com" />
             </div>
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Telefone</label>
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Telefone</label>
               <Input value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className={inputCls} placeholder="(00) 00000-0000" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 flex items-center justify-between">
                 Cargo / Perfil *
                 <Button
                   type="button"
@@ -102,7 +102,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
               </Select>
             </div>
             <div>
-              <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 flex items-center justify-between">
                 Departamento
                 <Button
                   type="button"
@@ -125,7 +125,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
             </div>
           </div>
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Status</label>
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Status</label>
             <Select value={form.status || "ativo"} onValueChange={(v) => setForm({ ...form, status: v as UserStatus })}>
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className={selectContentCls}>
@@ -136,13 +136,13 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
             </Select>
           </div>
           <div>
-            <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Observações (Opcional)</label>
-            <Textarea value={(form as any).notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-white/[0.05] border-white/[0.1] rounded-lg text-xs focus:border-primary/50 resize-none" placeholder="Adicionar informações extras sobre o usuário..." rows={2} />
+            <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Observações (Opcional)</label>
+            <Textarea value={(form as any).notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="bg-white/[0.05] border-border rounded-lg text-xs focus:border-primary/50 resize-none" placeholder="Adicionar informações extras sobre o usuário..." rows={2} />
           </div>
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white/50 hover:text-white hover:bg-white/[0.06]">Cancelar</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-foreground hover:bg-white/[0.06]">Cancelar</Button>
           <Button onClick={handleSave} disabled={!form.name?.trim() || !form.email?.trim() || !form.roleId} className="gradient-primary border-0 text-white font-semibold rounded-full px-6">
             {user ? "Salvar" : "Criar Usuário"}
           </Button>

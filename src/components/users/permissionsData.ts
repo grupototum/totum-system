@@ -365,6 +365,6 @@ export const initialAudit: AuditEntry[] = [
 // Status config
 export const userStatusConfig: Record<UserStatus, { label: string; color: string; bg: string }> = {
   ativo: { label: "Ativo", color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  inativo: { label: "Inativo", color: "text-white/40", bg: "bg-white/[0.05]" },
+  inativo: { label: "Inativo", color: "text-muted-foreground/70", bg: "bg-white/[0.05]" },
   bloqueado: { label: "Bloqueado", color: "text-red-400", bg: "bg-red-500/10" },
 };

@@ -24,7 +24,7 @@ const categoryColors: Record<string, string> = {
   suporte: "bg-amber-500/15 text-amber-400",
   financeiro: "bg-purple-500/15 text-purple-400",
   operacional: "bg-rose-500/15 text-rose-400",
-  geral: "bg-white/10 text-white/60",
+  geral: "bg-white/10 text-muted-foreground",
 };
 
 export default function PopLibrary() {

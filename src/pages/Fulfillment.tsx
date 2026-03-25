@@ -11,8 +11,8 @@ const statusIcons: Record<UIStatus, { icon: typeof CheckCircle2; color: string; 
   entregue: { icon: CheckCircle2, color: "text-emerald-400", label: "Entregue" },
   entregue_parcialmente: { icon: AlertCircle, color: "text-amber-400", label: "Parcial" },
   nao_entregue: { icon: MinusCircle, color: "text-red-400", label: "Não entregue" },
-  nao_aplicavel: { icon: Ban, color: "text-white/30", label: "N/A" },
-  pending: { icon: AlertCircle, color: "text-white/20", label: "Pendente" },
+  nao_aplicavel: { icon: Ban, color: "text-muted-foreground/50", label: "N/A" },
+  pending: { icon: AlertCircle, color: "text-muted-foreground/40", label: "Pendente" },
 };
 
 const statusOptions: Enums<"delivery_item_status">[] = ["entregue", "entregue_parcialmente", "nao_entregue", "nao_aplicavel"];
@@ -50,7 +50,7 @@ export default function Fulfillment() {
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-heading font-bold tracking-tight">Entregas Contratuais</h1>
-        <p className="text-sm text-white/50 mt-1">Checklists de entrega por cliente e período</p>
+        <p className="text-sm text-muted-foreground mt-1">Checklists de entrega por cliente e período</p>
       </div>
 
       {loading ? (
@@ -58,7 +58,7 @@ export default function Fulfillment() {
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : checklists.length === 0 ? (
-        <div className="text-center py-20 text-white/30">Nenhum checklist de entrega encontrado. Gere checklists a partir dos contratos ativos.</div>
+        <div className="text-center py-20 text-muted-foreground/50">Nenhum checklist de entrega encontrado. Gere checklists a partir dos contratos ativos.</div>
       ) : (
         <div className="space-y-4">
           {checklists.map((checklist) => {
@@ -78,18 +78,18 @@ export default function Fulfillment() {
               >
                 <button onClick={() => toggleExpand(checklist.id)} className="w-full flex items-center justify-between p-5 hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-center gap-4">
-                    {isExpanded ? <ChevronDown className="h-4 w-4 text-white/40" /> : <ChevronRight className="h-4 w-4 text-white/40" />}
+                    {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground/70" /> : <ChevronRight className="h-4 w-4 text-muted-foreground/70" />}
                     <div className="text-left">
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">{clientName}</span>
                         {planName && (
-                          <span className="text-xs text-white/30 px-2 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.04]">{planName}</span>
+                          <span className="text-xs text-muted-foreground/50 px-2 py-0.5 rounded-full border border-border bg-white/[0.04]">{planName}</span>
                         )}
                         {checklist.completed_at && (
                           <span className="text-xs text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10">Finalizado</span>
                         )}
                       </div>
-                      <span className="text-xs text-white/40 mt-0.5 block">{checklist.period} · {checklist.frequency}</span>
+                      <span className="text-xs text-muted-foreground/70 mt-0.5 block">{checklist.period} · {checklist.frequency}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export default function Fulfillment() {
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
-                      <div className="border-t border-white/[0.06] px-5 py-3 space-y-1">
+                      <div className="border-t border-border px-5 py-3 space-y-1">
                         {items.map((item) => {
                           const uiStatus: UIStatus = item.status || "pending";
                           const info = statusIcons[uiStatus];
@@ -125,7 +125,7 @@ export default function Fulfillment() {
                                         key={s}
                                         onClick={() => updateItemStatus(item.id, s)}
                                         disabled={!!checklist.completed_at}
-                                        className={`p-1.5 rounded-md transition-all text-xs ${active ? `${si.color} bg-white/[0.08]` : "text-white/20 hover:text-white/40 hover:bg-white/[0.04]"}`}
+                                        className={`p-1.5 rounded-md transition-all text-xs ${active ? `${si.color} bg-white/[0.08]` : "text-muted-foreground/40 hover:text-muted-foreground/70 hover:bg-white/[0.04]"}`}
                                         title={si.label}
                                       >
                                         <SIcon className="h-3.5 w-3.5" />
@@ -137,7 +137,7 @@ export default function Fulfillment() {
                               <AnimatePresence>
                                 {(uiStatus === "entregue_parcialmente" || uiStatus === "nao_entregue") && (
                                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                                    <div className={`ml-10 mr-3 mb-2 rounded-lg overflow-hidden ${needsJust ? "border-l-2 border-primary" : "border-l-2 border-white/10"}`}>
+                                    <div className={`ml-10 mr-3 mb-2 rounded-lg overflow-hidden ${needsJust ? "border-l-2 border-primary" : "border-l-2 border-border"}`}>
                                       <textarea
                                         value={item.justification || ""}
                                         onChange={(e) => updateItemJustification(item.id, e.target.value)}
@@ -154,15 +154,15 @@ export default function Fulfillment() {
                           );
                         })}
                       </div>
-                      <div className="border-t border-white/[0.06] px-5 py-4 flex items-center justify-between">
-                        <div className="text-xs text-white/40">
+                      <div className="border-t border-border px-5 py-4 flex items-center justify-between">
+                        <div className="text-xs text-muted-foreground/70">
                           {items.filter(i => i.status === "entregue").length} de {items.filter(i => i.status !== "nao_aplicavel").length} entregas concluídas
                         </div>
                         {!checklist.completed_at && (
                           <Button
                             disabled={!finalizable}
                             onClick={() => finalizeChecklist(checklist.id)}
-                            className={`rounded-full text-sm px-5 font-semibold ${finalizable ? "gradient-primary border-0 text-white shadow-lg shadow-red-500/20" : "bg-white/[0.06] text-white/30 border border-white/[0.08] cursor-not-allowed"}`}
+                            className={`rounded-full text-sm px-5 font-semibold ${finalizable ? "gradient-primary border-0 text-white shadow-lg shadow-red-500/20" : "bg-white/[0.06] text-muted-foreground/50 border border-border cursor-not-allowed"}`}
                           >
                             Confirmar Entrega
                           </Button>

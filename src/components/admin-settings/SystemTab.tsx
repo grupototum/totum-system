@@ -134,9 +134,9 @@ export function SystemTab() {
             max={365}
             value={archiveDays}
             onChange={(e) => setArchiveDays(Number(e.target.value) || 30)}
-            className="bg-white/[0.05] border-white/[0.1]"
+            className="bg-white/[0.05] border-border"
           />
-          <p className="text-[10px] text-white/30">Tarefas concluídas serão arquivadas após este período</p>
+          <p className="text-[10px] text-muted-foreground/50">Tarefas concluídas serão arquivadas após este período</p>
         </div>
       </div>
 
