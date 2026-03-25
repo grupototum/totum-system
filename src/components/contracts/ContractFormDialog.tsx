@@ -15,6 +15,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: any) => Promise<boolean>;
   editData?: any | null;
+  defaultClientId?: string;
 }
 
 interface FormErrors {
@@ -31,7 +32,7 @@ interface ProductOption {
   product_type?: { name: string } | null;
 }
 
-export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: Props) {
+export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, defaultClientId }: Props) {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [plans, setPlans] = useState<{ id: string; name: string; value: number | null; frequency: string }[]>([]);
   const [contractTypes, setContractTypes] = useState<{ id: string; name: string }[]>([]);
@@ -76,7 +77,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData }: P
           notes: editData.notes || "",
         });
       } else {
-        setForm({ title: "", client_id: "", plan_id: "", contract_type_id: "", value: "", billing_frequency: "mensal", start_date: "", end_date: "", notes: "" });
+        setForm({ title: "", client_id: defaultClientId || "", plan_id: "", contract_type_id: "", value: "", billing_frequency: "mensal", start_date: "", end_date: "", notes: "" });
       }
       setSelectedProducts([]);
       setErrors({});
