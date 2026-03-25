@@ -34,7 +34,6 @@ export default function SetupPage() {
 
       toast({ title: "Administrador criado com sucesso!", description: "Fazendo login..." });
 
-      // Auto-login
       const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
       if (loginError) {
         toast({ title: "Conta criada! Faça login manualmente.", description: loginError.message, variant: "destructive" });
@@ -46,10 +45,10 @@ export default function SetupPage() {
     }
   };
 
-  const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20";
+  const inputCls = "bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "hsl(var(--background))" }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
           <img src={logoRed} alt="Totum" className="h-10" />
@@ -57,14 +56,14 @@ export default function SetupPage() {
             <ShieldCheck className="h-6 w-6 text-primary" />
           </div>
           <h1 className="font-heading text-lg font-semibold text-foreground">Configuração Inicial</h1>
-          <p className="text-sm text-white/40 text-center">
+          <p className="text-sm text-muted-foreground text-center">
             Nenhum administrador encontrado. Crie o primeiro usuário administrador para começar.
           </p>
         </div>
 
         <div className="glass-card rounded-2xl p-6 space-y-4">
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -74,7 +73,7 @@ export default function SetupPage() {
           </div>
 
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               type="email"
               value={email}
@@ -85,7 +84,7 @@ export default function SetupPage() {
           </div>
 
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               type={showPass ? "text" : "password"}
               value={password}
@@ -94,7 +93,7 @@ export default function SetupPage() {
               className={inputCls}
               onKeyDown={(e) => e.key === "Enter" && handleSetup()}
             />
-            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/40">
+            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
               {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
@@ -109,7 +108,7 @@ export default function SetupPage() {
           </Button>
         </div>
 
-        <p className="text-center text-[10px] text-white/20">
+        <p className="text-center text-[10px] text-muted-foreground/60">
           Este usuário terá acesso total ao sistema.
         </p>
       </div>
