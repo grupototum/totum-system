@@ -23,7 +23,6 @@ export function RiskRanking() {
         .from("delivery_checklist_items")
         .select("checklist_id, status, delivery_checklists(client_id)");
 
-      // Aggregate fulfillment by client
       const clientMap = new Map<string, { name: string; totalPct: number; count: number; pending: number }>();
 
       (checklists || []).forEach((cl: any) => {
@@ -34,7 +33,6 @@ export function RiskRanking() {
         clientMap.set(key, existing);
       });
 
-      // Count pending items per client
       (items || []).forEach((item: any) => {
         const clientId = (item.delivery_checklists as any)?.client_id;
         if (!clientId || item.status === "entregue" || item.status === "nao_aplicavel") return;
@@ -68,17 +66,17 @@ export function RiskRanking() {
       className="glass-card rounded-xl p-6"
     >
       <h3 className="font-heading text-base font-semibold mb-1">Ranking de Risco Operacional</h3>
-      <p className="text-xs text-white/40 mb-5">Ordenado por % de cumprimento contratual</p>
+      <p className="text-xs text-muted-foreground mb-5">Ordenado por % de cumprimento contratual</p>
 
       <div className="space-y-1">
         {risks.length === 0 ? (
-          <p className="text-sm text-white/30 text-center py-4">Nenhum checklist de entrega cadastrado</p>
+          <p className="text-sm text-muted-foreground text-center py-4">Nenhum checklist de entrega cadastrado</p>
         ) : risks.map((client, i) => (
           <div
             key={client.name + i}
-            className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-white/[0.04] transition-colors"
+            className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-accent/50 transition-colors"
           >
-            <span className="text-xs text-white/30 w-4 font-heading">{i + 1}</span>
+            <span className="text-xs text-muted-foreground/60 w-4 font-heading">{i + 1}</span>
 
             <div className={`h-2 w-2 rounded-full shrink-0 ${
               client.status === "critical" ? "bg-red-500" :
@@ -91,14 +89,14 @@ export function RiskRanking() {
 
             <div className="flex items-center gap-3 shrink-0">
               {client.pendingItems > 0 && (
-                <span className="text-xs text-amber-400/80 flex items-center gap-1">
+                <span className="text-xs text-amber-600 dark:text-amber-400/80 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {client.pendingItems}
                 </span>
               )}
               <div className="w-20">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                  <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         client.fulfillment >= 90 ? "bg-emerald-500" :
@@ -107,7 +105,7 @@ export function RiskRanking() {
                       style={{ width: `${client.fulfillment}%` }}
                     />
                   </div>
-                  <span className="text-xs font-heading text-white/60 w-8 text-right">
+                  <span className="text-xs font-heading text-muted-foreground w-8 text-right">
                     {client.fulfillment}%
                   </span>
                 </div>
