@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -18,6 +18,7 @@ import {
   BookOpen,
   Clock,
   Upload,
+  BarChart3,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -26,6 +27,7 @@ import logoRed from "@/assets/logo-red.png";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
@@ -41,23 +43,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainNav = [
-  { title: "Central do Cliente", url: "/clientes", icon: Users },
-  { title: "Tarefas", url: "/tarefas", icon: CheckSquare },
-  { title: "Projetos", url: "/projetos", icon: Briefcase },
-  { title: "Produtos", url: "/produtos", icon: Package },
-  { title: "Financeiro", url: "/financeiro", icon: DollarSign },
-  { title: "POPs", url: "/pops", icon: BookOpen },
-  { title: "SLA", url: "/sla", icon: Clock },
+const allMainNav = [
+  { title: "Central do Cliente", url: "/clientes", icon: Users, permKey: "cli_geral.visualizar" },
+  { title: "Tarefas", url: "/tarefas", icon: CheckSquare, permKey: "tar_geral.visualizar" },
+  { title: "Projetos", url: "/projetos", icon: Briefcase, permKey: "proj_geral.visualizar" },
+  { title: "Produtos", url: "/produtos", icon: Package, permKey: "prod_geral.visualizar" },
+  { title: "Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
+  { title: "Relatórios", url: "/relatorios", icon: BarChart3, permKey: "rel_financeiros.visualizar" },
+  { title: "POPs", url: "/pops", icon: BookOpen, permKey: null },
+  { title: "SLA", url: "/sla", icon: Clock, permKey: null },
 ];
 
-const systemNav = [
-  { title: "Equipe", url: "/equipe", icon: UserCog },
-  { title: "Cadastros", url: "/cadastros", icon: Database },
-  { title: "Importação", url: "/importar", icon: Upload },
-  { title: "Permissões", url: "/usuarios", icon: Shield },
-  { title: "Configurações", url: "/configuracoes", icon: Settings },
-  { title: "Admin", url: "/admin", icon: ShieldCheck },
+const allSystemNav = [
+  { title: "Equipe", url: "/equipe", icon: UserCog, permKey: "usr_usuarios.visualizar" },
+  { title: "Cadastros", url: "/cadastros", icon: Database, permKey: "cad_geral.visualizar" },
+  { title: "Importação", url: "/importar", icon: Upload, permKey: null },
+  { title: "Permissões", url: "/usuarios", icon: Shield, permKey: "usr_permissoes.editar" },
+  { title: "Configurações", url: "/configuracoes", icon: Settings, permKey: null },
+  { title: "Admin", url: "/admin", icon: ShieldCheck, permKey: null, adminOnly: true },
 ];
 
 export function AppSidebar() {
@@ -66,12 +69,9 @@ export function AppSidebar() {
   const { profile, user, signOut } = useAuth();
   const { isDemoMode, toggleDemo } = useDemo();
   const { resolvedTheme } = useTheme();
+  const { isAdmin, hasPermission, hasAnyPermission } = usePermissions();
   const currentLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
-
-  const isAdmin =
-    profile?.roles?.name?.toLowerCase() === "administrador" ||
-    profile?.roles?.name?.toLowerCase() === "admin";
 
   useEffect(() => {
     if (!user) return;
@@ -80,8 +80,21 @@ export function AppSidebar() {
     if (perms?.acessar_dashboard_executivo) setHasExecDashboard(true);
   }, [user, isAdmin, profile]);
 
-  const filteredSystemNav = systemNav.filter(
-    (item) => item.url !== "/admin" || isAdmin
+  const mainNav = useMemo(() =>
+    allMainNav.filter((item) => {
+      if (!item.permKey) return true;
+      return isAdmin || hasPermission(item.permKey);
+    }),
+    [isAdmin, hasPermission]
+  );
+
+  const filteredSystemNav = useMemo(() =>
+    allSystemNav.filter((item) => {
+      if ((item as any).adminOnly && !isAdmin) return false;
+      if (!item.permKey) return true;
+      return isAdmin || hasPermission(item.permKey);
+    }),
+    [isAdmin, hasPermission]
   );
 
   const renderItems = (items: typeof mainNav) =>
@@ -117,7 +130,7 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge }])}
+                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge, permKey: null }])}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

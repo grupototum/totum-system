@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, AlertCircle, Plus } from "lucide-react";
+import { Loader2, AlertCircle, Plus, EyeOff } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Props {
   open: boolean;
@@ -59,6 +60,7 @@ function formatPhone(value: string) {
 }
 
 export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Props) {
+  const { canViewDocuments, maskDocument } = usePermissions();
   const [clientTypes, setClientTypes] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -206,18 +208,29 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
               )}
             </div>
             <div>
-              <Label className={errors.document && touched.document ? "text-destructive" : ""}>CPF / CNPJ</Label>
-              <Input
-                value={form.document}
-                onChange={(e) => handleChange("document", e.target.value)}
-                onBlur={() => handleBlur("document")}
-                className={errors.document && touched.document ? "border-destructive" : ""}
-                placeholder="000.000.000-00"
-                maxLength={18}
-              />
-              {errors.document && touched.document && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" /> {errors.document}
+              <Label className={errors.document && touched.document ? "text-destructive" : ""}>
+                CPF / CNPJ
+                {!canViewDocuments && <EyeOff className="inline h-3 w-3 ml-1 text-muted-foreground" />}
+              </Label>
+              {canViewDocuments ? (
+                <>
+                  <Input
+                    value={form.document}
+                    onChange={(e) => handleChange("document", e.target.value)}
+                    onBlur={() => handleBlur("document")}
+                    className={errors.document && touched.document ? "border-destructive" : ""}
+                    placeholder="000.000.000-00"
+                    maxLength={18}
+                  />
+                  {errors.document && touched.document && (
+                    <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.document}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1 italic">
+                  {maskDocument(editData?.document) || "Dado protegido"}
                 </p>
               )}
             </div>

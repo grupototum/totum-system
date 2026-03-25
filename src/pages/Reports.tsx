@@ -12,6 +12,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useReports, ReportsFilters } from "@/hooks/useReports";
+import { usePermissions } from "@/hooks/usePermissions";
+import { AccessDenied } from "@/components/shared/AccessDenied";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, Cell
@@ -36,11 +38,16 @@ const PRESETS = [
 ];
 
 export default function Reports() {
+  const { canViewReports } = usePermissions();
   const [startDate, setStartDate] = useState<Date>(startOfMonth(subMonths(new Date(), 5)));
   const [endDate, setEndDate] = useState<Date>(endOfMonth(new Date()));
 
   const filters: ReportsFilters = { startDate, endDate };
   const { data, loading } = useReports(filters);
+
+  if (!canViewReports) {
+    return <AccessDenied message="Você não tem permissão para acessar os relatórios. Solicite acesso a um administrador." />;
+  }
 
   const applyPreset = (preset: typeof PRESETS[0]) => {
     const range = preset.getRange();

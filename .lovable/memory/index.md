@@ -20,3 +20,11 @@ Menu: Central do Cliente, Tarefas, Projetos, Financeiro, Dashboard Executivo, Eq
 Header includes: TaskSearch (Ctrl+K), ThemeToggle, and NotificationCenter (realtime bell icon)
 Financial: supports installment (parcelamento) auto-generation
 TaskFormDialog: supports checklist creation and task templates
+
+Access Control: usePermissions hook (src/hooks/usePermissions.ts) checks profile.roles.permissions
+RLS: financial_entries SELECT restricted to fin_geral/fin_pagar/fin_receber.visualizar
+RLS: contracts SELECT restricted to ctr_geral.visualizar
+Sidebar items filtered by permission keys
+Financial/Reports pages show AccessDenied for unauthorized users
+Client documents (CPF/CNPJ) masked for users without cli_geral.editar permission
+Demo mode = DEV environment (all permissions granted, fake data)
