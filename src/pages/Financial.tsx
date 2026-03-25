@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { useFinancialEntries } from "@/hooks/useFinancial";
 import { FinancialFormDialog } from "@/components/financial/FinancialFormDialog";
+import { usePermissions } from "@/hooks/usePermissions";
+import { AccessDenied } from "@/components/shared/AccessDenied";
 import { format } from "date-fns";
 
 const now = new Date();
@@ -18,8 +20,13 @@ const statusCls: Record<string, string> = {
 };
 
 export default function Financial() {
+  const { canViewFinancial, hasPermission } = usePermissions();
   const { entries, loading, summary, refetch } = useFinancialEntries(currentMonth);
   const [formOpen, setFormOpen] = useState(false);
+
+  if (!canViewFinancial) {
+    return <AccessDenied message="Você não tem permissão para acessar o módulo financeiro. Solicite acesso a um administrador." />;
+  }
 
   const monthLabel = format(now, "MMMM yyyy").replace(/^\w/, (c) => c.toUpperCase());
 
