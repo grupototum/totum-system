@@ -208,18 +208,29 @@ export function ClientFormDialog({ open, onOpenChange, onSubmit, editData }: Pro
               )}
             </div>
             <div>
-              <Label className={errors.document && touched.document ? "text-destructive" : ""}>CPF / CNPJ</Label>
-              <Input
-                value={form.document}
-                onChange={(e) => handleChange("document", e.target.value)}
-                onBlur={() => handleBlur("document")}
-                className={errors.document && touched.document ? "border-destructive" : ""}
-                placeholder="000.000.000-00"
-                maxLength={18}
-              />
-              {errors.document && touched.document && (
-                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" /> {errors.document}
+              <Label className={errors.document && touched.document ? "text-destructive" : ""}>
+                CPF / CNPJ
+                {!canViewDocuments && <EyeOff className="inline h-3 w-3 ml-1 text-muted-foreground" />}
+              </Label>
+              {canViewDocuments ? (
+                <>
+                  <Input
+                    value={form.document}
+                    onChange={(e) => handleChange("document", e.target.value)}
+                    onBlur={() => handleBlur("document")}
+                    className={errors.document && touched.document ? "border-destructive" : ""}
+                    placeholder="000.000.000-00"
+                    maxLength={18}
+                  />
+                  {errors.document && touched.document && (
+                    <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" /> {errors.document}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1 italic">
+                  {maskDocument(editData?.document) || "Dado protegido"}
                 </p>
               )}
             </div>
