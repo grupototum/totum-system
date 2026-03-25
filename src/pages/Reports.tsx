@@ -42,12 +42,12 @@ export default function Reports() {
   const [startDate, setStartDate] = useState<Date>(startOfMonth(subMonths(new Date(), 5)));
   const [endDate, setEndDate] = useState<Date>(endOfMonth(new Date()));
 
+  const filters: ReportsFilters = { startDate, endDate };
+  const { data, loading } = useReports(filters);
+
   if (!canViewReports) {
     return <AccessDenied message="Você não tem permissão para acessar os relatórios. Solicite acesso a um administrador." />;
   }
-
-  const filters: ReportsFilters = { startDate, endDate };
-  const { data, loading } = useReports(filters);
 
   const applyPreset = (preset: typeof PRESETS[0]) => {
     const range = preset.getRange();
