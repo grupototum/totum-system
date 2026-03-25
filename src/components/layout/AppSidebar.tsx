@@ -104,8 +104,8 @@ export function AppSidebar() {
           <NavLink
             to={item.url}
             end={item.url === "/"}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-white/[0.06]"
-            activeClassName="bg-white/[0.08] text-primary"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent"
+            activeClassName="bg-accent text-primary"
           >
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && <span>{item.title}</span>}
@@ -163,7 +163,7 @@ export function AppSidebar() {
                     <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                       isDemoMode 
                         ? "bg-amber-500/15 text-amber-400" 
-                        : "hover:bg-white/[0.06] text-muted-foreground"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}>
                       <Monitor className="h-4 w-4 shrink-0" />
                       {!collapsed && <span>{isDemoMode ? "Sair do Demo" : "Modo Demo"}</span>}
@@ -177,7 +177,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-border space-y-2">
-        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-white/[0.06]">
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-accent">
           <UserAvatar avatarUrl={profile?.avatar_url} fullName={profile?.full_name || "Grupo Totum"} size="sm" />
           {!collapsed && (
             <div className="flex flex-col">

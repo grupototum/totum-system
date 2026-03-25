@@ -14,7 +14,6 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for recovery token in URL
     const hash = window.location.hash;
     if (!hash.includes("type=recovery")) {
       toast({ title: "Link inválido", description: "Use o link enviado por email.", variant: "destructive" });
@@ -37,18 +36,18 @@ export default function ResetPasswordPage() {
     }
   };
 
-  const inputCls = "bg-white/[0.05] border-white/[0.1] rounded-xl h-11 text-sm pl-10 focus:border-primary/50";
+  const inputCls = "bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 text-foreground placeholder:text-muted-foreground";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "hsl(var(--background))" }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
           <img src={logoRed} alt="Totum" className="h-10" />
-          <p className="text-sm text-white/40">Redefinir senha</p>
+          <p className="text-sm text-muted-foreground">Redefinir senha</p>
         </div>
         <div className="glass-card rounded-2xl p-6 space-y-4">
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
               type={showPass ? "text" : "password"}
               value={password}
@@ -57,7 +56,7 @@ export default function ResetPasswordPage() {
               className={inputCls}
               onKeyDown={(e) => e.key === "Enter" && handleReset()}
             />
-            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/40">
+            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
               {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>

@@ -7,11 +7,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload) return null;
   return (
     <div className="glass-card rounded-lg p-3 text-xs">
-      <p className="text-white/60 mb-1.5">{label}</p>
+      <p className="text-muted-foreground mb-1.5">{label}</p>
       {payload.map((entry: any) => (
         <p key={entry.name} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full" style={{ background: entry.color }} />
-          <span className="text-white/70">{entry.name === "receita" ? "Receita" : "Custo"}:</span>
+          <span className="text-muted-foreground">{entry.name === "receita" ? "Receita" : "Custo"}:</span>
           <span className="font-heading font-medium">
             R$ {(entry.value / 1000).toFixed(0)}k
           </span>
@@ -61,14 +61,14 @@ export function RevenueChart() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-heading text-base font-semibold">Receita vs Custo Operacional</h3>
-          <p className="text-xs text-white/40 mt-0.5">Últimos 9 meses</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Últimos 9 meses</p>
         </div>
         <div className="flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-primary" /> Receita
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-white/30" /> Custo
+            <span className="h-2 w-2 rounded-full bg-muted-foreground/40" /> Custo
           </span>
         </div>
       </div>
@@ -77,20 +77,20 @@ export function RevenueChart() {
         <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ff3b3b" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#ff3b3b" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(1, 97%, 58%)" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="hsl(1, 97%, 58%)" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="costGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity={0.08} />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
+              <stop offset="0%" stopColor="currentColor" stopOpacity={0.08} />
+              <stop offset="100%" stopColor="currentColor" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.04)" vertical={false} />
-          <XAxis dataKey="month" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
+          <CartesianGrid stroke="hsl(var(--border))" vertical={false} />
+          <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
           <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="receita" stroke="#ff3b3b" strokeWidth={2} fill="url(#revGrad)" />
-          <Area type="monotone" dataKey="custo" stroke="rgba(255,255,255,0.3)" strokeWidth={1.5} fill="url(#costGrad)" />
+          <Area type="monotone" dataKey="receita" stroke="hsl(1, 97%, 58%)" strokeWidth={2} fill="url(#revGrad)" />
+          <Area type="monotone" dataKey="custo" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5} fill="url(#costGrad)" />
         </AreaChart>
       </ResponsiveContainer>
     </motion.div>

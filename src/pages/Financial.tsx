@@ -74,7 +74,7 @@ export default function Financial() {
                 ) : entries.map((tx) => {
                   const isIncome = tx.type === "receber";
                   return (
-                    <tr key={tx.id} className="border-b border-border/50 hover:bg-white/[0.03] transition-colors">
+                    <tr key={tx.id} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isIncome ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
