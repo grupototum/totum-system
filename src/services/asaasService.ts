@@ -5,7 +5,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const ASAAS_BASE_URL = "https://api.asaas.com/v3";
+// URL base da Edge Function proxy (resolve CORS)
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://sugulxjfkhibuddmoyzr.supabase.co";
+const ASAAS_PROXY_URL = `${SUPABASE_URL}/functions/v1/asaas-proxy`;
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 
@@ -80,15 +82,21 @@ async function asaasRequest(
   method: "GET" | "POST" | "PUT" | "DELETE",
   path: string,
   apiKey: string,
-  body?: object
+  body?: object,
+  environment: "production" | "sandbox" = "production"
 ): Promise<any> {
-  const url = `${ASAAS_BASE_URL}${path}`;
+  // Usa a Edge Function proxy para evitar CORS
+  const { data: { session } } = await supabase.auth.getSession();
+  const url = `${ASAAS_PROXY_URL}${path}`;
   const res = await fetch(url, {
     method,
     headers: {
       "accept": "application/json",
       "content-type": "application/json",
-      "access_token": apiKey,
+      "authorization": `Bearer ${session?.access_token || ""}`,
+      "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "",
+      "x-asaas-key": apiKey,
+      "x-asaas-env": environment,
     },
     body: body ? JSON.stringify(body) : undefined,
   });

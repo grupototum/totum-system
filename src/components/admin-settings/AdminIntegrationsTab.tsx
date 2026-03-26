@@ -240,7 +240,7 @@ function AsaasConfigPanel() {
           />
           <p className="text-xs text-muted-foreground">
             URL do webhook: <code className="text-xs bg-muted px-1 py-0.5 rounded">
-              {`${window.location.origin.replace("system.", "")}/functions/v1/asaas-webhook`}
+              https://sugulxjfkhibuddmoyzr.supabase.co/functions/v1/asaas-webhook
             </code>
           </p>
         </div>
@@ -359,13 +359,7 @@ export function AdminIntegrationsTab() {
         ]}
       />
 
-      {/* API Keys */}
-      <IntegrationCard
-        title="API Keys"
-        description="Chaves de acesso para integrações externas"
-        status="pending"
-        details={["Gerenciamento de API keys disponível em breve"]}
-      />
+
     </div>
   );
 }
