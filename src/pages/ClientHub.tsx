@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Package, FileText, Clock, BarChart3, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Loader2, Package, FileText, Clock, BarChart3, AlertTriangle, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
@@ -10,11 +10,13 @@ import { ClientHubContracts } from "@/components/client-hub/ClientHubContracts";
 import { ClientHubTimeline } from "@/components/client-hub/ClientHubTimeline";
 import { ClientHubAnalysis } from "@/components/client-hub/ClientHubAnalysis";
 import { ClientHubPendencies } from "@/components/client-hub/ClientHubPendencies";
+import { ClientHubAsaas } from "@/components/client-hub/ClientHubAsaas";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { value: "deliveries", label: "Entregas", icon: Package },
   { value: "contracts", label: "Contratos", icon: FileText },
+  { value: "billing", label: "Cobranças", icon: CreditCard },
   { value: "timeline", label: "Timeline", icon: Clock },
   { value: "analysis", label: "Análise de Marketing", icon: BarChart3 },
   { value: "pendencies", label: "Pendências", icon: AlertTriangle },
@@ -103,7 +105,7 @@ export default function ClientHub() {
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left",
                   isActive
                     ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -117,6 +119,9 @@ export default function ClientHub() {
         <div className="flex-1 min-w-0">
           {activeTab === "deliveries" && <ClientHubDeliveries clientId={id!} />}
           {activeTab === "contracts" && <ClientHubContracts clientId={id!} />}
+          {activeTab === "billing" && (
+            <ClientHubAsaas clientId={id!} clientName={client.name} />
+          )}
           {activeTab === "timeline" && <ClientHubTimeline clientId={id!} />}
           {activeTab === "analysis" && <ClientHubAnalysis clientId={id!} initialAnalysis={client.marketing_analysis || ""} />}
           {activeTab === "pendencies" && <ClientHubPendencies clientId={id!} />}
