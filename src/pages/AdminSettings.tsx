@@ -22,9 +22,11 @@ export default function AdminSettings() {
     );
   }
 
-  const isAdmin = isDemoMode || 
-    profile?.roles?.name?.toLowerCase() === "administrador" ||
-    profile?.roles?.name?.toLowerCase() === "admin";
+  const _roleName = profile?.roles?.name?.toLowerCase() || "";
+  const isAdmin = isDemoMode ||
+    _roleName.includes("admin") ||
+    _roleName.includes("administrador") ||
+    _roleName.includes("master");
 
   if (!isAdmin) {
     return (

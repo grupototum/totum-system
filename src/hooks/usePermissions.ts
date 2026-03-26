@@ -13,8 +13,8 @@ export function usePermissions() {
 
   const isAdmin = useMemo(() => {
     if (isDemoMode) return true;
-    const roleName = profile?.roles?.name?.toLowerCase();
-    return roleName === "administrador" || roleName === "admin";
+    const roleName = profile?.roles?.name?.toLowerCase() || "";
+    return roleName.includes("admin") || roleName.includes("administrador") || roleName.includes("master");
   }, [profile, isDemoMode]);
 
   /** Check a single permission key like "fin_geral.visualizar" */

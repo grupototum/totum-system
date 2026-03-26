@@ -284,8 +284,8 @@ function SecurityTab() {
 // ── Integrations Tab ──
 function IntegrationsTab() {
   const { profile } = useAuth();
-  const isAdmin = profile?.roles?.name?.toLowerCase() === "administrador" ||
-    profile?.roles?.name?.toLowerCase() === "admin";
+  const roleName = profile?.roles?.name?.toLowerCase() || "";
+  const isAdmin = roleName.includes("admin") || roleName.includes("administrador") || roleName.includes("master");
 
   const [googleStatus, setGoogleStatus] = useState<"checking" | "ok" | "pending" | "error">("checking");
   const [googleDetails, setGoogleDetails] = useState<string[]>([]);
