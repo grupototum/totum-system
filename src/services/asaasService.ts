@@ -115,7 +115,7 @@ async function asaasRequest(
 // ─── CONFIGURAÇÃO ─────────────────────────────────────────────────────────────
 
 export async function getAsaasConfig(): Promise<AsaasConfig | null> {
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from("asaas_config")
     .select("*")
     .eq("is_active", true)
@@ -125,16 +125,16 @@ export async function getAsaasConfig(): Promise<AsaasConfig | null> {
 }
 
 export async function saveAsaasConfig(config: Partial<AsaasConfig>): Promise<void> {
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("asaas_config")
     .select("id")
     .limit(1)
     .single();
 
   if (existing) {
-    await supabase.from("asaas_config").update({ ...config, updated_at: new Date().toISOString() }).eq("id", existing.id);
+    await (supabase as any).from("asaas_config").update({ ...config, updated_at: new Date().toISOString() }).eq("id", existing.id);
   } else {
-    await supabase.from("asaas_config").insert(config);
+    await (supabase as any).from("asaas_config").insert(config);
   }
 }
 
@@ -163,7 +163,7 @@ export async function syncClientToAsaas(
   if (!client) throw new Error("Cliente não encontrado");
 
   // Verificar se já existe mapeamento
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("asaas_customers")
     .select("asaas_customer_id")
     .eq("client_id", clientId)
@@ -179,24 +179,21 @@ export async function syncClientToAsaas(
   };
 
   if (existing?.asaas_customer_id) {
-    // Atualizar cliente existente no Asaas
     await asaasRequest("PUT", `/customers/${existing.asaas_customer_id}`, apiKey, customerPayload);
-    await supabase.from("asaas_customers").update({
+    await (supabase as any).from("asaas_customers").update({
       synced_at: new Date().toISOString(),
       sync_status: "synced",
       error_message: null,
     }).eq("client_id", clientId);
     return { asaasId: existing.asaas_customer_id, created: false };
   } else {
-    // Criar cliente no Asaas
     const created = await asaasRequest("POST", "/customers", apiKey, customerPayload);
-    await supabase.from("asaas_customers").insert({
+    await (supabase as any).from("asaas_customers").insert({
       client_id: clientId,
       asaas_customer_id: created.id,
       sync_status: "synced",
     });
-    // Atualizar referência rápida na tabela clients
-    await supabase.from("clients").update({ asaas_customer_id: created.id }).eq("id", clientId);
+    await (supabase as any).from("clients").update({ asaas_customer_id: created.id } as any).eq("id", clientId);
     return { asaasId: created.id, created: true };
   }
 }
