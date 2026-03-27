@@ -5,6 +5,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Helper to bypass strict typing for Asaas tables not in generated types
+const asaasDb = supabase as any;
+
 // URL base da Edge Function proxy (resolve CORS)
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://sugulxjfkhibuddmoyzr.supabase.co";
 const ASAAS_PROXY_URL = `${SUPABASE_URL}/functions/v1/asaas-proxy`;
