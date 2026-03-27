@@ -90,14 +90,14 @@ export default function Clients() {
         </div>
         <div className="flex items-center gap-1 bg-white/[0.04] border border-border rounded-lg p-0.5">
           <button
-            onClick={() => setViewMode("list")}
+            onClick={() => { setViewMode("list"); localStorage.setItem("clients_view_mode", "list"); }}
             className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
             title="Visualização em lista"
           >
             <List className="h-4 w-4" />
           </button>
           <button
-            onClick={() => setViewMode("card")}
+            onClick={() => { setViewMode("card"); localStorage.setItem("clients_view_mode", "card"); }}
             className={`p-1.5 rounded-md transition-colors ${viewMode === "card" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
             title="Visualização em cards"
           >
