@@ -51,7 +51,7 @@ export function AsaasChargeDialog({
       toast({ title: "Asaas não configurado", description: "Configure a integração Asaas primeiro.", variant: "destructive" });
       return;
     }
-    if (!mapping?.asaas_customer_id) {
+    if (!(mapping as any)?.asaas_customer_id) {
       toast({ title: "Cliente não sincronizado", description: "Sincronize o cliente com o Asaas primeiro.", variant: "destructive" });
       return;
     }
