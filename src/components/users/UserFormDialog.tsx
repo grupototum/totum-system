@@ -81,7 +81,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 flex items-center justify-between">
-                Cargo / Perfil *
+                Perfil de Acesso *
                 <Button
                   type="button"
                   variant="ghost"
@@ -152,7 +152,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
         open={quickAddRoleOpen}
         onOpenChange={setQuickAddRoleOpen}
         registryKey="usr_cargos"
-        title="Novo Cargo/Perfil"
+        title="Novo Perfil de Acesso"
         onSuccess={(id, name) => {
           setLocalRoles([...localRoles, { id, name, permissions: {} as any, description: "", isSystem: false, usersCount: 0 }].sort((a, b) => a.name.localeCompare(b.name)));
           setForm({ ...form, roleId: id });

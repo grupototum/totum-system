@@ -217,21 +217,21 @@ export default function UsersPermissions() {
       description: role.description,
       permissions: role.permissions as any,
     });
-    await logAudit(role.id ? "Cargo editado" : "Cargo criado", `Cargo ${role.name}`);
+    await logAudit(role.id ? "Perfil editado" : "Perfil criado", `Perfil ${role.name}`);
   };
 
   const handleDuplicateRole = async (role: Role) => {
     const dbRole = roleRows.find((r) => r.id === role.id);
     if (dbRole) {
       await duplicateRoleDb(dbRole);
-      await logAudit("Perfil duplicado", `Cargo ${role.name} duplicado`);
+      await logAudit("Perfil duplicado", `Perfil ${role.name} duplicado`);
     }
   };
 
   const handleDeleteRole = async (role: Role) => {
     if (role.isSystem) return;
     await deleteRoleDb(role.id, role.name);
-    await logAudit("Cargo excluído", `Cargo ${role.name} removido`);
+    await logAudit("Perfil excluído", `Perfil ${role.name} removido`);
   };
 
   const handleViewPermissions = (user: AppUser) => {
@@ -246,7 +246,7 @@ export default function UsersPermissions() {
 
   const tabs: { key: Tab; label: string; icon: typeof Users }[] = [
     { key: "users", label: "Usuários", icon: Users },
-    { key: "roles", label: "Cargos e Perfis", icon: Shield },
+    { key: "roles", label: "Perfis de Acesso", icon: Shield },
     { key: "audit", label: "Auditoria", icon: History },
   ];
 
@@ -259,7 +259,7 @@ export default function UsersPermissions() {
         <div>
           <h1 className="text-2xl font-heading font-bold tracking-tight">Usuários e Permissões</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {users.filter((u) => u.status === "ativo").length} ativos · {roles.length} cargos · {audit.length} registros de auditoria
+            {users.filter((u) => u.status === "ativo").length} ativos · {roles.length} perfis · {audit.length} registros de auditoria
           </p>
         </div>
         <div>
@@ -270,7 +270,7 @@ export default function UsersPermissions() {
           )}
           {tab === "roles" && (
             <Button onClick={() => { setEditingRole(null); setRoleFormOpen(true); }} className="gradient-primary border-0 text-white font-semibold rounded-full px-5 gap-2">
-              <Plus className="h-4 w-4" /> Novo Cargo
+              <Plus className="h-4 w-4" /> Novo Perfil
             </Button>
           )}
         </div>
@@ -317,7 +317,7 @@ export default function UsersPermissions() {
                   <thead>
                     <tr className="border-b border-border">
                       <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Usuário</th>
-                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Cargo</th>
+                      <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Perfil de Acesso</th>
                       <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Departamento</th>
                       <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Status</th>
                       <th className="text-left p-3.5 text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Permissões</th>
@@ -448,7 +448,7 @@ export default function UsersPermissions() {
               <div className="relative w-64">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                 <Input
-                  placeholder="Buscar cargo..."
+                  placeholder="Buscar perfil..."
                   value={roleSearch}
                   onChange={(e) => setRoleSearch(e.target.value)}
                   className="pl-8 bg-white/[0.05] border-border rounded-lg h-8 text-xs placeholder:text-muted-foreground/50"

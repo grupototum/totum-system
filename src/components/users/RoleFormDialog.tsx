@@ -52,18 +52,18 @@ export function RoleFormDialog({ open, onOpenChange, role, onSave }: RoleFormDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border text-foreground max-w-3xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
-          <DialogTitle className="font-heading text-lg">{role ? "Editar Cargo" : "Novo Cargo"}</DialogTitle>
+          <DialogTitle className="font-heading text-lg">{role ? "Editar Perfil de Acesso" : "Novo Perfil de Acesso"}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Nome do Cargo *</label>
+              <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Nome do Perfil *</label>
               <Input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Ex: Gestor de Projetos" />
             </div>
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
-              <Input value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} placeholder="Breve descrição do cargo" />
+              <Input value={description} onChange={(e) => setDescription(e.target.value)} className={inputCls} placeholder="Breve descrição do perfil" />
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export function RoleFormDialog({ open, onOpenChange, role, onSave }: RoleFormDia
         <DialogFooter className="mt-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-foreground hover:bg-white/[0.06]">Cancelar</Button>
           <Button onClick={handleSave} disabled={!name.trim()} className="gradient-primary border-0 text-white font-semibold rounded-full px-6">
-            {role ? "Salvar" : "Criar Cargo"}
+            {role ? "Salvar" : "Criar Perfil"}
           </Button>
         </DialogFooter>
       </DialogContent>

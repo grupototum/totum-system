@@ -137,7 +137,7 @@ export function useRoles() {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
         return false;
       }
-      toast({ title: "Cargo atualizado", description: role.name });
+      toast({ title: "Perfil atualizado", description: role.name });
     } else {
       const { error } = await supabase.from("roles").insert({
         name: role.name,
@@ -148,7 +148,7 @@ export function useRoles() {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
         return false;
       }
-      toast({ title: "Cargo criado", description: role.name });
+      toast({ title: "Perfil criado", description: role.name });
     }
     await fetch();
     return true;
@@ -165,7 +165,7 @@ export function useRoles() {
       return false;
     }
     await fetch();
-    toast({ title: "Cargo removido", description: name });
+    toast({ title: "Perfil removido", description: name });
     return true;
   };
 

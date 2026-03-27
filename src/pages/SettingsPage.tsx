@@ -93,7 +93,7 @@ function ProfileTab() {
           <Input value={profile?.email || ""} disabled className="opacity-60" />
         </div>
         <div className="space-y-2">
-          <Label>Cargo / Papel</Label>
+          <Label>Cargo</Label>
           {canChangeRole ? (
             <Select value={roleId} onValueChange={setRoleId}>
               <SelectTrigger className="bg-white/[0.05] border-border rounded-lg">

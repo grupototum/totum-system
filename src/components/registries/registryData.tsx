@@ -483,7 +483,7 @@ export const registryGroups: RegistryGroup[] = [
       },
       {
         key: "cargos",
-        label: "Cargos e Funções",
+        label: "Cargos",
         description: "Cargos da equipe",
         icon: "BadgeCheck",
         columns: [
