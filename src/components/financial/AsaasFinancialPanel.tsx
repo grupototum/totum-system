@@ -43,10 +43,10 @@ export function AsaasFinancialPanel() {
     refetch();
   };
 
-  const filtered = payments?.filter(p => {
+  const filtered = (payments as any[])?.filter((p: any) => {
     const matchSearch = !search ||
       p.description?.toLowerCase().includes(search.toLowerCase()) ||
-      (p as any).clients?.name?.toLowerCase().includes(search.toLowerCase());
+      p.clients?.name?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -178,7 +178,7 @@ export function AsaasFinancialPanel() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((payment, i) => {
+          {filtered.map((payment: any, i: number) => {
             const statusInfo = formatAsaasStatus(payment.status);
             return (
               <motion.div
