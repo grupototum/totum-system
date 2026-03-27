@@ -347,7 +347,7 @@ export async function processWebhookEvent(
   autoCreateFinancial: boolean
 ): Promise<void> {
   // Atualizar status da cobrança no banco
-  await supabase
+  await (supabase as any)
     .from("asaas_payments")
     .update({
       status: payment.status,
@@ -359,13 +359,13 @@ export async function processWebhookEvent(
   // Se pagamento confirmado e auto_create_financial ativo
   if (event === "PAYMENT_RECEIVED" && autoCreateFinancial) {
     // Buscar cobrança no banco para obter client_id e contract_id
-    const { data: asaasPayment } = await supabase
+    const { data: asaasPayment } = await (supabase as any)
       .from("asaas_payments")
       .select("*, clients(id, name)")
       .eq("asaas_payment_id", payment.id)
       .single();
 
-    if (asaasPayment && !asaasPayment.financial_entry_id) {
+    if (asaasPayment && !(asaasPayment as any).financial_entry_id) {
       // Buscar categoria de receita padrão
       const { data: category } = await supabase
         .from("financial_categories")
@@ -380,11 +380,11 @@ export async function processWebhookEvent(
         .insert({
           type: "receber",
           category_id: category?.id || null,
-          client_id: asaasPayment.client_id,
-          contract_id: asaasPayment.contract_id,
-          description: asaasPayment.description || `Cobrança Asaas #${payment.id}`,
-          value: asaasPayment.value,
-          due_date: asaasPayment.due_date,
+          client_id: (asaasPayment as any).client_id,
+          contract_id: (asaasPayment as any).contract_id,
+          description: (asaasPayment as any).description || `Cobrança Asaas #${payment.id}`,
+          value: (asaasPayment as any).value,
+          due_date: (asaasPayment as any).due_date,
           payment_date: payment.paymentDate || new Date().toISOString().split("T")[0],
           status: "pago",
           recurrence: "unica",
@@ -395,7 +395,7 @@ export async function processWebhookEvent(
 
       if (entry) {
         // Vincular lançamento à cobrança
-        await supabase
+        await (supabase as any)
           .from("asaas_payments")
           .update({ financial_entry_id: entry.id })
           .eq("asaas_payment_id", payment.id);
