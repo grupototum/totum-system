@@ -69,9 +69,9 @@ export function ClientHubAsaas({ clientId, clientName }: ClientHubAsaasProps) {
     );
   }
 
-  const totalPending = payments?.filter(p => p.status === "PENDING").reduce((s, p) => s + Number(p.value), 0) || 0;
-  const totalReceived = payments?.filter(p => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status)).reduce((s, p) => s + Number(p.value), 0) || 0;
-  const totalOverdue = payments?.filter(p => p.status === "OVERDUE").reduce((s, p) => s + Number(p.value), 0) || 0;
+  const totalPending = (payments as any[])?.filter((p: any) => p.status === "PENDING").reduce((s: number, p: any) => s + Number(p.value), 0) || 0;
+  const totalReceived = (payments as any[])?.filter((p: any) => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status)).reduce((s: number, p: any) => s + Number(p.value), 0) || 0;
+  const totalOverdue = (payments as any[])?.filter((p: any) => p.status === "OVERDUE").reduce((s: number, p: any) => s + Number(p.value), 0) || 0;
 
   const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
@@ -82,14 +82,14 @@ export function ClientHubAsaas({ clientId, clientName }: ClientHubAsaasProps) {
         <div className="flex items-center gap-2">
           <CreditCard className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Cobranças Asaas</h3>
-          {mapping?.asaas_customer_id && (
+          {(mapping as any)?.asaas_customer_id && (
             <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-500/30 bg-emerald-500/10">
               <UserCheck className="h-3 w-3 mr-1" /> Sincronizado
             </Badge>
           )}
         </div>
         <div className="flex items-center gap-2">
-          {!mapping?.asaas_customer_id ? (
+          {!(mapping as any)?.asaas_customer_id ? (
             <Button
               size="sm"
               variant="outline"
@@ -150,14 +150,14 @@ export function ClientHubAsaas({ clientId, clientName }: ClientHubAsaasProps) {
         <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
           <CreditCard className="h-8 w-8 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">
-            {mapping?.asaas_customer_id
+            {(mapping as any)?.asaas_customer_id
               ? "Nenhuma cobrança encontrada para este cliente."
               : "Sincronize o cliente com o Asaas para ver e criar cobranças."}
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {payments.map((payment, i) => {
+         <div className="space-y-2">
+          {(payments as any[])?.map((payment: any, i: number) => {
             const statusInfo = formatAsaasStatus(payment.status);
             return (
               <motion.div
