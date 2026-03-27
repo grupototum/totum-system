@@ -100,7 +100,7 @@ export function useAsaasCustomerMapping(clientId?: string) {
     queryKey: ["asaas_customers", clientId],
     queryFn: async () => {
       if (!clientId) return null;
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("asaas_customers")
         .select("*")
         .eq("client_id", clientId)
@@ -142,7 +142,7 @@ export function useAsaasPaymentsByClient(clientId?: string) {
     queryKey: ["asaas_payments", "client", clientId],
     queryFn: async () => {
       if (!clientId) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("asaas_payments")
         .select("*")
         .eq("client_id", clientId)
@@ -157,7 +157,7 @@ export function useAsaasPayments(filters?: { status?: string; clientId?: string 
   return useQuery({
     queryKey: ["asaas_payments", filters],
     queryFn: async () => {
-      let query = supabase
+      let query = (supabase as any)
         .from("asaas_payments")
         .select("*, clients(name)")
         .order("due_date", { ascending: false })
@@ -197,20 +197,21 @@ export function useAsaasStats() {
   return useQuery({
     queryKey: ["asaas_stats"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("asaas_payments")
         .select("status, value");
 
       if (!data) return { total: 0, received: 0, pending: 0, overdue: 0, totalValue: 0, receivedValue: 0 };
 
-      const total = data.length;
-      const received = data.filter(p => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status)).length;
-      const pending = data.filter(p => p.status === "PENDING").length;
-      const overdue = data.filter(p => p.status === "OVERDUE").length;
-      const totalValue = data.reduce((s, p) => s + Number(p.value), 0);
-      const receivedValue = data
-        .filter(p => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status))
-        .reduce((s, p) => s + Number(p.value), 0);
+      const items = data as any[];
+      const total = items.length;
+      const received = items.filter((p: any) => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status)).length;
+      const pending = items.filter((p: any) => p.status === "PENDING").length;
+      const overdue = items.filter((p: any) => p.status === "OVERDUE").length;
+      const totalValue = items.reduce((s: number, p: any) => s + Number(p.value), 0);
+      const receivedValue = items
+        .filter((p: any) => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(p.status))
+        .reduce((s: number, p: any) => s + Number(p.value), 0);
 
       return { total, received, pending, overdue, totalValue, receivedValue };
     },
