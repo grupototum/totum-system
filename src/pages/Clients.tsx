@@ -25,7 +25,9 @@ export default function Clients() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientRow | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "card">("list");
+  const [viewMode, setViewMode] = useState<"list" | "card">(() => {
+    return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
+  });
 
   const filtered = clients.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
