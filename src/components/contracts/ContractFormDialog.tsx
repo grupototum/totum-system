@@ -243,7 +243,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
           {/* Plan Section */}
           <div className="space-y-3">
             <Label className="text-sm font-semibold flex items-center justify-between">
-              Plano Recorrente
+              Pacote
               <Button
                 type="button"
                 variant="ghost"
@@ -255,7 +255,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
               </Button>
             </Label>
             <Select value={form.plan_id} onValueChange={handlePlanChange}>
-              <SelectTrigger><SelectValue placeholder="Vincular a um plano (opcional)" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Vincular a um pacote (opcional)" /></SelectTrigger>
               <SelectContent>
                 {plans.map((p) => (
                   <SelectItem key={p.id} value={p.id}>

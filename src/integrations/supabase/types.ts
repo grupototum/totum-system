@@ -303,6 +303,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_products: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          is_package: boolean
+          notes: string | null
+          product_id: string
+          quantity: number
+          unit_price: number | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          is_package?: boolean
+          notes?: string | null
+          product_id: string
+          quantity?: number
+          unit_price?: number | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          is_package?: boolean
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_products_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_types: {
         Row: {
           created_at: string
@@ -1052,6 +1100,7 @@ export type Database = {
           frequency: Database["public"]["Enums"]["checklist_frequency"]
           id: string
           is_active: boolean
+          label: string | null
           name: string
           updated_at: string
           value: number | null
@@ -1062,6 +1111,7 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["checklist_frequency"]
           id?: string
           is_active?: boolean
+          label?: string | null
           name: string
           updated_at?: string
           value?: number | null
@@ -1072,6 +1122,7 @@ export type Database = {
           frequency?: Database["public"]["Enums"]["checklist_frequency"]
           id?: string
           is_active?: boolean
+          label?: string | null
           name?: string
           updated_at?: string
           value?: number | null
@@ -1210,7 +1261,9 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          notes: string | null
           price: number | null
+          price_package: number | null
           product_type_id: string | null
           updated_at: string
         }
@@ -1221,7 +1274,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          notes?: string | null
           price?: number | null
+          price_package?: number | null
           product_type_id?: string | null
           updated_at?: string
         }
@@ -1232,7 +1287,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          notes?: string | null
           price?: number | null
+          price_package?: number | null
           product_type_id?: string | null
           updated_at?: string
         }

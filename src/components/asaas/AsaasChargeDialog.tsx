@@ -51,7 +51,7 @@ export function AsaasChargeDialog({
       toast({ title: "Asaas não configurado", description: "Configure a integração Asaas primeiro.", variant: "destructive" });
       return;
     }
-    if (!mapping?.asaas_customer_id) {
+    if (!(mapping as any)?.asaas_customer_id) {
       toast({ title: "Cliente não sincronizado", description: "Sincronize o cliente com o Asaas primeiro.", variant: "destructive" });
       return;
     }
@@ -62,7 +62,7 @@ export function AsaasChargeDialog({
 
     const payment = await createPayment.mutateAsync({
       input: {
-        customer: mapping.asaas_customer_id,
+        customer: (mapping as any).asaas_customer_id,
         billingType,
         value: Number(value),
         dueDate,
@@ -168,7 +168,7 @@ export function AsaasChargeDialog({
         ) : (
           // Formulário de criação
           <div className="space-y-4 py-2">
-            {!mapping?.asaas_customer_id && (
+            {!(mapping as any)?.asaas_customer_id && (
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm text-amber-600 dark:text-amber-400">
                 Este cliente ainda não foi sincronizado com o Asaas. Sincronize-o primeiro na aba de cobranças da central do cliente.
               </div>
@@ -242,7 +242,7 @@ export function AsaasChargeDialog({
           {!result && (
             <Button
               onClick={handleSubmit}
-              disabled={createPayment.isPending || !mapping?.asaas_customer_id}
+              disabled={createPayment.isPending || !(mapping as any)?.asaas_customer_id}
               className="gradient-primary text-white"
             >
               {createPayment.isPending ? (

@@ -5,6 +5,9 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Helper to bypass strict typing for Asaas tables not in generated types
+const asaasDb = supabase as any;
+
 // URL base da Edge Function proxy (resolve CORS)
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://sugulxjfkhibuddmoyzr.supabase.co";
 const ASAAS_PROXY_URL = `${SUPABASE_URL}/functions/v1/asaas-proxy`;
@@ -112,7 +115,7 @@ async function asaasRequest(
 // ─── CONFIGURAÇÃO ─────────────────────────────────────────────────────────────
 
 export async function getAsaasConfig(): Promise<AsaasConfig | null> {
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from("asaas_config")
     .select("*")
     .eq("is_active", true)
@@ -122,16 +125,16 @@ export async function getAsaasConfig(): Promise<AsaasConfig | null> {
 }
 
 export async function saveAsaasConfig(config: Partial<AsaasConfig>): Promise<void> {
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("asaas_config")
     .select("id")
     .limit(1)
     .single();
 
   if (existing) {
-    await supabase.from("asaas_config").update({ ...config, updated_at: new Date().toISOString() }).eq("id", existing.id);
+    await (supabase as any).from("asaas_config").update({ ...config, updated_at: new Date().toISOString() }).eq("id", existing.id);
   } else {
-    await supabase.from("asaas_config").insert(config);
+    await (supabase as any).from("asaas_config").insert(config);
   }
 }
 
@@ -160,7 +163,7 @@ export async function syncClientToAsaas(
   if (!client) throw new Error("Cliente não encontrado");
 
   // Verificar se já existe mapeamento
-  const { data: existing } = await supabase
+  const { data: existing } = await (supabase as any)
     .from("asaas_customers")
     .select("asaas_customer_id")
     .eq("client_id", clientId)
@@ -176,24 +179,21 @@ export async function syncClientToAsaas(
   };
 
   if (existing?.asaas_customer_id) {
-    // Atualizar cliente existente no Asaas
     await asaasRequest("PUT", `/customers/${existing.asaas_customer_id}`, apiKey, customerPayload);
-    await supabase.from("asaas_customers").update({
+    await (supabase as any).from("asaas_customers").update({
       synced_at: new Date().toISOString(),
       sync_status: "synced",
       error_message: null,
     }).eq("client_id", clientId);
     return { asaasId: existing.asaas_customer_id, created: false };
   } else {
-    // Criar cliente no Asaas
     const created = await asaasRequest("POST", "/customers", apiKey, customerPayload);
-    await supabase.from("asaas_customers").insert({
+    await (supabase as any).from("asaas_customers").insert({
       client_id: clientId,
       asaas_customer_id: created.id,
       sync_status: "synced",
     });
-    // Atualizar referência rápida na tabela clients
-    await supabase.from("clients").update({ asaas_customer_id: created.id }).eq("id", clientId);
+    await (supabase as any).from("clients").update({ asaas_customer_id: created.id } as any).eq("id", clientId);
     return { asaasId: created.id, created: true };
   }
 }
@@ -215,7 +215,7 @@ export async function syncAllClientsToAsaas(apiKey: string): Promise<SyncResult>
       else result.updated++;
     } catch (e: any) {
       result.errors.push(`${client.name}: ${e.message}`);
-      await supabase.from("asaas_customers").upsert({
+      await (supabase as any).from("asaas_customers").upsert({
         client_id: client.id,
         asaas_customer_id: `error_${client.id}`,
         sync_status: "error",
@@ -239,7 +239,7 @@ export async function createAsaasPayment(
   const payment = await asaasRequest("POST", "/payments", apiKey, input);
 
   // Salvar no banco
-  await supabase.from("asaas_payments").insert({
+  await (supabase as any).from("asaas_payments").insert({
     asaas_payment_id: payment.id,
     asaas_customer_id: input.customer,
     client_id: clientId || null,
@@ -288,13 +288,13 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
 
       for (const payment of data.data || []) {
         // Buscar client_id pelo asaas_customer_id
-        const { data: mapping } = await supabase
+        const { data: mapping } = await (supabase as any)
           .from("asaas_customers")
           .select("client_id")
           .eq("asaas_customer_id", payment.customer)
           .single();
 
-        const { data: existing } = await supabase
+        const { data: existing } = await (supabase as any)
           .from("asaas_payments")
           .select("id")
           .eq("asaas_payment_id", payment.id)
@@ -302,7 +302,7 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
 
         const paymentData = {
           asaas_customer_id: payment.customer,
-          client_id: mapping?.client_id || null,
+          client_id: (mapping as any)?.client_id || null,
           value: payment.value,
           net_value: payment.netValue,
           billing_type: payment.billingType,
@@ -317,10 +317,10 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
         };
 
         if (existing) {
-          await supabase.from("asaas_payments").update(paymentData).eq("asaas_payment_id", payment.id);
+          await (supabase as any).from("asaas_payments").update(paymentData).eq("asaas_payment_id", payment.id);
           result.updated++;
         } else {
-          await supabase.from("asaas_payments").insert({
+          await (supabase as any).from("asaas_payments").insert({
             asaas_payment_id: payment.id,
             ...paymentData,
           });
@@ -347,7 +347,7 @@ export async function processWebhookEvent(
   autoCreateFinancial: boolean
 ): Promise<void> {
   // Atualizar status da cobrança no banco
-  await supabase
+  await (supabase as any)
     .from("asaas_payments")
     .update({
       status: payment.status,
@@ -359,13 +359,13 @@ export async function processWebhookEvent(
   // Se pagamento confirmado e auto_create_financial ativo
   if (event === "PAYMENT_RECEIVED" && autoCreateFinancial) {
     // Buscar cobrança no banco para obter client_id e contract_id
-    const { data: asaasPayment } = await supabase
+    const { data: asaasPayment } = await (supabase as any)
       .from("asaas_payments")
       .select("*, clients(id, name)")
       .eq("asaas_payment_id", payment.id)
       .single();
 
-    if (asaasPayment && !asaasPayment.financial_entry_id) {
+    if (asaasPayment && !(asaasPayment as any).financial_entry_id) {
       // Buscar categoria de receita padrão
       const { data: category } = await supabase
         .from("financial_categories")
@@ -380,11 +380,11 @@ export async function processWebhookEvent(
         .insert({
           type: "receber",
           category_id: category?.id || null,
-          client_id: asaasPayment.client_id,
-          contract_id: asaasPayment.contract_id,
-          description: asaasPayment.description || `Cobrança Asaas #${payment.id}`,
-          value: asaasPayment.value,
-          due_date: asaasPayment.due_date,
+          client_id: (asaasPayment as any).client_id,
+          contract_id: (asaasPayment as any).contract_id,
+          description: (asaasPayment as any).description || `Cobrança Asaas #${payment.id}`,
+          value: (asaasPayment as any).value,
+          due_date: (asaasPayment as any).due_date,
           payment_date: payment.paymentDate || new Date().toISOString().split("T")[0],
           status: "pago",
           recurrence: "unica",
@@ -395,7 +395,7 @@ export async function processWebhookEvent(
 
       if (entry) {
         // Vincular lançamento à cobrança
-        await supabase
+        await (supabase as any)
           .from("asaas_payments")
           .update({ financial_entry_id: entry.id })
           .eq("asaas_payment_id", payment.id);
