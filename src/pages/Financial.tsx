@@ -62,18 +62,8 @@ export default function Financial() {
   if (!canViewFinancial) {
     return <AccessDenied message="Você não tem permissão para acessar o módulo financeiro." />;
   }
-    const groups: Record<string, FinancialEntryRow[]> = {};
-    const keys = kanbanGroup === "status" ? kanbanStatusOrder : ["receber", "pagar"];
-    keys.forEach(k => { groups[k] = []; });
-    entries.forEach(e => {
-      const key = kanbanGroup === "status" ? e.status : e.type;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(e);
-    });
-    return groups;
-  }, [entries, kanbanGroup]);
 
-  const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
 
   return (
     <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-8">
