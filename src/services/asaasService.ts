@@ -288,13 +288,13 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
 
       for (const payment of data.data || []) {
         // Buscar client_id pelo asaas_customer_id
-        const { data: mapping } = await supabase
+        const { data: mapping } = await (supabase as any)
           .from("asaas_customers")
           .select("client_id")
           .eq("asaas_customer_id", payment.customer)
           .single();
 
-        const { data: existing } = await supabase
+        const { data: existing } = await (supabase as any)
           .from("asaas_payments")
           .select("id")
           .eq("asaas_payment_id", payment.id)
@@ -302,7 +302,7 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
 
         const paymentData = {
           asaas_customer_id: payment.customer,
-          client_id: mapping?.client_id || null,
+          client_id: (mapping as any)?.client_id || null,
           value: payment.value,
           net_value: payment.netValue,
           billing_type: payment.billingType,
