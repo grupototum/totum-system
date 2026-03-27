@@ -215,7 +215,7 @@ export async function syncAllClientsToAsaas(apiKey: string): Promise<SyncResult>
       else result.updated++;
     } catch (e: any) {
       result.errors.push(`${client.name}: ${e.message}`);
-      await supabase.from("asaas_customers").upsert({
+      await (supabase as any).from("asaas_customers").upsert({
         client_id: client.id,
         asaas_customer_id: `error_${client.id}`,
         sync_status: "error",
@@ -239,7 +239,7 @@ export async function createAsaasPayment(
   const payment = await asaasRequest("POST", "/payments", apiKey, input);
 
   // Salvar no banco
-  await supabase.from("asaas_payments").insert({
+  await (supabase as any).from("asaas_payments").insert({
     asaas_payment_id: payment.id,
     asaas_customer_id: input.customer,
     client_id: clientId || null,
@@ -317,10 +317,10 @@ export async function syncPaymentsFromAsaas(apiKey: string): Promise<SyncResult>
         };
 
         if (existing) {
-          await supabase.from("asaas_payments").update(paymentData).eq("asaas_payment_id", payment.id);
+          await (supabase as any).from("asaas_payments").update(paymentData).eq("asaas_payment_id", payment.id);
           result.updated++;
         } else {
-          await supabase.from("asaas_payments").insert({
+          await (supabase as any).from("asaas_payments").insert({
             asaas_payment_id: payment.id,
             ...paymentData,
           });
