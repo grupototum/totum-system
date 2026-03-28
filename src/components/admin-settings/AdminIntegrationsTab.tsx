@@ -106,7 +106,7 @@ function AsaasConfigPanel() {
   }, [config]);
 
   const handleTest = async () => {
-    const result = await testConnection.mutateAsync(apiKey);
+    const result = await testConnection.mutateAsync({ apiKey, environment });
     setConnectionResult(result);
   };
 

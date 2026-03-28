@@ -22,6 +22,7 @@ import {
   formatAsaasStatus,
   formatBillingType,
 } from "@/hooks/useAsaas";
+import { AsaasSubscriptionsPanel } from "@/components/asaas/AsaasSubscriptionsPanel";
 import { useQueryClient } from "@tanstack/react-query";
 import { AsaasChargeDialog } from "@/components/asaas/AsaasChargeDialog";
 
