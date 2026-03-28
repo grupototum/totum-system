@@ -13,6 +13,7 @@ import {
   UserCheck,
   AlertCircle,
   Loader2,
+  RotateCcw,
 } from "lucide-react";
 import {
   useAsaasConfig,
@@ -22,6 +23,7 @@ import {
   formatAsaasStatus,
   formatBillingType,
 } from "@/hooks/useAsaas";
+import { AsaasSubscriptionsPanel } from "@/components/asaas/AsaasSubscriptionsPanel";
 import { useQueryClient } from "@tanstack/react-query";
 import { AsaasChargeDialog } from "@/components/asaas/AsaasChargeDialog";
 
@@ -206,6 +208,17 @@ export function ClientHubAsaas({ clientId, clientName }: ClientHubAsaasProps) {
               </motion.div>
             );
           })}
+        </div>
+      )}
+
+      {/* Assinaturas */}
+      {(mapping as any)?.asaas_customer_id && (
+        <div className="space-y-3 pt-3 border-t border-border">
+          <div className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4 text-primary" />
+            <h4 className="font-medium text-sm">Assinaturas recorrentes</h4>
+          </div>
+          <AsaasSubscriptionsPanel clientId={clientId} />
         </div>
       )}
 

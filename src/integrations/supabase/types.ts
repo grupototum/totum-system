@@ -14,6 +14,312 @@ export type Database = {
   }
   public: {
     Tables: {
+      asaas_config: {
+        Row: {
+          api_key: string
+          auto_create_financial: boolean
+          created_at: string
+          default_billing_type: string
+          environment: string
+          id: string
+          is_active: boolean
+          sync_clients: boolean
+          sync_payments: boolean
+          updated_at: string
+          webhook_token: string | null
+        }
+        Insert: {
+          api_key: string
+          auto_create_financial?: boolean
+          created_at?: string
+          default_billing_type?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          sync_clients?: boolean
+          sync_payments?: boolean
+          updated_at?: string
+          webhook_token?: string | null
+        }
+        Update: {
+          api_key?: string
+          auto_create_financial?: boolean
+          created_at?: string
+          default_billing_type?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          sync_clients?: boolean
+          sync_payments?: boolean
+          updated_at?: string
+          webhook_token?: string | null
+        }
+        Relationships: []
+      }
+      asaas_customers: {
+        Row: {
+          asaas_customer_id: string
+          client_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          sync_status: string
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          asaas_customer_id: string
+          client_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asaas_customer_id?: string
+          client_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          sync_status?: string
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_customers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_payments: {
+        Row: {
+          asaas_customer_id: string
+          asaas_payment_id: string
+          asaas_subscription_id: string | null
+          bank_slip_url: string | null
+          billing_type: string
+          client_id: string | null
+          contract_id: string | null
+          created_at: string
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          due_date: string
+          external_reference: string | null
+          financial_entry_id: string | null
+          fine_value: number | null
+          id: string
+          installment_count: number | null
+          installment_value: number | null
+          interest_value: number | null
+          invoice_url: string | null
+          net_value: number | null
+          payment_date: string | null
+          pix_qr_code: string | null
+          pix_qr_code_url: string | null
+          status: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          asaas_customer_id: string
+          asaas_payment_id: string
+          asaas_subscription_id?: string | null
+          bank_slip_url?: string | null
+          billing_type?: string
+          client_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          due_date: string
+          external_reference?: string | null
+          financial_entry_id?: string | null
+          fine_value?: number | null
+          id?: string
+          installment_count?: number | null
+          installment_value?: number | null
+          interest_value?: number | null
+          invoice_url?: string | null
+          net_value?: number | null
+          payment_date?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_url?: string | null
+          status?: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          asaas_customer_id?: string
+          asaas_payment_id?: string
+          asaas_subscription_id?: string | null
+          bank_slip_url?: string | null
+          billing_type?: string
+          client_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          due_date?: string
+          external_reference?: string | null
+          financial_entry_id?: string | null
+          fine_value?: number | null
+          id?: string
+          installment_count?: number | null
+          installment_value?: number | null
+          interest_value?: number | null
+          invoice_url?: string | null
+          net_value?: number | null
+          payment_date?: string | null
+          pix_qr_code?: string | null
+          pix_qr_code_url?: string | null
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_payments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_payments_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_payments_financial_entry_id_fkey"
+            columns: ["financial_entry_id"]
+            isOneToOne: false
+            referencedRelation: "financial_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_subscriptions: {
+        Row: {
+          asaas_customer_id: string
+          asaas_subscription_id: string
+          billing_type: string
+          client_id: string | null
+          contract_id: string | null
+          created_at: string
+          cycle: string
+          description: string | null
+          discount_type: string | null
+          discount_value: number | null
+          end_date: string | null
+          external_reference: string | null
+          fine_value: number | null
+          id: string
+          interest_value: number | null
+          max_payments: number | null
+          next_due_date: string | null
+          status: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          asaas_customer_id: string
+          asaas_subscription_id: string
+          billing_type?: string
+          client_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          cycle?: string
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          end_date?: string | null
+          external_reference?: string | null
+          fine_value?: number | null
+          id?: string
+          interest_value?: number | null
+          max_payments?: number | null
+          next_due_date?: string | null
+          status?: string
+          updated_at?: string
+          value: number
+        }
+        Update: {
+          asaas_customer_id?: string
+          asaas_subscription_id?: string
+          billing_type?: string
+          client_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          cycle?: string
+          description?: string | null
+          discount_type?: string | null
+          discount_value?: number | null
+          end_date?: string | null
+          external_reference?: string | null
+          fine_value?: number | null
+          id?: string
+          interest_value?: number | null
+          max_payments?: number | null
+          next_due_date?: string | null
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asaas_subscriptions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asaas_subscriptions_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asaas_webhook_logs: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          payload: Json
+          payment_id: string | null
+          processed: boolean
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          processed?: boolean
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          processed?: boolean
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
