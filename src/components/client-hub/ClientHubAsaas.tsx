@@ -210,6 +210,17 @@ export function ClientHubAsaas({ clientId, clientName }: ClientHubAsaasProps) {
         </div>
       )}
 
+      {/* Assinaturas */}
+      {(mapping as any)?.asaas_customer_id && (
+        <div className="space-y-3 pt-3 border-t border-border">
+          <div className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4 text-primary" />
+            <h4 className="font-medium text-sm">Assinaturas recorrentes</h4>
+          </div>
+          <AsaasSubscriptionsPanel clientId={clientId} />
+        </div>
+      )}
+
       {/* Diálogo de nova cobrança */}
       <AsaasChargeDialog
         open={chargeDialogOpen}
