@@ -105,10 +105,6 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           total_installments: numInstallments > 1 ? numInstallments : null,
           notes: notes.trim() || null,
           created_by: user?.id || null,
-          category_id: categoryId || null,
-          cost_registration_id: type === "custo" ? costRegistrationId : null,
-          expense_type_id: type === "despesa" ? expenseTypeId : null,
-          nature: nature,
         });
       }
 

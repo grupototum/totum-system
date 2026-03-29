@@ -3,7 +3,7 @@ import fs from 'fs';
 // simple function to parse env
 function getEnv() {
   const content = fs.readFileSync('.env', 'utf-8');
-  const env: Record<string, string> = {};
+  const env = {};
   for (const line of content.split('\n')) {
     if (line.trim() && !line.startsWith('#')) {
       const parts = line.split('=');
