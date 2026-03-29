@@ -2266,6 +2266,57 @@ export type Database = {
           },
         ]
       }
+      task_goals: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          current_count: number
+          description: string | null
+          end_date: string | null
+          goal_type: string
+          id: string
+          period: string
+          responsible_id: string | null
+          start_date: string
+          status: string
+          target_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          current_count?: number
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          id?: string
+          period?: string
+          responsible_id?: string | null
+          start_date?: string
+          status?: string
+          target_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          current_count?: number
+          description?: string | null
+          end_date?: string | null
+          goal_type?: string
+          id?: string
+          period?: string
+          responsible_id?: string | null
+          start_date?: string
+          status?: string
+          target_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       task_history: {
         Row: {
           action: string
