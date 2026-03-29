@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
@@ -13,6 +13,7 @@ import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
+import { TaskGoals } from "@/components/tasks/TaskGoals";
 import { ProjectTemplateManager } from "@/components/templates/ProjectTemplateManager";
 import { Confetti } from "@/components/tasks/Confetti";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,7 +21,7 @@ import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "templates";
+type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
 export default function Tasks() {
   const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles, clients } = useSupabaseTasks();
@@ -227,6 +228,7 @@ export default function Tasks() {
     { key: "kanban", icon: LayoutGrid, label: "Kanban" },
     { key: "list", icon: List, label: "Lista" },
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
+    { key: "goals", icon: Target, label: "Metas" },
     { key: "templates", icon: LayoutTemplate, label: "Templates" },
   ];
 
@@ -325,7 +327,7 @@ export default function Tasks() {
           ))}
         </div>
 
-        {view !== "dashboard" && view !== "templates" && (
+        {view !== "dashboard" && view !== "templates" && view !== "goals" && (
           <TaskFilters
             search={search} onSearchChange={setSearch}
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
@@ -373,6 +375,9 @@ export default function Tasks() {
               currentMonth={calendarMonth}
               onMonthChange={setCalendarMonth}
             />
+          )}
+          {view === "goals" && !showArchived && (
+            <TaskGoals tasks={activeTasks} profiles={profiles} clients={clients} />
           )}
           {view === "templates" && (
             <div className="mt-4">
