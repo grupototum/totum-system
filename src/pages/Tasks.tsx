@@ -327,7 +327,7 @@ export default function Tasks() {
           ))}
         </div>
 
-        {view !== "dashboard" && view !== "templates" && (
+        {view !== "dashboard" && view !== "templates" && view !== "goals" && (
           <TaskFilters
             search={search} onSearchChange={setSearch}
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
