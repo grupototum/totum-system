@@ -204,6 +204,9 @@ export function TaskFormDialog({
       sla_id: selectedSlaId || null,
       sla_response_deadline: slaResponseDeadline,
       sla_resolution_deadline: slaResolutionDeadline,
+      is_recurring: isRecurring,
+      recurrence_type: isRecurring ? recurrenceType : null,
+      recurrence_end_date: isRecurring && recurrenceEndDate ? recurrenceEndDate : null,
     };
 
     const { data: taskData, error } = await (supabase as any).from("tasks").insert(insertPayload).select("id").single();
