@@ -21,11 +21,11 @@
     --popover: var(--bg-elevated);
     --popover-foreground: 20 14% 12%;
 
-    --primary: 1 97% 58%;
+    --primary: 19 92% 56%;
     --primary-foreground: 0 0% 100%;
-    --primary-deep: 0 74% 47%;
-    --primary-hover: 1 97% 52%;
-    --primary-soft: 1 97% 58%;
+    --primary-deep: 18 80% 45%;
+    --primary-hover: 20 93% 61%;
+    --primary-soft: 19 92% 56%;
 
     --secondary: var(--bg-tertiary);
     --secondary-foreground: 20 14% 12%;
@@ -49,7 +49,7 @@
     --border-strong: 20 10% 74%;
     --input: 20 10% 86%;
     --input-hover: 20 10% 74%;
-    --ring: 1 97% 58%;
+    --ring: 19 92% 56%;
 
     --radius: 0.75rem;
 
@@ -67,12 +67,12 @@
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 20 14% 12%;
-    --sidebar-primary: 1 97% 58%;
+    --sidebar-primary: 19 92% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: var(--bg-secondary);
     --sidebar-accent-foreground: 20 14% 12%;
     --sidebar-border: 20 10% 88%;
-    --sidebar-ring: 1 97% 58%;
+    --sidebar-ring: 19 92% 56%;
 
     /* Typography */
     --font-heading: "Sora", "Manrope", sans-serif;
@@ -96,11 +96,11 @@
     --popover: var(--bg-secondary);
     --popover-foreground: 0 0% 100%;
 
-    --primary: 1 97% 58%;
+    --primary: 19 92% 56%;
     --primary-foreground: 0 0% 100%;
-    --primary-deep: 0 74% 47%;
-    --primary-hover: 1 97% 63%;
-    --primary-soft: 1 97% 58%;
+    --primary-deep: 18 80% 45%;
+    --primary-hover: 20 93% 61%;
+    --primary-soft: 19 92% 56%;
 
     --secondary: var(--bg-tertiary);
     --secondary-foreground: 0 0% 100%;
@@ -124,7 +124,7 @@
     --border-strong: 0 0% 100% / 0.22;
     --input: 0 0% 100% / 0.08;
     --input-hover: 0 0% 100% / 0.16;
-    --ring: 1 97% 58%;
+    --ring: 19 92% 56%;
 
     /* Glass tokens (dark) */
     --glass-fill: 0 0% 100% / 0.06;
@@ -140,12 +140,12 @@
     /* Sidebar */
     --sidebar-background: var(--bg-secondary);
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 1 97% 58%;
+    --sidebar-primary: 19 92% 56%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: var(--bg-elevated);
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.08;
-    --sidebar-ring: 1 97% 58%;
+    --sidebar-ring: 19 92% 56%;
   }
 }
 
