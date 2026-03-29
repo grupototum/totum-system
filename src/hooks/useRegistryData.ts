@@ -14,7 +14,18 @@ export interface RegistryTableConfig {
 export const registryTableMap: Record<string, RegistryTableConfig> = {
   bancos: { table: "banks", columns: { name: "name", codigo: "code" } },
   contas_bancarias: { table: "bank_accounts", columns: { name: "name", agencia: "agency", conta: "account_number", tipo_conta: "account_type" } },
-  centros_custo: { table: "cost_centers", columns: { name: "name", descricao: "description" } },
+  centros_custo: { 
+    table: "cost_registrations", 
+    columns: { 
+      name: "name", 
+      descricao: "description",
+      categoria: "category",
+      natureza: "nature",
+      metodo_pagamento: "payment_method",
+      parcelas: "installments",
+      intervalo: "interval"
+    } 
+  },
   categorias_financeiras: { table: "financial_categories", columns: { name: "name", tipo: "type" } },
   tipos_despesa: { table: "expense_types", columns: { name: "name", recorrencia: "recurrence", descricao: "description" } },
   tipos_cliente: { table: "client_types", columns: { name: "name", descricao: "description" } },
@@ -35,7 +46,7 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
 };
 
 type ValidTable = 
-  | "banks" | "bank_accounts" | "cost_centers" | "financial_categories"
+  | "banks" | "bank_accounts" | "cost_registrations" | "financial_categories"
   | "expense_types" | "client_types" | "contract_types" | "plans"
   | "project_types" | "service_types" | "product_types" | "general_categories"
   | "suppliers" | "partners" | "departments" | "tags"

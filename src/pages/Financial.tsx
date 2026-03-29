@@ -11,6 +11,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { AccessDenied } from "@/components/shared/AccessDenied";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
 
 const now = new Date();
 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -45,19 +46,58 @@ export default function Financial() {
 
   const monthLabel = format(now, "MMMM yyyy").replace(/^\w/, (c) => c.toUpperCase());
 
+  const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+
+  const metrics = useMemo(() => {
+    const paid = entries.filter(e => e.status === "pago");
+    
+    const receita = paid.filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
+    
+    // Custos (Agrupados por natureza)
+    const custoFixo = paid.filter(e => e.type === "custo" && e.nature === "fixo").reduce((s, e) => s + Number(e.value), 0);
+    const custoVar = paid.filter(e => e.type === "custo" && e.nature === "variavel").reduce((s, e) => s + Number(e.value), 0);
+    
+    // Despesas (Agrupadas por natureza)
+    const despesaFixo = paid.filter(e => (e.type === "pagar" || e.type === "despesa") && e.nature === "fixo").reduce((s, e) => s + Number(e.value), 0);
+    const despesaVar = paid.filter(e => (e.type === "pagar" || e.type === "despesa") && e.nature === "variavel").reduce((s, e) => s + Number(e.value), 0);
+    
+    const totalCustos = custoFixo + custoVar;
+    const totalDespesas = despesaFixo + despesaVar;
+    
+    const lucroOp = receita - totalCustos;
+    const resultadoLiq = lucroOp - totalDespesas;
+    
+    const inadimplencia = entries.filter(e => e.status === "atrasado").reduce((s, e) => s + Number(e.value), 0);
+    const overdueCount = entries.filter(e => e.status === "atrasado").length;
+
+    return {
+      receita, custoFixo, custoVar, despesaFixo, despesaVar,
+      totalCustos, totalDespesas, lucroOp, resultadoLiq,
+      inadimplencia, overdueCount
+    };
+  }, [entries]);
+
+  const chartDataComposition = [
+    { name: "Custos", value: metrics.totalCustos, color: "#8b5cf6" },
+    { name: "Despesas", value: metrics.totalDespesas, color: "#f43f5e" },
+  ];
+
+  const chartDataNature = [
+    { name: "Fixo", value: metrics.custoFixo + metrics.despesaFixo, color: "#3b82f6" },
+    { name: "Variável", value: metrics.custoVar + metrics.despesaVar, color: "#f59e0b" },
+  ];
+
   const grouped = useMemo(() => {
     const groups: Record<string, FinancialEntryRow[]> = {};
     const keys = kanbanGroup === "status" ? kanbanStatusOrder : ["receber", "pagar"];
     keys.forEach(k => { groups[k] = []; });
     entries.forEach(e => {
-      const key = kanbanGroup === "status" ? e.status : e.type;
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(e);
+      const g = kanbanGroup === "status" ? e.status : e.type;
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(e);
     });
     return groups;
   }, [entries, kanbanGroup]);
-
-  const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
   if (!canViewFinancial) {
     return <AccessDenied message="Você não tem permissão para acessar o módulo financeiro." />;
@@ -78,10 +118,55 @@ export default function Financial() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Receita Recebida" value={fmt(summary.income)} change={`${entries.filter(e => e.type === "receber").length} lançamentos`} changeType="positive" icon={TrendingUp} />
-        <MetricCard title="Despesas Pagas" value={fmt(summary.expense)} change={`${entries.filter(e => e.type === "pagar").length} lançamentos`} changeType="negative" icon={TrendingDown} />
-        <MetricCard title="Resultado" value={fmt(summary.profit)} change={summary.profit >= 0 ? "Positivo" : "Negativo"} changeType={summary.profit >= 0 ? "positive" : "negative"} icon={DollarSign} />
-        <MetricCard title="Inadimplência" value={fmt(summary.overdue)} change={`${summary.overdueCount} atrasado(s)`} changeType="negative" icon={TrendingDown} pulse={summary.overdueCount > 0} />
+        <MetricCard title="Receita Recebida" value={fmt(metrics.receita)} icon={TrendingUp} changeType="positive" />
+        <MetricCard title="Custos Fixos" value={fmt(metrics.custoFixo)} icon={ArrowUpRight} changeType="neutral" />
+        <MetricCard title="Custos Variáveis" value={fmt(metrics.custoVar)} icon={ArrowUpRight} changeType="neutral" />
+        <MetricCard title="Lucro Operacional" value={fmt(metrics.lucroOp)} icon={DollarSign} changeType={metrics.lucroOp >= 0 ? "positive" : "negative"} />
+        
+        <MetricCard title="Despesas Fixas" value={fmt(metrics.despesaFixo)} icon={TrendingDown} changeType="negative" />
+        <MetricCard title="Despesas Variáveis" value={fmt(metrics.despesaVar)} icon={TrendingDown} changeType="negative" />
+        <MetricCard title="Resultado Líquido" value={fmt(metrics.resultadoLiq)} icon={DollarSign} changeType={metrics.resultadoLiq >= 0 ? "positive" : "negative"} />
+        <MetricCard title="Inadimplência" value={fmt(metrics.inadimplencia)} icon={TrendingDown} change={`${metrics.overdueCount} atrasado(s)`} changeType="negative" pulse={metrics.overdueCount > 0} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="glass-card rounded-xl p-6">
+          <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
+            <LayoutGrid className="h-4 w-4 text-primary" /> Composição de Gastos (Custo vs Despesa)
+          </h3>
+          <div className="h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={chartDataComposition} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  {chartDataComposition.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip formatter={(v: any) => fmt(v)} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="glass-card rounded-xl p-6">
+          <h3 className="text-sm font-semibold mb-6 flex items-center gap-2">
+            <LayoutGrid className="h-4 w-4 text-primary" /> Natureza Financeira (Fixo vs Variável)
+          </h3>
+          <div className="h-[240px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={chartDataNature} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  {chartDataNature.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <RechartsTooltip formatter={(v: any) => fmt(v)} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       {/* Tabs + View Toggle */}
@@ -158,12 +243,15 @@ export default function Financial() {
                       const isIncome = tx.type === "receber";
                       return (
                         <tr key={tx.id} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
-                          <td className="p-4">
+                           <td className="p-4">
                             <div className="flex items-center gap-3">
                               <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${isIncome ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
                                 {isIncome ? <ArrowDownLeft className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /> : <ArrowUpRight className="h-4 w-4 text-red-600 dark:text-red-400" />}
                               </div>
-                              <span className="font-medium">{tx.description}</span>
+                              <div>
+                                <span className="font-medium block">{tx.description}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{tx.nature || "Fixo"}</span>
+                              </div>
                             </div>
                           </td>
                           <td className="p-4 text-xs text-muted-foreground">{isIncome ? "Receita" : "Despesa"}</td>

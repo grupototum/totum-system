@@ -27,12 +27,24 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   const [value, setValue] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [installments, setInstallments] = useState("1");
+  const [nature, setNature] = useState<"fixo" | "variavel">("fixo");
+  const [costRegistrationId, setCostRegistrationId] = useState("");
+  const [expenseTypeId, setExpenseTypeId] = useState("");
+  const [costRegistrations, setCostRegistrations] = useState<{ id: string; name: string }[]>([]);
+  const [expenseTypes, setExpenseTypes] = useState<{ id: string; name: string }[]>([]);
+  const [interval, setIntervalValue] = useState("1");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (open) {
       supabase.from("financial_categories").select("id, name, type").then(({ data }) => {
         if (data) setCategories(data);
+      });
+      supabase.from("cost_registrations" as any).select("id, name").eq("is_active", true).then(({ data }) => {
+        if (data) setCostRegistrations(data as any);
+      });
+      supabase.from("expense_types").select("id, name").eq("is_active", true).then(({ data }) => {
+        if (data) setExpenseTypes(data as any);
       });
     }
   }, [open]);
@@ -43,7 +55,17 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   }, [type]);
 
   const resetForm = () => {
-    setDescription(""); setType("receber"); setCategoryId(""); setValue(""); setDueDate(""); setInstallments("1"); setNotes("");
+    setDescription(""); 
+    setType("receber"); 
+    setCategoryId(""); 
+    setValue(""); 
+    setDueDate(""); 
+    setInstallments("1"); 
+    setIntervalValue("1");
+    setNature("fixo");
+    setCostRegistrationId("");
+    setExpenseTypeId("");
+    setNotes("");
   };
 
   const handleSave = async () => {
@@ -58,19 +80,23 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
     const installmentValue = Math.round((totalValue / numInstallments) * 100) / 100;
 
     const { data: { user } } = await supabase.auth.getUser();
-    const entries = [];
-    
-    // Convert generic local types to DB type ("receber" | "pagar")
-    const dbType = type === "receber" ? "receber" : "pagar";
-    // Also store expense_type_id maybe? For now we just use the DB's type and the selected category.
+    // Determine nature from related entity if not manually set (fallback)
+    const finalNature = nature;
 
     try {
+      const dbType = type === "receber" ? "receber" : "pagar";
+      const intervalMonths = Math.max(1, parseInt(interval) || 1);
+      const entries = [];
+      
       for (let i = 0; i < numInstallments; i++) {
-        const date = addMonths(parseISO(dueDate), i);
+        const date = addMonths(parseISO(dueDate), i * intervalMonths);
         entries.push({
           description: numInstallments > 1 ? `${description.trim()} (${i + 1}/${numInstallments})` : description.trim(),
           type: dbType,
           category_id: categoryId || null,
+          cost_registration_id: type === "custo" ? costRegistrationId || null : null,
+          expense_type_id: type === "despesa" ? expenseTypeId || null : null,
+          nature: finalNature,
           value: installmentValue,
           due_date: format(date, "yyyy-MM-dd"),
           status: "pendente" as const,
@@ -79,6 +105,10 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           total_installments: numInstallments > 1 ? numInstallments : null,
           notes: notes.trim() || null,
           created_by: user?.id || null,
+          category_id: categoryId || null,
+          cost_registration_id: type === "custo" ? costRegistrationId : null,
+          expense_type_id: type === "despesa" ? expenseTypeId : null,
+          nature: nature,
         });
       }
 
@@ -161,14 +191,54 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Parcelas</Label>
-            <Input type="number" min="1" max="48" value={installments} onChange={e => setInstallments(e.target.value)} className="bg-white/[0.04] border-border" />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Natureza</Label>
+              <Select value={nature} onValueChange={(v: any) => setNature(v)}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fixo">Fixo</SelectItem>
+                  <SelectItem value="variavel">Variável</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {(type === "custo" || type === "despesa") && (
+              <div className="space-y-1.5">
+                <Label>{type === "custo" ? "Cadastro de Custo" : "Tipo de Despesa"}</Label>
+                <Select 
+                  value={type === "custo" ? costRegistrationId : expenseTypeId} 
+                  onValueChange={type === "custo" ? setCostRegistrationId : setExpenseTypeId}
+                >
+                  <SelectTrigger className="bg-white/[0.04] border-border">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(type === "custo" ? costRegistrations : expenseTypes).map(item => (
+                      <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
-          {parseInt(installments) > 1 && value && (
+          {nature === "variavel" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Parcelas</Label>
+                <Input type="number" min="1" max="48" value={installments} onChange={e => setInstallments(e.target.value)} className="bg-white/[0.04] border-border" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Intervalo (meses)</Label>
+                <Input type="number" min="1" max="12" value={interval} onChange={e => setIntervalValue(e.target.value)} className="bg-white/[0.04] border-border" />
+              </div>
+            </div>
+          )}
+
+          {nature === "variavel" && parseInt(installments) > 1 && value && (
             <p className="text-xs text-muted-foreground">
-              {installments}x de R$ {(parseFloat(value) / parseInt(installments)).toFixed(2)} — parcelas mensais a partir de {dueDate && parseISO(dueDate) ? format(parseISO(dueDate), "dd/MM/yyyy") : dueDate}
+              {installments}x de R$ {(parseFloat(value) / parseInt(installments)).toFixed(2)} — Intervalo de {interval} mês(es).
             </p>
           )}
 

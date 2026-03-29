@@ -110,7 +110,8 @@ const mkEntry = (id: number, overrides: Partial<FinancialEntryRow>): FinancialEn
   client_id: null,
   contract_id: null,
   category_id: null,
-  cost_center_id: null,
+  cost_registration_id: null,
+  nature: "fixo",
   expense_type_id: null,
   supplier_id: null,
   bank_account_id: null,
@@ -245,6 +246,14 @@ export const demoExecutiveDashboardData = {
     { name: "DigitalPlus Agência", revenue: 4000, pct: 11 },
   ],
   revenueConcentration: 1642,
+  financialHistory: [
+    { month: "out/25", revenue: 22000, costs: 8000, expenses: 10000 },
+    { month: "nov/25", revenue: 24500, costs: 9000, expenses: 10500 },
+    { month: "dez/25", revenue: 26000, costs: 9500, expenses: 11000 },
+    { month: "jan/26", revenue: 28000, costs: 10000, expenses: 11500 },
+    { month: "fev/26", revenue: 29500, costs: 11000, expenses: 12000 },
+    { month: "mar/26", revenue: 35000, costs: 12000, expenses: 12200 },
+  ],
 };
 
 // ── Delivery Checklists (demo) ──

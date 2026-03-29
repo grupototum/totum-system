@@ -117,24 +117,32 @@ export const registryGroups: RegistryGroup[] = [
       },
       {
         key: "centros_custo",
-        label: "Centros de Custo",
+        label: "Cadastro de Custo",
         description: "Agrupamento de custos por área ou finalidade",
         icon: "Target",
         columns: [
           { key: "name", label: "Nome" },
+          { key: "categoria", label: "Categoria" },
+          { key: "natureza", label: "Natureza" },
           { key: "descricao", label: "Descrição" },
           statusColumn,
         ],
         formFields: [
           { key: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Marketing" },
-          { key: "descricao", label: "Descrição", type: "textarea", placeholder: "Descreva o centro de custo..." },
+          { key: "categoria", label: "Categoria", type: "text", placeholder: "Ex: Operacional" },
+          { key: "natureza", label: "Natureza", type: "select", options: [
+            { label: "Fixo", value: "fixo" },
+            { label: "Variável", value: "variavel" },
+          ], required: true },
+          { key: "metodo_pagamento", label: "Método de Pagamento", type: "select", options: [
+            { label: "À vista", value: "avista" },
+            { label: "Parcelado", value: "parcelado" },
+          ]},
+          { key: "parcelas", label: "Parcelas", type: "number", placeholder: "1" },
+          { key: "intervalo", label: "Intervalo (meses)", type: "number", placeholder: "1" },
+          { key: "descricao", label: "Descrição", type: "textarea", placeholder: "Descreva o custo..." },
         ],
-        initialData: [
-          { id: "cc1", name: "Operações", descricao: "Custos operacionais gerais", status: "ativo" },
-          { id: "cc2", name: "Comercial", descricao: "Vendas e prospecção", status: "ativo" },
-          { id: "cc3", name: "Administrativo", descricao: "Custos administrativos", status: "ativo" },
-          { id: "cc4", name: "Mídia Paga", descricao: "Investimento em tráfego", status: "ativo" },
-        ],
+        initialData: [],
       },
       {
         key: "categorias_financeiras",
@@ -193,6 +201,10 @@ export const registryGroups: RegistryGroup[] = [
         ],
         formFields: [
           { key: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Aluguel" },
+          { key: "natureza", label: "Natureza", type: "select", options: [
+            { label: "Fixo", value: "fixo" },
+            { label: "Variável", value: "variavel" },
+          ], required: true },
           { key: "recorrencia", label: "Recorrência", type: "select", required: true, options: [
             { label: "Recorrente", value: "recorrente" },
             { label: "Única", value: "unica" },

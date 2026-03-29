@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoExecutiveDashboardData } from "@/data/demoData";
+import { format, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ExecutiveDashboardData {
   totalRevenue: number;
@@ -28,6 +30,7 @@ interface ExecutiveDashboardData {
   revenueForecast: number;
   topClients: { name: string; revenue: number; pct: number }[];
   revenueConcentration: number;
+  financialHistory: { month: string; revenue: number; costs: number; expenses: number }[];
 }
 
 export interface PeriodFilter {
@@ -186,6 +189,48 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
     const revenueForecast = mrr;
     const revenueByService = revenueByClient.slice(0, 5);
 
+    // Fetch historical data for the last 6 months
+    const historyStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
+    const { data: historyEntries } = await supabase
+      .from("financial_entries")
+      .select("value, type, due_date, status, nature")
+      .gte("due_date", historyStart)
+      .lt("due_date", periodEnd)
+      .eq("status", "pago");
+
+    const historyMap: Record<string, { revenue: number; costs: number; expenses: number }> = {};
+    // Pre-fill last 6 months
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      historyMap[m] = { revenue: 0, costs: 0, expenses: 0 };
+    }
+
+    (historyEntries || []).forEach(e => {
+      const m = e.due_date.substring(0, 7);
+      if (historyMap[m]) {
+        if (e.type === "receber") historyMap[m].revenue += Number(e.value);
+        else if (e.type === "custo") historyMap[m].costs += Number(e.value);
+        else if (e.type === "pagar" || e.type === "despesa") historyMap[m].expenses += Number(e.value);
+      }
+    });
+
+    const financialHistory = Object.entries(historyMap)
+      .map(([month, vals]) => ({ 
+        month: format(new Date(month + "-01"), "MMM/yy", { locale: ptBR }), 
+        ...vals 
+      }))
+      .sort((a, b) => {
+         // Sort by date correctly if needed, but they are already in order if we loop correctly
+         return 0; 
+      });
+      
+    // Fix sorting for display (chronological)
+    const sortedHistory = Object.keys(historyMap).sort().map(m => ({
+      month: format(new Date(m + "-01"), "MMM/yy", { locale: ptBR }),
+      ...historyMap[m]
+    }));
+
     setData({
       totalRevenue, mrr, receivables, overdueReceivables, totalExpenses,
       grossProfit, netProfit, margin, revenueByClient, revenueByService,
@@ -194,6 +239,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       productivityByUser, criticalTasks,
       activeContracts, defaultingContracts, contractFulfillment,
       revenueForecast, topClients, revenueConcentration,
+      financialHistory: sortedHistory,
     });
     } catch (err) {
       console.error("[ExecutiveDashboard] Erro ao carregar dados:", err);
@@ -204,6 +250,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         overdueTasks: 0, completionRate: 0, productivityByUser: [], criticalTasks: [],
         activeContracts: 0, defaultingContracts: 0, contractFulfillment: [],
         revenueForecast: 0, topClients: [], revenueConcentration: 0,
+        financialHistory: [],
       });
     } finally {
       setLoading(false);
