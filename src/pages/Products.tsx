@@ -41,11 +41,15 @@ export default function Products() {
   const [cost, setCost] = useState("");
   const [typeId, setTypeId] = useState("");
   const [notes, setNotes] = useState("");
+  const [profMonthlyCost, setProfMonthlyCost] = useState("");
+  const [monthlyHours, setMonthlyHours] = useState("160");
+  const [timeSpent, setTimeSpent] = useState("");
   const [quickAddTypeOpen, setQuickAddTypeOpen] = useState(false);
 
   const openNew = () => {
     setEditing(null);
     setName(""); setDescription(""); setPrice(""); setPricePackage(""); setCost(""); setTypeId(""); setNotes("");
+    setProfMonthlyCost(""); setMonthlyHours("160"); setTimeSpent("");
     setDialogOpen(true);
   };
 
@@ -58,6 +62,9 @@ export default function Products() {
     setCost(formatCurrency(p.cost));
     setTypeId(p.product_type_id || "");
     setNotes((p as any).notes || "");
+    setProfMonthlyCost(formatCurrency((p as any).professional_monthly_cost));
+    setMonthlyHours((p as any).monthly_hours_worked?.toString() || "160");
+    setTimeSpent((p as any).time_spent_hours?.toString() || "");
     setDialogOpen(true);
   };
 
@@ -71,6 +78,9 @@ export default function Products() {
       cost: parseCurrency(cost),
       product_type_id: typeId || null,
       notes: notes || null,
+      professional_monthly_cost: parseCurrency(profMonthlyCost),
+      monthly_hours_worked: parseFloat(monthlyHours) || 160,
+      time_spent_hours: parseFloat(timeSpent) || 0,
     };
     if (editing) {
       const ok = await updateProduct(editing.id, values);
@@ -78,6 +88,18 @@ export default function Products() {
     } else {
       const ok = await addProduct(values);
       if (ok) setDialogOpen(false);
+    }
+  };
+
+  const calculateEffortCost = () => {
+    const monthlyCostInput = parseCurrency(profMonthlyCost) || 0;
+    const hoursWorkedInput = parseFloat(monthlyHours) || 160;
+    const timeSpentInput = parseFloat(timeSpent) || 0;
+    
+    if (monthlyCostInput > 0 && hoursWorkedInput > 0 && timeSpentInput > 0) {
+      const hourlyRate = monthlyCostInput / hoursWorkedInput;
+      const totalCost = hourlyRate * timeSpentInput;
+      setCost(formatCurrency(totalCost));
     }
   };
 
@@ -142,8 +164,8 @@ export default function Products() {
                     </DropdownMenu>
                   </div>
                 </div>
-                <h3 className="font-semibold mb-1">{product.name}</h3>
-                {product.description && <p className="text-xs text-muted-foreground mb-3">{product.description}</p>}
+                <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                {product.description && <p className="text-xs text-muted-foreground mb-3 line-clamp-3 min-h-[3rem]">{product.description}</p>}
                 <div className="grid grid-cols-2 gap-3 text-center mb-2">
                   <div>
                     <div className="font-heading text-sm font-bold">
@@ -236,54 +258,100 @@ export default function Products() {
                   <p className="text-[10px] text-muted-foreground">Preço quando incluído em um pacote</p>
                 </div>
               </div>
+
+              <div className="rounded-xl border border-border bg-accent/30 p-4 space-y-4 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-3">
+                  <TrendingUp className="h-4 w-4 text-primary/20" />
+                </div>
+                <h4 className="text-sm font-semibold flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  Calculadora de Custo (Esforço Humano)
+                </h4>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Custo Mensal Prof.</Label>
+                    <Input 
+                      type="text" 
+                      value={profMonthlyCost} 
+                      onChange={(e) => setProfMonthlyCost(formatCurrency(e.target.value))} 
+                      onBlur={calculateEffortCost}
+                      placeholder="R$ 0,00" 
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Horas Totais/Mês</Label>
+                    <Input 
+                      type="number" 
+                      value={monthlyHours} 
+                      onChange={(e) => setMonthlyHours(e.target.value)} 
+                      onBlur={calculateEffortCost}
+                      placeholder="160" 
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px]">Tempo no Prod. (h)</Label>
+                    <Input 
+                      type="number" 
+                      value={timeSpent} 
+                      onChange={(e) => setTimeSpent(e.target.value)} 
+                      onBlur={calculateEffortCost}
+                      placeholder="8" 
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  * O custo do produto será automaticamente calculado com base no valor da hora do profissional.
+                </p>
+              </div>
+
               <div className="space-y-1.5">
-                <Label>Custo</Label>
-                <Input type="text" value={cost} onChange={(e) => setCost(formatCurrency(e.target.value))} placeholder="R$ 0,00" />
+                <Label>Custo Final (Mercado/Insumos)</Label>
+                <div className="flex gap-2">
+                  <Input type="text" value={cost} onChange={(e) => setCost(formatCurrency(e.target.value))} placeholder="R$ 0,00" className="flex-1" />
+                </div>
+                <p className="text-[10px] text-muted-foreground">Custo total para a empresa produzir/entregar este item.</p>
               </div>
 
               {/* Pricing summary */}
               {(parseCurrency(price) || parseCurrency(cost)) && (
-                <div className="rounded-lg border border-border bg-accent/50 p-4 space-y-2">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resumo de Precificação</h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Preço Avulso:</span>
-                      <span className="ml-2 font-semibold">{price || "—"}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Preço Pacote:</span>
-                      <span className="ml-2 font-semibold text-primary">{pricePackage || "—"}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Custo:</span>
-                      <span className="ml-2 font-semibold">{cost || "—"}</span>
-                    </div>
-                    {parseCurrency(price) && parseCurrency(cost) && (
-                      <div>
-                        <span className="text-muted-foreground">Margem (avulso):</span>
-                        <span className="ml-2 font-semibold text-emerald-600 dark:text-emerald-400">
-                          {Math.round(((parseCurrency(price)! - parseCurrency(cost)!) / parseCurrency(price)!) * 100)}%
-                        </span>
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-primary">Indicadores de Lucratividade</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground text-xs">Margem Avulso:</span>
+                        {parseCurrency(price) && parseCurrency(cost) && (
+                          <span className={`font-bold ${((parseCurrency(price)! - parseCurrency(cost)!) / parseCurrency(price)!) > 0.3 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                            {Math.round(((parseCurrency(price)! - parseCurrency(cost)!) / parseCurrency(price)!) * 100)}%
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {parseCurrency(pricePackage) && parseCurrency(cost) && (
-                      <div>
-                        <span className="text-muted-foreground">Margem (pacote):</span>
-                        <span className="ml-2 font-semibold text-emerald-600 dark:text-emerald-400">
-                          {Math.round(((parseCurrency(pricePackage)! - parseCurrency(cost)!) / parseCurrency(pricePackage)!) * 100)}%
-                        </span>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground text-xs">Margem Pacote:</span>
+                        {parseCurrency(pricePackage) && parseCurrency(cost) && (
+                          <span className={`font-bold ${((parseCurrency(pricePackage)! - parseCurrency(cost)!) / parseCurrency(pricePackage)!) > 0.2 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                            {Math.round(((parseCurrency(pricePackage)! - parseCurrency(cost)!) / parseCurrency(pricePackage)!) * 100)}%
+                          </span>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground text-xs">Lucro Líquido:</span>
+                        {parseCurrency(price) && parseCurrency(cost) && (
+                          <span className="font-bold">
+                            R$ {(parseCurrency(price)! - parseCurrency(cost)!).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
-
-              <div className="rounded-lg border border-dashed border-border p-4 text-center">
-                <p className="text-xs text-muted-foreground">
-                  A composição detalhada de custos, alocação operacional e indicadores de lucratividade
-                  serão configurados aqui com base na planilha de precificação.
-                </p>
-              </div>
             </TabsContent>
           </Tabs>
 

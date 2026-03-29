@@ -36,6 +36,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [plans, setPlans] = useState<{ id: string; name: string; value: number | null; frequency: string }[]>([]);
   const [contractTypes, setContractTypes] = useState<{ id: string; name: string }[]>([]);
+  const [packages, setPackages] = useState<{ id: string; name: string; total_sale: number | null }[]>([]);
   const [products, setProducts] = useState<ProductOption[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -45,7 +46,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
   const [quickAddPlanOpen, setQuickAddPlanOpen] = useState(false);
   const [quickAddTypeOpen, setQuickAddTypeOpen] = useState(false);
   const [form, setForm] = useState({
-    title: "", client_id: "", plan_id: "", contract_type_id: "",
+    title: "", client_id: "", plan_id: "", package_id: "", contract_type_id: "",
     value: "", billing_frequency: "mensal" as string,
     start_date: "", end_date: "", notes: "",
   });
@@ -56,11 +57,13 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
         supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
         supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
         supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
+        (supabase.from("packages") as any).select("id, name, total_sale").eq("is_active", true).order("name"),
         supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
-      ]).then(([c, p, ct, pr]) => {
+      ]).then(([c, p, ct, pkg, pr]) => {
         setClients(c.data || []);
         setPlans((p.data as any) || []);
         setContractTypes(ct.data || []);
+        setPackages((pkg as any).data || []);
         setProducts((pr.data as any) || []);
       });
 
@@ -69,6 +72,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
           title: editData.title || "",
           client_id: editData.client_id || "",
           plan_id: editData.plan_id || "",
+          package_id: editData.package_id || "",
           contract_type_id: editData.contract_type_id || "",
           value: editData.value ? String(editData.value) : "",
           billing_frequency: editData.billing_frequency || "mensal",
@@ -77,7 +81,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
           notes: editData.notes || "",
         });
       } else {
-        setForm({ title: "", client_id: defaultClientId || "", plan_id: "", contract_type_id: "", value: "", billing_frequency: "mensal", start_date: "", end_date: "", notes: "" });
+        setForm({ title: "", client_id: defaultClientId || "", plan_id: "", package_id: "", contract_type_id: "", value: "", billing_frequency: "mensal", start_date: "", end_date: "", notes: "" });
       }
       setSelectedProducts([]);
       setErrors({});
@@ -105,8 +109,19 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
     setForm({
       ...form,
       plan_id: planId,
+      package_id: "", // Clear package if plan is selected
       value: plan?.value ? String(plan.value) : form.value,
       billing_frequency: plan?.frequency || form.billing_frequency,
+    });
+  };
+
+  const handlePackageChange = (packageId: string) => {
+    const pkg = packages.find((p) => p.id === packageId);
+    setForm({
+      ...form,
+      package_id: packageId,
+      plan_id: "", // Clear plan if package is selected
+      value: pkg?.total_sale ? String(pkg.total_sale) : form.value,
     });
   };
 
@@ -140,6 +155,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
       billing_frequency: form.billing_frequency,
     };
     if (form.plan_id) payload.plan_id = form.plan_id;
+    if (form.package_id) payload.package_id = form.package_id;
     if (form.contract_type_id) payload.contract_type_id = form.contract_type_id;
     // Use manual value or sum from products
     const finalValue = form.value ? Number(form.value) : productsTotal > 0 ? productsTotal : undefined;
@@ -255,7 +271,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
               </Button>
             </Label>
             <Select value={form.plan_id} onValueChange={handlePlanChange}>
-              <SelectTrigger><SelectValue placeholder="Vincular a um pacote (opcional)" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Vincular a um plano legando (opcional)" /></SelectTrigger>
               <SelectContent>
                 {plans.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
@@ -266,10 +282,32 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
             </Select>
             {selectedPlan && (
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-xs space-y-1">
-                <p><strong>Pacote selecionado:</strong> {selectedPlan.name}</p>
+                <p><strong>Plano selecionado:</strong> {selectedPlan.name}</p>
                 {selectedPlan.value && <p><strong>Valor sugerido:</strong> R$ {Number(selectedPlan.value).toLocaleString("pt-BR")}</p>}
                 <p><strong>Frequência:</strong> {selectedPlan.frequency}</p>
               </div>
+            )}
+          </div>
+
+          {/* Package Section (New) */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold flex items-center gap-2">
+              <Package className="h-4 w-4" /> Pacote Estratégico (Smart)
+            </Label>
+            <Select value={form.package_id} onValueChange={handlePackageChange}>
+              <SelectTrigger className="border-primary/50 bg-primary/5"><SelectValue placeholder="Vincular a um Pacote Estratégico" /></SelectTrigger>
+              <SelectContent>
+                {packages.map((pkg) => (
+                  <SelectItem key={pkg.id} value={pkg.id}>
+                    {pkg.name} {pkg.total_sale ? `— R$ ${Number(pkg.total_sale).toLocaleString("pt-BR")}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {form.package_id && (
+              <p className="text-[10px] text-emerald-500 font-medium px-1">
+                ✨ Este pacote gerará automaticamente as entregas operacionais ao ativar o contrato.
+              </p>
             )}
           </div>
 

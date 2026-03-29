@@ -5,7 +5,7 @@ import {
   CheckSquare,
   Briefcase,
   DollarSign,
-  Gauge,
+  LayoutDashboard,
   UserCog,
   Settings,
   ShieldCheck,
@@ -14,11 +14,16 @@ import {
   Monitor,
   LogOut,
   Package,
-  LayoutTemplate,
-  BookOpen,
+  Box,
+  Tags,
+  FileText,
+  Truck,
+  List,
+  BarChart3,
   Clock,
   Upload,
-  BarChart3,
+  ChevronRight,
+  Gauge,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -38,29 +43,73 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarHeader,
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const allMainNav = [
-  { title: "Central do Cliente", url: "/clientes", icon: Users, permKey: "cli_geral.visualizar" },
-  { title: "Tarefas", url: "/tarefas", icon: CheckSquare, permKey: "tar_geral.visualizar" },
-  { title: "Projetos", url: "/projetos", icon: Briefcase, permKey: "proj_geral.visualizar" },
-  { title: "Produtos", url: "/produtos", icon: Package, permKey: "prod_geral.visualizar" },
-  { title: "Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
-  { title: "Relatórios", url: "/relatorios", icon: BarChart3, permKey: "rel_financeiros.visualizar" },
-  { title: "POPs", url: "/pops", icon: BookOpen, permKey: null },
-  { title: "SLA", url: "/sla", icon: Clock, permKey: null },
-];
-
-const allSystemNav = [
-  { title: "Equipe", url: "/equipe", icon: UserCog, permKey: "usr_usuarios.visualizar" },
-  { title: "Cadastros", url: "/cadastros", icon: Database, permKey: "cad_geral.visualizar" },
-  { title: "Importação", url: "/importar", icon: Upload, permKey: null },
-  { title: "Permissões", url: "/usuarios", icon: Shield, permKey: "usr_permissoes.editar" },
-  { title: "Configurações", url: "/configuracoes", icon: Settings, permKey: null },
-  { title: "Admin", url: "/admin", icon: ShieldCheck, permKey: null, adminOnly: true },
+const navGroups = [
+  {
+    title: "Dashboards",
+    icon: LayoutDashboard,
+    items: [
+      { title: "Visão Geral", url: "/", permKey: null },
+      { title: "Executivo", url: "/dashboard-executivo", permKey: "acessar_dashboard_executivo" },
+    ]
+  },
+  {
+    title: "Comercial",
+    icon: List,
+    items: [
+      { title: "Clientes", url: "/clientes", icon: Users, permKey: "cli_geral.visualizar" },
+      { title: "Pacotes", url: "/pacotes", icon: Box, permKey: "prod_geral.visualizar" },
+      { title: "Contratos", url: "/contratos", icon: FileText, permKey: null },
+    ]
+  },
+  {
+    title: "Operacional",
+    icon: Briefcase,
+    items: [
+      { title: "Tarefas", url: "/tarefas", icon: CheckSquare, permKey: "tar_geral.visualizar" },
+      { title: "Projetos", url: "/projetos", icon: Briefcase, permKey: "proj_geral.visualizar" },
+      { title: "Entregas", url: "/entregas", icon: Truck, permKey: null },
+    ]
+  },
+  {
+    title: "Financeiro",
+    icon: DollarSign,
+    items: [
+      { title: "Painel Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
+      { title: "Lançamentos", url: "/financeiro", icon: List, permKey: "fin_geral.visualizar" },
+    ]
+  },
+  {
+    title: "Cadastros Base",
+    icon: Database,
+    items: [
+      { title: "Produtos", url: "/produtos", icon: Package, permKey: "prod_geral.visualizar" },
+      { title: "Categorias", url: "/cadastros", icon: Tags, permKey: "cad_geral.visualizar" },
+      { title: "Equipe", url: "/equipe", icon: UserCog, permKey: "usr_usuarios.visualizar" },
+    ]
+  },
+  {
+    title: "Administração",
+    icon: Shield,
+    items: [
+      { title: "Permissões", url: "/usuarios", icon: Shield, permKey: "usr_permissoes.editar" },
+      { title: "Configurações", url: "/configuracoes", icon: Settings, permKey: null },
+      { title: "Importação", url: "/importar", icon: Upload, permKey: null },
+      { title: "Admin", url: "/admin", icon: ShieldCheck, permKey: null, adminOnly: true },
+    ]
+  }
 ];
 
 export function AppSidebar() {
@@ -80,39 +129,18 @@ export function AppSidebar() {
     if (perms?.acessar_dashboard_executivo) setHasExecDashboard(true);
   }, [user, isAdmin, profile]);
 
-  const mainNav = useMemo(() =>
-    allMainNav.filter((item) => {
-      if (!item.permKey) return true;
-      return isAdmin || hasPermission(item.permKey);
-    }),
-    [isAdmin, hasPermission]
+  const filteredGroups = useMemo(() =>
+    navGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if ((item as any).adminOnly && !isAdmin) return false;
+        if (item.permKey === "acessar_dashboard_executivo") return hasExecDashboard;
+        if (!item.permKey) return true;
+        return isAdmin || hasPermission(item.permKey);
+      })
+    })).filter(group => group.items.length > 0),
+    [isAdmin, hasPermission, hasExecDashboard]
   );
-
-  const filteredSystemNav = useMemo(() =>
-    allSystemNav.filter((item) => {
-      if ((item as any).adminOnly && !isAdmin) return false;
-      if (!item.permKey) return true;
-      return isAdmin || hasPermission(item.permKey);
-    }),
-    [isAdmin, hasPermission]
-  );
-
-  const renderItems = (items: typeof mainNav) =>
-    items.map((item) => (
-      <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton asChild>
-          <NavLink
-            to={item.url}
-            end={item.url === "/"}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent"
-            activeClassName="bg-accent text-primary"
-          >
-            <item.icon className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
-          </NavLink>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-    ));
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -122,37 +150,39 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        {hasExecDashboard && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
-              Estratégico
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItems([{ title: "Dashboard Executivo", url: "/dashboard-executivo", icon: Gauge, permKey: null }])}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1">
-            Principal
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(mainNav)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground px-3 mb-1 mt-4">
-            Sistema
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{renderItems(filteredSystemNav)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="px-2 pt-2">
+        <SidebarMenu>
+          {filteredGroups.map((group) => (
+            <Collapsible key={group.title} asChild defaultOpen className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip={group.title}>
+                    <group.icon className="h-4 w-4 shrink-0 transition-colors group-hover/collapsible:text-primary" />
+                    <span>{group.title}</span>
+                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {group.items.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.url}>
+                          <NavLink
+                            to={item.url}
+                            className="flex items-center gap-2 py-1.5 transition-colors"
+                            activeClassName="text-primary font-medium"
+                          >
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          ))}
+        </SidebarMenu>
 
         {(isAdmin || (profile?.roles?.permissions as Record<string, boolean> | null)?.["cfg_modo_demo.visualizar"]) && (
           <SidebarGroup>

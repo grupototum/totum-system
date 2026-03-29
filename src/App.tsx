@@ -29,6 +29,7 @@ import Registries from "./pages/Registries";
 import Tasks from "./pages/Tasks";
 import UsersPermissions from "./pages/UsersPermissions";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import Packages from "./pages/Packages";
 import Templates from "./pages/Templates";
 import PopLibrary from "./pages/PopLibrary";
 import SlaRules from "./pages/SlaRules";
