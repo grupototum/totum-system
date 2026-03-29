@@ -32,7 +32,7 @@ export function useClients() {
 
       const { data, error } = await supabase
         .from("clients")
-        .select("*, client_types(name), contracts(value, plan_id, status, plans(name)), profiles:assigned_user_id(full_name)")
+        .select("*, client_types(name), contracts(value, plan_id, status, plans(name))")
         .order("name");
 
       if (error) throw error;

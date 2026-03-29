@@ -103,12 +103,29 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
-    const expCatMap: Record<string, number> = {};
-    paidExpenses.forEach(e => {
-      const name = (e as any).financial_categories?.name || "Sem categoria";
-      expCatMap[name] = (expCatMap[name] || 0) + Number(e.value);
+    const expCatMap: Record<string, number> = {
+      "Custo Fixo": 0,
+      "Custo Variável": 0,
+      "Despesa Fixa": 0,
+      "Despesa Variável": 0,
+    };
+
+    allEntries.filter(e => (e.type === "pagar" || e.type === "despesa" || e.type === "custo") && e.status === "pago").forEach(e => {
+      let cat = "Outros";
+      const isCusto = e.type === "custo";
+      const isFixo = e.nature === "fixo";
+
+      if (isCusto) {
+        cat = isFixo ? "Custo Fixo" : "Custo Variável";
+      } else {
+        cat = isFixo ? "Despesa Fixa" : "Despesa Variável";
+      }
+      
+      expCatMap[cat] = (expCatMap[cat] || 0) + Number(e.value);
     });
+
     const expensesByCategory = Object.entries(expCatMap)
+      .filter(([_, value]) => value > 0)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
