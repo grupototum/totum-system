@@ -376,6 +376,9 @@ export default function Tasks() {
               onMonthChange={setCalendarMonth}
             />
           )}
+          {view === "goals" && !showArchived && (
+            <TaskGoals tasks={activeTasks} profiles={profiles} clients={clients} />
+          )}
           {view === "templates" && (
             <div className="mt-4">
               <Tabs defaultValue="projects" className="space-y-4">
