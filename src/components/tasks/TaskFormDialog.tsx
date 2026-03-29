@@ -66,6 +66,9 @@ export function TaskFormDialog({
   const [checklistItems, setChecklistItems] = useState<string[]>([]);
   const [newCheckItem, setNewCheckItem] = useState("");
   const [subtaskItems, setSubtaskItems] = useState<string[]>([]);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState("mensal");
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
   const [templates, setTemplates] = useState<any[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [pops, setPops] = useState<any[]>([]);
@@ -108,6 +111,9 @@ export function TaskFormDialog({
     setChecklistItems([]);
     setNewCheckItem("");
     setSubtaskItems([]);
+    setIsRecurring(false);
+    setRecurrenceType("mensal");
+    setRecurrenceEndDate("");
     setShowTemplates(false);
     setSelectedPopId("");
     setSelectedSlaId("");
