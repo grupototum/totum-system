@@ -35,14 +35,20 @@ type KanbanGroup = "status" | "type";
 const kanbanStatusOrder = ["pendente", "pago", "atrasado", "cancelado"];
 const kanbanTypeLabels: Record<string, string> = { receber: "A Receber", pagar: "A Pagar" };
 const kanbanStatusLabels: Record<string, string> = { pendente: "Pendente", pago: "Pago", atrasado: "Atrasado", cancelado: "Cancelado" };
-
 export default function Financial() {
   const { canViewFinancial } = usePermissions();
-  const { entries, loading, summary, refetch } = useFinancialEntries(currentMonth);
   const [formOpen, setFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabValue>("lancamentos");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [kanbanGroup, setKanbanGroup] = useState<KanbanGroup>("status");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const { entries, loading, summary, refetch } = useFinancialEntries({ 
+    month: startDate || endDate ? undefined : currentMonth,
+    startDate,
+    endDate 
+  });
 
   const monthLabel = format(now, "MMMM yyyy").replace(/^\w/, (c) => c.toUpperCase());
 
@@ -220,8 +226,37 @@ export default function Financial() {
             </div>
           ) : viewMode === "list" ? (
             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-xl overflow-hidden">
-              <div className="p-5 border-b border-border">
+              <div className="p-5 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h3 className="font-heading text-base font-semibold">Movimentações</h3>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2 bg-muted/30 p-1.5 rounded-lg border border-border/50">
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground px-1">Período</span>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={e => setStartDate(e.target.value)}
+                      className="bg-transparent text-xs outline-none border-b border-transparent focus:border-primary transition-colors"
+                    />
+                    <span className="text-muted-foreground text-xs">→</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={e => setEndDate(e.target.value)}
+                      className="bg-transparent text-xs outline-none border-b border-transparent focus:border-primary transition-colors"
+                    />
+                    {(startDate || endDate) && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => { setStartDate(""); setEndDate(""); }}
+                        className="h-6 px-2 text-[10px] text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                      >
+                        Limpar
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

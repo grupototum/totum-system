@@ -27,13 +27,19 @@ import {
 } from "@/hooks/useAsaas";
 
 export function AsaasFinancialPanel() {
-  const { data: config, isLoading: configLoading } = useAsaasConfig();
-  const { data: stats } = useAsaasStats();
-  const { data: payments, isLoading: paymentsLoading, refetch } = useAsaasPayments();
-  const syncPayments = useSyncPaymentsFromAsaas();
-
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const { data: config, isLoading: configLoading } = useAsaasConfig();
+  const { data: stats } = useAsaasStats();
+  const { data: payments, isLoading: paymentsLoading, refetch } = useAsaasPayments({
+    status: statusFilter,
+    startDate,
+    endDate
+  });
+  const syncPayments = useSyncPaymentsFromAsaas();
 
   const fmt = (v: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
 
@@ -136,33 +142,52 @@ export function AsaasFinancialPanel() {
       )}
 
       {/* Filtros */}
-      <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por cliente ou descrição..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="pl-9 h-10 text-sm"
           />
         </div>
-        <div className="flex gap-1">
-          {[
-            { value: "all", label: "Todas" },
-            { value: "PENDING", label: "Pendentes" },
-            { value: "RECEIVED", label: "Recebidas" },
-            { value: "OVERDUE", label: "Vencidas" },
-          ].map(f => (
-            <Button
-              key={f.value}
-              variant={statusFilter === f.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setStatusFilter(f.value)}
-              className="text-xs h-8"
-            >
-              {f.label}
-            </Button>
-          ))}
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              className="h-10 text-xs w-36"
+            />
+            <span className="text-muted-foreground">até</span>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              className="h-10 text-xs w-36"
+            />
+          </div>
+
+          <div className="flex bg-muted/50 p-1 rounded-lg border border-border/50">
+            {[
+              { value: "all", label: "Todas" },
+              { value: "PENDING", label: "Pendentes" },
+              { value: "RECEIVED", label: "Recebidas" },
+              { value: "OVERDUE", label: "Vencidas" },
+            ].map(f => (
+              <Button
+                key={f.value}
+                variant={statusFilter === f.value ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setStatusFilter(f.value)}
+                className={`text-xs h-8 px-3 ${statusFilter === f.value ? "bg-background shadow-sm" : ""}`}
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 

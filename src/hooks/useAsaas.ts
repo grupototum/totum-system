@@ -196,20 +196,22 @@ export function useAsaasPaymentsByClient(clientId?: string) {
   });
 }
 
-export function useAsaasPayments(filters?: { status?: string; clientId?: string }) {
+export function useAsaasPayments(filters?: { status?: string; clientId?: string; startDate?: string; endDate?: string }) {
   return useQuery({
     queryKey: ["asaas_payments", filters],
     queryFn: async () => {
       let query = supabase
         .from("asaas_payments")
         .select("*, clients(name)")
-        .order("due_date", { ascending: false })
-        .limit(200);
+        .order("due_date", { ascending: false });
 
-      if (filters?.status) query = query.eq("status", filters.status);
+      if (filters?.status && filters.status !== "all") query = query.eq("status", filters.status);
       if (filters?.clientId) query = query.eq("client_id", filters.clientId);
+      if (filters?.startDate) query = query.gte("due_date", filters.startDate);
+      if (filters?.endDate) query = query.lte("due_date", filters.endDate);
 
-      const { data } = await query;
+      const { data, error } = await query.limit(300);
+      if (error) throw error;
       return data || [];
     },
   });

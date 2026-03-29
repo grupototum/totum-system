@@ -8,7 +8,7 @@ export type FinancialEntryRow = Tables<"financial_entries"> & {
   clients?: { name: string } | null;
 };
 
-export function useFinancialEntries(month?: string) {
+export function useFinancialEntries(filters?: { month?: string; startDate?: string; endDate?: string }) {
   const { isDemoMode } = useDemo();
   const [entries, setEntries] = useState<FinancialEntryRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,8 +16,14 @@ export function useFinancialEntries(month?: string) {
   const fetch = useCallback(async () => {
     if (isDemoMode) {
       let filtered = demoFinancialEntries as FinancialEntryRow[];
-      if (month) {
-        filtered = filtered.filter(e => e.due_date.startsWith(month));
+      if (filters?.month) {
+        filtered = filtered.filter(e => e.due_date.startsWith(filters.month!));
+      }
+      if (filters?.startDate) {
+        filtered = filtered.filter(e => e.due_date >= filters.startDate!);
+      }
+      if (filters?.endDate) {
+        filtered = filtered.filter(e => e.due_date <= filters.endDate!);
       }
       setEntries(filtered);
       setLoading(false);
@@ -30,11 +36,17 @@ export function useFinancialEntries(month?: string) {
         .select("*, clients(name)")
         .order("due_date", { ascending: false });
 
-      if (month) {
-        query = query.gte("due_date", `${month}-01`).lte("due_date", `${month}-31`);
+      if (filters?.month) {
+        query = query.gte("due_date", `${filters.month}-01`).lte("due_date", `${filters.month}-31`);
+      }
+      if (filters?.startDate) {
+        query = query.gte("due_date", filters.startDate);
+      }
+      if (filters?.endDate) {
+        query = query.lte("due_date", filters.endDate);
       }
 
-      const { data, error } = await query.limit(200);
+      const { data, error } = await query.limit(300);
       if (error) throw error;
       setEntries((data as FinancialEntryRow[]) || []);
     } catch (err) {
@@ -42,7 +54,7 @@ export function useFinancialEntries(month?: string) {
     } finally {
       setLoading(false);
     }
-  }, [month, isDemoMode]);
+  }, [filters?.month, filters?.startDate, filters?.endDate, isDemoMode]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
