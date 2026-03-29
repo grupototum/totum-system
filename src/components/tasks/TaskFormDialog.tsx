@@ -20,7 +20,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, X, FileText, BookOpen, Shield } from "lucide-react";
+import { Loader2, Plus, X, FileText, BookOpen, Shield, RefreshCw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -326,6 +327,32 @@ export function TaskFormDialog({
             </div>
           </div>
 
+          {/* Recurrence */}
+          <div className="space-y-3 border border-border rounded-lg p-3">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5" /> Tarefa Recorrente</Label>
+              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
+            </div>
+            {isRecurring && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Frequência</Label>
+                  <Select value={recurrenceType} onValueChange={setRecurrenceType}>
+                    <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="diaria">Diária</SelectItem>
+                      <SelectItem value="semanal">Semanal</SelectItem>
+                      <SelectItem value="mensal">Mensal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Data Fim (opcional)</Label>
+                  <Input type="date" value={recurrenceEndDate} onChange={(e) => setRecurrenceEndDate(e.target.value)} className="bg-white/[0.04] border-border" />
+                </div>
+              </div>
+            )}
+          </div>
           {/* POP + SLA Selection */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
