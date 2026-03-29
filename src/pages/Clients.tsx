@@ -123,7 +123,7 @@ export default function Clients() {
                 <tr className="border-b border-border">
                   <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Cliente</th>
                   <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Tipo</th>
-                  <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Plano</th>
+                  <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Pacote</th>
                   <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <span className="flex items-center gap-1 cursor-pointer hover:text-foreground">MRR <ArrowUpDown className="h-3 w-3" /></span>
                   </th>

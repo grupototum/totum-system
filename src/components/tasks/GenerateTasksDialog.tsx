@@ -45,7 +45,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
       history: [{
         id: crypto.randomUUID(),
         action: "Criada",
-        detail: `Gerada automaticamente do plano ${clientPlan.planName}`,
+        detail: `Gerada automaticamente do pacote ${clientPlan.planName}`,
         user: "Sistema",
         createdAt: new Date().toISOString(),
       }],
@@ -111,7 +111,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 className="p-4 rounded-xl bg-white/[0.03] border border-border"
               >
                 <p className="text-xs text-muted-foreground mb-3">
-                  Modelo de entregas do plano <span className="text-white font-medium">{model.planName}</span> — {model.items.length} entregas
+                  Modelo de entregas do pacote <span className="text-white font-medium">{model.planName}</span> — {model.items.length} entregas
                 </p>
                 <div className="space-y-1.5">
                   {model.items.map((item) => (

@@ -74,7 +74,7 @@ export const permissionTree: PermCategory[] = [
       { key: "prod_precos", label: "Preços", actions: ["visualizar"] },
       { key: "prod_custos", label: "Custos", actions: ["visualizar"] },
       { key: "prod_margem", label: "Margem", actions: ["visualizar"] },
-      { key: "prod_planos", label: "Planos Recorrentes", actions: ["visualizar", "criar", "editar", "excluir"] },
+      { key: "prod_planos", label: "Pacotes", actions: ["visualizar", "criar", "editar", "excluir"] },
     ],
   },
   {

@@ -145,7 +145,7 @@ export function ClientHubContracts({ clientId }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="text-muted-foreground">Plano</span>
+                  <span className="text-muted-foreground">Pacote</span>
                   <p className="font-medium">{(c.plans as any)?.name || "—"}</p>
                 </div>
                 <div>

@@ -170,7 +170,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
       <DialogContent className="sm:max-w-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editData ? "Editar Contrato" : "Novo Contrato"}</DialogTitle>
-          <DialogDescription>Configure o contrato com plano e produtos vinculados.</DialogDescription>
+          <DialogDescription>Configure o contrato com pacote e produtos vinculados.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Basic Info */}
@@ -266,7 +266,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
             </Select>
             {selectedPlan && (
               <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-xs space-y-1">
-                <p><strong>Plano selecionado:</strong> {selectedPlan.name}</p>
+                <p><strong>Pacote selecionado:</strong> {selectedPlan.name}</p>
                 {selectedPlan.value && <p><strong>Valor sugerido:</strong> R$ {Number(selectedPlan.value).toLocaleString("pt-BR")}</p>}
                 <p><strong>Frequência:</strong> {selectedPlan.frequency}</p>
               </div>
@@ -401,7 +401,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
           open={quickAddPlanOpen}
           onOpenChange={setQuickAddPlanOpen}
           registryKey="planos"
-          title="Novo Plano"
+          title="Novo Pacote"
           onSuccess={(id, name) => {
             setPlans([...plans, { id, name, value: null, frequency: "mensal" }].sort((a, b) => a.name.localeCompare(b.name)));
             setForm({ ...form, plan_id: id });

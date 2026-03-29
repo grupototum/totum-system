@@ -281,8 +281,8 @@ export const registryGroups: RegistryGroup[] = [
       },
       {
         key: "planos_recorrentes",
-        label: "Planos Recorrentes",
-        description: "Planos de serviço com entregas definidas",
+        label: "Pacotes",
+        description: "Pacotes de serviço com entregas definidas",
         icon: "RefreshCw",
         columns: [
           { key: "name", label: "Nome" },
@@ -291,9 +291,9 @@ export const registryGroups: RegistryGroup[] = [
           statusColumn,
         ],
         formFields: [
-          { key: "name", label: "Nome do Plano", type: "text", required: true, placeholder: "Ex: Plano Essencial" },
-          { key: "valor", label: "Valor (R$)", type: "number", placeholder: "4800" },
-          { key: "entregas", label: "Entregas Incluídas", type: "textarea", placeholder: "Liste as entregas do plano..." },
+          { key: "name", label: "Nome do Pacote", type: "text", required: true, placeholder: "Ex: Pacote Essencial" },
+          { key: "value", label: "Valor de Referência", type: "number", placeholder: "0,00" },
+          { key: "entregas", label: "Entregas Incluídas", type: "textarea", placeholder: "Liste as entregas do pacote..." },
         ],
         initialData: [
           { id: "pr1", name: "Essencial", valor: "4.800", entregas: "3 artes, gestão de tráfego, relatório", status: "ativo" },
@@ -357,11 +357,11 @@ export const registryGroups: RegistryGroup[] = [
           statusColumn,
         ],
         formFields: [
-          { key: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Plano Recorrente" },
+          { key: "name", label: "Nome", type: "text", required: true, placeholder: "Ex: Pacote" },
           { key: "descricao", label: "Descrição", type: "textarea" },
         ],
         initialData: [
-          { id: "tprod1", name: "Plano Recorrente", descricao: "Produto de assinatura mensal", status: "ativo" },
+          { id: "tprod1", name: "Pacote", descricao: "Produto de assinatura mensal", status: "ativo" },
           { id: "tprod2", name: "Projeto Pontual", descricao: "Produto de venda única", status: "ativo" },
           { id: "tprod3", name: "Serviço Avulso", descricao: "Serviço sob demanda", status: "ativo" },
         ],

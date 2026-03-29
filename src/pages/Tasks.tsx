@@ -301,7 +301,7 @@ export default function Tasks() {
                 variant="outline"
                 className="gap-2 rounded-full px-4 text-sm border-border bg-muted/40 hover:bg-muted/80 text-foreground"
               >
-                <Sparkles className="h-4 w-4 text-primary" /> Gerar do Plano
+                <Sparkles className="h-4 w-4 text-primary" /> Gerar do Pacote
               </Button>
             </>
           )}

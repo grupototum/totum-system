@@ -128,7 +128,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
                     {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">{(checklist.plans as any)?.name || "Sem plano"}</span>
+                        <span className="font-medium text-sm">{(checklist.plans as any)?.name || "Sem pacote"}</span>
                         {checklist.completed_at && <span className="text-xs text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10">Finalizado</span>}
                       </div>
                       <span className="text-xs text-muted-foreground">{checklist.period} · {checklist.frequency}</span>
