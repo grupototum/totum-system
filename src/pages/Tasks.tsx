@@ -228,6 +228,7 @@ export default function Tasks() {
     { key: "kanban", icon: LayoutGrid, label: "Kanban" },
     { key: "list", icon: List, label: "Lista" },
     { key: "calendar", icon: CalendarDays, label: "Calendário" },
+    { key: "goals", icon: Target, label: "Metas" },
     { key: "templates", icon: LayoutTemplate, label: "Templates" },
   ];
 
