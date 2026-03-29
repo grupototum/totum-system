@@ -32,10 +32,10 @@ export default function Dashboard() {
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="MRR" value={`R$ ${data.mrr.toLocaleString("pt-BR")}`} change={data.mrrChange} changeType="positive" icon={DollarSign} />
-        <MetricCard title="Clientes Ativos" value={String(data.activeClients)} change={`${data.clientsChange} com contrato`} changeType="positive" icon={Users} />
-        <MetricCard title="Cumprimento Contratual" value={`${data.fulfillmentPct}%`} change="" changeType="positive" icon={ClipboardCheck} />
-        <MetricCard title="Resultado do Mês" value={`R$ ${data.profit.toLocaleString("pt-BR")}`} change={data.profitChange} changeType={data.profit >= 0 ? "positive" : "negative"} icon={TrendingUp} />
+        <MetricCard title="MRR" value={`R$ ${data.mrr.toLocaleString("pt-BR")}`} change={data.mrrChange} changeType="positive" icon={DollarSign} tooltip="Soma do valor de todos os Contratos Ativos." />
+        <MetricCard title="Clientes Ativos" value={String(data.activeClients)} change={`${data.clientsChange} com contrato`} changeType="positive" icon={Users} tooltip="Total de clientes com status ativo no sistema." />
+        <MetricCard title="Cumprimento Contratual" value={`${data.fulfillmentPct}%`} change="" changeType="positive" icon={ClipboardCheck} tooltip="Percentual médio de entregas finalizadas neste mês." />
+        <MetricCard title="Resultado do Mês" value={`R$ ${data.profit.toLocaleString("pt-BR")}`} change={data.profitChange} changeType={data.profit >= 0 ? "positive" : "negative"} icon={TrendingUp} tooltip="Receitas - Despesas de títulos pagos no mês corrente." />
       </div>
 
       {/* Charts */}
