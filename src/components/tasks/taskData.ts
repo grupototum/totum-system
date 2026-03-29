@@ -45,8 +45,10 @@ export interface Task {
   description: string;
   clientId: string;
   clientName: string;
+  clientManagerId?: string;
   contractId?: string;
-  planName?: string;
+  planName?: string; // Mantendo o nome das propriedades internas para evitar quebras de DB, mas mudando o rótulo visual quando necessário
+  packageName?: string;
   projectId?: string;
   responsible?: string;
   responsibleAvatarUrl?: string;
@@ -82,7 +84,7 @@ export interface DeliveryModelItem {
 
 export interface DeliveryModel {
   planId: string;
-  planName: string;
+  packageName: string;
   items: DeliveryModelItem[];
 }
 
@@ -127,7 +129,7 @@ export const statusColumns: TaskStatus[] = ["pendente", "em_andamento", "pausado
 export const deliveryModels: DeliveryModel[] = [
   {
     planId: "premium",
-    planName: "Premium",
+    packageName: "Premium",
     items: [
       { id: "dm1", name: "Criar 8 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
       { id: "dm2", name: "Criar 4 stories animados", description: "Stories semanais", type: "conteudo", suggestedPriority: "media" },
@@ -141,7 +143,7 @@ export const deliveryModels: DeliveryModel[] = [
   },
   {
     planId: "pro",
-    planName: "Pro",
+    packageName: "Pro",
     items: [
       { id: "dm9", name: "Criar 6 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
       { id: "dm10", name: "Criar 3 stories", description: "Stories semanais", type: "conteudo", suggestedPriority: "media" },
@@ -152,7 +154,7 @@ export const deliveryModels: DeliveryModel[] = [
   },
   {
     planId: "essencial",
-    planName: "Essencial",
+    packageName: "Essencial",
     items: [
       { id: "dm14", name: "Criar 3 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
       { id: "dm15", name: "Gestão de tráfego (Meta Ads)", description: "Monitoramento básico", type: "trafego", suggestedPriority: "alta" },
@@ -163,12 +165,12 @@ export const deliveryModels: DeliveryModel[] = [
 
 // Mock clients with plans
 export const clientPlans = [
-  { clientId: "1", clientName: "TechVentures S.A.", planId: "premium", planName: "Premium" },
-  { clientId: "2", clientName: "Nova Digital", planId: "essencial", planName: "Essencial" },
-  { clientId: "3", clientName: "Startup Labs", planId: "premium", planName: "Premium" },
-  { clientId: "4", clientName: "Innova Corp", planId: "pro", planName: "Pro" },
-  { clientId: "5", clientName: "DigitalPlus", planId: "essencial", planName: "Essencial" },
-  { clientId: "6", clientName: "Agro Connect", planId: "pro", planName: "Pro" },
+  { clientId: "1", clientName: "TechVentures S.A.", planId: "premium", packageName: "Premium" },
+  { clientId: "2", clientName: "Nova Digital", planId: "essencial", packageName: "Essencial" },
+  { clientId: "3", clientName: "Startup Labs", planId: "premium", packageName: "Premium" },
+  { clientId: "4", clientName: "Innova Corp", planId: "pro", packageName: "Pro" },
+  { clientId: "5", clientName: "DigitalPlus", planId: "essencial", packageName: "Essencial" },
+  { clientId: "6", clientName: "Agro Connect", planId: "pro", packageName: "Pro" },
 ];
 
 export const teamMembers = [

@@ -5,6 +5,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { generateChecklistForClient } from "./checklistService";
 
 // URL base da Edge Function proxy (resolve CORS)
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://sugulxjfkhibuddmoyzr.supabase.co";
@@ -553,6 +554,12 @@ export async function processWebhookEvent(
           .from("asaas_payments")
           .update({ financial_entry_id: entry.id } as any)
           .eq("asaas_payment_id", payment.id);
+      }
+
+      // 7. Gerar Checklist de Entrega (se configurado)
+      if (asaasPayment && (asaasPayment as any).client_id) {
+        const period = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        await generateChecklistForClient((asaasPayment as any).client_id, period);
       }
     }
   }

@@ -51,7 +51,7 @@ export function useSupabaseTasks() {
         .from("tasks")
         .select(`
           *,
-          clients(name),
+          clients(name, assigned_user_id),
           plans(name),
           subtasks(*),
           task_checklist_items(*),
@@ -75,6 +75,7 @@ export function useSupabaseTasks() {
         description: t.description || "",
         clientId: t.client_id,
         clientName: t.clients?.name || "—",
+        clientManagerId: t.clients?.assigned_user_id || undefined,
         contractId: t.contract_id || undefined,
         planName: t.plans?.name || undefined,
         projectId: t.project_id || undefined,

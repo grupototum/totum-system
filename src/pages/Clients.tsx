@@ -11,6 +11,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useClients, ClientRow } from "@/hooks/useClients";
 import { ClientFormDialog } from "@/components/clients/ClientFormDialog";
 import { Badge } from "@/components/ui/badge";
+import { useProfiles } from "@/hooks/useProfiles";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserCheck } from "lucide-react";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
@@ -22,16 +25,20 @@ const statusConfig: Record<string, string> = {
 export default function Clients() {
   const navigate = useNavigate();
   const { clients, loading, addClient, updateClient, deleteClient } = useClients();
+  const { profiles } = useProfiles();
   const [search, setSearch] = useState("");
+  const [managerFilter, setManagerFilter] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientRow | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "card">(() => {
     return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
   });
 
-  const filtered = clients.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = clients.filter((c: any) => {
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchesManager = managerFilter === "all" || c.assigned_user_id === managerFilter;
+    return matchesSearch && matchesManager;
+  });
 
   const getActivePlan = (c: ClientRow) => {
     const active = (c.contracts || []).find((ct) => ct.status === "ativo");
@@ -88,6 +95,24 @@ export default function Clients() {
             className="pl-9 bg-white/[0.05] border-border rounded-xl h-10 text-sm placeholder:text-muted-foreground focus:border-primary/50 focus:ring-primary/20"
           />
         </div>
+        
+        <div className="flex-1 max-w-[200px]">
+          <Select value={managerFilter} onValueChange={setManagerFilter}>
+            <SelectTrigger className="bg-white/[0.05] border-border rounded-xl h-10 text-sm focus:ring-primary/20">
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Gestor de Conta" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Gestores</SelectItem>
+              {profiles.map((p) => (
+                <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <div className="flex items-center gap-1 bg-white/[0.04] border border-border rounded-lg p-0.5">
           <button
             onClick={() => { setViewMode("list"); localStorage.setItem("clients_view_mode", "list"); }}

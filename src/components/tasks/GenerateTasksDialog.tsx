@@ -34,7 +34,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
       description: item.description,
       clientId: clientPlan.clientId,
       clientName: clientPlan.clientName,
-      planName: clientPlan.planName,
+      packageName: clientPlan.packageName,
       responsible: item.suggestedResponsible,
       priority: item.suggestedPriority,
       status: "pendente" as const,
@@ -45,7 +45,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
       history: [{
         id: crypto.randomUUID(),
         action: "Criada",
-        detail: `Gerada automaticamente do pacote ${clientPlan.planName}`,
+        detail: `Gerada automaticamente do pacote ${clientPlan.packageName}`,
         user: "Sistema",
         createdAt: new Date().toISOString(),
       }],
@@ -97,7 +97,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 <SelectContent className="bg-popover border-border text-foreground">
                   {clientPlans.map((c) => (
                     <SelectItem key={c.clientId} value={c.clientId} className="focus:bg-white/[0.06] focus:text-foreground">
-                      {c.clientName} — {c.planName}
+                      {c.clientName} — {c.packageName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -111,7 +111,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 className="p-4 rounded-xl bg-white/[0.03] border border-border"
               >
                 <p className="text-xs text-muted-foreground mb-3">
-                  Modelo de entregas do pacote <span className="text-white font-medium">{model.planName}</span> — {model.items.length} entregas
+                  Modelo de entregas do pacote <span className="text-white font-medium">{model.packageName}</span> — {model.items.length} entregas
                 </p>
                 <div className="space-y-1.5">
                   {model.items.map((item) => (

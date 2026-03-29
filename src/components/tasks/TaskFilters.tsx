@@ -17,7 +17,10 @@ interface TaskFiltersProps {
   onPriorityFilterChange: (v: string[]) => void;
   typeFilter: string[];
   onTypeFilterChange: (v: string[]) => void;
+  managerFilter: string[];
+  onManagerFilterChange: (v: string[]) => void;
   tasks?: Task[];
+  profiles?: { user_id: string; full_name: string }[];
 }
 
 export function TaskFilters({
@@ -27,9 +30,11 @@ export function TaskFilters({
   statusFilter, onStatusFilterChange,
   priorityFilter, onPriorityFilterChange,
   typeFilter, onTypeFilterChange,
+  managerFilter, onManagerFilterChange,
   tasks = [],
+  profiles = [],
 }: TaskFiltersProps) {
-  const hasFilters = clientFilter.length > 0 || responsibleFilter.length > 0 || statusFilter.length > 0 || priorityFilter.length > 0 || typeFilter.length > 0;
+  const hasFilters = clientFilter.length > 0 || responsibleFilter.length > 0 || statusFilter.length > 0 || priorityFilter.length > 0 || typeFilter.length > 0 || managerFilter.length > 0;
 
   const clearAll = () => {
     onClientFilterChange([]);
@@ -37,6 +42,7 @@ export function TaskFilters({
     onStatusFilterChange([]);
     onPriorityFilterChange([]);
     onTypeFilterChange([]);
+    onManagerFilterChange([]);
   };
 
   const counts = useMemo(() => {
@@ -45,6 +51,7 @@ export function TaskFilters({
     const priority: Record<string, number> = {};
     const type: Record<string, number> = {};
     const responsible: Record<string, number> = {};
+    const manager: Record<string, number> = {};
     tasks.forEach((t) => {
       client[t.clientId] = (client[t.clientId] || 0) + 1;
       status[t.status] = (status[t.status] || 0) + 1;
@@ -52,14 +59,25 @@ export function TaskFilters({
       type[t.type] = (type[t.type] || 0) + 1;
       const key = t.responsible || "unassigned";
       responsible[key] = (responsible[key] || 0) + 1;
+      if (t.clientManagerId) {
+        manager[t.clientManagerId] = (manager[t.clientManagerId] || 0) + 1;
+      } else {
+        manager["unassigned"] = (manager["unassigned"] || 0) + 1;
+      }
     });
-    return { client, status, priority, type, responsible };
+    return { client, status, priority, type, responsible, manager };
   }, [tasks]);
 
-  const clientOptions = clientPlans.map((c) => ({ value: c.clientId, label: c.clientName, count: counts.client[c.clientId] || 0 }));
+  const clientOptions = clientPlans.length > 0 ? clientPlans.map((c) => ({ value: c.clientId, label: c.clientName, count: counts.client[c.clientId] || 0 })) : [];
+  
   const responsibleOptions = [
     { value: "unassigned", label: "Sem responsável", count: counts.responsible["unassigned"] || 0 },
     ...teamMembers.map((m) => ({ value: m, label: m, count: counts.responsible[m] || 0 })),
+  ];
+
+  const managerOptions = [
+    { value: "unassigned", label: "Sem gestor", count: counts.manager["unassigned"] || 0 },
+    ...profiles.map((p) => ({ value: p.user_id, label: p.full_name, count: counts.manager[p.user_id] || 0 })),
   ];
   const statusOptions = (Object.keys(statusConfig) as TaskStatus[]).map((s) => ({ value: s, label: statusConfig[s].label, count: counts.status[s] || 0 }));
   const priorityOptions = (Object.keys(priorityConfig) as TaskPriority[]).map((p) => ({ value: p, label: priorityConfig[p].label, count: counts.priority[p] || 0 }));
@@ -104,6 +122,12 @@ export function TaskFilters({
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Tipo</label>
           <MultiSelect options={typeOptions} selected={typeFilter} onChange={onTypeFilterChange} allLabel="Todos os tipos" />
+        </div>
+
+        {/* Gestor */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Gestor de Conta</label>
+          <MultiSelect options={managerOptions} selected={managerFilter} onChange={onManagerFilterChange} allLabel="Todos" />
         </div>
 
         {/* Responsável */}

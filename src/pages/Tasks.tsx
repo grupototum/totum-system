@@ -11,6 +11,7 @@ import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
+import { calculateNextDueDate } from "@/lib/recurrence";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
 import { TaskGoals } from "@/components/tasks/TaskGoals";
@@ -48,6 +49,7 @@ export default function Tasks() {
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
+  const [managerFilter, setManagerFilter] = useState<string[]>([]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((t) => {
@@ -66,9 +68,13 @@ export default function Tasks() {
       if (statusFilter.length > 0 && !statusFilter.includes(t.status)) return false;
       if (priorityFilter.length > 0 && !priorityFilter.includes(t.priority)) return false;
       if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
+      if (managerFilter.length > 0) {
+        if (managerFilter.includes("unassigned") && !t.clientManagerId) return true;
+        if (!t.clientManagerId || !managerFilter.includes(t.clientManagerId)) return false;
+      }
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter, showArchived]);
+  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter, managerFilter, showArchived]);
 
   const archivedCount = useMemo(() => tasks.filter(t => t.status === "arquivado").length, [tasks]);
 
@@ -139,20 +145,16 @@ export default function Tasks() {
 
     if (data.decision === "next_action" && data.nextAction && task) {
       // Create subtask linked to original task
-      const { error: subErr } = await supabase.from("subtasks").insert({
+      await supabase.from("subtasks").insert({
         task_id: data.taskId,
         title: data.nextAction.title,
         status: "pendente",
         responsible_id: data.nextAction.responsible_id || null,
         due_date: data.nextAction.due_date || null,
       });
-      if (subErr) {
-        toast({ title: "Erro ao criar subtarefa", description: subErr.message, variant: "destructive" });
-        return;
-      }
 
       // Also create a new standalone task linked as child
-      const { error: taskErr } = await supabase.from("tasks").insert({
+      await supabase.from("tasks").insert({
         title: data.nextAction.title,
         description: data.nextAction.description || null,
         client_id: task.clientId,
@@ -165,10 +167,6 @@ export default function Tasks() {
         contract_id: task.contractId || null,
         project_id: task.projectId || null,
       });
-      if (taskErr) {
-        toast({ title: "Erro ao criar tarefa", description: taskErr.message, variant: "destructive" });
-        return;
-      }
 
       // Log history
       if (userId) {
@@ -200,12 +198,44 @@ export default function Tasks() {
       }
     }
 
+    // --- Recurrence Logic ---
+    if (task && task.isRecurring && !task.parentTaskId) {
+      const nextDueDate = calculateNextDueDate(
+        task.dueDate || new Date().toISOString(),
+        task.recurrenceType || "mensal",
+        task.recurrenceConfig
+      );
+
+      const isEnded = task.recurrenceEndDate && new Date(nextDueDate) > new Date(task.recurrenceEndDate);
+
+      if (!isEnded) {
+        await supabase.from("tasks").insert({
+          title: task.title,
+          description: task.description,
+          client_id: task.clientId,
+          responsible_id: task.responsibleId || null,
+          priority: task.priority as any,
+          status: "pendente",
+          task_type: task.type as any,
+          start_date: null,
+          due_date: nextDueDate,
+          is_recurring: false,
+          parent_task_id: task.id,
+          contract_id: task.contractId || null,
+          project_id: task.projectId || null,
+        });
+        
+        await supabase.from("tasks").update({
+          last_generated_at: new Date().toISOString()
+        }).eq("id", task.id);
+      }
+    }
+
     // Mark task as completed
     await updateTaskStatus(data.taskId, "concluido");
     setConfettiActive(true);
     setTimeout(() => setConfettiActive(false), 3000);
 
-    // Close detail dialog if open
     if (detailOpen) {
       setDetailOpen(false);
       setSelectedTask(null);
@@ -213,9 +243,7 @@ export default function Tasks() {
 
     toast({
       title: "Tarefa concluída",
-      description: data.decision === "next_action"
-        ? `Próxima ação "${data.nextAction?.title}" criada com sucesso.`
-        : "Tarefa encerrada com sucesso.",
+      description: "Operação realizada com sucesso.",
     });
   };
 
@@ -335,7 +363,9 @@ export default function Tasks() {
             statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
             priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
             typeFilter={typeFilter} onTypeFilterChange={setTypeFilter}
+            managerFilter={managerFilter} onManagerFilterChange={setManagerFilter}
             tasks={tasks}
+            profiles={profiles}
           />
         )}
       </div>
