@@ -198,7 +198,6 @@ export function useRegistryData(registryKey: string) {
     
     const { error } = await (supabase.from(config.table as any) as any)
       .delete()
-      .delete()
       .eq("id", id);
       
     if (error) {
