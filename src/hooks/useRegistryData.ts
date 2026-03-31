@@ -198,8 +198,8 @@ export function useRegistryData(registryKey: string) {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
+      .delete()
       .delete()
       .eq("id", id);
       
