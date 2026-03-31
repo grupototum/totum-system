@@ -538,7 +538,6 @@ export type Database = {
           import_batch_id?: string | null
           marketing_analysis?: string | null
           name: string
-          nature?: string | null
           notes?: string | null
           phone?: string | null
           status?: string
@@ -555,7 +554,6 @@ export type Database = {
           import_batch_id?: string | null
           marketing_analysis?: string | null
           name?: string
-          nature?: string | null
           notes?: string | null
           phone?: string | null
           status?: string
@@ -627,7 +625,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_package?: boolean
-          nature?: string | null
           notes?: string | null
           product_id: string
           quantity?: number
@@ -638,7 +635,6 @@ export type Database = {
           created_at?: string
           id?: string
           is_package?: boolean
-          nature?: string | null
           notes?: string | null
           product_id?: string
           quantity?: number
@@ -712,7 +708,6 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
-          nature?: string | null
           notes?: string | null
           plan_id?: string | null
           start_date?: string | null
@@ -730,7 +725,6 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
-          nature?: string | null
           notes?: string | null
           plan_id?: string | null
           start_date?: string | null
@@ -763,42 +757,27 @@ export type Database = {
           },
         ]
       }
-      cost_registrations: {
+      cost_centers: {
         Row: {
-          category: string | null
           created_at: string
           description: string | null
           id: string
-          installments: number | null
-          interval: number | null
           is_active: boolean
           name: string
-          nature: string | null
-          payment_method: string | null
         }
         Insert: {
-          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          installments?: number | null
-          interval?: number | null
           is_active?: boolean
           name: string
-          nature?: string | null
-          payment_method?: string | null
         }
         Update: {
-          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          installments?: number | null
-          interval?: number | null
           is_active?: boolean
           name?: string
-          nature?: string | null
-          payment_method?: string | null
         }
         Relationships: []
       }
@@ -1089,7 +1068,6 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
-          nature: string | null
           recurrence: Database["public"]["Enums"]["expense_recurrence"]
         }
         Insert: {
@@ -1098,7 +1076,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
-          nature?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"]
         }
         Update: {
@@ -1107,7 +1084,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
-          nature?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"]
         }
         Relationships: []
@@ -1154,7 +1130,7 @@ export type Database = {
           client_id: string | null
           competence_date: string | null
           contract_id: string | null
-          cost_registration_id: string | null
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           description: string
@@ -1163,7 +1139,6 @@ export type Database = {
           id: string
           import_batch_id: string | null
           installment_number: number | null
-          nature: string | null
           notes: string | null
           payment_date: string | null
           recurrence: Database["public"]["Enums"]["expense_recurrence"] | null
@@ -1180,7 +1155,7 @@ export type Database = {
           client_id?: string | null
           competence_date?: string | null
           contract_id?: string | null
-          cost_registration_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           description: string
@@ -1189,7 +1164,6 @@ export type Database = {
           id?: string
           import_batch_id?: string | null
           installment_number?: number | null
-          nature?: string | null
           notes?: string | null
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
@@ -1206,7 +1180,7 @@ export type Database = {
           client_id?: string | null
           competence_date?: string | null
           contract_id?: string | null
-          cost_registration_id?: string | null
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
@@ -1215,7 +1189,6 @@ export type Database = {
           id?: string
           import_batch_id?: string | null
           installment_number?: number | null
-          nature?: string | null
           notes?: string | null
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
@@ -1256,10 +1229,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "financial_entries_cost_registration_id_fkey"
-            columns: ["cost_registration_id"]
+            foreignKeyName: "financial_entries_cost_center_id_fkey"
+            columns: ["cost_center_id"]
             isOneToOne: false
-            referencedRelation: "cost_registrations"
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
           {
@@ -1607,7 +1580,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
-          nature?: string | null
           notes?: string | null
           price?: number | null
           price_package?: number | null
@@ -1621,7 +1593,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
-          nature?: string | null
           notes?: string | null
           price?: number | null
           price_package?: number | null
