@@ -152,7 +152,6 @@ export function UserDetailSheet({
 
   const tabs: { key: Tab; label: string; icon: typeof User }[] = [
     { key: "resumo", label: "Resumo", icon: User },
-    { key: "acesso", label: "Acesso", icon: Shield },
     { key: "financeiro", label: "Financeiro", icon: DollarSign },
     { key: "historico", label: "Histórico", icon: History },
   ];
@@ -236,18 +235,8 @@ export function UserDetailSheet({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Shield className="h-3 w-3" /> Cargo</Label>
-                    {editing ? (
-                      <Select value={form.role_id} onValueChange={(v) => setForm({ ...form, role_id: v })}>
-                        <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent className={selectContentCls}>
-                          {roles.map((r) => (
-                            <SelectItem key={r.id} value={r.id} className={selectItemCls}>{r.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <p className="text-sm mt-1">{roleName}</p>
-                    )}
+                    <p className="text-sm mt-1">{roleName}</p>
+                    {editing && <p className="text-[10px] text-muted-foreground/50 mt-1">Gerenciado em Permissões</p>}
                   </div>
                   <div>
                     <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider flex items-center gap-1"><Building2 className="h-3 w-3" /> Departamento</Label>
@@ -362,64 +351,6 @@ export function UserDetailSheet({
             </div>
           )}
 
-          {/* Acesso Tab */}
-          {tab === "acesso" && (
-            <div className="space-y-4">
-              <div>
-                <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Perfil de acesso atual</Label>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.03] border border-border">
-                  <Shield className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium">{roleName}</p>
-                    <p className="text-xs text-muted-foreground/70">
-                      {roles.find((r) => r.id === profile.role_id)?.description || "Sem descrição"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {isAdmin && (
-                <div>
-                  <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Alterar perfil</Label>
-                  <Select
-                    value={form.role_id || ""}
-                    onValueChange={async (v) => {
-                      setForm({ ...form, role_id: v });
-                      await supabase.from("profiles").update({ role_id: v }).eq("id", profile.id);
-                      const roleName = roles.find((r) => r.id === v)?.name;
-                      toast({ title: "Cargo alterado", description: `Novo cargo: ${roleName}` });
-                      
-                      // Audit
-                      const { data: { user } } = await supabase.auth.getUser();
-                      if (user) {
-                        await supabase.from("audit_logs").insert({
-                          user_id: user.id, action: "Cargo alterado", entity_type: "profile",
-                          entity_id: profile.id, detail: `Cargo alterado para ${roleName}`,
-                        });
-                      }
-                      onRefresh();
-                    }}
-                  >
-                    <SelectTrigger className={inputCls}><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent className={selectContentCls}>
-                      {roles.map((r) => (
-                        <SelectItem key={r.id} value={r.id} className={selectItemCls}>{r.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <Separator className="bg-white/[0.06]" />
-
-              <div>
-                <Label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Permissões do perfil</Label>
-                <div className="max-h-[400px] overflow-y-auto scrollbar-thin">
-                  <PermissionMatrix permissions={permissions} onChange={() => {}} readOnly />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Financeiro Tab */}
           {tab === "financeiro" && (

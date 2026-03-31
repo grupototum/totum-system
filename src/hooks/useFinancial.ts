@@ -16,6 +16,9 @@ export function useFinancialEntries(filters?: { month?: string; startDate?: stri
   const fetch = useCallback(async () => {
     if (isDemoMode) {
       let filtered = demoFinancialEntries as FinancialEntryRow[];
+      // Remove lançamentos zerados
+      filtered = filtered.filter(e => Number(e.value) !== 0);
+
       if (filters?.month) {
         filtered = filtered.filter(e => e.due_date.startsWith(filters.month!));
       }
@@ -48,7 +51,10 @@ export function useFinancialEntries(filters?: { month?: string; startDate?: stri
 
       const { data, error } = await query.limit(300);
       if (error) throw error;
-      setEntries((data as FinancialEntryRow[]) || []);
+      
+      // Remove 183 lançamentos zerados residualmente da API
+      const validEntries = ((data as FinancialEntryRow[]) || []).filter(e => Number(e.value) !== 0);
+      setEntries(validEntries);
     } catch (err) {
       console.error("Error fetching financial entries:", err);
     } finally {

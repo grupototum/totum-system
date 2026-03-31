@@ -97,9 +97,7 @@ export function PermissionMatrix({ permissions, onChange, readOnly }: Permission
                 <span className="text-[10px] text-muted-foreground/40 font-heading mr-2">{checked}/{total}</span>
                 {!readOnly && (
                   <Checkbox
-                    checked={allChecked}
-                    // @ts-ignore
-                    indeterminate={someChecked}
+                    checked={someChecked ? "indeterminate" : allChecked}
                     onCheckedChange={(v) => { toggleCategoryAll(cat, !!v); }}
                     onClick={(e) => e.stopPropagation()}
                     className="h-3.5 w-3.5"
