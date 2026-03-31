@@ -122,8 +122,7 @@ export function useRegistryData(registryKey: string) {
         return;
       }
 
-      const { data: rows, error } = await supabase
-        .from(config.table as ValidTable)
+      const { data: rows, error } = await (supabase.from(config.table as any) as any)
         .select("*")
         .order("name");
 
