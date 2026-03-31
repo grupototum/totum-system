@@ -59,13 +59,12 @@ export default function Financial() {
     
     const receita = paid.filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
     
-    // Custos (Agrupados por natureza)
-    const custoFixo = paid.filter(e => e.type === "custo" && e.nature === "fixo").reduce((s, e) => s + Number(e.value), 0);
-    const custoVar = paid.filter(e => e.type === "custo" && e.nature === "variavel").reduce((s, e) => s + Number(e.value), 0);
+    // Custos e Despesas
+    const custoFixo = paid.filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
+    const custoVar = 0;
     
-    // Despesas (Agrupadas por natureza)
-    const despesaFixo = paid.filter(e => (e.type === "pagar" || e.type === "despesa") && e.nature === "fixo").reduce((s, e) => s + Number(e.value), 0);
-    const despesaVar = paid.filter(e => (e.type === "pagar" || e.type === "despesa") && e.nature === "variavel").reduce((s, e) => s + Number(e.value), 0);
+    const despesaFixo = paid.filter(e => e.type === "despesa").reduce((s, e) => s + Number(e.value), 0);
+    const despesaVar = 0;
     
     const totalCustos = custoFixo + custoVar;
     const totalDespesas = despesaFixo + despesaVar;
@@ -285,7 +284,7 @@ export default function Financial() {
                               </div>
                               <div>
                                 <span className="font-medium block">{tx.description}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">{tx.nature || "Fixo"}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{tx.type === "receber" ? "Receita" : "Despesa"}</span>
                               </div>
                             </div>
                           </td>

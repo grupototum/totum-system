@@ -15,15 +15,10 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
   bancos: { table: "banks", columns: { name: "name", codigo: "code" } },
   contas_bancarias: { table: "bank_accounts", columns: { name: "name", agencia: "agency", conta: "account_number", tipo_conta: "account_type" } },
   centros_custo: { 
-    table: "cost_registrations", 
+    table: "cost_centers", 
     columns: { 
       name: "name", 
       descricao: "description",
-      categoria: "category",
-      natureza: "nature",
-      metodo_pagamento: "payment_method",
-      parcelas: "installments",
-      intervalo: "interval"
     } 
   },
   categorias_financeiras: { table: "financial_categories", columns: { name: "name", tipo: "type" } },
@@ -127,8 +122,7 @@ export function useRegistryData(registryKey: string) {
         return;
       }
 
-      const { data: rows, error } = await supabase
-        .from(config.table as ValidTable)
+      const { data: rows, error } = await (supabase.from(config.table as any) as any)
         .select("*")
         .order("name");
 
@@ -161,8 +155,7 @@ export function useRegistryData(registryKey: string) {
       dbValues.module = "geral";
     }
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
       .insert(dbValues as any);
       
     if (error) {
@@ -185,8 +178,7 @@ export function useRegistryData(registryKey: string) {
     
     const dbValues = frontendToDb(values, config);
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
       .update(dbValues)
       .eq("id", id);
       
@@ -204,8 +196,7 @@ export function useRegistryData(registryKey: string) {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
       .delete()
       .eq("id", id);
       
@@ -225,8 +216,7 @@ export function useRegistryData(registryKey: string) {
     
     const newActive = currentStatus !== "ativo";
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
       .update({ is_active: newActive } as any)
       .eq("id", id);
       
