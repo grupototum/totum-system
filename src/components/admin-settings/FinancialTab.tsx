@@ -43,7 +43,7 @@ export function FinancialTab() {
   const { data: costCenters, isLoading: loadCC } = useQuery({
     queryKey: ["cost_centers_count"],
     queryFn: async () => {
-      const { count } = await supabase.from("cost_centers").select("*", { count: "exact", head: true }).eq("is_active", true);
+      const { count } = await (supabase.from("cost_centers") as any).select("*", { count: "exact", head: true }).eq("is_active", true);
       return count || 0;
     },
   });

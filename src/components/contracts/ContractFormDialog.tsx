@@ -57,7 +57,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
         supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
         supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
         supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
-        (supabase.from("packages") as any).select("id, name, total_sale").eq("is_active", true).order("name"),
+        supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name").then(r => ({ ...r, data: (r.data || []).map((p: any) => ({ id: p.id, name: p.name, total_sale: p.value })) })),
         supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
       ]).then(([c, p, ct, pkg, pr]) => {
         setClients(c.data || []);

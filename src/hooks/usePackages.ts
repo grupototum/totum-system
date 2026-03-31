@@ -4,20 +4,9 @@ import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import type { Tables } from "@/integrations/supabase/types";
 
-export type PackageRow = {
-  id: string;
-  name: string;
-  description: string | null;
-  loyalty_enabled: boolean | null;
-  loyalty_months: number | null;
-  total_cost: number | null;
-  total_sale: number | null;
-  is_active: boolean | null;
-  created_at: string | null;
-  updated_at: string | null;
-  items?: (Tables<"package_items"> & {
-    products?: Tables<"products"> | null;
-  })[];
+// Packages are stored in the "plans" table with label = 'pacote'
+export type PackageRow = Tables<"plans"> & {
+  items?: Tables<"delivery_model_items">[];
 };
 
 const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
@@ -30,15 +19,14 @@ export function usePackages() {
   const fetch = useCallback(async () => {
     setLoading(true);
     if (isDemoMode) {
-      // Return empty for now in demo, or I could add mock data
       setPackages([]);
       setLoading(false);
       return;
     }
     try {
       const { data, error } = await supabase
-        .from("packages")
-        .select("*, items:package_items(*, products(*))")
+        .from("plans")
+        .select("*, items:delivery_model_items(*)")
         .eq("is_active", true)
         .order("name");
       if (error) throw error;
@@ -52,46 +40,25 @@ export function usePackages() {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const addPackage = async (values: any, items: any[]) => {
+  const addPackage = async (values: Partial<Tables<"plans">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     
-    const { data: pkg, error: pkgErr } = await supabase
-      .from("packages")
-      .insert(values)
-      .select()
-      .single();
+    const { error } = await supabase
+      .from("plans")
+      .insert({ ...values, name: values.name || "Novo Pacote" } as any);
 
-    if (pkgErr) { toast({ title: "Erro", description: pkgErr.message, variant: "destructive" }); return false; }
-
-    if (items.length > 0) {
-      const itemRows = items.map(item => ({
-        ...item,
-        package_id: pkg.id
-      }));
-      const { error: itemsErr } = await supabase.from("package_items").insert(itemRows);
-      if (itemsErr) { toast({ title: "Erro nos itens", description: itemsErr.message, variant: "destructive" }); }
-    }
+    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
 
     await fetch();
     toast({ title: "Pacote criado", description: values.name });
     return true;
   };
 
-  const updatePackage = async (id: string, values: any, items: any[]) => {
+  const updatePackage = async (id: string, values: Partial<Tables<"plans">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     
-    const { error: pkgErr } = await supabase.from("packages").update(values).eq("id", id);
-    if (pkgErr) { toast({ title: "Erro", description: pkgErr.message, variant: "destructive" }); return false; }
-
-    // Update items: delete and re-insert (simplest way for now)
-    await supabase.from("package_items").delete().eq("package_id", id);
-    if (items.length > 0) {
-      const itemRows = items.map(item => ({
-        ...item,
-        package_id: id
-      }));
-      await supabase.from("package_items").insert(itemRows);
-    }
+    const { error } = await supabase.from("plans").update(values).eq("id", id);
+    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
 
     await fetch();
     return true;
@@ -99,7 +66,7 @@ export function usePackages() {
 
   const deletePackage = async (id: string) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-    const { error } = await supabase.from("packages").update({ is_active: false }).eq("id", id);
+    const { error } = await supabase.from("plans").update({ is_active: false }).eq("id", id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
     await fetch();
     return true;
