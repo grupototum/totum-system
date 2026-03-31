@@ -157,7 +157,6 @@ export function useRegistryData(registryKey: string) {
     
     const { error } = await (supabase.from(config.table as any) as any)
       .insert(dbValues as any);
-      .insert(dbValues as any);
       
     if (error) {
       if (error.code === "23505") {
