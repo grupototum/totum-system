@@ -15,15 +15,10 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
   bancos: { table: "banks", columns: { name: "name", codigo: "code" } },
   contas_bancarias: { table: "bank_accounts", columns: { name: "name", agencia: "agency", conta: "account_number", tipo_conta: "account_type" } },
   centros_custo: { 
-    table: "cost_registrations", 
+    table: "cost_centers", 
     columns: { 
       name: "name", 
       descricao: "description",
-      categoria: "category",
-      natureza: "nature",
-      metodo_pagamento: "payment_method",
-      parcelas: "installments",
-      intervalo: "interval"
     } 
   },
   categorias_financeiras: { table: "financial_categories", columns: { name: "name", tipo: "type" } },

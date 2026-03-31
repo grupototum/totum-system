@@ -284,7 +284,7 @@ export default function Financial() {
                               </div>
                               <div>
                                 <span className="font-medium block">{tx.description}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">{tx.nature || "Fixo"}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{tx.type === "receber" ? "Receita" : "Despesa"}</span>
                               </div>
                             </div>
                           </td>
