@@ -110,17 +110,8 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       "Despesa Variável": 0,
     };
 
-    allEntries.filter(e => (e.type === "pagar" || e.type === "despesa" || e.type === "custo") && e.status === "pago").forEach(e => {
-      let cat = "Outros";
-      const isCusto = e.type === "custo";
-      const isFixo = e.nature === "fixo";
-
-      if (isCusto) {
-        cat = isFixo ? "Custo Fixo" : "Custo Variável";
-      } else {
-        cat = isFixo ? "Despesa Fixa" : "Despesa Variável";
-      }
-      
+    allEntries.filter(e => (e.type === "pagar" || e.type === "despesa") && e.status === "pago").forEach(e => {
+      const cat = e.type === "pagar" ? "Despesa Fixa" : "Despesa Variável";
       expCatMap[cat] = (expCatMap[cat] || 0) + Number(e.value);
     });
 
