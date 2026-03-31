@@ -180,7 +180,6 @@ export function useRegistryData(registryKey: string) {
     
     const { error } = await (supabase.from(config.table as any) as any)
       .update(dbValues)
-      .update(dbValues)
       .eq("id", id);
       
     if (error) {
