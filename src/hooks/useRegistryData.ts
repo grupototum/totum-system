@@ -179,8 +179,8 @@ export function useRegistryData(registryKey: string) {
     
     const dbValues = frontendToDb(values, config);
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
+      .update(dbValues)
       .update(dbValues)
       .eq("id", id);
       
