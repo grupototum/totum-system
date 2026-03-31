@@ -155,8 +155,8 @@ export function useRegistryData(registryKey: string) {
       dbValues.module = "geral";
     }
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
+      .insert(dbValues as any);
       .insert(dbValues as any);
       
     if (error) {
