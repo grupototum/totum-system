@@ -55,7 +55,7 @@ export default function Financial() {
   const fmt = (v: number) => `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 
   const metrics = useMemo(() => {
-    const paid = entries.filter(e => e.status === "pago");
+    const paid = (entries || []).filter(e => e.status === "pago");
     
     const receita = paid.filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
     
@@ -72,8 +72,8 @@ export default function Financial() {
     const lucroOp = receita - totalCustos;
     const resultadoLiq = lucroOp - totalDespesas;
     
-    const inadimplencia = entries.filter(e => e.status === "atrasado").reduce((s, e) => s + Number(e.value), 0);
-    const overdueCount = entries.filter(e => e.status === "atrasado").length;
+    const inadimplencia = (entries || []).filter(e => e.status === "atrasado").reduce((s, e) => s + Number(e.value), 0);
+    const overdueCount = (entries || []).filter(e => e.status === "atrasado").length;
 
     return {
       receita, custoFixo, custoVar, despesaFixo, despesaVar,
@@ -96,7 +96,7 @@ export default function Financial() {
     const groups: Record<string, FinancialEntryRow[]> = {};
     const keys = kanbanGroup === "status" ? kanbanStatusOrder : ["receber", "pagar"];
     keys.forEach(k => { groups[k] = []; });
-    entries.forEach(e => {
+    (entries || []).forEach(e => {
       const g = kanbanGroup === "status" ? e.status : e.type;
       if (!groups[g]) groups[g] = [];
       groups[g].push(e);
@@ -177,7 +177,7 @@ export default function Financial() {
       {/* Tabs + View Toggle */}
       <div className="flex items-center justify-between border-b border-border">
         <div className="flex gap-1">
-          {tabs.map(tab => (
+          {(tabs || []).map(tab => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
@@ -271,9 +271,9 @@ export default function Financial() {
                     </tr>
                   </thead>
                   <tbody>
-                    {entries.length === 0 ? (
+                    {(entries || []).length === 0 ? (
                       <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum lançamento neste mês</td></tr>
-                    ) : entries.map((tx) => {
+                    ) : (entries || []).map((tx) => {
                       const isIncome = tx.type === "receber";
                       return (
                         <tr key={tx.id} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
@@ -313,8 +313,8 @@ export default function Financial() {
             </motion.div>
           ) : (
             /* Kanban View */
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Object.keys(grouped).length}, minmax(250px, 1fr))` }}>
-              {Object.entries(grouped).map(([key, items]) => (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Object.keys(grouped || {}).length}, minmax(250px, 1fr))` }}>
+              {Object.entries(grouped || {}).map(([key, items]) => (
                 <div key={key} className="glass-card rounded-xl p-4 space-y-3 min-h-[200px]">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-semibold capitalize">
@@ -323,7 +323,7 @@ export default function Financial() {
                     <span className="text-xs text-muted-foreground bg-accent px-2 py-0.5 rounded-full">{items.length}</span>
                   </div>
                   <div className="space-y-2">
-                    {items.map(tx => {
+                    {(items || []).map(tx => {
                       const isIncome = tx.type === "receber";
                       return (
                         <div key={tx.id} className="rounded-lg border border-border bg-card p-3 space-y-1.5">

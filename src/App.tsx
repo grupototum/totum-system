@@ -80,6 +80,7 @@ function ProtectedRoutes() {
         <Route path="/projetos" element={<Projects />} />
         <Route path="/financeiro" element={<Financial />} />
         <Route path="/produtos" element={<Products />} />
+        <Route path="/pacotes" element={<Packages />} />
         <Route path="/relatorios" element={<Reports />} />
         <Route path="/equipe" element={<Team />} />
         <Route path="/cadastros" element={<Registries />} />

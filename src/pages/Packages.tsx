@@ -51,8 +51,8 @@ export default function Packages() {
   const metrics = useMemo(() => {
     let cost = 0;
     let sale = 0;
-    selectedItems.forEach(item => {
-      const prod = products.find(pr => pr.id === item.product_id);
+    (selectedItems || []).forEach(item => {
+      const prod = (products || []).find(pr => pr.id === item.product_id);
       cost += (Number(prod?.cost) || 0) * item.quantity;
       sale += item.unit_price * item.quantity;
     });
@@ -65,8 +65,8 @@ export default function Packages() {
 
   const handleToggleProduct = (productId: string, checked: boolean) => {
     if (checked) {
-      const prod = products.find(p => p.id === productId);
-      const newItems = [...selectedItems, { 
+      const prod = (products || []).find(p => p.id === productId);
+      const newItems = [...(selectedItems || []), { 
         product_id: productId, 
         quantity: 1, 
         unit_price: Number((prod as any)?.price_package) || Number(prod?.price) || 0,
@@ -75,14 +75,14 @@ export default function Packages() {
       setSelectedItems(newItems);
       setTotalSale(newItems.reduce((acc, curr) => acc + (curr.unit_price * curr.quantity), 0));
     } else {
-      const newItems = selectedItems.filter(i => i.product_id !== productId);
+      const newItems = (selectedItems || []).filter(i => i.product_id !== productId);
       setSelectedItems(newItems);
       setTotalSale(newItems.reduce((acc, curr) => acc + (curr.unit_price * curr.quantity), 0));
     }
   };
 
   const handleUpdateItem = (productId: string, field: string, val: any) => {
-    const newItems = selectedItems.map(item => {
+    const newItems = (selectedItems || []).map(item => {
       if (item.product_id === productId) {
         return { ...item, [field]: val };
       }
@@ -127,14 +127,14 @@ export default function Packages() {
         <div className="flex items-center justify-center py-20 text-muted-foreground/30">
           <Loader2 className="h-10 w-10 animate-spin text-primary/30" />
         </div>
-      ) : packages.length === 0 ? (
+      ) : (packages || []).length === 0 ? (
         <div className="text-center py-20 text-muted-foreground/50 border-2 border-dashed rounded-2xl">
           <Box className="h-12 w-12 mx-auto mb-4 opacity-10" />
           Nenhum pacote estratégico cadastrado
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {packages.map((pkg) => (
+          {(packages || []).map((pkg) => (
             <motion.div
               key={pkg.id}
               initial={{ opacity: 0, y: 10 }}
@@ -226,8 +226,8 @@ export default function Packages() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.filter(p => p.is_active).map((p) => {
-                      const isSelected = selectedItems.find(it => it.product_id === p.id);
+                    {(products || []).filter(p => p.is_active).map((p) => {
+                      const isSelected = (selectedItems || []).find(it => it.product_id === p.id);
                       return (
                         <TableRow key={p.id} className={isSelected ? "bg-primary/5" : ""}>
                           <TableCell>
