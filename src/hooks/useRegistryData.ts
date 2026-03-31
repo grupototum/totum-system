@@ -218,7 +218,6 @@ export function useRegistryData(registryKey: string) {
     
     const { error } = await (supabase.from(config.table as any) as any)
       .update({ is_active: newActive } as any)
-      .update({ is_active: newActive } as any)
       .eq("id", id);
       
     if (error) {
