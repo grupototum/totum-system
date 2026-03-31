@@ -219,8 +219,8 @@ export function useRegistryData(registryKey: string) {
     
     const newActive = currentStatus !== "ativo";
     
-    const { error } = await supabase
-      .from(config.table as ValidTable)
+    const { error } = await (supabase.from(config.table as any) as any)
+      .update({ is_active: newActive } as any)
       .update({ is_active: newActive } as any)
       .eq("id", id);
       

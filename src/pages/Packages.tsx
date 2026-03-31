@@ -29,14 +29,12 @@ export default function Packages() {
   // Form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [loyaltyEnabled, setLoyaltyEnabled] = useState(true);
-  const [loyaltyMonths, setLoyaltyMonths] = useState("12");
   const [selectedItems, setSelectedItems] = useState<{product_id: string, quantity: number, unit_price: number, discount: number}[]>([]);
   const [totalSale, setTotalSale] = useState(0);
 
   const openNew = () => {
     setEditing(null);
-    setName(""); setDescription(""); setLoyaltyEnabled(true); setLoyaltyMonths("12"); setSelectedItems([]); setTotalSale(0);
+    setName(""); setDescription(""); setSelectedItems([]); setTotalSale(0);
     setDialogOpen(true);
   };
 
@@ -44,15 +42,8 @@ export default function Packages() {
     setEditing(p);
     setName(p.name);
     setDescription(p.description || "");
-    setLoyaltyEnabled(!!p.loyalty_enabled);
-    setLoyaltyMonths(p.loyalty_months?.toString() || "12");
-    setSelectedItems((p as any).items?.map((it: any) => ({
-      product_id: it.product_id,
-      quantity: it.quantity,
-      unit_price: it.unit_price,
-      discount: it.discount || 0
-    })) || []);
-    setTotalSale(Number(p.total_sale) || 0);
+    setSelectedItems([]);
+    setTotalSale(Number(p.value) || 0);
     setDialogOpen(true);
   };
 
@@ -68,10 +59,9 @@ export default function Packages() {
 
     const profit = totalSale - cost;
     const margin = totalSale > 0 ? (profit / totalSale) * 100 : 0;
-    const loyaltyProfit = profit * (parseFloat(loyaltyMonths) || 12);
 
-    return { totalCost: cost, totalBaseSale: sale, profit, margin, loyaltyProfit };
-  }, [selectedItems, products, totalSale, loyaltyMonths]);
+    return { totalCost: cost, totalBaseSale: sale, profit, margin };
+  }, [selectedItems, products, totalSale]);
 
   const handleToggleProduct = (productId: string, checked: boolean) => {
     if (checked) {
@@ -83,7 +73,6 @@ export default function Packages() {
         discount: 0
       }];
       setSelectedItems(newItems);
-      // Auto-update total sale
       setTotalSale(newItems.reduce((acc, curr) => acc + (curr.unit_price * curr.quantity), 0));
     } else {
       const newItems = selectedItems.filter(i => i.product_id !== productId);
@@ -110,23 +99,14 @@ export default function Packages() {
     const values = {
       name,
       description: description || null,
-      loyalty_enabled: loyaltyEnabled,
-      loyalty_months: parseInt(loyaltyMonths) || 12,
-      total_cost: metrics.totalCost,
-      total_sale: totalSale,
+      value: totalSale,
     };
-    const items = selectedItems.map(it => ({
-      product_id: it.product_id,
-      quantity: it.quantity,
-      unit_price: it.unit_price,
-      discount: it.discount
-    }));
 
     if (editing) {
-      const ok = await updatePackage(editing.id, values, items);
+      const ok = await updatePackage(editing.id, values);
       if (ok) setDialogOpen(false);
     } else {
-      const ok = await addPackage(values, items);
+      const ok = await addPackage(values);
       if (ok) setDialogOpen(false);
     }
   };
@@ -185,27 +165,17 @@ export default function Packages() {
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Valor de Venda (Mensal):</span>
-                  <span className="font-bold text-primary">{formatCurrency(pkg.total_sale)}</span>
+                  <span className="text-muted-foreground">Valor (Mensal):</span>
+                  <span className="font-bold text-primary">{formatCurrency(pkg.value)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Lucro p/ Contrato:</span>
-                  <span className="text-emerald-500 font-semibold">{formatCurrency(Number(pkg.total_sale) - Number(pkg.total_cost))}</span>
-                </div>
-                <div className="flex justify-between text-[10px] uppercase tracking-wider font-bold">
-                  <span className="text-muted-foreground">Fidelidade:</span>
-                  <span className={pkg.loyalty_enabled ? "text-primary" : "text-muted-foreground opacity-50"}>
-                    {pkg.loyalty_enabled ? `${pkg.loyalty_months} Meses` : "Não"}
-                  </span>
+                  <span className="text-muted-foreground">Frequência:</span>
+                  <span className="text-muted-foreground">{pkg.frequency}</span>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-border flex justify-between items-center">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full">
-                  <TrendingUp className="h-3 w-3" />
-                  Margem: {Math.round(((Number(pkg.total_sale) - Number(pkg.total_cost)) / (Number(pkg.total_sale) || 1)) * 100)}%
-                </div>
-                <div className="text-[10px] text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {(pkg as any).items?.length || 0} Itens
                 </div>
               </div>
@@ -218,7 +188,7 @@ export default function Packages() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="text-xl font-heading">{editing ? "Editar Pacote Estratégico" : "Criar Novo Pacote Estratégico"}</DialogTitle>
+            <DialogTitle className="text-xl font-heading">{editing ? "Editar Pacote" : "Criar Novo Pacote"}</DialogTitle>
             <DialogDescription>Personalize e valide a lucratividade deste pacote de serviços.</DialogDescription>
           </DialogHeader>
 
@@ -228,22 +198,11 @@ export default function Packages() {
                 <Label>Nome do Pacote</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Pacote Business Gold" />
               </div>
-              <div className="flex gap-4 items-end pb-1">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border flex-1">
-                  <Switch checked={loyaltyEnabled} onCheckedChange={setLoyaltyEnabled} />
-                  <Label className="text-xs cursor-pointer">Fidelidade Obrigatória</Label>
-                </div>
-                {loyaltyEnabled && (
-                  <div className="w-24 space-y-2">
-                    <Label className="text-[10px]">Meses</Label>
-                    <Input type="number" value={loyaltyMonths} onChange={(e) => setLoyaltyMonths(e.target.value)} className="h-9 px-2 text-center" />
-                  </div>
-                )}
-              </div>
+              <div />
             </div>
 
             <div className="space-y-2">
-              <Label>Descrição / Argumento de Venda</Label>
+              <Label>Descrição</Label>
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Destaque os benefícios deste pacote..." className="resize-none" rows={2} />
             </div>
 
@@ -316,38 +275,32 @@ export default function Packages() {
             </div>
           </div>
 
-          {/* Intelligence Footer */}
+          {/* Footer */}
           <div className="p-6 bg-accent/50 border-t border-border mt-auto">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Custo Total (Indireto)</span>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">Custo Total</span>
                 <div className="text-lg font-bold">{formatCurrency(metrics.totalCost)}</div>
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Valor de Venda Sugerido</span>
-                <div className="text-lg font-bold text-emerald-500">{formatCurrency(metrics.totalCost * 1.3)} (+30%)</div>
+                <span className="text-[10px] uppercase font-bold text-muted-foreground">Valor Sugerido (+30%)</span>
+                <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(metrics.totalCost * 1.3)}</div>
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] uppercase font-bold">Valor de Venda Final</Label>
-                <div className="relative">
-                   <Input 
-                    type="number" 
-                    value={totalSale} 
-                    onChange={(e) => setTotalSale(parseFloat(e.target.value) || 0)}
-                    className="h-10 text-lg font-bold text-primary border-primary/20 bg-primary/5 focus:bg-primary/10 transition-colors" 
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-primary opacity-50">/mês</span>
-                </div>
+                <Input 
+                  type="number" 
+                  value={totalSale} 
+                  onChange={(e) => setTotalSale(parseFloat(e.target.value) || 0)}
+                  className="h-10 text-lg font-bold text-primary border-primary/20 bg-primary/5" 
+                />
               </div>
-              <div className="rounded-xl bg-primary shadow-lg p-4 text-white space-y-1">
+              <div className="rounded-xl bg-primary shadow-lg p-4 text-primary-foreground space-y-1">
                 <div className="flex justify-between items-center text-[10px] uppercase font-bold opacity-80">
-                  <span>Margem Real Bruta</span>
+                  <span>Margem Bruta</span>
                   <TrendingUp className="h-4 w-4" />
                 </div>
                 <div className="text-2xl font-black">{Math.round(metrics.margin)}%</div>
-                <div className="text-[10px] font-medium opacity-90 truncate">
-                   LTV Projetado: {formatCurrency(totalSale * (parseInt(loyaltyMonths) || 1))}
-                </div>
               </div>
             </div>
             
@@ -355,10 +308,10 @@ export default function Packages() {
               <Button variant="ghost" onClick={() => setDialogOpen(false)} className="rounded-full">Cancelar</Button>
               <Button 
                 onClick={handleSave} 
-                disabled={!name.trim() || selectedItems.length === 0} 
-                className="gradient-primary border-0 text-white font-bold rounded-full px-10 shadow-lg hover:shadow-primary/20 transition-all"
+                disabled={!name.trim()} 
+                className="gradient-primary border-0 text-white font-bold rounded-full px-10"
               >
-                {editing ? "Salvar Alterações" : "Criar Pacote Estratégico"}
+                {editing ? "Salvar Alterações" : "Criar Pacote"}
               </Button>
             </DialogFooter>
           </div>
