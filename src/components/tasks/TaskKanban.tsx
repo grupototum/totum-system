@@ -49,7 +49,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                     <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided, snapshot) => {
                         const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "concluido";
-                        const priorityColor = priorityConfig[task.priority].color;
+                        const priorityColor = priorityConfig[task.priority]?.color || "text-muted-foreground";
                         
                         return (
                           <div
