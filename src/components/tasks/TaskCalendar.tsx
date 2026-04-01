@@ -95,7 +95,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                         key={task.id}
                         onClick={() => onTaskClick(task)}
                         className={`w-full text-left px-1.5 py-1 rounded text-[10px] truncate transition-colors hover:bg-white/[0.08] flex items-center gap-1 ${
-                          priorityConfig[task.priority].color
+                          (priorityConfig[task.priority]?.color || "text-muted-foreground")
                         }`}
                         title={`${task.title}${task.responsible ? ` — ${task.responsible}` : ""}`}
                       >
