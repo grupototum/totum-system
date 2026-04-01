@@ -95,7 +95,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                         key={task.id}
                         onClick={() => onTaskClick(task)}
                         className={`w-full text-left px-1.5 py-1 rounded text-[10px] truncate transition-colors hover:bg-white/[0.08] flex items-center gap-1 ${
-                          priorityConfig[task.priority].color
+                          (priorityConfig[task.priority]?.color || "text-muted-foreground")
                         }`}
                         title={`${task.title}${task.responsible ? ` — ${task.responsible}` : ""}`}
                       >
@@ -105,7 +105,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                             <AvatarFallback className="text-[5px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
                           </Avatar>
                         ) : (
-                          <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority].dot}`} />
+                          <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                         )}
                         <span className="truncate">{task.title}</span>
                       </button>

@@ -116,7 +116,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 <div className="space-y-1.5">
                   {model.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-2 text-xs">
-                      <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[item.suggestedPriority].dot}`} />
+                      <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[item.suggestedPriority]?.dot || "bg-muted-foreground"}`} />
                       <span className="flex-1">{item.name}</span>
                       <span className="text-muted-foreground/40 text-[10px]">{item.type}</span>
                     </div>
@@ -150,7 +150,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto scrollbar-thin">
               {previewTasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-white/[0.03] text-xs">
-                  <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
+                  <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                   <span className="flex-1 font-medium">{task.title}</span>
                   {task.responsible && (
                     <span className="text-muted-foreground/50">{task.responsible.split(" ")[0]}</span>

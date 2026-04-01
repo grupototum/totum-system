@@ -105,8 +105,8 @@ export default function Fulfillment() {
                     <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
                       <div className="border-t border-border px-5 py-3 space-y-1">
                         {items.map((item) => {
-                          const uiStatus: UIStatus = item.status || "pending";
-                          const info = statusIcons[uiStatus];
+                          const uiStatus: UIStatus = (item.status as UIStatus) || "pending";
+                          const info = statusIcons[uiStatus] || statusIcons.pending;
                           const Icon = info.icon;
                           const needsJust = (uiStatus === "entregue_parcialmente" || uiStatus === "nao_entregue") && !(item.justification || "").trim();
 
@@ -117,7 +117,7 @@ export default function Fulfillment() {
                                 <span className="flex-1 text-sm">{item.name}</span>
                                 <div className="flex items-center gap-1">
                                   {statusOptions.map((s) => {
-                                    const si = statusIcons[s];
+                                    const si = statusIcons[s] || statusIcons.pending;
                                     const SIcon = si.icon;
                                     const active = item.status === s;
                                     return (

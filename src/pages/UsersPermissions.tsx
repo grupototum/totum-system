@@ -193,8 +193,8 @@ export default function UsersPermissions() {
 
   const handleToggleStatus = async (user: AppUser, status: "ativo" | "inativo" | "bloqueado") => {
     await updateProfile(user.id, { status: status as any });
-    await logAudit("Status alterado", `Usuário ${user.name} → ${userStatusConfig[status].label}`);
-    toast({ title: "Status atualizado", description: `${user.name} → ${userStatusConfig[status].label}` });
+    await logAudit("Status alterado", `Usuário ${user.name} → ${userStatusConfig[status]?.label || status}`);
+    toast({ title: "Status atualizado", description: `${user.name} → ${userStatusConfig[status]?.label || status}` });
     await refetchProfiles();
   };
 
