@@ -333,7 +333,7 @@ export default function UsersPermissions() {
                         </td>
                       </tr>
                     ) : filteredUsers.map((user) => {
-                      const st = userStatusConfig[user.status];
+                      const st = userStatusConfig[user.status] || { label: user.status || "Desconhecido", color: "text-muted-foreground", bg: "bg-muted" };
                       const pc = user.permCount || 0;
                       return (
                         <tr key={user.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
