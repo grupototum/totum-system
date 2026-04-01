@@ -106,7 +106,7 @@ export default function Fulfillment() {
                       <div className="border-t border-border px-5 py-3 space-y-1">
                         {items.map((item) => {
                           const uiStatus: UIStatus = (item.status as UIStatus) || "pending";
-                          const info = statusIcons[uiStatus] || statusIcons.pending;
+                          const info = statusIcons[uiStatus] || statusIcons.pending || { icon: AlertCircle, color: "text-muted-foreground/40", label: "Pendente" };
                           const Icon = info.icon;
                           const needsJust = (uiStatus === "entregue_parcialmente" || uiStatus === "nao_entregue") && !(item.justification || "").trim();
 

@@ -130,7 +130,7 @@ export function UserFormDialog({ open, onOpenChange, user, roles, onSave }: User
               <SelectTrigger className={selectCls}><SelectValue /></SelectTrigger>
               <SelectContent className={selectContentCls}>
                 {(Object.keys(userStatusConfig) as UserStatus[]).map((s) => (
-                  <SelectItem key={s} value={s} className={selectItemCls}>{userStatusConfig[s].label}</SelectItem>
+                  <SelectItem key={s} value={s} className={selectItemCls}>{userStatusConfig[s]?.label || s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
