@@ -163,9 +163,10 @@ export default function UsersPermissions() {
 
   // ─── Users ────
   const filteredUsers = useMemo(() => {
-    if (!userSearch.trim()) return users;
+    const activeUsers = users.filter((u) => u.status !== "inativo");
+    if (!userSearch.trim()) return activeUsers;
     const q = userSearch.toLowerCase();
-    return users.filter((u) =>
+    return activeUsers.filter((u) =>
       u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.department.toLowerCase().includes(q)
     );
   }, [users, userSearch]);
