@@ -116,7 +116,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
                 <div className="space-y-1.5">
                   {model.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-2 text-xs">
-                      <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[item.suggestedPriority].dot}`} />
+                      <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[item.suggestedPriority]?.dot || "bg-muted-foreground"}`} />
                       <span className="flex-1">{item.name}</span>
                       <span className="text-muted-foreground/40 text-[10px]">{item.type}</span>
                     </div>
