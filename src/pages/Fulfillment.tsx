@@ -117,7 +117,7 @@ export default function Fulfillment() {
                                 <span className="flex-1 text-sm">{item.name}</span>
                                 <div className="flex items-center gap-1">
                                   {statusOptions.map((s) => {
-                                    const si = statusIcons[s];
+                                    const si = statusIcons[s] || statusIcons.pending;
                                     const SIcon = si.icon;
                                     const active = item.status === s;
                                     return (
