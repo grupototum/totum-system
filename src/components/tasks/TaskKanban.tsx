@@ -68,7 +68,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                             <div className={`absolute top-0 left-0 bottom-0 w-1 ${priorityColor.replace('text-', 'bg-')}`} />
                             
                             <div className="flex items-center gap-1.5 mb-2 pl-1">
-                              <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
+                              <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                               <span className="text-[10px] text-muted-foreground/50 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
                               {(task.isRecurring || task.parentTaskId) && (
                                 <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? recurrenceLabels[task.recurrenceType] : ''}` : 'Ocorrência de tarefa recorrente'}>
