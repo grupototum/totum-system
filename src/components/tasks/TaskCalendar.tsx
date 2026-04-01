@@ -105,7 +105,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                             <AvatarFallback className="text-[5px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
                           </Avatar>
                         ) : (
-                          <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority].dot}`} />
+                          <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                         )}
                         <span className="truncate">{task.title}</span>
                       </button>

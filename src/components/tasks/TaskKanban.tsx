@@ -71,7 +71,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                               <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                               <span className="text-[10px] text-muted-foreground/50 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
                               {(task.isRecurring || task.parentTaskId) && (
-                                <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? recurrenceLabels[task.recurrenceType] : ''}` : 'Ocorrência de tarefa recorrente'}>
+                                <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? (recurrenceLabels[task.recurrenceType] || task.recurrenceType) : ''}` : 'Ocorrência de tarefa recorrente'}>
                                   <RefreshCw className="h-3 w-3" />
                                 </span>
                               )}

@@ -31,8 +31,8 @@ export function TaskListView({ tasks, onTaskClick, showUnarchive, onUnarchive }:
               <tr><td colSpan={7} className="p-8 text-center text-muted-foreground/50">Nenhuma tarefa encontrada</td></tr>
             ) : (
               tasks.map((task) => {
-                const st = statusConfig[task.status];
-                const pr = priorityConfig[task.priority];
+                const st = statusConfig[task.status] || { label: task.status, color: "text-muted-foreground", bgColor: "bg-muted" };
+                const pr = priorityConfig[task.priority] || { label: task.priority, color: "text-muted-foreground", dot: "bg-muted-foreground" };
                 const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "concluido";
                 const checkProgress = task.checklist.length > 0
                   ? Math.round((task.checklist.filter((c) => c.completed).length / task.checklist.length) * 100)

@@ -150,7 +150,7 @@ export function GenerateTasksDialog({ open, onOpenChange, onGenerate }: Generate
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto scrollbar-thin">
               {previewTasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-2 p-2.5 rounded-lg bg-white/[0.03] text-xs">
-                  <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority].dot}`} />
+                  <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
                   <span className="flex-1 font-medium">{task.title}</span>
                   {task.responsible && (
                     <span className="text-muted-foreground/50">{task.responsible.split(" ")[0]}</span>
