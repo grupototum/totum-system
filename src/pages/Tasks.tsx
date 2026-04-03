@@ -25,7 +25,7 @@ import { toast } from "@/hooks/use-toast";
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles, clients } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, deleteTask, refetch, profiles, clients } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
@@ -34,7 +34,7 @@ export default function Tasks() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1));
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [showArchived, setShowArchived] = useState(false);
 
   // Completion dialog state
@@ -433,6 +433,13 @@ export default function Tasks() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         onUpdate={handleTaskUpdate}
+        onDelete={async (taskId) => {
+          const success = await deleteTask(taskId);
+          if (success) {
+            setDetailOpen(false);
+            setSelectedTask(null);
+          }
+        }}
       />
 
       <GenerateTasksDialog

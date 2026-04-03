@@ -26,13 +26,15 @@ interface TaskDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdate: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
 }
 
-export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDetailDialogProps) {
+export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete }: TaskDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!task) return null;
 
@@ -525,6 +527,42 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDet
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {/* Delete section */}
+        {onDelete && (
+          <div className="mt-4 pt-3 border-t border-border">
+            {!confirmDelete ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                Excluir tarefa permanentemente
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-destructive">Tem certeza? Essa ação é irreversível.</span>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => { onDelete(task.id); setConfirmDelete(false); }}
+                >
+                  Confirmar exclusão
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setConfirmDelete(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>

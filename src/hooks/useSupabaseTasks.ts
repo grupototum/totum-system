@@ -228,6 +228,31 @@ export function useSupabaseTasks() {
     return true;
   };
 
+  const deleteTask = async (taskId: string) => {
+    if (isDemoMode) {
+      setTasks(prev => prev.filter(t => t.id !== taskId));
+      toast({ title: "Modo Demo", description: "Tarefa excluída (simulado)." });
+      return true;
+    }
+
+    // Delete related records first
+    await supabase.from("task_checklist_items").delete().eq("task_id", taskId);
+    await supabase.from("task_comments").delete().eq("task_id", taskId);
+    await supabase.from("task_history").delete().eq("task_id", taskId);
+    await supabase.from("subtasks").delete().eq("task_id", taskId);
+
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+
+    if (error) {
+      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+      return false;
+    }
+
+    toast({ title: "Tarefa excluída", description: "A tarefa foi removida permanentemente." });
+    await fetchTasks();
+    return true;
+  };
+
   return {
     tasks,
     loading,
@@ -236,6 +261,7 @@ export function useSupabaseTasks() {
     updateTaskStatus,
     updateTask,
     addTasks,
+    deleteTask,
     refetch: fetchTasks,
   };
 }
