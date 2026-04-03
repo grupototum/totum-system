@@ -1,57 +1,38 @@
 
 
-## Diagnóstico
+## Correção de Bugs no Calendário de Tarefas + Deletar Tarefas
 
-O erro `TypeError: Cannot read properties of undefined (reading 'bg')` ocorre em **`src/pages/UsersPermissions.tsx` linha 336**:
+### Bug 1: Calendário abrindo em Março ao invés do mês atual
 
+**Causa**: Linha 37 de `Tasks.tsx` tem o mês hardcoded:
 ```typescript
-const st = userStatusConfig[user.status]; // undefined quando status não está no mapa
-// linha 361:
-<span className={`... ${st.bg} ${st.color}`}> // CRASH
+const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1)); // Março 2026
 ```
 
-O `userStatusConfig` só tem 3 chaves (`ativo`, `inativo`, `bloqueado`), mas o banco pode retornar `null`, string vazia, ou outro valor inesperado — causando `undefined.bg`.
+**Correção**: Trocar para `new Date()` (mês atual).
 
-## Plano de Correção
+---
 
-### 1. Adicionar fallback defensivo em `UsersPermissions.tsx` (linha 336)
+### Bug 2: Tarefas aparecendo no dia errado (domingo ao invés de segunda)
 
-Substituir:
-```typescript
-const st = userStatusConfig[user.status];
-```
-Por:
-```typescript
-const st = userStatusConfig[user.status] || { label: user.status || "Desconhecido", color: "text-muted-foreground", bg: "bg-muted" };
-```
+**Causa**: O campo `due_date` vem do banco como string `"2026-04-06"` (formato date ISO). Quando o JS faz `new Date("2026-04-06")`, interpreta como UTC meia-noite, que no fuso de Brasília (UTC-3) vira `2026-04-05 21:00` -- ou seja, domingo ao invés de segunda.
 
-### 2. Criar utilitário global de proteção para style maps
+**Correção**: Ao parsear `dueDate` no calendário, usar `new Date(date + "T00:00:00")` para forçar interpretação no fuso local. Aplicar em `TaskCalendar.tsx` na linha 31.
 
-Criar uma função `safeLookup` em `src/lib/utils.ts` que encapsula o padrão de optional chaining + fallback, para uso em todo o projeto:
+---
 
-```typescript
-export function safeLookup<T>(map: Record<string, T>, key: string | undefined | null, fallback: T): T {
-  return (key && map[key]) || fallback;
-}
-```
+### Bug 3: Adicionar opção de deletar tarefa
 
-### 3. Varredura e blindagem de todos os acessos dinâmicos restantes
-
-Aplicar o mesmo padrão defensivo nos seguintes locais que ainda fazem acesso direto:
-
-- **`src/pages/Fulfillment.tsx`** — `statusIcons[status]` dentro do `.map()` de items (linha ~80+)
-- **`src/components/users/UserFormDialog.tsx`** — `userStatusConfig[s].label` no `SelectItem`
-- **`src/components/tasks/TaskDashboard.tsx`** — `m.bg` (já seguro pois é array hardcoded, mas verificar)
-- **`src/components/tasks/TaskGoals.tsx`** — idem
-
-### 4. CSP Warning
-
-O aviso de Content Security Policy (`unsafe-eval`) é gerado pelo Vite em modo dev e **não afeta produção**. Não requer ação.
+**Implementação**:
+1. Adicionar função `deleteTask` no hook `useSupabaseTasks.ts` que faz `DELETE` na tabela `tasks`
+2. Adicionar botão "Excluir" no `TaskDetailDialog.tsx` com confirmação
+3. Passar callback `onDelete` do `Tasks.tsx` para o dialog
+4. Arquivar != deletar: arquivar mantém o registro com status "arquivado", deletar remove permanentemente
 
 ### Arquivos modificados
 
-1. `src/lib/utils.ts` — adicionar `safeLookup`
-2. `src/pages/UsersPermissions.tsx` — aplicar fallback na linha 336
-3. `src/pages/Fulfillment.tsx` — blindar `statusIcons` access
-4. `src/components/users/UserFormDialog.tsx` — blindar acesso ao config
+1. `src/pages/Tasks.tsx` -- fix calendarMonth + wiring onDelete
+2. `src/components/tasks/TaskCalendar.tsx` -- fix timezone parsing
+3. `src/hooks/useSupabaseTasks.ts` -- add deleteTask function
+4. `src/components/tasks/TaskDetailDialog.tsx` -- add delete button with confirmation
 
