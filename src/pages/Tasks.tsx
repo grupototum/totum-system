@@ -25,7 +25,7 @@ import { toast } from "@/hooks/use-toast";
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
 export default function Tasks() {
-  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, refetch, profiles, clients } = useSupabaseTasks();
+  const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, deleteTask, refetch, profiles, clients } = useSupabaseTasks();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
