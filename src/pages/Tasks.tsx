@@ -433,6 +433,13 @@ export default function Tasks() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         onUpdate={handleTaskUpdate}
+        onDelete={async (taskId) => {
+          const success = await deleteTask(taskId);
+          if (success) {
+            setDetailOpen(false);
+            setSelectedTask(null);
+          }
+        }}
       />
 
       <GenerateTasksDialog

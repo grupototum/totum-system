@@ -28,7 +28,7 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
     const map: Record<number, Task[]> = {};
     tasks.forEach((t) => {
       if (t.dueDate) {
-        const d = new Date(t.dueDate);
+        const d = new Date(t.dueDate + (t.dueDate.length === 10 ? "T00:00:00" : ""));
         if (d.getMonth() === month && d.getFullYear() === year) {
           const day = d.getDate();
           if (!map[day]) map[day] = [];
