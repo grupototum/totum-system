@@ -29,11 +29,12 @@ interface TaskDetailDialogProps {
   onDelete?: (taskId: string) => void;
 }
 
-export function TaskDetailDialog({ task, open, onOpenChange, onUpdate }: TaskDetailDialogProps) {
+export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete }: TaskDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!task) return null;
 
