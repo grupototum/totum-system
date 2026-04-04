@@ -27,11 +27,12 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   const [value, setValue] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [installments, setInstallments] = useState("1");
-  const [nature, setNature] = useState<"fixo" | "variavel">("fixo");
-  const [costRegistrationId, setCostRegistrationId] = useState("");
+  const [costCenterId, setCostCenterId] = useState("");
+  const [costCenters, setCostCenters] = useState<{ id: string; name: string }[]>([]);
   const [expenseTypeId, setExpenseTypeId] = useState("");
-  const [costRegistrations, setCostRegistrations] = useState<{ id: string; name: string }[]>([]);
   const [expenseTypes, setExpenseTypes] = useState<{ id: string; name: string }[]>([]);
+  const [clientId, setClientId] = useState("");
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [interval, setIntervalValue] = useState("1");
   const [notes, setNotes] = useState("");
 
