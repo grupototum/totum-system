@@ -12,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   Task, Subtask, ChecklistItem, TaskComment, TaskStatus, TaskPriority,
-  statusConfig, priorityConfig, typeLabels, teamMembers, TaskType,
+  statusConfig, priorityConfig, typeLabels, TaskType,
   RecurrenceType, recurrenceLabels, weekDayLabels, RecurrenceConfig,
 } from "./taskData";
 import {

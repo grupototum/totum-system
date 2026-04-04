@@ -2,7 +2,7 @@ import { Search, X } from "lucide-react";
 import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "./MultiSelect";
-import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
+import { clientPlans, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
