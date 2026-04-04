@@ -198,8 +198,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                   <SelectTrigger className={selectClasses}><SelectValue placeholder="Selecionar" /></SelectTrigger>
                   <SelectContent className={selectContentClasses}>
                     <SelectItem value="none" className={selectItemClasses}>Sem responsável</SelectItem>
-                    {teamMembers.map((m) => (
-                      <SelectItem key={m} value={m} className={selectItemClasses}>{m}</SelectItem>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.user_id} value={p.full_name} className={selectItemClasses}>{p.full_name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
