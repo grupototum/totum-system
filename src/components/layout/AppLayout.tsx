@@ -4,6 +4,7 @@ import { NotificationCenter } from "./NotificationCenter";
 import { TaskSearch } from "./TaskSearch";
 import { DemoBanner } from "./DemoBanner";
 import { ThemeToggle } from "./ThemeToggle";
+import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               <div className="flex items-center gap-1">
                 <TaskSearch />
+                <PwaInstallPrompt />
                 <ThemeToggle />
                 <NotificationCenter />
               </div>
