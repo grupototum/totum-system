@@ -27,45 +27,40 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   const [value, setValue] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [installments, setInstallments] = useState("1");
-  const [nature, setNature] = useState<"fixo" | "variavel">("fixo");
-  const [costRegistrationId, setCostRegistrationId] = useState("");
+  const [costCenterId, setCostCenterId] = useState("");
+  const [costCenters, setCostCenters] = useState<{ id: string; name: string }[]>([]);
   const [expenseTypeId, setExpenseTypeId] = useState("");
-  const [costRegistrations, setCostRegistrations] = useState<{ id: string; name: string }[]>([]);
   const [expenseTypes, setExpenseTypes] = useState<{ id: string; name: string }[]>([]);
+  const [clientId, setClientId] = useState("");
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [interval, setIntervalValue] = useState("1");
   const [notes, setNotes] = useState("");
 
   useEffect(() => {
     if (open) {
-      supabase.from("financial_categories").select("id, name, type").then(({ data }) => {
+      supabase.from("financial_categories").select("id, name, type").eq("is_active", true).then(({ data }) => {
         if (data) setCategories(data);
       });
-      supabase.from("cost_registrations" as any).select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setCostRegistrations(data as any);
+      supabase.from("cost_centers").select("id, name").eq("is_active", true).then(({ data }) => {
+        if (data) setCostCenters(data);
       });
       supabase.from("expense_types").select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setExpenseTypes(data as any);
+        if (data) setExpenseTypes(data);
+      });
+      supabase.from("clients").select("id, name").eq("status", "ativo").order("name").then(({ data }) => {
+        if (data) setClients(data);
       });
     }
   }, [open]);
 
-  // Reset category when type changes, but first map visual types to logical if needed.
   useEffect(() => {
     setCategoryId("");
   }, [type]);
 
   const resetForm = () => {
-    setDescription(""); 
-    setType("receber"); 
-    setCategoryId(""); 
-    setValue(""); 
-    setDueDate(""); 
-    setInstallments("1"); 
-    setIntervalValue("1");
-    setNature("fixo");
-    setCostRegistrationId("");
-    setExpenseTypeId("");
-    setNotes("");
+    setDescription(""); setType("receber"); setCategoryId(""); setValue("");
+    setDueDate(""); setInstallments("1"); setIntervalValue("1");
+    setCostCenterId(""); setExpenseTypeId(""); setClientId(""); setNotes("");
   };
 
   const handleSave = async () => {
@@ -80,8 +75,6 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
     const installmentValue = Math.round((totalValue / numInstallments) * 100) / 100;
 
     const { data: { user } } = await supabase.auth.getUser();
-    // Determine nature from related entity if not manually set (fallback)
-    const finalNature = nature;
 
     try {
       const dbType = type === "receber" ? "receber" : "pagar";
@@ -94,9 +87,9 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           description: numInstallments > 1 ? `${description.trim()} (${i + 1}/${numInstallments})` : description.trim(),
           type: dbType,
           category_id: categoryId || null,
-          cost_registration_id: type === "custo" ? costRegistrationId || null : null,
-          expense_type_id: type === "despesa" ? expenseTypeId || null : null,
-          nature: finalNature,
+          cost_center_id: costCenterId || null,
+          expense_type_id: (type === "despesa" || type === "custo") ? expenseTypeId || null : null,
+          client_id: clientId || null,
           value: installmentValue,
           due_date: format(date, "yyyy-MM-dd"),
           status: "pendente" as const,
@@ -110,9 +103,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
 
       const { error } = await supabase.from("financial_entries").insert(entries);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       toast({ title: "Lançamento criado", description: numInstallments > 1 ? `${numInstallments} parcelas geradas` : undefined });
       resetForm();
@@ -129,7 +120,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
     if (type === "receber") return c.type === "receber" || c.type === "receita";
     if (type === "despesa") return c.type === "pagar" || c.type === "despesa";
     if (type === "custo") return c.type === "custo";
-    return true; // fallback
+    return true;
   });
 
   return (
@@ -165,7 +156,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {filteredCategories.length === 0 ? (
-                    <div className="px-2 py-2 text-xs text-muted-foreground">Nenhuma categoria</div>
+                    <div className="px-2 py-2 text-xs text-muted-foreground">Nenhuma categoria para este tipo</div>
                   ) : (
                     filteredCategories.map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -189,50 +180,61 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Natureza</Label>
-              <Select value={nature} onValueChange={(v: any) => setNature(v)}>
-                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
+              <Label>Cliente</Label>
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fixo">Fixo</SelectItem>
-                  <SelectItem value="variavel">Variável</SelectItem>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {clients.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             
-            {(type === "custo" || type === "despesa") && (
-              <div className="space-y-1.5">
-                <Label>{type === "custo" ? "Cadastro de Custo" : "Tipo de Despesa"}</Label>
-                <Select 
-                  value={type === "custo" ? costRegistrationId : expenseTypeId} 
-                  onValueChange={type === "custo" ? setCostRegistrationId : setExpenseTypeId}
-                >
-                  <SelectTrigger className="bg-white/[0.04] border-border">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(type === "custo" ? costRegistrations : expenseTypes).map(item => (
-                      <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-1.5">
+              <Label>Centro de Custo</Label>
+              <Select value={costCenterId} onValueChange={setCostCenterId}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {costCenters.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {nature === "variavel" && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Parcelas</Label>
-                <Input type="number" min="1" max="48" value={installments} onChange={e => setInstallments(e.target.value)} className="bg-white/[0.04] border-border" />
-              </div>
+          {(type === "despesa" || type === "custo") && (
+            <div className="space-y-1.5">
+              <Label>Tipo de Despesa</Label>
+              <Select value={expenseTypeId} onValueChange={setExpenseTypeId}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {expenseTypes.map(item => (
+                    <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Parcelas</Label>
+              <Input type="number" min="1" max="48" value={installments} onChange={e => setInstallments(e.target.value)} className="bg-white/[0.04] border-border" />
+            </div>
+            {parseInt(installments) > 1 && (
               <div className="space-y-1.5">
                 <Label>Intervalo (meses)</Label>
                 <Input type="number" min="1" max="12" value={interval} onChange={e => setIntervalValue(e.target.value)} className="bg-white/[0.04] border-border" />
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {nature === "variavel" && parseInt(installments) > 1 && value && (
+          {parseInt(installments) > 1 && value && (
             <p className="text-xs text-muted-foreground">
               {installments}x de R$ {(parseFloat(value) / parseInt(installments)).toFixed(2)} — Intervalo de {interval} mês(es).
             </p>

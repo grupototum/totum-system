@@ -12,7 +12,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   Task, Subtask, ChecklistItem, TaskComment, TaskStatus, TaskPriority,
-  statusConfig, priorityConfig, typeLabels, teamMembers, TaskType,
+  statusConfig, priorityConfig, typeLabels, TaskType,
   RecurrenceType, recurrenceLabels, weekDayLabels, RecurrenceConfig,
 } from "./taskData";
 import {
@@ -27,9 +27,10 @@ interface TaskDetailDialogProps {
   onOpenChange: (open: boolean) => void;
   onUpdate: (task: Task) => void;
   onDelete?: (taskId: string) => void;
+  profiles?: { user_id: string; full_name: string }[];
 }
 
-export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete }: TaskDetailDialogProps) {
+export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
@@ -197,8 +198,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete 
                   <SelectTrigger className={selectClasses}><SelectValue placeholder="Selecionar" /></SelectTrigger>
                   <SelectContent className={selectContentClasses}>
                     <SelectItem value="none" className={selectItemClasses}>Sem responsável</SelectItem>
-                    {teamMembers.map((m) => (
-                      <SelectItem key={m} value={m} className={selectItemClasses}>{m}</SelectItem>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.user_id} value={p.full_name} className={selectItemClasses}>{p.full_name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

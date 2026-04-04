@@ -2,7 +2,7 @@ import { Search, X } from "lucide-react";
 import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "./MultiSelect";
-import { clientPlans, teamMembers, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
+import { clientPlans, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
@@ -72,7 +72,7 @@ export function TaskFilters({
   
   const responsibleOptions = [
     { value: "unassigned", label: "Sem responsável", count: counts.responsible["unassigned"] || 0 },
-    ...teamMembers.map((m) => ({ value: m, label: m, count: counts.responsible[m] || 0 })),
+    ...profiles.map((p) => ({ value: p.full_name, label: p.full_name, count: counts.responsible[p.full_name] || 0 })),
   ];
 
   const managerOptions = [

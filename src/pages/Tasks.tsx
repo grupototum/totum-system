@@ -433,6 +433,7 @@ export default function Tasks() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         onUpdate={handleTaskUpdate}
+        profiles={profiles}
         onDelete={async (taskId) => {
           const success = await deleteTask(taskId);
           if (success) {
