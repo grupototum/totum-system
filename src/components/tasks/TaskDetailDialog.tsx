@@ -30,7 +30,7 @@ interface TaskDetailDialogProps {
   profiles?: { user_id: string; full_name: string }[];
 }
 
-export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete }: TaskDetailDialogProps) {
+export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
