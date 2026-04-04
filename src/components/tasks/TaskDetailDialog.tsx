@@ -27,6 +27,7 @@ interface TaskDetailDialogProps {
   onOpenChange: (open: boolean) => void;
   onUpdate: (task: Task) => void;
   onDelete?: (taskId: string) => void;
+  profiles?: { user_id: string; full_name: string }[];
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete }: TaskDetailDialogProps) {
