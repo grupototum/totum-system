@@ -18,6 +18,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               <div className="flex items-center gap-1">
                 <TaskSearch />
+                <PwaInstallPrompt />
                 <ThemeToggle />
                 <NotificationCenter />
               </div>
