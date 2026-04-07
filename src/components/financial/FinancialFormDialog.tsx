@@ -178,20 +178,20 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
             </div>
           </div>
 
+          <div className="space-y-1.5">
+            <Label>Cliente</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhum</SelectItem>
+                {clients.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Cliente</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {clients.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
             <div className="space-y-1.5">
               <Label>Centro de Custo</Label>
               <Select value={costCenterId} onValueChange={setCostCenterId}>
@@ -204,9 +204,6 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          {(type === "despesa" || type === "custo") && (
             <div className="space-y-1.5">
               <Label>Tipo de Despesa</Label>
               <Select value={expenseTypeId} onValueChange={setExpenseTypeId}>
@@ -219,8 +216,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
                 </SelectContent>
               </Select>
             </div>
-          )}
-
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Parcelas</Label>
