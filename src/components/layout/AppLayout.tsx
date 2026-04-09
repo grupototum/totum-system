@@ -1,76 +1,34 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
-import AppSidebar from "./AppSidebar";
-import MobileSidebar, { MobileTrigger } from "./MobileSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./AppSidebar";
+import { NotificationCenter } from "./NotificationCenter";
+import { TaskSearch } from "./TaskSearch";
+import { DemoBanner } from "./DemoBanner";
+import { ThemeToggle } from "./ThemeToggle";
+import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
-
-export default function AppLayout({ children }: AppLayoutProps) {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        navigate("/login");
-      } else {
-        setIsReady(true);
-      }
-    }
-  }, [user, loading, navigate]);
-
-  // Mostra loading enquanto verifica autenticação
-  if (loading || !isReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex gap-[3px] items-end animate-industrial-pulse">
-          <div className="w-[5px] h-6 bg-primary rounded-full" />
-          <div className="w-[5px] h-4 bg-primary/60 rounded-full" />
-          <div className="w-[5px] h-6 bg-primary rounded-full" />
+export function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex flex-col w-full">
+        <DemoBanner />
+        <div className="flex flex-1 min-h-0">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="h-14 flex items-center justify-between border-b border-border px-4 shrink-0 bg-background/80 backdrop-blur-sm">
+              <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+              <div className="flex items-center gap-1">
+                <TaskSearch />
+                <PwaInstallPrompt />
+                <ThemeToggle />
+                <NotificationCenter />
+              </div>
+            </header>
+            <main className="flex-1 overflow-auto scrollbar-thin">
+              {children}
+            </main>
+          </div>
         </div>
       </div>
-    );
-  }
-
-  // Se não há usuário, não renderiza nada (já vai redirecionar)
-  if (!user) return null;
-
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Theme toggle - fixed top-right */}
-      <button
-        onClick={toggleTheme}
-        className="fixed top-4 right-4 z-50 p-2.5 rounded-xl bg-card/60 border border-border/40 backdrop-blur-sm text-muted-foreground hover:text-foreground transition-colors"
-        title={theme === "dark" ? "Modo Claro" : "Modo Escuro"}
-      >
-        {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-      </button>
-
-      {/* Desktop sidebar */}
-      {!isMobile && <AppSidebar />}
-
-      {/* Mobile sidebar */}
-      {isMobile && (
-        <>
-          <MobileTrigger onClick={() => setMobileOpen(true)} />
-          <MobileSidebar open={mobileOpen} onOpenChange={setMobileOpen} />
-        </>
-      )}
-
-      {/* Main content */}
-      <main className={isMobile ? "pt-16" : "ml-[280px]"}>
-        {children}
-      </main>
-    </div>
+    </SidebarProvider>
   );
 }

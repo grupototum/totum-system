@@ -1,36 +1,73 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Theme = "dark" | "light";
+type Theme = "light" | "dark" | "system";
 
-interface ThemeContextType {
+interface ThemeContextValue {
   theme: Theme;
+  resolvedTheme: "light" | "dark";
+  setTheme: (t: Theme) => void;
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("totum-theme") as Theme) || "dark";
+function getSystemTheme(): "light" | "dark" {
+  if (typeof window === "undefined") return "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getStoredTheme(): Theme {
+  try {
+    const v = localStorage.getItem("totum-theme");
+    if (v === "light" || v === "dark" || v === "system") return v;
+  } catch {}
+  return "system";
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
+  const [resolvedTheme, setResolved] = useState<"light" | "dark">(
+    () => (getStoredTheme() === "system" ? getSystemTheme() : getStoredTheme()) as "light" | "dark"
+  );
+
+  const applyTheme = (t: Theme) => {
+    const resolved = t === "system" ? getSystemTheme() : t;
+    setResolved(resolved);
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(resolved);
+    if (resolved === "dark") {
+      document.body.classList.add("dark-bg");
+    } else {
+      document.body.classList.remove("dark-bg");
     }
-    return "dark";
-  });
+  };
+
+  const setTheme = (t: Theme) => {
+    setThemeState(t);
+    localStorage.setItem("totum-theme", t);
+    applyTheme(t);
+  };
+
+  const toggleTheme = () => {
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(next);
+  };
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "light") {
-      root.classList.add("light");
-    } else {
-      root.classList.remove("light");
-    }
-    localStorage.setItem("totum-theme", theme);
+    applyTheme(theme);
+  }, []);
+
+  useEffect(() => {
+    if (theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyTheme("system");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

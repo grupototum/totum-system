@@ -1,49 +1,38 @@
 
 
-## Plan: Sync Project with GitHub Commit d6a3350 + Fix Build Errors
+## Correção de Bugs no Calendário de Tarefas + Deletar Tarefas
 
-This commit adds agent task management, Gantt chart, and updates the task system. There are also pre-existing build errors to fix.
+### Bug 1: Calendário abrindo em Março ao invés do mês atual
 
-### What Changes
+**Causa**: Linha 37 de `Tasks.tsx` tem o mês hardcoded:
+```typescript
+const [calendarMonth, setCalendarMonth] = useState(new Date(2026, 2, 1)); // Março 2026
+```
 
-**From the GitHub commit (8 files, +2719 lines):**
-1. New database migration for agent execution logs
-2. New `AgentTaskManager` component for managing agent-scheduled tasks
-3. New `GanttChart` component for timeline visualization
-4. New `useAgentTasks` hook for agent task scheduling
-5. Updated `useTasks` hook with new fields (Gantt dates, progress, dependencies, agent support)
-6. Updated `ActionPlan` page with Gantt and Agent tabs
-7. Updated component index exports
+**Correção**: Trocar para `new Date()` (mês atual).
 
-**Build error fixes (4 files):**
-1. `AgentChat.tsx` line 113 - filter out `'system'` role comparison (change to filter by known roles instead)
-2. `AgentChatLayout.tsx` lines 176, 195, 199 - fix broken arrow functions `(c) =` → `(c) =>`
-3. `TarefasWidget.tsx` - add local `filtros`/`setFiltros` state since `useTasks` doesn't expose them
-4. `QuadroTarefas.tsx` line 476 - fix type mismatch: `adicionarSubtarefa` returns `Promise<Subtarefa>` but `TaskModal` expects `Promise<boolean>`. Wrap the call.
+---
 
-### Technical Steps
+### Bug 2: Tarefas aparecendo no dia errado (domingo ao invés de segunda)
 
-**Step 1: Database Migration**
-- Create migration for `logs_execucao_agente` table with RLS and realtime
-- Add `proxima_execucao`, `ultima_execucao`, `ultimo_resultado` columns to `tarefas`
+**Causa**: O campo `due_date` vem do banco como string `"2026-04-06"` (formato date ISO). Quando o JS faz `new Date("2026-04-06")`, interpreta como UTC meia-noite, que no fuso de Brasília (UTC-3) vira `2026-04-05 21:00` -- ou seja, domingo ao invés de segunda.
 
-**Step 2: Create New Files**
-- `src/hooks/useAgentTasks.ts` - Agent task scheduling hook (from GitHub, adapted for Lovable's Supabase types)
-- `src/components/agents/AgentTaskManager.tsx` - Agent task management UI
-- `src/components/gantt/GanttChart.tsx` - Gantt chart + MiniGantt components
-- `src/components/gantt/index.ts` - Export barrel
+**Correção**: Ao parsear `dueDate` no calendário, usar `new Date(date + "T00:00:00")` para forçar interpretação no fuso local. Aplicar em `TaskCalendar.tsx` na linha 31.
 
-**Step 3: Update Existing Files**
-- `src/hooks/useTasks.ts` - Add new fields: `data_inicio`, `data_fim`, `progresso`, `dependencias`, `agente_id`, `recorrencia`, `horario_execucao`, `params`, `milestone_id`, `departamento`, `RESPONSAVEIS` constant, `filtros`/`setFiltros` state
-- `src/components/agents/index.ts` - Add `AgentTaskManager` and `useAgentTasks` exports
-- `src/pages/ActionPlan.tsx` - Add Gantt and Agent tabs
+---
 
-**Step 4: Fix Build Errors**
-- `AgentChat.tsx` - Change role filter from `!== 'system'` to `=== 'user' || === 'agent'`
-- `AgentChatLayout.tsx` - Fix 3 broken arrow functions (missing `>`)
-- `TarefasWidget.tsx` - Add local filter state
-- `QuadroTarefas.tsx` - Wrap `adicionarSubtarefa` to return `Promise<boolean>`
-- `TaskModal.tsx` - Ensure `onAddSubtarefa` type matches
+### Bug 3: Adicionar opção de deletar tarefa
 
-**Dependencies:** May need `date-fns` (likely already installed). No new packages expected.
+**Implementação**:
+1. Adicionar função `deleteTask` no hook `useSupabaseTasks.ts` que faz `DELETE` na tabela `tasks`
+2. Adicionar botão "Excluir" no `TaskDetailDialog.tsx` com confirmação
+3. Passar callback `onDelete` do `Tasks.tsx` para o dialog
+4. Arquivar != deletar: arquivar mantém o registro com status "arquivado", deletar remove permanentemente
+
+### Arquivos modificados
+
+1. `src/pages/Tasks.tsx` -- fix calendarMonth + wiring onDelete
+2. `src/components/tasks/TaskCalendar.tsx` -- fix timezone parsing
+3. `src/hooks/useSupabaseTasks.ts` -- add deleteTask function
+4. `src/components/tasks/TaskDetailDialog.tsx` -- add delete button with confirmation
 

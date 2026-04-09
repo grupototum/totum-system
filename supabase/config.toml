@@ -1,1 +1,10 @@
-project_id = "zjjhdhsiwcuvulppigiu"
+project_id = "sugulxjfkhibuddmoyzr"
+
+[functions.generate-checklists]
+verify_jwt = false
+
+[functions.generate-tasks]
+verify_jwt = false
+
+[functions.bootstrap-admin]
+verify_jwt = false

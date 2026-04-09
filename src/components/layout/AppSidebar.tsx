@@ -1,223 +1,229 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Bot,
-  KanbanSquare,
-  GitBranch,
-  Building2,
-  Terminal,
   Users,
-  Settings,
-  LogOut,
-  ChevronLeft,
-  Menu,
-  UserPlus,
-  Contact,
-  Rocket,
-  Network,
-  Sparkles,
-  BookOpen,
-  Shield,
-  FolderOpen,
-  CalendarClock,
-  Cpu,
-  UserCog,
   CheckSquare,
+  Briefcase,
+  DollarSign,
+  LayoutDashboard,
+  UserCog,
+  Settings,
+  ShieldCheck,
+  Database,
+  Shield,
+  Monitor,
+  LogOut,
+  Package,
+  Box,
+  Tags,
+  FileText,
+  Truck,
+  List,
+  BarChart3,
+  Clock,
+  Upload,
+  ChevronRight,
+  Gauge,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { NavLink } from "@/components/NavLink";
+import { useLocation, Link } from "react-router-dom";
+import logoWhite from "@/assets/logo-white.png";
+import logoRed from "@/assets/logo-red.png";
+import { useAuth } from "@/hooks/useAuth";
+import { useDemo } from "@/contexts/DemoContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { UserAvatar } from "@/components/shared/AvatarUpload";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarHeader,
+  SidebarFooter,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-interface NavItem {
-  label: string;
-  icon: React.ElementType;
-  path: string;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-const sections: NavSection[] = [
+const navGroups = [
   {
-    title: "PRINCIPAL",
+    title: "Dashboards",
+    icon: LayoutDashboard,
     items: [
-      { label: "Stark Industries", icon: Shield, path: "/stark" },
-      { label: "Hub de Agentes", icon: Sparkles, path: "/hub" },
-      { label: "Visão do Escritório", icon: Building2, path: "/office" },
-      { label: "Estrutura do Time", icon: Users, path: "/team" },
-    ],
+      { title: "Visão Geral", url: "/", permKey: null },
+      { title: "Executivo", url: "/dashboard-executivo", permKey: "acessar_dashboard_executivo" },
+    ]
   },
   {
-    title: "CENTRAL DE AGENTES",
+    title: "Comercial",
+    icon: List,
     items: [
-      { label: "Painel", icon: Bot, path: "/painel-agentes" },
-      { label: "Estrutura", icon: Network, path: "/estrutura-time" },
-    ],
+      { title: "Clientes", url: "/clientes", icon: Users, permKey: "cli_geral.visualizar" },
+      { title: "Pacotes", url: "/pacotes", icon: Box, permKey: "prod_geral.visualizar" },
+      { title: "Contratos", url: "/contratos", icon: FileText, permKey: null },
+    ]
   },
   {
-    title: "ÁREA DE TRABALHO",
+    title: "Operacional",
+    icon: Briefcase,
     items: [
-      { label: "Quadro de Tarefas", icon: KanbanSquare, path: "/quadro-tarefas" },
-      { label: "Recorrência de Tarefas", icon: CalendarClock, path: "/task-recurrence" },
-      { label: "Pipeline de Conteúdo", icon: GitBranch, path: "/content" },
-      { label: "Google Drive", icon: FolderOpen, path: "/google-drive" },
-      { label: "Checklist Deploy", icon: CheckSquare, path: "/deployment" },
-      { label: "Novo Cliente", icon: UserPlus, path: "/new-client" },
-      { label: "Central de Clientes", icon: Contact, path: "/clients" },
-    ],
+      { title: "Tarefas", url: "/tarefas", icon: CheckSquare, permKey: "tar_geral.visualizar" },
+      { title: "Projetos", url: "/projetos", icon: Briefcase, permKey: "proj_geral.visualizar" },
+      { title: "Entregas", url: "/entregas", icon: Truck, permKey: null },
+    ]
   },
   {
-    title: "FERRAMENTAS IA",
+    title: "Financeiro",
+    icon: DollarSign,
     items: [
-      { label: "Alexandria", icon: BookOpen, path: "/alexandria" },
-      { label: "Cráudio Codete", icon: Cpu, path: "/craudio-codete" },
-      { label: "Claudio Code", icon: Terminal, path: "/claude-code" },
-    ],
+      { title: "Painel Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
+      { title: "Lançamentos", url: "/financeiro", icon: List, permKey: "fin_geral.visualizar" },
+    ]
   },
   {
-    title: "CONFIGURAÇÕES",
+    title: "Cadastros Base",
+    icon: Database,
     items: [
-      { label: "Operadores", icon: UserCog, path: "/operadores" },
-      { label: "Configurações", icon: Settings, path: "/settings" },
-    ],
+      { title: "Produtos", url: "/produtos", icon: Package, permKey: "prod_geral.visualizar" },
+      { title: "Categorias", url: "/cadastros", icon: Tags, permKey: "cad_geral.visualizar" },
+      { title: "Equipe", url: "/equipe", icon: UserCog, permKey: "usr_usuarios.visualizar" },
+    ]
   },
+  {
+    title: "Administração",
+    icon: Shield,
+    items: [
+      { title: "Permissões", url: "/usuarios", icon: Shield, permKey: "usr_permissoes.editar" },
+      { title: "Configurações", url: "/configuracoes", icon: Settings, permKey: null },
+      { title: "Importação", url: "/importar", icon: Upload, permKey: null },
+      { title: "Admin", url: "/admin", icon: ShieldCheck, permKey: null, adminOnly: true },
+    ]
+  }
 ];
 
-export default function AppSidebar() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
+export function AppSidebar() {
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const { profile, user, signOut } = useAuth();
+  const { isDemoMode, toggleDemo } = useDemo();
+  const { resolvedTheme } = useTheme();
+  const { isAdmin, hasPermission, hasAnyPermission } = usePermissions();
+  const currentLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
+  const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  useEffect(() => {
+    if (!user) return;
+    if (isAdmin) { setHasExecDashboard(true); return; }
+    const perms = profile?.roles?.permissions as Record<string, boolean> | null;
+    if (perms?.acessar_dashboard_executivo) setHasExecDashboard(true);
+  }, [user, isAdmin, profile]);
 
-  const handleNav = (path: string) => {
-    // Previne navegação se já estiver navegando
-    if (isNavigating) return;
-    
-    setIsNavigating(true);
-    navigate(path);
-    
-    // Libera o estado após a transição
-    setTimeout(() => setIsNavigating(false), 300);
-  };
-
-  const handleLogout = () => {
-    signOut();
-    navigate("/login");
-  };
+  const filteredGroups = useMemo(() =>
+    navGroups.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if ((item as any).adminOnly && !isAdmin) return false;
+        if (item.permKey === "acessar_dashboard_executivo") return hasExecDashboard;
+        if (!item.permKey) return true;
+        return isAdmin || hasPermission(item.permKey);
+      })
+    })).filter(group => group.items.length > 0),
+    [isAdmin, hasPermission, hasExecDashboard]
+  );
 
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 h-full z-40 flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 ease-in-out",
-        collapsed ? "w-[72px]" : "w-[280px]"
-      )}
-    >
-      {/* Logo */}
-      <div className="flex items-center justify-between px-5 h-16 border-b border-sidebar-border shrink-0">
-        {!collapsed && (
-          <div className="flex items-center gap-2.5">
-            <div className="flex gap-[3px]">
-              <div className="w-[5px] h-6 bg-primary rounded-full" />
-              <div className="w-[5px] h-4 bg-primary/60 rounded-full" />
-              <div className="w-[5px] h-6 bg-primary rounded-full" />
-            </div>
-            <span className="font-heading text-lg font-medium text-sidebar-foreground tracking-tight">
-              TOTUM
-            </span>
-          </div>
+    <Sidebar collapsible="icon" className="border-r border-border">
+      <SidebarHeader className="p-4 pb-6">
+        <div className="flex items-center gap-3">
+          <img src={currentLogo} alt="Totum" className={`${collapsed ? "h-6" : "h-7"} transition-opacity duration-300`} />
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="px-2 pt-2">
+        <SidebarMenu>
+          {filteredGroups.map((group) => (
+            <Collapsible key={group.title} asChild defaultOpen className="group/collapsible">
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton tooltip={group.title}>
+                    <group.icon className="h-4 w-4 shrink-0 transition-colors group-hover/collapsible:text-primary" />
+                    <span>{group.title}</span>
+                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {group.items.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild isActive={location.pathname === item.url}>
+                          <NavLink
+                            to={item.url}
+                            className="flex items-center gap-2 py-1.5 transition-colors"
+                            activeClassName="text-primary font-medium"
+                          >
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          ))}
+        </SidebarMenu>
+
+        {(isAdmin || (profile?.roles?.permissions as Record<string, boolean> | null)?.["cfg_modo_demo.visualizar"]) && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={toggleDemo}>
+                    <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      isDemoMode 
+                        ? "bg-amber-500/15 text-amber-400" 
+                        : "hover:bg-accent text-muted-foreground"
+                    }`}>
+                      <Monitor className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>{isDemoMode ? "Sair do Demo" : "Modo Demo"}</span>}
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
+      </SidebarContent>
+
+      <SidebarFooter className="p-4 border-t border-border space-y-2">
+        <Link to="/configuracoes" className="flex items-center gap-3 rounded-lg p-1 -m-1 transition-colors hover:bg-accent">
+          <UserAvatar avatarUrl={profile?.avatar_url} fullName={profile?.full_name || "Grupo Totum"} size="sm" />
+          {!collapsed && (
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{profile?.full_name || "Grupo Totum"}</span>
+              <span className="text-xs text-muted-foreground">{profile?.roles?.name || "Usuário"}</span>
+            </div>
+          )}
+        </Link>
         <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/60 hover:text-sidebar-foreground"
+          onClick={signOut}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
-          {collapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Sair</span>}
         </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-        {sections.map((section) => (
-          <div key={section.title}>
-            {!collapsed && (
-              <p className="label-industrial text-[10px] text-sidebar-foreground/40 mb-2 px-2">
-                {section.title}
-              </p>
-            )}
-            <ul className="space-y-0.5">
-              {section.items.map((item) => {
-                const active = isActive(item.path);
-                return (
-                  <li key={item.path}>
-                    <button
-                      onClick={() => handleNav(item.path)}
-                      className={cn(
-                        "w-full flex items-center gap-3 rounded-lg transition-all duration-200 group relative",
-                        collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
-                        active
-                          ? "bg-sidebar-accent text-primary"
-                          : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-                      )}
-                    >
-                      {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
-                      )}
-                      <item.icon className={cn("w-[18px] h-[18px] shrink-0", active && "text-primary")} />
-                      {!collapsed && (
-                        <span className="text-[13px] font-medium tracking-wide truncate">
-                          {item.label}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
-
-      {/* Footer / User */}
-      <div className="border-t border-sidebar-border p-3 shrink-0">
-        {collapsed ? (
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-semibold uppercase">
-              {user?.email?.[0] || "U"}
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1.5 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground/40 hover:text-sidebar-foreground transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-semibold uppercase shrink-0">
-              {user?.email?.[0] || "U"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-sidebar-foreground truncate">
-                {user?.email?.split("@")[0] || "User"}
-              </p>
-              <p className="text-[10px] text-sidebar-foreground/40 truncate">
-                {user?.email || ""}
-              </p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1.5 rounded-lg hover:bg-sidebar-accent text-sidebar-foreground/40 hover:text-sidebar-foreground transition-colors"
-              title="Sair"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
-    </aside>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
