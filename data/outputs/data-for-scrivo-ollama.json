@@ -1,0 +1,112 @@
+[
+  {
+    "id": "Claude AI para Marketing",
+    "subject": "Claude AI para Marketing",
+    "creator": "o Claude lê tudo e gera soluções específicas para seu negócio. Já testei com copywriting",
+    "script": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Automação de Relatórios com IA",
+    "subject": "Automação de Relatórios com IA",
+    "creator": "alimenta com dados",
+    "script": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Agentes de IA para Vendas",
+    "subject": "Agentes de IA para Vendas",
+    "creator": "entende o que o cliente quer",
+    "script": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "sales",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Prompt Engineering: O Segredo",
+    "subject": "Prompt Engineering: O Segredo",
+    "creator": "o Claude entende melhor e dá resposta muito mais boa. Compartilha isso.\"",
+    "script": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "educational",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Codia AI - Design Automático",
+    "subject": "Codia AI - Design Automático",
+    "creator": "ela cria",
+    "script": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Raspberry Pi como Servidor IA",
+    "subject": "Raspberry Pi como Servidor IA",
+    "creator": "zero dependência de cloud",
+    "script": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "educational",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Supabase vs Firebase - Qual Es",
+    "subject": "Supabase vs Firebase - Qual Escolher?",
+    "creator": "Firebase melhor pra mobile. Depende do seu caso. Se quer IA nativa",
+    "script": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "sales",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Automação Com N8N Gratuito",
+    "subject": "Automação Com N8N Gratuito",
+    "creator": "ChatGPT",
+    "script": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Venda Digital SEM Facebook Ads",
+    "subject": "Venda Digital SEM Facebook Ads",
+    "creator": "Sales Mastery",
+    "script": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!",
+    "ctas": [
+      "compartilha"
+    ],
+    "category": "sales",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!\nCTAs: compartilha"
+  },
+  {
+    "id": "Llama 2 vs Claude: Qual IA é M",
+    "subject": "Llama 2 vs Claude: Qual IA é Melhor?",
+    "creator": "análise de dados e code generation. Claude vence em subtileza",
+    "script": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "tool_review",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "RAG - Retrieval Augmented Gene",
+    "subject": "RAG - Retrieval Augmented Generation",
+    "creator": "entende contexto",
+    "script": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!\nCTAs: "
+  },
+  {
+    "id": "Totum: Marketing + CRM + Autom",
+    "subject": "Totum: Marketing + CRM + Automação",
+    "creator": "CRM e automação numa plataforma. Um cliente nosso saiu do caos e foi pra 100k MRR em 4 meses. Estrutura previsível > crescimento aleatório. Me segue pra case studies.\"",
+    "script": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!",
+    "ctas": [],
+    "category": "other",
+    "promptForScrivo": "Otimize este script:\nSCRIPT: 🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!\nCTAs: "
+  }
+]

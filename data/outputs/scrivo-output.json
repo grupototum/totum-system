@@ -1,0 +1,594 @@
+{
+  "agentName": "SCRIVO",
+  "agentType": "script-optimizer",
+  "timestamp": "2026-04-10T20:30:05.516Z",
+  "processedRecords": 12,
+  "strategiesPerScript": 4,
+  "totalOptimizations": 48,
+  "scripts": [
+    {
+      "id": "Claude AI para Marketing",
+      "subject": "Claude AI para Marketing",
+      "creator": "o Claude lê tudo e gera soluções específicas para seu negócio. Já testei com copywriting",
+      "original_script": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora anal",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora anal... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 36.08237635078257,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 8.418639293581574
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais",
+          "optimized": "⏰ AVISO: 🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você... Isso não vai durar! Assista agora! 🎯 Claude AI para Marketing\n\n\ud83d...",
+          "ctas": [],
+          "estimatedConversionLift": 33.881057061130925,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.96557614531274
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos ... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 27.725689744294424,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.980700503934733
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing...\n\n👉 Me segue pra mais",
+          "optimized": "🏆 Especialista aqui: 🎯 Claude AI para Marketing\n\n💡 \"O Claude consegue fazer em ... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 40.772233174677865,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 8.129557309506263
+        }
+      ]
+    },
+    {
+      "id": "Automação de Relatórios com IA",
+      "subject": "Automação de Relatórios com IA",
+      "creator": "alimenta com dados",
+      "original_script": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? A",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 M",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? A... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 57.762360012183166,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.815732329394958
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 M",
+          "optimized": "⏰ AVISO: 🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando r... Isso não vai durar! Assista agora! 🎯 Automação de Relatórios com...",
+          "ctas": [],
+          "estimatedConversionLift": 53.78681935153476,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.817534584255036
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 M",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas ... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 74.7347683969488,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.04191102401089
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente...\n\n👉 M",
+          "optimized": "🏆 Especialista aqui: 🎯 Automação de Relatórios com IA\n\n💡 \"Sabe quando você pass... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 74.18590486465851,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 8.198476649756081
+        }
+      ]
+    },
+    {
+      "id": "Agentes de IA para Vendas",
+      "subject": "Agentes de IA para Vendas",
+      "creator": "entende o que o cliente quer",
+      "original_script": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática.",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática.... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 74.62542719787515,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 8.859458097665742
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente ... Isso não vai durar! Assista agora! 🎯 Agentes de IA para Vendas\n\n...",
+          "ctas": [],
+          "estimatedConversionLift": 50.616771430901906,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 8.130438802387552
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia co... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 67.3348086736043,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 8.11707109823841
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que negocia com cliente de forma automática...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Agentes de IA para Vendas\n\n💡 \"Criei um agente de IA que ... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 64.96752562519964,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.464182966578539
+        }
+      ]
+    },
+    {
+      "id": "Prompt Engineering: O Segredo",
+      "subject": "Prompt Engineering: O Segredo",
+      "creator": "o Claude entende melhor e dá resposta muito mais boa. Compartilha isso.\"",
+      "original_script": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt rui",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt rui... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 73.56019353979309,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.156138852438568
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porqu... Isso não vai durar! Assista agora! 🎯 Prompt Engineering: O Segre...",
+          "ctas": [],
+          "estimatedConversionLift": 27.09313859042906,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.225405936658856
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usa... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 69.42277823364094,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 8.367096023019139
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas não sabe usar IA porque escreve prompt ruim...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Prompt Engineering: O Segredo\n\n💡 \"Maioria das pessoas nã... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 44.87477932843328,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.061651659064692
+        }
+      ]
+    },
+    {
+      "id": "Codia AI - Design Automático",
+      "subject": "Codia AI - Design Automático",
+      "creator": "ela cria",
+      "original_script": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n\ud83d",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n\ud83d... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 37.54166742006459,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.430698261551978
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automati... Isso não vai durar! Assista agora! 🎯 Codia AI - Design Automátic...",
+          "ctas": [],
+          "estimatedConversionLift": 67.94400915463623,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.54321447896188
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera desig... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 26.13356177701865,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.858486456473758
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que gera design automaticamente com IA...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Codia AI - Design Automático\n\n💡 \"Tem uma ferramenta que ... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 44.83894439727697,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.989175668847189
+        }
+      ]
+    },
+    {
+      "id": "Raspberry Pi como Servidor IA",
+      "subject": "Raspberry Pi como Servidor IA",
+      "creator": "zero dependência de cloud",
+      "original_script": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 M",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 M... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 74.45507883635844,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 8.19975831566677
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor ... Isso não vai durar! Assista agora! 🎯 Raspberry Pi como Servidor ...",
+          "ctas": [],
+          "estimatedConversionLift": 44.20828537519754,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 8.922692550186055
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 63.015161987398656,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.100634627365077
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspberry Pi 5 em servidor de IA local...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Raspberry Pi como Servidor IA\n\n💡 \"Transformei um Raspber... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 65.8383585357242,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.764261897788927
+        }
+      ]
+    },
+    {
+      "id": "Supabase vs Firebase - Qual Es",
+      "subject": "Supabase vs Firebase - Qual Escolher?",
+      "creator": "Firebase melhor pra mobile. Depende do seu caso. Se quer IA nativa",
+      "original_script": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas..",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas..... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 48.69222812203964,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 8.445439012353248
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra a... Isso não vai durar! Assista agora! 🎯 Supabase vs Firebase - Qual...",
+          "ctas": [],
+          "estimatedConversionLift": 50.17340631845161,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 8.627591827607343
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Fire... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 45.29487917599633,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.763775548430045
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supabase e Firebase pra aplicação de vendas...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Supabase vs Firebase - Qual Escolher?\n\n💡 \"Comparei Supab... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 25.74103190277444,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.549587283577209
+        }
+      ]
+    },
+    {
+      "id": "Automação Com N8N Gratuito",
+      "subject": "Automação Com N8N Gratuito",
+      "creator": "ChatGPT",
+      "original_script": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra ",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra ... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 73.68797205522517,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.59578346025254
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código.... Isso não vai durar! Assista agora! 🎯 Automação Com N8N Gratuito\n...",
+          "ctas": [],
+          "estimatedConversionLift": 37.75710138379927,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.384757097976545
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows s... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 38.041500436792546,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.083827370082332
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar workflows sem código...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Automação Com N8N Gratuito\n\n💡 \"N8N permite automatizar w... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 27.484803013032177,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.009750134533625
+        }
+      ]
+    },
+    {
+      "id": "Venda Digital SEM Facebook Ads",
+      "subject": "Venda Digital SEM Facebook Ads",
+      "creator": "Sales Mastery",
+      "original_script": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [
+            "compartilha"
+          ],
+          "estimatedConversionLift": 52.342414532448615,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.662582249548972
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais s... Isso não vai durar! Assista agora! 🎯 Venda Digital SEM Facebook ...",
+          "ctas": [
+            "compartilha"
+          ],
+          "estimatedConversionLift": 60.290038111107464,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.254464806007839
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos ... Clique pra entender!",
+          "ctas": [
+            "compartilha"
+          ],
+          "estimatedConversionLift": 29.86993819524616,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 8.10806577434472
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Venda Digital SEM Facebook Ads\n\n💡 \"Vendi 50 mil reais em... Nossa experiência prova isso. Confira:",
+          "ctas": [
+            "compartilha"
+          ],
+          "estimatedConversionLift": 62.47768203834764,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.309526225237066
+        }
+      ]
+    },
+    {
+      "id": "Llama 2 vs Claude: Qual IA é M",
+      "subject": "Llama 2 vs Claude: Qual IA é Melhor?",
+      "creator": "análise de dados e code generation. Claude vence em subtileza",
+      "original_script": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 56.51191308092723,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.125592849081546
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas d... Isso não vai durar! Assista agora! 🎯 Llama 2 vs Claude: Qual IA ...",
+          "ctas": [],
+          "estimatedConversionLift": 31.597304728623133,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.971404624647924
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 39.8813758424678,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 8.921713297827495
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois modelos em tarefas de copywriting...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Llama 2 vs Claude: Qual IA é Melhor?\n\n💡 \"Testei os dois ... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 51.73302109074001,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 8.805567169771612
+        }
+      ]
+    },
+    {
+      "id": "RAG - Retrieval Augmented Gene",
+      "subject": "RAG - Retrieval Augmented Generation",
+      "creator": "entende contexto",
+      "original_script": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 ",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 ... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 69.88998674979204,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 8.20045294928001
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + g... Isso não vai durar! Assista agora! 🎯 RAG - Retrieval Augmented G...",
+          "ctas": [],
+          "estimatedConversionLift": 45.61993232753643,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 9.673644697305482
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de info... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 69.71647356054447,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.953628965521165
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina busca de informação + geração de IA...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 RAG - Retrieval Augmented Generation\n\n💡 \"RAG combina bus... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 25.87161126032042,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.717635666711216
+        }
+      ]
+    },
+    {
+      "id": "Totum: Marketing + CRM + Autom",
+      "subject": "Totum: Marketing + CRM + Automação",
+      "creator": "CRM e automação numa plataforma. Um cliente nosso saiu do caos e foi pra 100k MRR em 4 meses. Estrutura previsível > crescimento aleatório. Me segue pra case studies.\"",
+      "original_script": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue ",
+      "optimized_versions": [
+        {
+          "strategy": "storytelling",
+          "original": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!",
+          "optimized": "[HOOK EMOCIONAL] 🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue ... [TRANSFORMAÇÃO] Veja como mudou... [RESOLUÇÃO] Me segue pra detalhes!",
+          "ctas": [],
+          "estimatedConversionLift": 41.9137032982926,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Use transições lentas, background music suave",
+          "hookQuality": 9.916083209217236
+        },
+        {
+          "strategy": "urgency",
+          "original": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!",
+          "optimized": "⏰ AVISO: 🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra market... Isso não vai durar! Assista agora! 🎯 Totum: Marketing + CRM + Au...",
+          "ctas": [],
+          "estimatedConversionLift": 40.257179312779776,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Segs rápidos, texto em vermelho",
+          "hookQuality": 8.613871803321011
+        },
+        {
+          "strategy": "curiosity",
+          "original": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!",
+          "optimized": "🤔 Tem algo que provavelmente você não sabe... 🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que inte... Clique pra entender!",
+          "ctas": [],
+          "estimatedConversionLift": 49.073019526101746,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Intriga visual, suspense",
+          "hookQuality": 9.202165287174278
+        },
+        {
+          "strategy": "authority",
+          "original": "🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistema que integra marketing...\n\n👉 Me segue pra mais!",
+          "optimized": "🏆 Especialista aqui: 🎯 Totum: Marketing + CRM + Automação\n\n💡 \"Criamos um sistem... Nossa experiência prova isso. Confira:",
+          "ctas": [],
+          "estimatedConversionLift": 49.1678810006604,
+          "recommendedLength": "30-45 segundos",
+          "visualNotes": "Mostrar credenciais, prova social",
+          "hookQuality": 9.223669408808258
+        }
+      ]
+    }
+  ]
+}
