@@ -11,8 +11,14 @@
 import axios from 'axios';
 import { config } from 'dotenv';
 import https from 'https';
-import { Server } from 'http';
+import { Server, createServer } from 'http';
 import url from 'url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 config({ path: '.env.local' });
 
@@ -56,7 +62,7 @@ class TikTokOAuth {
 
   startCallbackServer() {
     return new Promise((resolve) => {
-      const server = require('http').createServer((req, res) => {
+      const server = createServer((req, res) => {
         const parsedUrl = url.parse(req.url, true);
         const code = parsedUrl.query.code;
         const error = parsedUrl.query.error;
@@ -148,7 +154,6 @@ class TikTokOAuth {
       console.log('\n💾 Guardando credenciais...');
       
       // Save to .env.local
-      const fs = require('fs');
       const envPath = '.env.local';
       let envContent = fs.readFileSync(envPath, 'utf-8');
       envContent = envContent.replace(
