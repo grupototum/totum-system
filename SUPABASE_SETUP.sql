@@ -40,10 +40,7 @@ CREATE TABLE IF NOT EXISTS wanda_posts (
   -- Metadata
   published_at TIMESTAMP WITH TIME ZONE,
   last_updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  
-  -- Índices para performance
-  CONSTRAINT wanda_posts_tipo_check CHECK (tipo IN ('viral', 'educational', 'conversion'))
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_wanda_posts_creator ON wanda_posts(creator);

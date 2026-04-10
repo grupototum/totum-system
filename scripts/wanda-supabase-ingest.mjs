@@ -60,8 +60,8 @@ class WandaSupabaseIngestion {
           hook: post.hook,
           body: '',
           cta: '',
-          hashtags: post.hashtags || [],
-          hashtags_string: post.hashtags?.join(' ') || '',
+          hashtags: Array.isArray(post.hashtags) ? post.hashtags : post.hashtags?.split(' ') || [],
+          hashtags_string: typeof post.hashtags === 'string' ? post.hashtags : post.hashtags?.join(' ') || '',
           
           // Métricas
           views: post.metrics.views,
