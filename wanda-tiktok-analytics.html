@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANDA TikTok Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .chart-box {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-box h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .posts-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+        }
+
+        .posts-table h3 {
+            padding: 25px 25px 20px 25px;
+            color: #333;
+            font-size: 1.3em;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #666;
+        }
+
+        .tipo-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .tipo-viral {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .tipo-educational {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .tipo-conversion {
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .recommendations {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .recommendations h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3em;
+        }
+
+        .rec-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            background-color: #f8f9ff;
+            border-radius: 4px;
+        }
+
+        .rec-priority {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+
+        .priority-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .rec-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .rec-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .number-formatted {
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background-color: #ffcdd2;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            td, th {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 WANDA TikTok Analytics<br>Real-Time Engagement Tracker</h1>
+            <p>36 Posts • Monitoramento em Tempo Real • AI-Powered Insights</p>
+        </header>
+
+        <div id="content">
+            <div class="loading">⏳ Carregando dados...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('../data/outputs/wanda-tiktok-results.json');
+                if (!response.ok) throw new Error('Arquivo não encontrado. Execute o publisher primeiro.');
+                
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        ❌ ${error.message}
+                        <br><br>
+                        Execute primeiro: <code>node scripts/wanda-tiktok-publisher.mjs</code>
+                    </div>
+                `;
+            }
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('pt-BR');
+        }
+
+        function renderDashboard(data) {
+            const stats = data.totalStats;
+            const avgEng = data.avgEngagement;
+            const revenue = data.totalRevenue;
+
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-label">Total de Views</div>
+                        <div class="stat-value"><span class="number-formatted">${formatNumber(stats.views)}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-label">Total de Likes</div>
+                        <div class="stat-value"><span class="number-formatted">${formatNumber(stats.likes)}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-label">Total de Comentários</div>
+                        <div class="stat-value"><span class="number-formatted">${formatNumber(stats.comments)}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🔄</div>
+                        <div class="stat-label">Total de Shares</div>
+                        <div class="stat-value"><span class="number-formatted">${formatNumber(stats.shares)}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-label">Conversões Estimadas</div>
+                        <div class="stat-value"><span class="number-formatted">${formatNumber(stats.conversions)}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-label">Engagement Rate</div>
+                        <div class="stat-value">${avgEng}<span style="font-size: 0.6em">%</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-label">Receita Estimada (CPM)</div>
+                        <div class="stat-value">R$ <span class="number-formatted">${formatNumber(parseInt(revenue))}</span></div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📱</div>
+                        <div class="stat-label">Posts Publicados</div>
+                        <div class="stat-value">${data.totalPublished}</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-box">
+                        <h3>📈 Métrica Principal por Tipo</h3>
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+
+                    <div class="chart-box">
+                        <h3>🎯 Distribuição de Views por Tipo</h3>
+                        <canvas id="viewsChart"></canvas>
+                    </div>
+
+                    <div class="chart-box">
+                        <h3>⏰ Engajamento por Horas Transcorridas</h3>
+                        <canvas id="timeChart"></canvas>
+                    </div>
+
+                    <div class="chart-box">
+                        <h3>🔝 Métricas Médias por Post</h3>
+                        <canvas id="metricsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="posts-table">
+                    <h3>📊 Detalhes de Todos os Posts</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Assunto</th>
+                                <th>Tipo</th>
+                                <th>Horas</th>
+                                <th>Views</th>
+                                <th>Likes</th>
+                                <th>Eng %</th>
+                                <th>Conversão %</th>
+                                <th>Link TikTok</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.posts.forEach((post, idx) => {
+                const tipo = post.tipo.toLowerCase();
+                const typoBadgeClass = `tipo-${tipo === 'viral' ? 'viral' : tipo === 'educational' ? 'educational' : 'conversion'}`;
+                
+                html += `
+                    <tr>
+                        <td>#${post.index}</td>
+                        <td>${post.subject.substring(0, 40)}...</td>
+                        <td><span class="tipo-badge ${typoBadgeClass}">${post.tipo}</span></td>
+                        <td>${post.hoursElapsed}h</td>
+                        <td><span class="number-formatted">${formatNumber(post.metrics.views)}</span></td>
+                        <td><span class="number-formatted">${formatNumber(post.metrics.likes)}</span></td>
+                        <td>${post.metrics.engagementRate}%</td>
+                        <td>${post.metrics.conversionRate}%</td>
+                        <td><a href="${post.tiktokUrl}" target="_blank" style="color: #667eea; text-decoration: none;">🔗 Ver</a></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="recommendations">
+                    <h3>💡 Recomendações de Otimização</h3>
+            `;
+
+            data.recommendations.forEach(rec => {
+                const priorityClass = `priority-${rec.priority.toLowerCase()}`;
+                html += `
+                    <div class="rec-item">
+                        <div class="rec-priority ${priorityClass}">${rec.priority}</div>
+                        <div class="rec-title">${rec.title}</div>
+                        <div class="rec-desc">${rec.description}</div>
+                    </div>
+                `;
+            });
+
+            html += `
+                </div>
+            `;
+
+            document.getElementById('content').innerHTML = html;
+
+            // Renderizar gráficos
+            renderCharts(data);
+        }
+
+        function renderCharts(data) {
+            // Agregar dados por tipo
+            const byType = {
+                'viral': [],
+                'educational': [],
+                'conversion': [],
+            };
+
+            data.posts.forEach(p => {
+                byType[p.tipo].push(p.metrics);
+            });
+
+            const typeLabels = Object.keys(byType);
+            const avgEngagementByType = typeLabels.map(type => {
+                const posts = byType[type];
+                return posts.length > 0 
+                    ? (posts.reduce((s, m) => s + parseFloat(m.engagementRate), 0) / posts.length).toFixed(1)
+                    : 0;
+            });
+
+            const totalViewsByType = typeLabels.map(type => {
+                return byType[type].reduce((s, m) => s + m.views, 0);
+            });
+
+            // Chart 1: Engagement by Type
+            new Chart(document.getElementById('engagementChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['🔥 Viral', '💡 Educational', '💰 Conversion'],
+                    datasets: [{
+                        label: 'Engagement Rate (%)',
+                        data: avgEngagementByType,
+                        backgroundColor: ['#ff6b6b', '#4ecdc4', '#ffe66d'],
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Chart 2: Views by Type (Pie)
+            new Chart(document.getElementById('viewsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['🔥 Viral', '💡 Educational', '💰 Conversion'],
+                    datasets: [{
+                        data: totalViewsByType,
+                        backgroundColor: ['#ff6b6b', '#4ecdc4', '#ffe66d'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Chart 3: Engagement Timeline
+            const timeData = data.posts.sort((a, b) => a.hoursElapsed - b.hoursElapsed);
+            new Chart(document.getElementById('timeChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Engagement Rate vs Horas',
+                        data: timeData.map(p => ({
+                            x: p.hoursElapsed,
+                            y: parseFloat(p.metrics.engagementRate)
+                        })),
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        tension: 0.4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Horas Transcorridas' } },
+                        y: { title: { display: true, text: 'Engagement Rate (%)' } }
+                    }
+                }
+            });
+
+            // Chart 4: Average Metrics
+            const avgLikes = Math.floor(data.totalStats.likes / data.totalPublished);
+            const avgComments = Math.floor(data.totalStats.comments / data.totalPublished);
+            const avgShares = Math.floor(data.totalStats.shares / data.totalPublished);
+            
+            new Chart(document.getElementById('metricsChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['❤️ Likes', '💬 Comments', '🔄 Shares'],
+                    datasets: [{
+                        label: 'Média por Post',
+                        data: [avgLikes, avgComments, avgShares],
+                        backgroundColor: ['#ff6b6b', '#4ecdc4', '#667eea'],
+                        borderRadius: 8,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // Load on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
