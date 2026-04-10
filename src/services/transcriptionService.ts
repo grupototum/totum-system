@@ -12,12 +12,23 @@ export const extractInsights = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Analise a transcrição abaixo e extraia 3 a 5 insights principais, claros e acionáveis sobre o conteúdo.
+    const prompt = `Leia CUIDADOSAMENTE esta transcrição de vídeo TikTok e extraia 3-5 insights REAIS e específicos do conteúdo:
 
-Transcrição: "${input.transcricao}"
+TEMA: "${input.subject}"
+CRIADOR: "${input.criador}"
+TRANSCRIÇÃO:
+"${input.transcricao}"
 
-Responda APENAS com um JSON no formato:
-{"insights": ["insight 1", "insight 2", "insight 3"]}`;
+REQUISITOS:
+- Insights devem ser ESPECÍFICOS (não genéricos como "Insight 1, Insight 2")
+- Devem vir diretamente do conteúdo real do vídeo
+- Máximo 100 caracteres cada insight
+- Formato JSON: {"insights": ["insight1", "insight2", ...]}
+
+EXEMPLO DE BOM INSIGHT: "Ferramentas de IA como Claude podem aumentar produtividade em 40%"
+EXEMPLO DE RUIM INSIGHT: "Insight 1"
+
+Responda APENAS com o JSON, sem explicação adicional.`;
 
     const raw = await ollamaGenerate({ model, prompt });
     const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
@@ -36,18 +47,35 @@ export const classifyContent = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Classifique o conteúdo do vídeo abaixo em uma categoria principal.
+    const prompt = `Classifique CORRETAMENTE esta transcrição em UMA categoria principal baseado no conteúdo REAL:
 
-Subject: "${input.subject}"
-Transcrição: "${input.transcricao}"
+TEMA: "${input.subject}"
+TRANSCRIÇÃO: "${input.transcricao.substring(0, 500)}"
 
-Categorias possíveis: Educação, Entretenimento, Marketing, Lifestyle, Tecnologia, Saúde, Finanças, Humor, Notícias, Outro.
+Categorias válidas:
+- educational (tutorial, dica, aprendizado)
+- entertainment (diversão, humor, entretenimento)
+- sales (venda, promoção, CTA forte)
+- news (notícia, análise, informação)
+- tutorial (passo a passo, how-to)
+- opinion (opinião, crítica, análise pessoal)
+- tool_review (análise de ferramenta, demo)
+- lifestyle (lifestyle, bem-estar, rotina)
+- other
 
-Responda APENAS com JSON: {"categoria": "...", "subcategoria": "...", "confianca": 0.0}`;
+Responda APENAS a categoria em minúsculas, sem pontuação.
+EXEMPLO: educational`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Classificador de Conteúdo', output: json, model, execution_ms: Date.now() - start, success: true };
+    const categoria = raw.toLowerCase().trim().split(/[\s,\.\!]/)[0];
+    const valido = ['educational', 'entertainment', 'sales', 'news', 'tutorial', 'opinion', 'tool_review', 'lifestyle', 'other'];
+    return { 
+      skill: 'Classificador de Conteúdo', 
+      output: { categoria: valido.includes(categoria) ? categoria : 'other', confianca: 0.85 }, 
+      model, 
+      execution_ms: Date.now() - start, 
+      success: true 
+    };
   } catch (err: any) {
     return { skill: 'Classificador de Conteúdo', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }
@@ -62,16 +90,26 @@ export const generateTags = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Gere exatamente 10 hashtags relevantes para o TikTok baseado na transcrição abaixo.
+    const prompt = `Gere 6-8 hashtags REAIS baseadas no conteúdo ESPECÍFICO deste vídeo TikTok:
 
-Transcrição: "${input.transcricao}"
+TEMA: "${input.subject}"
+CONTEÚDO: "${input.transcricao.substring(0, 400)}"
 
-Regras: Use hashtags em português, sem espaços, comecem com #.
-Responda APENAS com JSON: {"hashtags": ["#tag1", "#tag2", ...]}`;
+REQUISITOS:
+- Tags relevantes ao assunto REAL do vídeo
+- Sem espaços, começando com #
+- Português ou inglês (conforme conteúdo)
+- Mix de hashtags populares (#ia, #tiktok) e específicas
+- Formato JSON: {"hashtags": ["#tag1", "#tag2", ...]}
+
+EXEMPLO BOM: ["#claudeai", "#automacao", "#ia", "#tiktok", "#produtividade"]
+EXEMPLO RUIM: ["#tag1", "#tag2"]
+
+Responda APENAS com JSON.`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Gerador de Tags', output: json, model, execution_ms: Date.now() - start, success: true };
+    const json = JSON.parse(raw.match(/\[[\s\S]*\]/)?.[0] || '[]');
+    return { skill: 'Gerador de Tags', output: { hashtags: Array.isArray(json) ? json : [] }, model, execution_ms: Date.now() - start, success: true };
   } catch (err: any) {
     return { skill: 'Gerador de Tags', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }
@@ -86,15 +124,23 @@ export const summarizeVideo = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Resuma o conteúdo do vídeo em 100-150 palavras, em português claro e objetivo.
+    const prompt = `Resuma este vídeo TikTok em 1-2 frases (máximo 150 caracteres) de forma CLARA e OBJETIVA:
 
-Transcrição: "${input.transcricao}"
+TEMA: "${input.subject}"
+CRIADOR: "${input.criador}"
+CONTEÚDO: "${input.transcricao.substring(0, 800)}"
 
-Responda APENAS com JSON: {"resumo": "..."}`;
+REQUISITOS:
+- Ser ESPECÍFICO ao conteúdo real (não genérico)
+- 1-2 frases apenas
+- Máximo 150 caracteres
+- Responder APENAS o resumo, sem aspas ou markdown
+
+EXEMPLO: "Aprenda a usar Claude para criar posts de Instagram em 2 minutos com IA"`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Resumidor de Vídeo', output: json, model, execution_ms: Date.now() - start, success: true };
+    const resumo = raw.trim().substring(0, 150).replace(/^["']|["']$/g, '');
+    return { skill: 'Resumidor de Vídeo', output: { resumo }, model, execution_ms: Date.now() - start, success: true };
   } catch (err: any) {
     return { skill: 'Resumidor de Vídeo', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }
@@ -109,15 +155,27 @@ export const extractCTAs = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Identifique todos os calls-to-action (CTAs) explícitos e implícitos na transcrição.
+    const prompt = `Extraia TODOS os call-to-actions (CTAs) específicos e explícitos deste vídeo:
 
-Transcrição: "${input.transcricao}"
+TRANSCRIÇÃO:
+"${input.transcricao}"
 
-Responda APENAS com JSON: {"ctas": [{"texto": "...", "tipo": "explicito|implicito", "intencao": "..."}]}`;
+CTAs são frases como:
+- "comenta X"
+- "me segue"
+- "clica no link"
+- "ativa notificação"
+- "compartilha"
+- "assiste até o final"
+- "coloca um like"
+
+Formato JSON: ["cta1", "cta2", ...]
+Se não tiver CTA claro, retorne: []
+Responda APENAS com JSON.`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Extrator de CTAs', output: json, model, execution_ms: Date.now() - start, success: true };
+    const ctas = JSON.parse(raw.match(/\[[\s\S]*\]/)?.[0] || '[]');
+    return { skill: 'Extrator de CTAs', output: { ctas: Array.isArray(ctas) ? ctas : [] }, model, execution_ms: Date.now() - start, success: true };
   } catch (err: any) {
     return { skill: 'Extrator de CTAs', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }
@@ -132,15 +190,21 @@ export const detectTrendingTopics = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Identifique tópicos em alta e tendências presentes na transcrição abaixo.
+    const prompt = `Identifique tópicos TRENDING e tendências presentes nesta transcrição (2025-2026):
 
-Transcrição: "${input.transcricao}"
+TRANSCRIÇÃO:
+"${input.transcricao}"
 
-Responda APENAS com JSON: {"topicos": [{"nome": "...", "relevancia": "alta|media|baixa", "contexto": "..."}]}`;
+Tópicos em alta em 2025-2026: IA, Claude, ChatGPT, automatização, Gemini, agentes de IA, prompting, RAG, embeddings, etc.
+
+Formato JSON: ["topico1", "topico2", ...]
+Máximo 4 tópicos.
+Se não houver tópicos trending, retorne: []
+Responda APENAS com JSON.`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Detector de Trending Topics', output: json, model, execution_ms: Date.now() - start, success: true };
+    const topicos = JSON.parse(raw.match(/\[[\s\S]*\]/)?.[0] || '[]');
+    return { skill: 'Detector de Trending Topics', output: { topicos: Array.isArray(topicos) ? topicos : [] }, model, execution_ms: Date.now() - start, success: true };
   } catch (err: any) {
     return { skill: 'Detector de Trending Topics', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }
@@ -155,16 +219,28 @@ export const generateScript = async (
 ): Promise<SkillExecutionResult> => {
   const start = Date.now();
   try {
-    const prompt = `Baseado na transcrição abaixo, crie um script similar para um novo vídeo TikTok sobre o tema "${input.tema || input.subject}".
+    const prompt = `Crie um SCRIPT CURTO (50-80 palavras) otimizado para TikTok baseado neste conteúdo:
 
-Transcrição de referência: "${input.transcricao}"
+TEMA: "${input.subject}"
+CRIADOR: "${input.criador}"
+CONTEÚDO: "${input.transcricao.substring(0, 400)}"
 
-O script deve ter gancho inicial forte, desenvolvimento e CTA final.
-Responda APENAS com JSON: {"script": {"gancho": "...", "desenvolvimento": "...", "cta": "...", "duracao_estimada": "30-60s"}}`;
+REQUISITOS:
+- Hook forte (primeiros 5 segundos)
+- Tom casual e direto
+- CTA clara no final
+- Pronto para gravar com a mão ou câmera
+- 50-80 palavras exatamente
+- Responda APENAS o script, sem formatação extra
+
+EXEMPLO:
+"E aí! Você sabia que Claude consegue fazer em 2 minutos o que você levaria 1 hora?
+Assista como funciona... [pausa visual]
+Me segue para mais dicas de IA!"`;
 
     const raw = await ollamaGenerate({ model, prompt });
-    const json = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] || '{}');
-    return { skill: 'Gerador de Scripts', output: json, model, execution_ms: Date.now() - start, success: true };
+    const script = raw.trim().substring(0, 250).replace(/^["'\n]+|["'\n]+$/g, '');
+    return { skill: 'Gerador de Scripts', output: { script }, model, execution_ms: Date.now() - start, success: true };
   } catch (err: any) {
     return { skill: 'Gerador de Scripts', output: null, model, execution_ms: Date.now() - start, success: false, error: err.message };
   }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import AppLayout from '@/components/layout/AppLayout';
-import { AgentHierarchy } from '@/components/agents';
 import { useAgents } from '@/hooks/useAgents';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -214,24 +213,8 @@ export default function EstruturaTime() {
                   </motion.div>
                 ))}
 
-                {/* Interactive Tree View */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="mt-12 pt-8 border-t border-stone-300"
-                >
-                  <div className="flex items-center gap-3 mb-6">
-                    <Icon icon="solar:branching-paths-down-linear" className="w-5 h-5 text-stone-600" />
-                    <h3 className="text-lg font-medium text-stone-900">Visualização em Árvore</h3>
-                  </div>
-
-                  <AgentHierarchy
-                    agents={agents}
-                    onAgentClick={(agent) => navigate(`/agente/${agent.id}`)}
-                    selectedAgentId={selectedAgentId}
-                  />
-                </motion.div>
+                {/* Level Cards - SIMPLIFIED (without tree) */}
+                {/* Removed: AgentHierarchy Tree View for cleaner presentation */}
               </div>
             )}
           </div>

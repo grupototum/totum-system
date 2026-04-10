@@ -1,0 +1,361 @@
+[
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Claude AI para Marketing",
+      "Transcrição": "\"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing. Você copia e cola seus problemas",
+      "Criador": "o Claude lê tudo e gera soluções específicas para seu negócio. Já testei com copywriting"
+    },
+    "subject": "Claude AI para Marketing",
+    "insights": [
+      "\"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing",
+      "Você copia e cola seus problemas"
+    ],
+    "summary": "\"O Claude consegue fazer em 2 minutos o que você levaria 1 hora analisando dados de marketing",
+    "tags": [
+      "#claude",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia",
+      "claude"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Claude AI para Marketing... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Automação de Relatórios com IA",
+      "Transcrição": "\"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente. Você monta um template",
+      "Criador": "alimenta com dados"
+    },
+    "subject": "Automação de Relatórios com IA",
+    "insights": [
+      "\"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticame",
+      "Você monta um template"
+    ],
+    "summary": "\"Sabe quando você passa 3 horas montando relatório em Excel? Agora o AI pode fazer isso automaticamente",
+    "tags": [
+      "#automação",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "IA"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Automação de Relatórios com IA... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Agentes de IA para Vendas",
+      "Transcrição": "\"Criei um agente de IA que negocia com cliente de forma automática. Ele lê email",
+      "Criador": "entende o que o cliente quer"
+    },
+    "subject": "Agentes de IA para Vendas",
+    "insights": [
+      "\"Criei um agente de IA que negocia com cliente de forma automática"
+    ],
+    "summary": "\"Criei um agente de IA que negocia com cliente de forma automática",
+    "tags": [
+      "#agentes",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Agentes de IA para Vendas... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Prompt Engineering: O Segredo",
+      "Transcrição": "\"Maioria das pessoas não sabe usar IA porque escreve prompt ruim. A diferença entre um prompt genérico e um específico é gigante. Eu vou mostrar a técnica de cadeia de pensamento. Você estrutura a pergunta em passos",
+      "Criador": "o Claude entende melhor e dá resposta muito mais boa. Compartilha isso.\""
+    },
+    "subject": "Prompt Engineering: O Segredo",
+    "insights": [
+      "\"Maioria das pessoas não sabe usar IA porque escreve prompt ruim",
+      "A diferença entre um prompt genérico e um específico é gigante",
+      "Eu vou mostrar a técnica de cadeia de pensamento"
+    ],
+    "summary": "\"Maioria das pessoas não sabe usar IA porque escreve prompt ruim",
+    "tags": [
+      "#prompt",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "educational",
+    "script": "E aí! Saiba: Prompt Engineering: O Segredo... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Codia AI - Design Automático",
+      "Transcrição": "\"Tem uma ferramenta que gera design automaticamente com IA. Você descreve o que quer",
+      "Criador": "ela cria"
+    },
+    "subject": "Codia AI - Design Automático",
+    "insights": [
+      "\"Tem uma ferramenta que gera design automaticamente com IA",
+      "Você descreve o que quer"
+    ],
+    "summary": "\"Tem uma ferramenta que gera design automaticamente com IA",
+    "tags": [
+      "#codia",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Codia AI - Design Automático... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Raspberry Pi como Servidor IA",
+      "Transcrição": "\"Transformei um Raspberry Pi 5 em servidor de IA local. Rodei Llama 3.2 7B e funciona beleza. Nenhum lag",
+      "Criador": "zero dependência de cloud"
+    },
+    "subject": "Raspberry Pi como Servidor IA",
+    "insights": [
+      "\"Transformei um Raspberry Pi 5 em servidor de IA local",
+      "2 7B e funciona beleza"
+    ],
+    "summary": "\"Transformei um Raspberry Pi 5 em servidor de IA local",
+    "tags": [
+      "#raspberry",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Raspberry Pi como Servidor IA... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Supabase vs Firebase - Qual Escolher?",
+      "Transcrição": "\"Comparei Supabase e Firebase pra aplicação de vendas. Supabase tem melhor integração com IA (embeddings)",
+      "Criador": "Firebase melhor pra mobile. Depende do seu caso. Se quer IA nativa"
+    },
+    "subject": "Supabase vs Firebase - Qual Escolher?",
+    "insights": [
+      "\"Comparei Supabase e Firebase pra aplicação de vendas",
+      "Supabase tem melhor integração com IA (embeddings)"
+    ],
+    "summary": "\"Comparei Supabase e Firebase pra aplicação de vendas",
+    "tags": [
+      "#supabase",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "sales",
+    "script": "E aí! Saiba: Supabase vs Firebase - Qual Escolher?... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Automação Com N8N Gratuito",
+      "Transcrição": "\"N8N permite automatizar workflows sem código. Conectei Zapier",
+      "Criador": "ChatGPT"
+    },
+    "subject": "Automação Com N8N Gratuito",
+    "insights": [
+      "\"N8N permite automatizar workflows sem código"
+    ],
+    "summary": "\"N8N permite automatizar workflows sem código",
+    "tags": [
+      "#automação",
+      "#tech",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "IA"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Automação Com N8N Gratuito... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Venda Digital SEM Facebook Ads",
+      "Transcrição": "\"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads. 100% com estratégia no TikTok e SMS. Engajamento > investimento em ads. Vou gravar um case study completo. Compartilha com quem quer lucrar online.\"",
+      "Criador": "Sales Mastery"
+    },
+    "subject": "Venda Digital SEM Facebook Ads",
+    "insights": [
+      "\"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads",
+      "100% com estratégia no TikTok e SMS",
+      "Engajamento > investimento em ads"
+    ],
+    "summary": "\"Vendi 50 mil reais em produtos digitais sem gastar um centavo em ads",
+    "tags": [
+      "#venda",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Venda Digital SEM Facebook Ads... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Llama 2 vs Claude: Qual IA é Melhor?",
+      "Transcrição": "\"Testei os dois modelos em tarefas de copywriting",
+      "Criador": "análise de dados e code generation. Claude vence em subtileza"
+    },
+    "subject": "Llama 2 vs Claude: Qual IA é Melhor?",
+    "insights": [
+      "\"Testei os dois modelos em tarefas de copywriting"
+    ],
+    "summary": "\"Testei os dois modelos em tarefas de copywriting",
+    "tags": [
+      "#llama",
+      "#tech",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "IA"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Llama 2 vs Claude: Qual IA é Melhor?... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "RAG - Retrieval Augmented Generation",
+      "Transcrição": "\"RAG combina busca de informação + geração de IA. Seu chatbot lê sua documentação",
+      "Criador": "entende contexto"
+    },
+    "subject": "RAG - Retrieval Augmented Generation",
+    "insights": [
+      "\"RAG combina busca de informação + geração de IA",
+      "Seu chatbot lê sua documentação"
+    ],
+    "summary": "\"RAG combina busca de informação + geração de IA",
+    "tags": [
+      "#rag",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia",
+      "rag"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: RAG - Retrieval Augmented Generation... Assista como funciona e depois me segue pra mais. "
+  },
+  {
+    "status": "success",
+    "originalRecord": {
+      "Subject": "Totum: Marketing + CRM + Automação",
+      "Transcrição": "\"Criamos um sistema que integra marketing",
+      "Criador": "CRM e automação numa plataforma. Um cliente nosso saiu do caos e foi pra 100k MRR em 4 meses. Estrutura previsível > crescimento aleatório. Me segue pra case studies.\""
+    },
+    "subject": "Totum: Marketing + CRM + Automação",
+    "insights": [
+      "\"Criamos um sistema que integra marketing"
+    ],
+    "summary": "\"Criamos um sistema que integra marketing",
+    "tags": [
+      "#totum:",
+      "#ia",
+      "#tech",
+      "#tiktok",
+      "#marketing"
+    ],
+    "ctas": [
+      "me segue",
+      "compartilha"
+    ],
+    "trendingTopics": [
+      "ia"
+    ],
+    "category": "other",
+    "script": "E aí! Saiba: Totum: Marketing + CRM + Automação... Assista como funciona e depois me segue pra mais. "
+  }
+]

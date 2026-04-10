@@ -225,8 +225,8 @@ export default function AgentsDashboard() {
   return (
     <AppLayout>
       <div className="min-h-screen p-6" style={{ backgroundColor: '#EAEAE5' }}>
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Header */}
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header + Action Buttons */}
           <motion.div {...anim(0)} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">
@@ -236,19 +236,84 @@ export default function AgentsDashboard() {
                 Dashboard · Gerenciamento de Agentes IA
               </p>
             </div>
-            <Button 
-              className="bg-stone-900 hover:bg-stone-800 text-white"
-              onClick={() => navigate('/agents/new')}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Agente
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Button 
+                className="bg-stone-900 hover:bg-stone-800 text-white text-sm"
+                onClick={() => navigate('/agents/new')}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Workflow
+              </Button>
+              <Button variant="outline" className="border-stone-300 bg-white text-sm">
+                <Users className="w-4 h-4 mr-2" /> 
+                Adicionar Cliente
+              </Button>
+              <Button variant="outline" className="border-stone-300 bg-white text-sm">
+                <FileText className="w-4 h-4 mr-2" /> 
+                Ver Relatórios
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Usage Chart - HORIZONTAL & SMALLER */}
+          <motion.div {...anim(1)}>
+            <Card className="border-stone-300 bg-[#EAEAE5]">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-stone-900">
+                  Uso dos Agentes (7 dias)
+                </CardTitle>
+                <p className="text-[10px] text-stone-500">Interações por agente</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <XAxis 
+                        dataKey="day" 
+                        tick={{ fill: "#78716C", fontSize: 11 }} 
+                        axisLine={false} 
+                        tickLine={false} 
+                      />
+                      <YAxis 
+                        tick={{ fill: "#78716C", fontSize: 11 }} 
+                        axisLine={false} 
+                        tickLine={false} 
+                        width={30} 
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: "#1C1917",
+                          border: "1px solid #44403C",
+                          borderRadius: 8,
+                          fontSize: 12,
+                          color: 'white'
+                        }}
+                        labelStyle={{ color: "#D6D3D1" }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
+                      
+                      {agents.slice(0, 5).map((agent) => (
+                        <Line
+                          key={agent.name}
+                          type="monotone"
+                          dataKey={agent.name}
+                          stroke={AGENT_COLORS[agent.name] ?? "#78716C"}
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 4 }}
+                        />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((s, i) => (
-              <motion.div key={s.label} {...anim(i + 1)}>
+              <motion.div key={s.label} {...anim(i + 2)}>
                 <Card className="border-stone-300 bg-[#EAEAE5] hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
                   <CardContent className="p-5 flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-stone-200 border border-stone-300 flex items-center justify-center text-2xl">
@@ -265,7 +330,7 @@ export default function AgentsDashboard() {
           </div>
 
           {/* Filters & View Toggle */}
-          <motion.div {...anim(5)} className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
+          <motion.div {...anim(6)} className="flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">
             <div className="flex gap-2 flex-wrap">
               {CATEGORIES.map((cat) => (
                 <button
@@ -331,103 +396,29 @@ export default function AgentsDashboard() {
             </div>
           </motion.div>
 
-          {/* Main Content Area */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Left/Top: Agent Views */}
-            <div className="xl:col-span-2">
-              {filtered.length === 0 ? (
-                <Card className="border-stone-300 bg-[#EAEAE5] p-12 text-center">
-                  <Bot className="w-16 h-16 mx-auto text-stone-400 mb-4" />
-                  <p className="text-stone-500">Nenhum agente encontrado</p>
-                  <p className="text-xs text-stone-400 mt-1">Tente alterar os filtros ou a busca</p>
-                </Card>
-              ) : viewMode === "list" ? (
-                <AgentList 
-                  agents={filtered} 
-                  onAgentClick={handleAgentClick}
-                  selectedAgentId={selectedAgentId}
-                />
-              ) : viewMode === "graph" ? (
-                <AgentGraph 
-                  agents={filtered}
-                  onAgentClick={handleAgentClick}
-                  selectedAgentId={selectedAgentId}
-                />
-              ) : (
-                <AgentStats agents={filtered} />
-              )}
-            </div>
-
-            {/* Right/Bottom: Usage Chart */}
-            <div className="xl:col-span-1">
-              <Card className="border-stone-300 bg-[#EAEAE5] h-full">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-stone-900">
-                    Uso dos Agentes (7 dias)
-                  </CardTitle>
-                  <p className="text-[10px] text-stone-500">Interações por agente</p>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={chartData}>
-                        <XAxis 
-                          dataKey="day" 
-                          tick={{ fill: "#78716C", fontSize: 11 }} 
-                          axisLine={false} 
-                          tickLine={false} 
-                        />
-                        <YAxis 
-                          tick={{ fill: "#78716C", fontSize: 11 }} 
-                          axisLine={false} 
-                          tickLine={false} 
-                          width={30} 
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            background: "#1C1917",
-                            border: "1px solid #44403C",
-                            borderRadius: 8,
-                            fontSize: 12,
-                            color: 'white'
-                          }}
-                          labelStyle={{ color: "#D6D3D1" }}
-                        />
-                        <Legend wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
-                        
-                        {agents.slice(0, 5).map((agent) => (
-                          <Line
-                            key={agent.name}
-                            type="monotone"
-                            dataKey={agent.name}
-                            stroke={AGENT_COLORS[agent.name] ?? "#78716C"}
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{ r: 4 }}
-                          />
-                        ))}
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
+          {/* Main Content - Full Width */}
+          <motion.div {...anim(7)}>
+            {filtered.length === 0 ? (
+              <Card className="border-stone-300 bg-[#EAEAE5] p-12 text-center">
+                <Bot className="w-16 h-16 mx-auto text-stone-400 mb-4" />
+                <p className="text-stone-500">Nenhum agente encontrado</p>
+                <p className="text-xs text-stone-400 mt-1">Tente alterar os filtros ou a busca</p>
               </Card>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <motion.div {...anim(8)} className="flex flex-wrap gap-3">
-            <Button className="bg-stone-900 hover:bg-stone-800 text-white">
-              <Plus className="w-4 h-4 mr-2" /> 
-              Novo Workflow
-            </Button>
-            <Button variant="outline" className="border-stone-300 bg-white">
-              <Users className="w-4 h-4 mr-2" /> 
-              Adicionar Cliente
-            </Button>
-            <Button variant="outline" className="border-stone-300 bg-white">
-              <FileText className="w-4 h-4 mr-2" /> 
-              Ver Relatórios
-            </Button>
+            ) : viewMode === "list" ? (
+              <AgentList 
+                agents={filtered} 
+                onAgentClick={handleAgentClick}
+                selectedAgentId={selectedAgentId}
+              />
+            ) : viewMode === "graph" ? (
+              <AgentGraph 
+                agents={filtered}
+                onAgentClick={handleAgentClick}
+                selectedAgentId={selectedAgentId}
+              />
+            ) : (
+              <AgentStats agents={filtered} />
+            )}
           </motion.div>
         </div>
       </div>
