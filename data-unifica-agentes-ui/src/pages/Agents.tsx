@@ -1,7 +1,7 @@
 // Página /agents - Integração do DashboardGeral
 // Esta página pode ser importada e usada em projetos Next.js, React Router, etc.
 
-import { DashboardGeral } from '../components/dashboards/DashboardGeral';
+import { DashboardGeral } from '../components/dashboards';
 
 export default function AgentsPage() {
   return (
