@@ -117,10 +117,9 @@ export default function EditClient() {
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto space-y-6">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-12 w-full rounded-xl" />
-          <Skeleton className="h-96 rounded-xl" />
-        </div>
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     );
   }
@@ -128,12 +127,11 @@ export default function EditClient() {
   if (!form) {
     return (
       <div className="p-6 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
-          <Building2 className="w-16 h-16 text-muted-foreground/40 mb-4" />
-          <p className="text-muted-foreground">Cliente não encontrado</p>
-          <Button variant="outline" className="mt-4 border-border/40" onClick={() => navigate("/clientes")}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
-          </Button>
-        </div>
+        <Building2 className="w-16 h-16 text-muted-foreground/40 mb-4" />
+        <p className="text-muted-foreground">Cliente não encontrado</p>
+        <Button variant="outline" className="mt-4 border-border/40" onClick={() => navigate("/clientes")}>
+          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+        </Button>
       </div>
     );
   }
