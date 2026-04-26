@@ -20,6 +20,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2, Plus, X, FileText, BookOpen, Shield, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -55,6 +57,7 @@ export function TaskFormDialog({
   profiles,
   onCreated,
 }: TaskFormDialogProps) {
+  const { tenant } = useTenant();
   const [saving, setSaving] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -210,7 +213,8 @@ export function TaskFormDialog({
       recurrence_end_date: isRecurring && recurrenceEndDate ? recurrenceEndDate : null,
     };
 
-    const { data: taskData, error } = await (supabase as any).from("tasks").insert(insertPayload).select("id").single();
+    const scopedPayload = attachOrganizationId(insertPayload, tenant?.organization_id);
+    const { data: taskData, error } = await (supabase as any).from("tasks").insert(scopedPayload).select("id").single();
 
     if (error) {
       setSaving(false);

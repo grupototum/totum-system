@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 
@@ -89,6 +91,7 @@ const INCOME_KEYWORDS = ["receita", "income", "entrada", "receber", "crédito", 
 const EXPENSE_KEYWORDS = ["despesa", "expense", "saída", "saida", "pagar", "débito", "debito"];
 
 export function useImportData() {
+  const { tenant } = useTenant();
   const [step, setStep] = useState(1);
   const [file, setFile] = useState<File | null>(null);
   const [rawData, setRawData] = useState<Record<string, string>[]>([]);
@@ -233,7 +236,7 @@ export function useImportData() {
             clientIdMap.set(key, existingMap.get(key)!);
           } else {
             const { data: created, error } = await (supabase.from("clients") as any)
-              .insert({
+              .insert(attachOrganizationId({
                 company_name: client.name,
                 contact_name: client.name,
                 email: client.email || null,
@@ -241,7 +244,7 @@ export function useImportData() {
                 cnpj: client.document || null,
                 import_batch_id: batch.id,
                 status: "active",
-              })
+              }, tenant?.organization_id))
               .select("id")
               .single();
             if (!error && created) {
@@ -270,7 +273,7 @@ export function useImportData() {
           const entryClass = isIncome ? "receita" : typeRaw.includes("custo") ? "custo" : "despesa";
           const value = Math.abs(parseValue(row.data.value) || 0);
           const clientKey = row.data.client_name?.toLowerCase();
-          return {
+          return attachOrganizationId({
             description: row.data.description,
             value,
             type: isIncome ? "receber" : "pagar",
@@ -284,7 +287,7 @@ export function useImportData() {
             bank_account_id: row.data.bank_account ? bankMap.get(row.data.bank_account.toLowerCase()) || null : null,
             import_batch_id: batch.id,
             created_by: user.id,
-          };
+          }, tenant?.organization_id);
         });
 
         const { error } = await (supabase.from("financial_entries") as any).insert(entries);
@@ -312,7 +315,7 @@ export function useImportData() {
       setImporting(false);
       setProgress(0);
     }
-  }, [validatedRows]);
+  }, [tenant?.organization_id, validatedRows]);
 
   const rollbackLastImport = useCallback(async () => {
     try {

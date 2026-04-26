@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { demoContracts } from "@/data/demoData";
 
 export type ContractRow = Tables<"contracts"> & {
@@ -13,6 +15,7 @@ export type ContractRow = Tables<"contracts"> & {
 
 export function useContracts() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [contracts, setContracts] = useState<ContractRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,13 +38,14 @@ export function useContracts() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const addContract = async (values: Partial<Tables<"contracts">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const { error } = await supabase.from("contracts").insert(values as any);
+    const payload = attachOrganizationId(values as any, tenant?.organization_id);
+    const { error } = await supabase.from("contracts").insert(payload);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
       return false;

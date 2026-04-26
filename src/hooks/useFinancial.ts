@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { demoFinancialEntries } from "@/data/demoData";
 
 export type FinancialEntryRow = Tables<"financial_entries"> & {
@@ -12,6 +13,7 @@ export type FinancialEntryRow = Tables<"financial_entries"> & {
 
 export function useFinancialEntries(filters?: { month?: string; startDate?: string; endDate?: string }) {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [entries, setEntries] = useState<FinancialEntryRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ export function useFinancialEntries(filters?: { month?: string; startDate?: stri
     } finally {
       setLoading(false);
     }
-  }, [filters?.month, filters?.startDate, filters?.endDate, isDemoMode]);
+  }, [filters?.month, filters?.startDate, filters?.endDate, isDemoMode, tenant?.organization_id]);
 
   useEffect(() => { fetch(); }, [fetch]);
 

@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTenant } from "@/contexts/TenantContext";
 import logoRed from "@/assets/logo-red.png";
 import { Mail, Lock, Eye, EyeOff, Loader2, Clock, User } from "lucide-react";
 
 export default function AuthPage() {
   const { isPending } = useAuth();
+  const { tenant } = useTenant();
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -93,6 +95,15 @@ export default function AuthPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
           <img src={logoRed} alt="Totum" className="h-10" />
+          <div className="text-center">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Ambiente</p>
+            <p className="font-medium text-foreground">
+              {tenant?.display_name || "Totum System"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {tenant?.matched_hostname || window.location.hostname}
+            </p>
+          </div>
           <p className="text-sm text-muted-foreground">
             {mode === "login" ? "Acesse sua conta" : mode === "signup" ? "Criar nova conta" : "Recuperar senha"}
           </p>

@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { demoProjects } from "@/data/demoData";
 
 export type ProjectRow = Tables<"projects"> & {
@@ -17,6 +19,7 @@ interface TaskDef {
 
 export function useProjects() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +42,7 @@ export function useProjects() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
@@ -47,7 +50,8 @@ export function useProjects() {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
 
     // Create project
-    const { data: project, error } = await supabase.from("projects").insert(values as any).select("id").single();
+    const payload = attachOrganizationId(values as any, tenant?.organization_id);
+    const { data: project, error } = await supabase.from("projects").insert(payload).select("id").single();
     if (error || !project) {
       toast({ title: "Erro", description: error?.message, variant: "destructive" });
       return false;
@@ -56,14 +60,15 @@ export function useProjects() {
     // Create tasks + subtasks
     if (tasks.length > 0) {
       for (const taskDef of tasks) {
-        const { data: task, error: taskErr } = await supabase.from("tasks").insert({
+        const taskPayload = attachOrganizationId({
           title: taskDef.title,
           client_id: values.client_id!,
           project_id: project.id,
           status: "pendente" as any,
           priority: "media" as any,
           task_type: "outro" as any,
-        }).select("id").single();
+        }, tenant?.organization_id);
+        const { data: task, error: taskErr } = await supabase.from("tasks").insert(taskPayload).select("id").single();
 
         if (taskErr || !task) continue;
 

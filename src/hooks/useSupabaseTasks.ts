@@ -4,12 +4,15 @@ import { toast } from "@/hooks/use-toast";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 import { Task, TaskStatus, RecurrenceType, RecurrenceConfig } from "@/components/tasks/taskData";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { demoTasks } from "@/data/demoData";
 
 type TaskRow = Tables<"tasks">;
 
 export function useSupabaseTasks() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
@@ -130,19 +133,19 @@ export function useSupabaseTasks() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   const fetchClients = useCallback(async () => {
     if (isDemoMode) return;
     const { data } = await supabase.from("clients").select("id, name").eq("status", "ativo").order("name");
     setClients(data || []);
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
     const { data } = await supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name");
     setProfiles(data || []);
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => {
     fetchTasks();
@@ -216,7 +219,8 @@ export function useSupabaseTasks() {
       toast({ title: "Modo Demo", description: `${newTasks.length} tarefas simuladas com sucesso.` });
       return true;
     }
-    const { error } = await supabase.from("tasks").insert(newTasks);
+    const payload = newTasks.map((task) => attachOrganizationId(task, tenant?.organization_id));
+    const { error } = await supabase.from("tasks").insert(payload);
 
     if (error) {
       toast({ title: "Erro ao gerar tarefas", description: error.message, variant: "destructive" });

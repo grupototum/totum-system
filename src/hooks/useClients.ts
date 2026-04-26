@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { demoClients } from "@/data/demoData";
 import { getClientDisplayName } from "@/lib/clients";
 
@@ -15,6 +17,7 @@ export type ClientRow = Tables<"clients"> & {
 
 export function useClients() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,13 +51,14 @@ export function useClients() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const addClient = async (values: Partial<Tables<"clients">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const { error } = await supabase.from("clients").insert(values as any);
+    const payload = attachOrganizationId(values as any, tenant?.organization_id);
+    const { error } = await supabase.from("clients").insert(payload);
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
       return false;

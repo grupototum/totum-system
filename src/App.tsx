@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import AuthPage from "./pages/AuthPage";
@@ -133,14 +134,16 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <AuthProvider>
-                <Routes>
-                  <Route path="/login" element={<AuthRoutes />} />
-                  <Route path="/setup" element={<SetupRoute />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route path="/*" element={<ProtectedRoutes />} />
-                </Routes>
-              </AuthProvider>
+              <TenantProvider>
+                <AuthProvider>
+                  <Routes>
+                    <Route path="/login" element={<AuthRoutes />} />
+                    <Route path="/setup" element={<SetupRoute />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/*" element={<ProtectedRoutes />} />
+                  </Routes>
+                </AuthProvider>
+              </TenantProvider>
             </BrowserRouter>
           </DemoProvider>
         </GlobalLoadingProvider>

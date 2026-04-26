@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2 } from "lucide-react";
 import { addMonths, format, parseISO } from "date-fns";
 import { getClientDisplayName } from "@/lib/clients";
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
+  const { tenant } = useTenant();
   const [saving, setSaving] = useState(false);
   const [description, setDescription] = useState("");
   const [entryClass, setEntryClass] = useState("receita");
@@ -109,7 +112,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
       
       for (let i = 0; i < numInstallments; i++) {
         const date = addMonths(parseISO(dueDate), i * intervalMonths);
-        entries.push({
+        entries.push(attachOrganizationId({
           description: numInstallments > 1 ? `${description.trim()} (${i + 1}/${numInstallments})` : description.trim(),
           type: dbType,
           entry_class: entryClass,
@@ -127,7 +130,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           total_installments: numInstallments > 1 ? numInstallments : null,
           notes: notes.trim() || null,
           created_by: user?.id || null,
-        });
+        }, tenant?.organization_id));
       }
 
       const { error } = await supabase.from("financial_entries").insert(entries);

@@ -4,22 +4,40 @@ import { toast } from "@/hooks/use-toast";
 import { handleApiError } from "@/lib/errorHandler";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { demoCompanySettings, demoSystemSettings, demoAuditLogsList } from "@/data/demoData";
 
 const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
 
 export function useCompanySettings() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
+
   return useQuery({
-    queryKey: ["company_settings", isDemoMode],
+    queryKey: ["company_settings", tenant?.organization_id, isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return demoCompanySettings;
+
+      if (tenant?.organization_id && !tenant.fallback) {
+        const { data, error } = await supabase
+          .from("organization_settings" as any)
+          .select("*")
+          .eq("organization_id", tenant.organization_id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) return data;
+      }
+
       const { data, error } = await supabase
         .from("company_settings")
         .select("*")
         .limit(1)
         .single();
+
       if (error) throw error;
+
       return data;
     },
   });
@@ -29,9 +47,30 @@ export function useUpdateCompanySettings() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
+
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (isDemoMode) { toast(DEMO_TOAST); return; }
+
+      if (tenant?.organization_id && !tenant.fallback) {
+        const payload = {
+          organization_id: tenant.organization_id,
+          name: updates.name || "",
+          email: updates.email || null,
+          phone: updates.phone || null,
+          address: updates.address || null,
+        };
+
+        const { error } = await supabase
+          .from("organization_settings" as any)
+          .upsert(payload, { onConflict: "organization_id" });
+
+        if (error) throw error;
+
+        return;
+      }
+
       const { data: existing } = await supabase.from("company_settings").select("id").limit(1).single();
       if (!existing) throw new Error("Configurações não encontradas");
       const { error } = await supabase.from("company_settings").update(updates).eq("id", existing.id);

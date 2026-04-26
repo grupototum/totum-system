@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/contexts/TenantContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import {
   ChevronLeft, ChevronRight, Check, Loader2, User,
 } from "lucide-react";
 import { validateClientBasicInfo, isValidEmail, isValidCNPJ, isValidPhone, isValidURL, sanitizeURL, type ValidationErrors } from "@/lib/validation";
+import { attachOrganizationId } from "@/lib/tenant";
 
 /* ─── types ─── */
 interface FormData {
@@ -72,6 +74,7 @@ export default function NewClient() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const { user } = useAuth();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) => {
@@ -144,7 +147,7 @@ export default function NewClient() {
     const sanitizedWebsite = form.website ? sanitizeURL(form.website) : null;
     
     setSaving(true);
-    const { error } = await supabase.from("clients").insert({
+    const payload = attachOrganizationId({
       user_id: user.id,
       company_name: form.company_name, cnpj: form.cnpj, contact_name: form.contact_name, email: form.email, phone: form.phone, website: sanitizedWebsite,
       industry: form.industry || null, business_description: form.business_description || null, products_services: form.products_services || null, time_in_market: form.time_in_market || null, company_size: form.company_size || null, monthly_revenue: form.monthly_revenue || null,
@@ -152,7 +155,8 @@ export default function NewClient() {
       primary_color: form.primary_color, secondary_color: form.secondary_color, fonts: form.fonts || null, visual_elements: form.visual_elements || null, visual_personality: form.visual_personality || null,
       support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, additional_info: form.additional_info || null, terms_accepted: form.terms_accepted,
       status: "active",
-    } as any);
+    } as any, tenant?.organization_id);
+    const { error } = await supabase.from("clients").insert(payload);
     setSaving(false);
     if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
     toast({ title: "✅ Cliente cadastrado!", description: `${form.company_name} adicionado com sucesso` });

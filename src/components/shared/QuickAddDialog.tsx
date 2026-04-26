@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2 } from "lucide-react";
 
 interface QuickAddDialogProps {
@@ -28,6 +30,7 @@ const tableMap: Record<string, string> = {
 };
 
 export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSuccess }: QuickAddDialogProps) {
+  const { tenant } = useTenant();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -47,10 +50,14 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
       payload.is_active = true;
     }
 
+    const scopedPayload = tableName === "clients"
+      ? attachOrganizationId(payload, tenant?.organization_id)
+      : payload;
+
     try {
       const { data, error } = await supabase
         .from(tableName as any)
-        .insert(payload)
+        .insert(scopedPayload)
         .select()
         .single();
 

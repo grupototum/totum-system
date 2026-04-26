@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTenant } from "@/contexts/TenantContext";
 import { useCompanySettings, useUpdateCompanySettings } from "@/hooks/useAdminSettings";
 
 export function CompanyTab() {
+  const { tenant } = useTenant();
   const { data: settings, isLoading } = useCompanySettings();
   const updateMutation = useUpdateCompanySettings();
 
@@ -47,6 +49,15 @@ export function CompanyTab() {
   return (
     <div className="space-y-6">
       <h3 className="font-heading font-semibold text-lg">Dados da Empresa</h3>
+      <div className="rounded-2xl border border-border/60 bg-secondary/40 px-4 py-3">
+        <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Tenant ativo</p>
+        <p className="mt-1 font-medium text-foreground">
+          {tenant?.display_name || settings?.name || "Tenant padrão"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {tenant?.matched_hostname || "sem domínio resolvido"}
+        </p>
+      </div>
 
       {/* Logo placeholder */}
       <div className="flex items-center gap-5">

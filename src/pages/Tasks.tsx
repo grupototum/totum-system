@@ -21,11 +21,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
 export default function Tasks() {
   const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, deleteTask, refetch, profiles, clients } = useSupabaseTasks();
+  const { tenant } = useTenant();
   
   const tasks = supabaseTasks.length > 0 || !loading ? supabaseTasks : initialTasks;
   
@@ -154,7 +157,7 @@ export default function Tasks() {
       });
 
       // Also create a new standalone task linked as child
-      await supabase.from("tasks").insert({
+      await supabase.from("tasks").insert(attachOrganizationId({
         title: data.nextAction.title,
         description: data.nextAction.description || null,
         client_id: task.clientId,
@@ -166,7 +169,7 @@ export default function Tasks() {
         task_type: task.type as any,
         contract_id: task.contractId || null,
         project_id: task.projectId || null,
-      });
+      }, tenant?.organization_id));
 
       // Log history
       if (userId) {
@@ -209,7 +212,7 @@ export default function Tasks() {
       const isEnded = task.recurrenceEndDate && new Date(nextDueDate) > new Date(task.recurrenceEndDate);
 
       if (!isEnded) {
-        await supabase.from("tasks").insert({
+        await supabase.from("tasks").insert(attachOrganizationId({
           title: task.title,
           description: task.description,
           client_id: task.clientId,
@@ -223,7 +226,7 @@ export default function Tasks() {
           parent_task_id: task.id,
           contract_id: task.contractId || null,
           project_id: task.projectId || null,
-        });
+        }, tenant?.organization_id));
         
         await supabase.from("tasks").update({
           last_generated_at: new Date().toISOString()
