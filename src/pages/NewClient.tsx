@@ -452,6 +452,5 @@ export default function NewClient() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
