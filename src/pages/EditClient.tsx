@@ -502,6 +502,5 @@ export default function EditClient() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
