@@ -12,6 +12,7 @@ import { AccessDenied } from "@/components/shared/AccessDenied";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { getClientDisplayName } from "@/lib/clients";
 
 const now = new Date();
 const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -33,8 +34,18 @@ type ViewMode = "list" | "kanban";
 type KanbanGroup = "status" | "type";
 
 const kanbanStatusOrder = ["pendente", "pago", "atrasado", "cancelado"];
-const kanbanTypeLabels: Record<string, string> = { receber: "A Receber", pagar: "A Pagar" };
+const kanbanTypeLabels: Record<string, string> = { receita: "Receitas", custo: "Custos", despesa: "Despesas" };
 const kanbanStatusLabels: Record<string, string> = { pendente: "Pendente", pago: "Pago", atrasado: "Atrasado", cancelado: "Cancelado" };
+
+function getEntryClass(entry: FinancialEntryRow) {
+  if ((entry as any).entry_class) return (entry as any).entry_class as string;
+  return entry.type === "receber" ? "receita" : "despesa";
+}
+
+function getEntryNature(entry: FinancialEntryRow) {
+  return (entry as any).nature || "fixo";
+}
+
 export default function Financial() {
   const { canViewFinancial } = usePermissions();
   const [formOpen, setFormOpen] = useState(false);
@@ -58,13 +69,11 @@ export default function Financial() {
     const paid = (entries || []).filter(e => e.status === "pago");
     
     const receita = paid.filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
-    
-    // Custos e Despesas
-    const custoFixo = paid.filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
-    const custoVar = 0;
-    
-    const despesaFixo = paid.filter(e => e.type === "despesa").reduce((s, e) => s + Number(e.value), 0);
-    const despesaVar = 0;
+
+    const custoFixo = paid.filter(e => getEntryClass(e) === "custo" && getEntryNature(e) === "fixo").reduce((s, e) => s + Number(e.value), 0);
+    const custoVar = paid.filter(e => getEntryClass(e) === "custo" && getEntryNature(e) === "variavel").reduce((s, e) => s + Number(e.value), 0);
+    const despesaFixo = paid.filter(e => getEntryClass(e) === "despesa" && getEntryNature(e) === "fixo").reduce((s, e) => s + Number(e.value), 0);
+    const despesaVar = paid.filter(e => getEntryClass(e) === "despesa" && getEntryNature(e) === "variavel").reduce((s, e) => s + Number(e.value), 0);
     
     const totalCustos = custoFixo + custoVar;
     const totalDespesas = despesaFixo + despesaVar;
@@ -94,10 +103,10 @@ export default function Financial() {
 
   const grouped = useMemo(() => {
     const groups: Record<string, FinancialEntryRow[]> = {};
-    const keys = kanbanGroup === "status" ? kanbanStatusOrder : ["receber", "pagar"];
+    const keys = kanbanGroup === "status" ? kanbanStatusOrder : ["receita", "custo", "despesa"];
     keys.forEach(k => { groups[k] = []; });
     (entries || []).forEach(e => {
-      const g = kanbanGroup === "status" ? e.status : e.type;
+      const g = kanbanGroup === "status" ? e.status : getEntryClass(e);
       if (!groups[g]) groups[g] = [];
       groups[g].push(e);
     });
@@ -275,6 +284,7 @@ export default function Financial() {
                       <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum lançamento neste mês</td></tr>
                     ) : (entries || []).map((tx) => {
                       const isIncome = tx.type === "receber";
+                      const entryClass = getEntryClass(tx);
                       return (
                         <tr key={tx.id} className="border-b border-border/50 hover:bg-accent/50 transition-colors">
                            <td className="p-4">
@@ -284,13 +294,15 @@ export default function Financial() {
                               </div>
                               <div>
                                 <span className="font-medium block">{tx.description}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">{tx.type === "receber" ? "Receita" : "Despesa"}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">{entryClass}</span>
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 text-xs text-muted-foreground">{isIncome ? "Receita" : "Despesa"}</td>
+                          <td className="p-4 text-xs text-muted-foreground">
+                            {entryClass} · {getEntryNature(tx)}
+                          </td>
                           <td className="p-4 text-muted-foreground font-heading text-xs">{format(new Date(tx.due_date), "dd/MM/yyyy")}</td>
-                          <td className="p-4 text-xs text-muted-foreground">{(tx.clients as any)?.name || "—"}</td>
+                          <td className="p-4 text-xs text-muted-foreground">{getClientDisplayName(tx.clients as any)}</td>
                           <td className={`p-4 text-right font-heading font-medium ${isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                             {isIncome ? "+" : "-"}{fmt(Number(tx.value))}
                           </td>
@@ -325,6 +337,7 @@ export default function Financial() {
                   <div className="space-y-2">
                     {(items || []).map(tx => {
                       const isIncome = tx.type === "receber";
+                      const entryClass = getEntryClass(tx);
                       return (
                         <div key={tx.id} className="rounded-lg border border-border bg-card p-3 space-y-1.5">
                           <p className="text-sm font-medium truncate">{tx.description}</p>
@@ -334,8 +347,11 @@ export default function Financial() {
                             </span>
                             <span className="text-[10px] text-muted-foreground">{format(new Date(tx.due_date), "dd/MM")}</span>
                           </div>
-                          {(tx.clients as any)?.name && (
-                            <p className="text-[10px] text-muted-foreground">{(tx.clients as any).name}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase">
+                            {entryClass} · {getEntryNature(tx)}
+                          </p>
+                          {getClientDisplayName(tx.clients as any) !== "—" && (
+                            <p className="text-[10px] text-muted-foreground">{getClientDisplayName(tx.clients as any)}</p>
                           )}
                         </div>
                       );

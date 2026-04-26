@@ -4,6 +4,7 @@ import { useDemo } from "@/contexts/DemoContext";
 import { demoExecutiveDashboardData } from "@/data/demoData";
 import { format, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { getClientDisplayName } from "@/lib/clients";
 
 interface ExecutiveDashboardData {
   totalRevenue: number;
@@ -79,11 +80,13 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
     const { data: entries } = await supabase
       .from("financial_entries")
-      .select("*, clients(name), financial_categories(name)")
+      .select("*, clients(*), financial_categories(name)")
       .gte("due_date", periodStart)
       .lt("due_date", periodEnd);
 
     const allEntries = entries || [];
+    const getEntryClass = (entry: any) => entry.entry_class || (entry.type === "receber" ? "receita" : "despesa");
+    const getEntryNature = (entry: any) => entry.nature || "fixo";
     const income = allEntries.filter(e => e.type === "receber" && e.status === "pago");
     const totalRevenue = income.reduce((s, e) => s + Number(e.value), 0);
     const receivables = allEntries.filter(e => e.type === "receber" && e.status === "pendente").reduce((s, e) => s + Number(e.value), 0);
@@ -96,7 +99,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
     const revClientMap: Record<string, number> = {};
     income.forEach(e => {
-      const name = (e as any).clients?.name || "Sem cliente";
+      const name = getClientDisplayName((e as any).clients) || "Sem cliente";
       revClientMap[name] = (revClientMap[name] || 0) + Number(e.value);
     });
     const revenueByClient = Object.entries(revClientMap)
@@ -110,8 +113,10 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       "Despesa Variável": 0,
     };
 
-    allEntries.filter(e => (e.type === "pagar" || e.type === "despesa") && e.status === "pago").forEach(e => {
-      const cat = e.type === "pagar" ? "Despesa Fixa" : "Despesa Variável";
+    allEntries.filter(e => e.type === "pagar" && e.status === "pago").forEach((e: any) => {
+      const prefix = getEntryClass(e) === "custo" ? "Custo" : "Despesa";
+      const suffix = getEntryNature(e) === "variavel" ? "Variável" : "Fixa";
+      const cat = `${prefix} ${suffix}`;
       expCatMap[cat] = (expCatMap[cat] || 0) + Number(e.value);
     });
 
@@ -122,7 +127,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
     const { data: contracts } = await supabase
       .from("contracts")
-      .select("value, client_id, clients(name), status")
+      .select("value, client_id, clients(*), status")
       .eq("status", "ativo");
     const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
     const activeContracts = (contracts || []).length;
@@ -131,11 +136,11 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
     const { data: checklists } = await supabase
       .from("delivery_checklists")
-      .select("fulfillment_pct, clients(name)")
+      .select("fulfillment_pct, clients(*)")
       .limit(100);
     const fulfillmentMap: Record<string, number[]> = {};
     (checklists || []).forEach((c: any) => {
-      const name = c.clients?.name || "—";
+      const name = getClientDisplayName(c.clients) || "—";
       if (!fulfillmentMap[name]) fulfillmentMap[name] = [];
       fulfillmentMap[name].push(Number(c.fulfillment_pct) || 0);
     });
@@ -145,7 +150,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
     const { data: tasks } = await supabase
       .from("tasks")
-      .select("id, title, status, priority, due_date, responsible_id, clients(name)");
+      .select("id, title, status, priority, due_date, responsible_id, clients(*)");
 
     const { data: profiles } = await supabase
       .from("profiles")
@@ -179,7 +184,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       .map(t => ({
         id: t.id,
         title: t.title,
-        client: (t as any).clients?.name || "—",
+        client: getClientDisplayName((t as any).clients) || "—",
         dueDate: t.due_date || "",
         responsible: t.responsible_id ? profileMap.get(t.responsible_id)?.name : undefined,
       }));
@@ -201,7 +206,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
     const historyStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
     const { data: historyEntries } = await supabase
       .from("financial_entries")
-      .select("value, type, due_date, status")
+      .select("value, type, due_date, status, entry_class, nature")
       .gte("due_date", historyStart)
       .lt("due_date", periodEnd)
       .eq("status", "pago");
@@ -218,8 +223,8 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       const m = e.due_date.substring(0, 7);
       if (historyMap[m]) {
         if (e.type === "receber") historyMap[m].revenue += Number(e.value);
-        else if (e.type === "custo") historyMap[m].costs += Number(e.value);
-        else if (e.type === "pagar" || e.type === "despesa") historyMap[m].expenses += Number(e.value);
+        else if ((e as any).entry_class === "custo") historyMap[m].costs += Number(e.value);
+        else historyMap[m].expenses += Number(e.value);
       }
     });
 

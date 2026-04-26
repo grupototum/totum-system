@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, Package, Plus } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
+import { getClientDisplayName } from "@/lib/clients";
 
 interface Props {
   open: boolean;
@@ -33,7 +34,7 @@ interface ProductOption {
 }
 
 export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, defaultClientId }: Props) {
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [plans, setPlans] = useState<{ id: string; name: string; value: number | null; frequency: string }[]>([]);
   const [contractTypes, setContractTypes] = useState<{ id: string; name: string }[]>([]);
   const [packages, setPackages] = useState<{ id: string; name: string; total_sale: number | null }[]>([]);
@@ -54,13 +55,16 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
   useEffect(() => {
     if (open) {
       Promise.all([
-        supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
+        supabase.from("clients").select("*"),
         supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
         supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
         supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name").then(r => ({ ...r, data: (r.data || []).map((p: any) => ({ id: p.id, name: p.name, total_sale: p.value })) })),
         supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
       ]).then(([c, p, ct, pkg, pr]) => {
-        setClients(c.data || []);
+        const activeClients = ((c.data as any[]) || [])
+          .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
+          .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+        setClients(activeClients);
         setPlans((p.data as any) || []);
         setContractTypes(ct.data || []);
         setPackages((pkg as any).data || []);
@@ -225,7 +229,7 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{getClientDisplayName(c)}</SelectItem>)}
                 </SelectContent>
               </Select>
               {errors.client_id && touched.client_id && (

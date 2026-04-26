@@ -5,7 +5,9 @@ import { useDemo } from "@/contexts/DemoContext";
 import { demoFinancialEntries } from "@/data/demoData";
 
 export type FinancialEntryRow = Tables<"financial_entries"> & {
-  clients?: { name: string } | null;
+  clients?: { name?: string | null; company_name?: string | null } | null;
+  entry_class?: "receita" | "custo" | "despesa" | null;
+  nature?: "fixo" | "variavel" | null;
 };
 
 export function useFinancialEntries(filters?: { month?: string; startDate?: string; endDate?: string }) {
@@ -36,7 +38,7 @@ export function useFinancialEntries(filters?: { month?: string; startDate?: stri
     try {
       let query = supabase
         .from("financial_entries")
-        .select("*, clients(name)")
+        .select("*, clients(*)")
         .order("due_date", { ascending: false });
 
       if (filters?.month) {

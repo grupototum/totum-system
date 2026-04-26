@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, Bot, KanbanSquare, GitBranch, Building2,
   Terminal, Users, Settings, LogOut, Sun, Moon,
-  ChevronDown, ChevronRight, Notebook, FileCheck, Lightbulb, ClipboardList, UserPlus, Contact,
+  ChevronDown, ChevronRight, Notebook, FileCheck, Lightbulb, UserPlus, Contact,
   BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,9 +37,8 @@ const staticSections: NavSection[] = [
     items: [
       { label: "Quadro de Tarefas", icon: KanbanSquare, path: "/tasks" },
       { label: "Pipeline de Conteúdo", icon: GitBranch, path: "/content" },
-      { label: "Plano de Ação", icon: ClipboardList, path: "/action-plan" },
-      { label: "Novo Cliente", icon: UserPlus, path: "/new-client" },
-      { label: "Central de Clientes", icon: Contact, path: "/clients" },
+      { label: "Novo Cliente", icon: UserPlus, path: "/clientes/novo" },
+      { label: "Central de Clientes", icon: Contact, path: "/clientes" },
       { label: "Visão do Escritório", icon: Building2, path: "/office" },
     ],
   },

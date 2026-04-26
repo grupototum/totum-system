@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getClientDisplayName } from "@/lib/clients";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoReportsData } from "@/data/demoData";
 
@@ -126,7 +127,7 @@ export function useReports(filters?: ReportsFilters) {
     // ── 3. Fulfillment by Client ──
     let checklistQuery = supabase
       .from("delivery_checklists")
-      .select("client_id, fulfillment_pct, period, clients(name)");
+      .select("client_id, fulfillment_pct, period, clients(*)");
 
     if (filters) {
       const startPeriod = `${rangeStart.getFullYear()}-${String(rangeStart.getMonth() + 1).padStart(2, "0")}`;
@@ -145,7 +146,7 @@ export function useReports(filters?: ReportsFilters) {
         existing.count += 1;
       } else {
         clientFulfillmentMap.set(key, {
-          name: cl.clients?.name || "—",
+          name: getClientDisplayName(cl.clients) || "—",
           total: Number(cl.fulfillment_pct) || 0,
           count: 1,
         });
@@ -164,7 +165,7 @@ export function useReports(filters?: ReportsFilters) {
     // ── 4. Profitability by Client ──
     let financialQuery = supabase
       .from("financial_entries")
-      .select("client_id, type, value, status, due_date, clients(name)");
+      .select("client_id, type, value, status, due_date, entry_class, clients(*)");
 
     if (filters) {
       financialQuery = financialQuery
@@ -177,7 +178,7 @@ export function useReports(filters?: ReportsFilters) {
     const profitMap = new Map<string, { name: string; revenue: number; cost: number }>();
     (financialEntries || []).forEach((e: any) => {
       if (!e.client_id) return;
-      const existing = profitMap.get(e.client_id) || { name: e.clients?.name || "—", revenue: 0, cost: 0 };
+      const existing = profitMap.get(e.client_id) || { name: getClientDisplayName(e.clients) || "—", revenue: 0, cost: 0 };
       const val = Number(e.value) || 0;
       if (e.type === "receber") existing.revenue += val;
       else if (e.type === "pagar") existing.cost += val;

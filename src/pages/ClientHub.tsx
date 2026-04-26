@@ -12,6 +12,7 @@ import { ClientHubAnalysis } from "@/components/client-hub/ClientHubAnalysis";
 import { ClientHubPendencies } from "@/components/client-hub/ClientHubPendencies";
 import { ClientHubAsaas } from "@/components/client-hub/ClientHubAsaas";
 import { cn } from "@/lib/utils";
+import { getClientDisplayName, getClientStatusLabel } from "@/lib/clients";
 
 const tabs = [
   { value: "deliveries", label: "Entregas", icon: Package },
@@ -43,7 +44,7 @@ export default function ClientHub() {
     }
     const { data } = await supabase
       .from("clients")
-      .select("*, client_types(name)")
+      .select("*")
       .eq("id", id)
       .single();
     setClient(data);
@@ -82,9 +83,10 @@ export default function ClientHub() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-heading font-bold tracking-tight">{client.name}</h1>
+          <h1 className="text-2xl font-heading font-bold tracking-tight">{getClientDisplayName(client)}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {(client.client_types as any)?.name || "Sem tipo"} · {client.status}
+            {getClientStatusLabel(client.status)}
+            {client.contact_name && ` · ${client.contact_name}`}
             {client.email && ` · ${client.email}`}
           </p>
         </div>
@@ -120,7 +122,7 @@ export default function ClientHub() {
           {activeTab === "deliveries" && <ClientHubDeliveries clientId={id!} />}
           {activeTab === "contracts" && <ClientHubContracts clientId={id!} />}
           {activeTab === "billing" && (
-            <ClientHubAsaas clientId={id!} clientName={client.name} />
+            <ClientHubAsaas clientId={id!} clientName={getClientDisplayName(client)} />
           )}
           {activeTab === "timeline" && <ClientHubTimeline clientId={id!} />}
           {activeTab === "analysis" && <ClientHubAnalysis clientId={id!} initialAnalysis={client.marketing_analysis || ""} />}

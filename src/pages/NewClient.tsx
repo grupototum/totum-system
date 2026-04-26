@@ -1,4 +1,3 @@
-import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -157,7 +156,7 @@ export default function NewClient() {
     setSaving(false);
     if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
     toast({ title: "✅ Cliente cadastrado!", description: `${form.company_name} adicionado com sucesso` });
-    navigate("/hub");
+    navigate("/clientes");
   };
 
   const progress = ((step + 1) / 5) * 100;
@@ -171,8 +170,7 @@ export default function NewClient() {
   };
 
   return (
-    <AppLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">NOVO CLIENTE</h1>
@@ -454,6 +452,6 @@ export default function NewClient() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </div>
   );
 }

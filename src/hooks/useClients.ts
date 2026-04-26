@@ -4,9 +4,12 @@ import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoClients } from "@/data/demoData";
+import { getClientDisplayName } from "@/lib/clients";
 
 export type ClientRow = Tables<"clients"> & {
-  client_types?: { name: string } | null;
+  company_name?: string | null;
+  contact_name?: string | null;
+  cnpj?: string | null;
   contracts?: { value: number | null; plan_id: string | null; status: string; plans?: { name: string } | null }[];
 };
 
@@ -32,11 +35,13 @@ export function useClients() {
 
       const { data, error } = await supabase
         .from("clients")
-        .select("*, client_types(name), contracts(value, plan_id, status, plans(name))")
-        .order("name");
+        .select("*, contracts(value, plan_id, status, plans(name))");
 
       if (error) throw error;
-      setClients((data as ClientRow[]) || []);
+      const sorted = ((data as ClientRow[]) || []).sort((a, b) =>
+        getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR")
+      );
+      setClients(sorted);
     } catch (error) {
       console.error("Error fetching clients:", error);
       setClients([]);
@@ -55,7 +60,7 @@ export function useClients() {
       return false;
     }
     await fetch();
-    toast({ title: "Cliente criado", description: values.name });
+    toast({ title: "Cliente criado", description: getClientDisplayName(values as ClientRow) });
     return true;
   };
 

@@ -9,33 +9,32 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useClients, ClientRow } from "@/hooks/useClients";
-import { ClientFormDialog } from "@/components/clients/ClientFormDialog";
-import { Badge } from "@/components/ui/badge";
 import { useProfiles } from "@/hooks/useProfiles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserCheck } from "lucide-react";
+import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
+  active: "status-active",
   pausado: "status-paused",
   cancelado: "status-cancelled",
   inativo: "status-cancelled",
+  pending: "status-paused",
 };
 
 export default function Clients() {
   const navigate = useNavigate();
-  const { clients, loading, addClient, updateClient, deleteClient } = useClients();
+  const { clients, loading, deleteClient } = useClients();
   const { profiles } = useProfiles();
   const [search, setSearch] = useState("");
   const [managerFilter, setManagerFilter] = useState<string>("all");
-  const [showForm, setShowForm] = useState(false);
-  const [editingClient, setEditingClient] = useState<ClientRow | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "card">(() => {
     return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
   });
 
   const filtered = clients.filter((c: any) => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = getClientDisplayName(c).toLowerCase().includes(search.toLowerCase());
     const matchesManager = managerFilter === "all" || c.assigned_user_id === managerFilter;
     return matchesSearch && matchesManager;
   });
@@ -51,24 +50,7 @@ export default function Clients() {
       .reduce((s, ct) => s + (Number(ct.value) || 0), 0);
   };
 
-  const activeCount = clients.filter((c) => c.status === "ativo").length;
-
-  const handleEdit = (client: ClientRow) => {
-    setEditingClient(client);
-    setShowForm(true);
-  };
-
-  const handleSubmit = async (values: any) => {
-    if (editingClient) {
-      return updateClient(editingClient.id, values);
-    }
-    return addClient(values);
-  };
-
-  const handleClose = (open: boolean) => {
-    setShowForm(open);
-    if (!open) setEditingClient(null);
-  };
+  const activeCount = clients.filter((c) => ["ativo", "active"].includes((c.status || "").toLowerCase())).length;
 
   const getInitials = (name: string) =>
     name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -80,7 +62,7 @@ export default function Clients() {
           <h1 className="text-2xl font-heading font-bold tracking-tight">Clientes</h1>
           <p className="text-sm text-muted-foreground mt-1">{activeCount} ativos · {clients.length} total</p>
         </div>
-        <Button onClick={() => { setEditingClient(null); setShowForm(true); }} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
+        <Button onClick={() => navigate("/clientes/novo")} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
           <Plus className="h-4 w-4" /> Novo Cliente
         </Button>
       </div>
@@ -162,24 +144,26 @@ export default function Clients() {
                   <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>
                 ) : filtered.map((client) => {
                   const mrr = getMrr(client);
+                  const displayName = getClientDisplayName(client);
+                  const statusLabel = getClientStatusLabel(client.status);
                   return (
                     <tr
                       key={client.id}
                       className="border-b border-border/50 hover:bg-white/[0.03] transition-colors cursor-pointer"
                       onClick={() => navigate(`/clientes/${client.id}`)}
                     >
-                      <td className="p-4 font-medium text-primary cursor-pointer">{client.name}</td>
-                      <td className="p-4 text-muted-foreground text-xs">{(client.client_types as any)?.name || "—"}</td>
+                      <td className="p-4 font-medium text-primary cursor-pointer">{displayName}</td>
+                      <td className="p-4 text-muted-foreground text-xs">{client.cnpj || client.document || "—"}</td>
                       <td className="p-4">{getActivePlan(client)}</td>
                       <td className="p-4 font-heading">
                         {mrr > 0 ? `R$ ${mrr.toLocaleString("pt-BR")}` : "—"}
                       </td>
                       <td className="p-4">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig[client.status] || "status-paused"}`}>
-                          {client.status}
+                          {statusLabel}
                         </span>
                       </td>
-                      <td className="p-4 text-xs text-muted-foreground">{client.email || client.phone || "—"}</td>
+                      <td className="p-4 text-xs text-muted-foreground">{getClientSecondaryInfo(client)}</td>
                       <td className="p-4" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -188,12 +172,12 @@ export default function Clients() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(client)}>
+                            <DropdownMenuItem onClick={() => navigate(`/clientes/${client.id}/editar`)}>
                               <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => { if (confirm(`Excluir "${client.name}"?`)) deleteClient(client.id); }}
+                              onClick={() => { if (confirm(`Excluir "${displayName}"?`)) deleteClient(client.id); }}
                             >
                               <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
                             </DropdownMenuItem>
@@ -218,6 +202,8 @@ export default function Clients() {
             <div className="col-span-full py-16 text-center text-muted-foreground">Nenhum cliente encontrado</div>
           ) : filtered.map((client, i) => {
             const mrr = getMrr(client);
+            const displayName = getClientDisplayName(client);
+            const statusLabel = getClientStatusLabel(client.status);
             return (
               <motion.div
                 key={client.id}
@@ -236,12 +222,12 @@ export default function Clients() {
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEdit(client)}>
+                      <DropdownMenuItem onClick={() => navigate(`/clientes/${client.id}/editar`)}>
                         <Pencil className="h-3.5 w-3.5 mr-2" /> Editar
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => { if (confirm(`Excluir "${client.name}"?`)) deleteClient(client.id); }}
+                        onClick={() => { if (confirm(`Excluir "${displayName}"?`)) deleteClient(client.id); }}
                       >
                         <Trash2 className="h-3.5 w-3.5 mr-2" /> Excluir
                       </DropdownMenuItem>
@@ -252,18 +238,18 @@ export default function Clients() {
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center text-primary text-sm font-bold shrink-0">
-                    {getInitials(client.name)}
+                    {getInitials(displayName)}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">{client.name}</h3>
-                    <p className="text-[11px] text-muted-foreground truncate">{(client.client_types as any)?.name || "Sem tipo"}</p>
+                    <h3 className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">{displayName}</h3>
+                    <p className="text-[11px] text-muted-foreground truncate">{client.cnpj || client.document || "Sem documento"}</p>
                   </div>
                 </div>
 
                 {/* Status + MRR */}
                 <div className="flex items-center justify-between mb-4">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusConfig[client.status] || "status-paused"}`}>
-                    {client.status}
+                    {statusLabel}
                   </span>
                   {mrr > 0 ? (
                     <span className="text-xs font-heading font-semibold text-emerald-400">R$ {mrr.toLocaleString("pt-BR")}<span className="text-muted-foreground font-normal">/mês</span></span>
@@ -274,10 +260,10 @@ export default function Clients() {
 
                 {/* Info rows */}
                 <div className="space-y-1.5 text-xs text-muted-foreground">
-                  {client.email && (
+                  {(client.contact_name || client.email) && (
                     <div className="flex items-center gap-2 truncate">
                       <Mail className="h-3 w-3 shrink-0 text-muted-foreground/60" />
-                      <span className="truncate">{client.email}</span>
+                      <span className="truncate">{client.contact_name || client.email}</span>
                     </div>
                   )}
                   {client.phone && (
@@ -296,8 +282,6 @@ export default function Clients() {
           })}
         </motion.div>
       )}
-
-      <ClientFormDialog open={showForm} onOpenChange={handleClose} onSubmit={handleSubmit} editData={editingClient} />
     </div>
   );
 }

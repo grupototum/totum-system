@@ -37,12 +37,12 @@ export function RevenueChart() {
 
         const { data: entries } = await supabase
           .from("financial_entries")
-          .select("type, value")
+          .select("type, value, entry_class")
           .gte("due_date", monthStart)
           .lt("due_date", monthEnd);
 
         const receita = (entries || []).filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
-        const custo = (entries || []).filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
+        const custo = (entries || []).filter((e: any) => e.type === "pagar" && e.entry_class === "custo").reduce((s, e) => s + Number(e.value), 0);
         const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
         results.push({ month: label.charAt(0).toUpperCase() + label.slice(1), receita, custo });
       }

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { addMonths, format, parseISO } from "date-fns";
+import { getClientDisplayName } from "@/lib/clients";
 
 interface Props {
   open: boolean;
@@ -21,7 +22,8 @@ interface Props {
 export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   const [saving, setSaving] = useState(false);
   const [description, setDescription] = useState("");
-  const [type, setType] = useState("receber");
+  const [entryClass, setEntryClass] = useState("receita");
+  const [nature, setNature] = useState("fixo");
   const [categoryId, setCategoryId] = useState("");
   const [categories, setCategories] = useState<{ id: string; name: string; type: string }[]>([]);
   const [value, setValue] = useState("");
@@ -32,7 +34,9 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   const [expenseTypeId, setExpenseTypeId] = useState("");
   const [expenseTypes, setExpenseTypes] = useState<{ id: string; name: string }[]>([]);
   const [clientId, setClientId] = useState("");
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
+  const [contractId, setContractId] = useState("");
+  const [contracts, setContracts] = useState<{ id: string; status: string; plans?: { name?: string | null } | null; value?: number | null }[]>([]);
   const [interval, setIntervalValue] = useState("1");
   const [notes, setNotes] = useState("");
 
@@ -47,20 +51,42 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
       supabase.from("expense_types").select("id, name").eq("is_active", true).then(({ data }) => {
         if (data) setExpenseTypes(data);
       });
-      supabase.from("clients").select("id, name").eq("status", "ativo").order("name").then(({ data }) => {
-        if (data) setClients(data);
+      supabase.from("clients").select("*").then(({ data }) => {
+        if (data) {
+          const activeClients = data
+            .filter((client: any) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
+            .sort((a: any, b: any) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+          setClients(activeClients);
+        }
       });
     }
   }, [open]);
 
   useEffect(() => {
     setCategoryId("");
-  }, [type]);
+  }, [entryClass]);
+
+  useEffect(() => {
+    if (!clientId || clientId === "none") {
+      setContractId("");
+      setContracts([]);
+      return;
+    }
+
+    supabase
+      .from("contracts")
+      .select("id, status, value, plans(name)")
+      .eq("client_id", clientId)
+      .order("start_date", { ascending: false })
+      .then(({ data }) => {
+        setContracts((data as any) || []);
+      });
+  }, [clientId]);
 
   const resetForm = () => {
-    setDescription(""); setType("receber"); setCategoryId(""); setValue("");
+    setDescription(""); setEntryClass("receita"); setNature("fixo"); setCategoryId(""); setValue("");
     setDueDate(""); setInstallments("1"); setIntervalValue("1");
-    setCostCenterId(""); setExpenseTypeId(""); setClientId(""); setNotes("");
+    setCostCenterId(""); setExpenseTypeId(""); setClientId(""); setContractId(""); setNotes("");
   };
 
   const handleSave = async () => {
@@ -77,7 +103,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
     const { data: { user } } = await supabase.auth.getUser();
 
     try {
-      const dbType = type === "receber" ? "receber" : "pagar";
+      const dbType = entryClass === "receita" ? "receber" : "pagar";
       const intervalMonths = Math.max(1, parseInt(interval) || 1);
       const entries = [];
       
@@ -86,10 +112,13 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
         entries.push({
           description: numInstallments > 1 ? `${description.trim()} (${i + 1}/${numInstallments})` : description.trim(),
           type: dbType,
+          entry_class: entryClass,
+          nature,
           category_id: categoryId || null,
           cost_center_id: costCenterId || null,
-          expense_type_id: (type === "despesa" || type === "custo") ? expenseTypeId || null : null,
-          client_id: clientId || null,
+          expense_type_id: entryClass === "receita" ? null : expenseTypeId || null,
+          client_id: !clientId || clientId === "none" ? null : clientId,
+          contract_id: !contractId || contractId === "none" ? null : contractId,
           value: installmentValue,
           due_date: format(date, "yyyy-MM-dd"),
           status: "pendente" as const,
@@ -117,10 +146,8 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
   };
 
   const filteredCategories = categories.filter(c => {
-    if (type === "receber") return c.type === "receber" || c.type === "receita";
-    if (type === "despesa") return c.type === "pagar" || c.type === "despesa";
-    if (type === "custo") return c.type === "custo";
-    return true;
+    if (entryClass === "receita") return c.type === "receber" || c.type === "receita";
+    return c.type === "pagar" || c.type === "despesa";
   });
 
   return (
@@ -140,10 +167,10 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Tipo</Label>
-              <Select value={type} onValueChange={setType}>
+              <Select value={entryClass} onValueChange={setEntryClass}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="receber">Receita</SelectItem>
+                  <SelectItem value="receita">Receita</SelectItem>
                   <SelectItem value="despesa">Despesa</SelectItem>
                   <SelectItem value="custo">Custo</SelectItem>
                 </SelectContent>
@@ -178,14 +205,41 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Natureza</Label>
+              <Select value={nature} onValueChange={setNature}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fixo">Fixo</SelectItem>
+                  <SelectItem value="variavel">Variável</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Cliente</Label>
+              <Select value={clientId} onValueChange={setClientId}>
+                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {clients.map(c => (
+                    <SelectItem key={c.id} value={c.id}>{getClientDisplayName(c)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
-            <Label>Cliente</Label>
-            <Select value={clientId} onValueChange={setClientId}>
+            <Label>Contrato</Label>
+            <Select value={contractId} onValueChange={setContractId} disabled={!clientId || clientId === "none"}>
               <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Nenhum</SelectItem>
-                {clients.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                {contracts.map(c => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.plans?.name || "Contrato"} {c.value ? `· R$ ${Number(c.value).toLocaleString("pt-BR")}` : ""}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -206,7 +260,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
             </div>
             <div className="space-y-1.5">
               <Label>Tipo de Despesa</Label>
-              <Select value={expenseTypeId} onValueChange={setExpenseTypeId}>
+              <Select value={expenseTypeId} onValueChange={setExpenseTypeId} disabled={entryClass === "receita"}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>

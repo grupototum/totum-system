@@ -226,14 +226,22 @@ export function useImportData() {
       let clientCount = 0;
 
       if (clientMap.size > 0) {
-        const { data: existing } = await supabase.from("clients").select("id, name");
-        const existingMap = new Map((existing || []).map(c => [c.name.toLowerCase(), c.id]));
+        const { data: existing } = await supabase.from("clients").select("*");
+        const existingMap = new Map((existing || []).map((c: any) => [String(c.company_name || c.name || "").toLowerCase(), c.id]));
         for (const [key, client] of clientMap) {
           if (existingMap.has(key)) {
             clientIdMap.set(key, existingMap.get(key)!);
           } else {
             const { data: created, error } = await (supabase.from("clients") as any)
-              .insert({ name: client.name, email: client.email || null, phone: client.phone || null, document: client.document || null, import_batch_id: batch.id })
+              .insert({
+                company_name: client.name,
+                contact_name: client.name,
+                email: client.email || null,
+                phone: client.phone || null,
+                cnpj: client.document || null,
+                import_batch_id: batch.id,
+                status: "active",
+              })
               .select("id")
               .single();
             if (!error && created) {
@@ -259,12 +267,15 @@ export function useImportData() {
         const entries = chunk.map(row => {
           const typeRaw = row.data.type.toLowerCase();
           const isIncome = INCOME_KEYWORDS.includes(typeRaw);
+          const entryClass = isIncome ? "receita" : typeRaw.includes("custo") ? "custo" : "despesa";
           const value = Math.abs(parseValue(row.data.value) || 0);
           const clientKey = row.data.client_name?.toLowerCase();
           return {
             description: row.data.description,
             value,
-            type: isIncome ? "receita" : "despesa",
+            type: isIncome ? "receber" : "pagar",
+            entry_class: entryClass,
+            nature: "variavel",
             due_date: parseDate(row.data.date),
             status: "pendente",
             notes: row.data.notes || null,

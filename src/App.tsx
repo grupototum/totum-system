@@ -16,6 +16,8 @@ import SetupPage from "./pages/SetupPage";
 import Index from "./pages/Index";
 import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
+import NewClient from "./pages/NewClient";
+import EditClient from "./pages/EditClient";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
@@ -73,7 +75,13 @@ function ProtectedRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/clientes" element={<Clients />} />
+        <Route path="/clientes/novo" element={<NewClient />} />
         <Route path="/clientes/:id" element={<ClientHub />} />
+        <Route path="/clientes/:clientId/editar" element={<EditClient />} />
+        <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/:id" element={<ClientHub />} />
+        <Route path="/new-client" element={<NewClient />} />
+        <Route path="/edit-client/:clientId" element={<EditClient />} />
         <Route path="/tarefas" element={<Tasks />} />
         <Route path="/entregas" element={<Fulfillment />} />
         <Route path="/contratos" element={<Contracts />} />

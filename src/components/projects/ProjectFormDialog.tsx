@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
+import { getClientDisplayName } from "@/lib/clients";
 
 interface TaskDef {
   title: string;
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
   const [profiles, setProfiles] = useState<{ user_id: string; full_name: string }[]>([]);
@@ -41,13 +42,16 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
   useEffect(() => {
     if (open) {
       Promise.all([
-        supabase.from("clients").select("id, name").eq("status", "ativo").order("name"),
+        supabase.from("clients").select("*"),
         supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
         supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
         supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name"),
         supabase.from("project_templates").select("*, project_template_tasks(*)").order("name"),
       ]).then(([c, ct, pt, p, tpl]) => {
-        setClients(c.data || []);
+        const activeClients = ((c.data as any[]) || [])
+          .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
+          .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+        setClients(activeClients);
         setContracts((ct.data as any) || []);
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
@@ -179,7 +183,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
               <Select value={form.client_id} onValueChange={(v) => setForm({ ...form, client_id: v, contract_id: "" })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
-                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{getClientDisplayName(c)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

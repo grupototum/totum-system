@@ -1,4 +1,3 @@
-import AppLayout from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -117,27 +116,25 @@ export default function EditClient() {
 
   if (loading) {
     return (
-      <AppLayout>
-        <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="p-6 max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-12 w-full rounded-xl" />
           <Skeleton className="h-96 rounded-xl" />
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
   if (!form) {
     return (
-      <AppLayout>
-        <div className="p-6 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="p-6 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
           <Building2 className="w-16 h-16 text-muted-foreground/40 mb-4" />
           <p className="text-muted-foreground">Cliente não encontrado</p>
-          <Button variant="outline" className="mt-4 border-border/40" onClick={() => navigate("/clients")}>
+          <Button variant="outline" className="mt-4 border-border/40" onClick={() => navigate("/clientes")}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </Button>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
@@ -221,7 +218,7 @@ export default function EditClient() {
     setSaving(false);
     if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
     toast({ title: "✅ Cliente atualizado!", description: `${form.company_name} salvo com sucesso` });
-    navigate("/clients");
+    navigate("/clientes");
   };
 
   const progress = ((step + 1) / 5) * 100;
@@ -234,11 +231,10 @@ export default function EditClient() {
   };
 
   return (
-    <AppLayout>
-      <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground mb-3" onClick={() => navigate("/clients")}>
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground mb-3" onClick={() => navigate("/clientes")}>
             <ArrowLeft className="w-3 h-3 mr-1" /> Voltar à Central
           </Button>
           <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">EDITAR CLIENTE</h1>
@@ -508,6 +504,6 @@ export default function EditClient() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </div>
   );
 }
