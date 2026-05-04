@@ -56,16 +56,20 @@ export default function Clients() {
     name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-heading font-bold tracking-tight">Clientes</h1>
-          <p className="text-sm text-muted-foreground mt-1">{activeCount} ativos · {clients.length} total</p>
-        </div>
-        <Button onClick={() => navigate("/clientes/novo")} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
-          <Plus className="h-4 w-4" /> Novo Cliente
-        </Button>
-      </div>
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+      <PageHeader
+        title="Clientes"
+        subtitle={`${activeCount} ativos · ${clients.length} total`}
+        icon={<Users className="h-5 w-5" />}
+        actions={
+          <Button
+            onClick={() => navigate("/clientes/novo")}
+            className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5"
+          >
+            <Plus className="h-4 w-4" /> Novo Cliente
+          </Button>
+        }
+      />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
