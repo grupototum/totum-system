@@ -1,61 +1,35 @@
 ## Objetivo
-Permitir soltar imagens em **qualquer ponto** do painel de Anexos do modal da tarefa (grid, busca, histórico, lista de upload), não apenas na dropzone superior, com feedback visual claro e suporte a múltiplos arquivos.
+Adicionar seleção múltipla e exclusão em lote de anexos dentro da aba Anexos da tarefa, com confirmação e registro automático no histórico.
 
-## Mudanças em `src/components/tasks/TaskAnexos.tsx`
+## Mudanças
 
-1. **Container raiz com drag-and-drop global**
-   - Adicionar `onDragEnter`, `onDragOver`, `onDragLeave`, `onDrop` no `<div className="p-6 space-y-5">` (wrapper de toda a aba).
-   - Usar um contador de drag (`dragDepthRef`) para evitar flicker quando o ponteiro passa por elementos filhos (problema clássico de `dragenter`/`dragleave` aninhados).
-   - Filtrar para ativar apenas quando `e.dataTransfer.types` inclui `"Files"` (ignora seleção de texto/elementos arrastados internamente).
-   - `position: relative` no container para o overlay.
+### `src/hooks/useTaskAttachments.ts`
+- Adicionar `removeMany(anexos: TaskAttachment[])`:
+  - Remove arquivos do storage via `.remove(paths)` (1 chamada).
+  - Deleta linhas via `.delete().in('id', ids)` (1 chamada — o trigger existente em `tarefa_anexos` já registra cada remoção em `tarefa_anexos_historico`, garantindo histórico por arquivo).
+  - Recarrega lista/histórico e retorna `{ removed, failed }`.
+- Exportar `removeMany` no retorno do hook.
 
-2. **Overlay de feedback visual fullscreen (dentro do painel)**
-   - Quando `dragOver === true`, renderizar um overlay absoluto cobrindo o painel: borda tracejada vermelha (accent `#ff3b3b`), fundo translúcido escuro com blur, ícone grande `solar:cloud-upload-bold` e texto "Solte para anexar (até X arquivos, X MB no total)".
-   - `pointer-events-none` no conteúdo interno do overlay para que `drop` chegue ao container.
-   - Z-index alto, mas abaixo do lightbox.
-
-3. **Dropzone interna mantida**
-   - Mantém clique para abrir o seletor e seu próprio destaque visual leve quando `dragOver` global está ativo (ex.: borda mais forte).
-   - Remover handlers duplicados ou deixá-los no-op (delegando ao container global) para evitar dois `drop` disparando.
-
-4. **Reuso da lógica de `handleFiles`**
-   - Sem alterações na validação/upload — apenas chamada a partir do `onDrop` global.
+### `src/components/tasks/TaskAnexos.tsx`
+- Estado novo: `selected: Set<string>` (ids selecionados) e `confirmOpen: boolean`.
+- Cada card do grid:
+  - Checkbox no canto superior esquerdo (sempre visível quando há seleção, hover caso contrário).
+  - Clicar no card com seleção ativa alterna seleção em vez de abrir lightbox.
+  - Borda destacada (`ring-2 ring-[#ff3b3b]`) quando selecionado.
+- Barra de ações fixa acima do grid quando `selected.size > 0`:
+  - Texto "X selecionado(s)".
+  - Botão "Selecionar todos" / "Limpar seleção".
+  - Botão `destructive` "Excluir selecionados" (ícone lixeira).
+- Diálogo de confirmação (`AlertDialog` do shadcn) ao clicar em excluir:
+  - Mensagem: "Excluir N anexos? Esta ação não pode ser desfeita."
+  - Confirmar chama `removeMany`, exibe `toast.success` com a contagem e limpa seleção. Erros via `toast.error`.
+- Limpar seleção automaticamente após exclusão e ao recarregar a tarefa.
 
 ## Detalhes técnicos
-
-```text
-<div ref={rootRef}
-     onDragEnter, onDragOver, onDragLeave, onDrop  ← global
-     className="relative p-6 space-y-5">
-
-  [dropzone clicável]
-  [upload queue]
-  [busca]
-  [grid de imagens]
-  [histórico]
-
-  {dragOver && (
-    <div className="absolute inset-0 z-40 rounded-xl
-                    border-2 border-dashed border-[#ff3b3b]
-                    bg-stone-900/40 backdrop-blur-sm
-                    flex flex-col items-center justify-center
-                    pointer-events-none">
-      <Icon ... />
-      <p>Solte para anexar imagens</p>
-    </div>
-  )}
-</div>
-```
-
-Contador de profundidade:
-```ts
-const depth = useRef(0);
-onDragEnter: depth.current++; if (hasFiles) setDragOver(true);
-onDragLeave: depth.current--; if (depth.current <= 0) setDragOver(false);
-onDrop: depth.current = 0; setDragOver(false); handleFiles(...);
-```
+- Usar `AlertDialog` (`@/components/ui/alert-dialog`) já presente no projeto.
+- Usar `Checkbox` (`@/components/ui/checkbox`).
+- Histórico: nada a fazer no front — o trigger `tarefa_anexos_historico` registra automaticamente cada `DELETE`. A seção Histórico já existente exibirá as entradas após o reload.
 
 ## Fora de escopo
-- Sem mudanças no hook `useTaskAttachments`.
-- Sem mudanças nos limites (2MB/arquivo, 20MB/lote, MAX_BATCH).
-- Sem alteração no `TaskModal` (drop ativo só dentro da aba Anexos, evitando captura indevida em outras abas).
+- Sem mudanças na migration/banco (trigger de histórico já cobre exclusão em lote).
+- Sem alteração no lightbox.
