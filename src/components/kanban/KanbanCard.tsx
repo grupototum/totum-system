@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Tarefa, PRIORIDADES } from '@/hooks/useTasks';
 import { Icon } from '@/components/shared/Icon';
-import { useTaskAttachmentsSummary } from '@/hooks/useTaskAttachments';
+import type { AttachmentSummary } from '@/hooks/useTaskAttachments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -9,6 +9,7 @@ interface KanbanCardProps {
   tarefa: Tarefa;
   projetoNome?: string | null;
   onClick: () => void;
+  attachmentSummary?: AttachmentSummary;
 }
 
 const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -44,7 +45,7 @@ const getPrioridadeColor = (prioridade: string) => {
   return p?.cor || '#78716C';
 };
 
-export function KanbanCard({ tarefa, projetoNome, onClick }: KanbanCardProps) {
+export function KanbanCard({ tarefa, projetoNome, onClick, attachmentSummary }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   
   const subtarefasConcluidas = (tarefa.subtarefas || []).filter(st => st.concluida).length;
