@@ -108,7 +108,9 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
   const selectItemClasses = "text-xs focus:bg-white/[0.06] focus:text-foreground";
 
   const tabs = [
-    { key: "detail", label: "Detalhes", icon: ChevronDown },
+    { key: "summary", label: "Resumo", icon: ChevronDown },
+    { key: "details", label: "Detalhes", icon: FileText },
+    { key: "subtasks", label: `Subtarefas (${task.subtasks.length})`, icon: ListTree },
     { key: "recurrence", label: "Recorrência", icon: RefreshCw },
     { key: "comments", label: `Comentários (${task.comments.length})`, icon: MessageSquare },
     { key: "history", label: `Histórico (${task.history.length})`, icon: History },
