@@ -163,8 +163,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
           ))}
         </div>
 
-        {/* Detail Tab */}
-        {activeTab === "detail" && (
+        {/* Summary Tab */}
+        {activeTab === "summary" && (
           <div className="space-y-5 mt-3">
             {/* Status & Priority Row */}
             <div className="grid grid-cols-2 gap-3">
@@ -240,14 +240,19 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 />
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Description */}
+        {/* Details Tab */}
+        {activeTab === "details" && (
+          <div className="space-y-5 mt-3">
+            {/* Description (5x larger) */}
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
               <Textarea
                 value={task.description}
                 onChange={(e) => update({ description: e.target.value })}
-                className="bg-muted/50 border-border rounded-lg text-xs min-h-[60px] resize-none focus:border-primary/50"
+                className="bg-muted/50 border-border rounded-lg text-xs min-h-[300px] resize-y focus:border-primary/50"
               />
             </div>
 
@@ -297,8 +302,12 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 </Button>
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Subtasks */}
+        {/* Subtasks Tab */}
+        {activeTab === "subtasks" && (
+          <div className="space-y-5 mt-3">
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Subtarefas</label>
               <div className="space-y-1">
