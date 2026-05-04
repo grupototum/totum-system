@@ -130,7 +130,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border text-foreground max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-thin">
+      <DialogContent className="bg-card border-border text-foreground max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg pr-8 flex items-center gap-2">
             {task.title}
