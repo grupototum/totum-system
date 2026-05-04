@@ -55,7 +55,7 @@ export function ExecutionLog({ execution, className }: ExecutionLogProps) {
       case 'success':
         return <Badge variant="default" className="bg-green-500">Sucesso</Badge>;
       case 'error':
-        return <Badge variant="error">Erro</Badge>;
+        return <Badge variant="destructive">Erro</Badge>;
       case 'running':
         return <Badge variant="secondary" className="animate-pulse">Executando...</Badge>;
       default:
