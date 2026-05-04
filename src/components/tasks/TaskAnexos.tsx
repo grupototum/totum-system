@@ -41,6 +41,7 @@ export function TaskAnexos({ tarefaId }: Props) {
     totalProgress,
     doneCount,
     uploadMany,
+    retryOne,
     remove,
     removeMany,
     clearQueue,
