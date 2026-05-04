@@ -32,7 +32,7 @@ export default function DatabaseStatus() {
     } catch {
       // Tenta um ping simples
       try {
-        const { error: pingError } = await supabase.from('skills').select('id').limit(1);
+        const { error: pingError } = await (supabase as any).from('skills').select('id').limit(1);
         const latency = Date.now() - start;
         setStats({ status: pingError ? 'offline' : 'online', tablesCount: 0, latency, lastChecked: new Date() });
       } catch {
