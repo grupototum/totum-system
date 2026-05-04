@@ -201,13 +201,31 @@ export function TaskAnexos({ tarefaId }: Props) {
           </div>
           <Progress value={usedPct} className="h-1" />
           <div className="flex items-center justify-between text-xs text-stone-600 pt-1">
-            <span>{doneCount}/{uploadQueue.length} concluídos</span>
-            <span>{totalProgress}%</span>
+            <span>
+              {doneCount}/{uploadQueue.length} concluídos
+              {errorCount > 0 && (
+                <span className="ml-2 text-red-500 font-medium">· {errorCount} falha(s)</span>
+              )}
+            </span>
+            <div className="flex items-center gap-2">
+              {errorCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={retryAllErrors}
+                  className="h-6 px-2 text-xs gap-1 text-[#ff3b3b] hover:text-[#ff3b3b]/80"
+                >
+                  <Icon name="solar:refresh-linear" className="w-3 h-3" />
+                  Repetir todos
+                </Button>
+              )}
+              <span>{totalProgress}%</span>
+            </div>
           </div>
           <Progress value={totalProgress} className="h-1.5" />
-          <div className="space-y-1.5 max-h-40 overflow-y-auto">
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {uploadQueue.map((q) => (
-              <div key={q.id} className="flex items-center gap-2 text-xs">
+              <div key={q.id} className="flex items-start gap-2 text-xs py-1">
                 <Icon
                   name={
                     q.status === 'done'
@@ -216,15 +234,32 @@ export function TaskAnexos({ tarefaId }: Props) {
                       ? 'solar:close-circle-bold'
                       : 'solar:upload-linear'
                   }
-                  className={`w-3.5 h-3.5 ${
+                  className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
                     q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
                   }`}
                 />
-                <span className="truncate flex-1">{q.name}</span>
-                {q.status === 'error' ? (
-                  <span className="text-red-500 truncate max-w-[40%]" title={q.error}>{q.error}</span>
-                ) : (
-                  <Progress value={q.progress} className="h-1 w-20" />
+                <div className="flex-1 min-w-0">
+                  <div className="truncate font-medium text-stone-700" title={q.name}>{q.name}</div>
+                  {q.status === 'error' ? (
+                    <div className="text-[11px] text-red-500 leading-snug" title={q.error}>
+                      {q.error}
+                    </div>
+                  ) : q.status === 'done' ? (
+                    <div className="text-[11px] text-emerald-600">Enviado</div>
+                  ) : (
+                    <Progress value={q.progress} className="h-1 w-full mt-1" />
+                  )}
+                </div>
+                {q.status === 'error' && q.file && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => retryOne(q.id)}
+                    className="h-6 px-2 text-xs gap-1 text-[#ff3b3b] hover:text-[#ff3b3b]/80 shrink-0"
+                  >
+                    <Icon name="solar:refresh-linear" className="w-3 h-3" />
+                    Repetir
+                  </Button>
                 )}
               </div>
             ))}
