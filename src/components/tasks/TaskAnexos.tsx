@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '@/components/shared/Icon';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
