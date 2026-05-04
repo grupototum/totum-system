@@ -19,6 +19,7 @@ import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
 import NewClient from "./pages/NewClient";
 import EditClient from "./pages/EditClient";
+import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
@@ -76,13 +77,13 @@ function ProtectedRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/clientes" element={<Clients />} />
-        <Route path="/clientes/novo" element={<NewClient />} />
+        <Route path="/clientes/novo" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
         <Route path="/clientes/:id" element={<ClientHub />} />
-        <Route path="/clientes/:clientId/editar" element={<EditClient />} />
+        <Route path="/clientes/:clientId/editar" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/:id" element={<ClientHub />} />
-        <Route path="/new-client" element={<NewClient />} />
-        <Route path="/edit-client/:clientId" element={<EditClient />} />
+        <Route path="/new-client" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
+        <Route path="/edit-client/:clientId" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
         <Route path="/tarefas" element={<Tasks />} />
         <Route path="/entregas" element={<Fulfillment />} />
         <Route path="/contratos" element={<Contracts />} />
