@@ -218,6 +218,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
     doneCount,
     uploadMany,
     remove,
+    removeMany,
     reload: load,
     clearQueue: () => setUploadQueue([]),
   };
