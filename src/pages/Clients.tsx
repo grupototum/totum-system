@@ -2,8 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Search, Plus, MoreHorizontal, ArrowUpDown, Loader2, Pencil, Trash2,
-  LayoutGrid, List, Mail, Phone, Building2
+  Search, Plus, MoreHorizontal, ArrowUpDown, Pencil, Trash2,
+  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useClients, ClientRow } from "@/hooks/useClients";
 import { useProfiles } from "@/hooks/useProfiles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserCheck } from "lucide-react";
 import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
+import { PageHeader, EmptyState, LoadingState } from "@/components/shared";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
@@ -56,16 +56,20 @@ export default function Clients() {
     name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-heading font-bold tracking-tight">Clientes</h1>
-          <p className="text-sm text-muted-foreground mt-1">{activeCount} ativos · {clients.length} total</p>
-        </div>
-        <Button onClick={() => navigate("/clientes/novo")} className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5">
-          <Plus className="h-4 w-4" /> Novo Cliente
-        </Button>
-      </div>
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+      <PageHeader
+        title="Clientes"
+        subtitle={`${activeCount} ativos · ${clients.length} total`}
+        icon={<Users className="h-5 w-5" />}
+        actions={
+          <Button
+            onClick={() => navigate("/clientes/novo")}
+            className="gradient-primary border-0 text-white font-semibold gap-2 rounded-full px-5"
+          >
+            <Plus className="h-4 w-4" /> Novo Cliente
+          </Button>
+        }
+      />
 
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
@@ -114,9 +118,7 @@ export default function Clients() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <LoadingState variant="cards" rows={6} />
       ) : viewMode === "list" ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
@@ -141,7 +143,19 @@ export default function Clients() {
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>
+                  <tr><td colSpan={7} className="p-0">
+                    <EmptyState
+                      title="Nenhum cliente encontrado"
+                      description={search || managerFilter !== "all" ? "Ajuste a busca ou os filtros." : "Cadastre o primeiro cliente para começar."}
+                      icon={<Users className="h-6 w-6" />}
+                      action={
+                        <Button onClick={() => navigate("/clientes/novo")} size="sm">
+                          <Plus className="h-4 w-4 mr-2" /> Novo Cliente
+                        </Button>
+                      }
+                      className="m-4"
+                    />
+                  </td></tr>
                 ) : filtered.map((client) => {
                   const mrr = getMrr(client);
                   const displayName = getClientDisplayName(client);
@@ -199,7 +213,18 @@ export default function Clients() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           {filtered.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-muted-foreground">Nenhum cliente encontrado</div>
+            <div className="col-span-full">
+              <EmptyState
+                title="Nenhum cliente encontrado"
+                description={search || managerFilter !== "all" ? "Ajuste a busca ou os filtros." : "Cadastre o primeiro cliente para começar."}
+                icon={<Users className="h-6 w-6" />}
+                action={
+                  <Button onClick={() => navigate("/clientes/novo")} size="sm">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Cliente
+                  </Button>
+                }
+              />
+            </div>
           ) : filtered.map((client, i) => {
             const mrr = getMrr(client);
             const displayName = getClientDisplayName(client);
