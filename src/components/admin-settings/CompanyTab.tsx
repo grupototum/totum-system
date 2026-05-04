@@ -53,7 +53,7 @@ export function CompanyTab() {
       <div className="rounded-2xl border border-border/60 bg-secondary/40 px-4 py-3">
         <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Tenant ativo</p>
         <p className="mt-1 font-medium text-foreground">
-          {tenant?.display_name || settings?.name || "Tenant padrão"}
+          {tenant?.display_name || (settings as any)?.name || "Tenant padrão"}
         </p>
         <p className="text-sm text-muted-foreground">
           {tenant?.matched_hostname || "sem domínio resolvido"}
