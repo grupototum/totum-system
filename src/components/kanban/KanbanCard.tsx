@@ -187,6 +187,16 @@ export function KanbanCard({ tarefa, projetoNome, onClick, attachmentSummary }: 
           </span>
         )}
       </div>
+
+      {attachmentSummary && attachmentSummary.count > 0 && (
+        <div
+          className="mt-2 flex items-center gap-1 text-[10px] text-stone-500"
+          title={attachmentSummary.lastUpdatedAt ? `Última atualização: ${format(new Date(attachmentSummary.lastUpdatedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}` : ''}
+        >
+          <Icon name="solar:paperclip-linear" className="w-3 h-3" />
+          <span>{attachmentSummary.count} {attachmentSummary.count === 1 ? 'anexo' : 'anexos'}</span>
+        </div>
+      )}
     </div>
   );
 }
