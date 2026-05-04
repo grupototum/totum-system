@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Tarefa, PRIORIDADES } from '@/hooks/useTasks';
 import { Icon } from '@/components/shared/Icon';
+import { useTaskAttachmentsSummary } from '@/hooks/useTaskAttachments';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface KanbanCardProps {
   tarefa: Tarefa;
