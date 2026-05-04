@@ -291,6 +291,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
     totalProgress,
     doneCount,
     uploadMany,
+    retryOne,
     remove,
     removeMany,
     reload: load,
