@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -31,7 +31,19 @@ interface TaskDetailDialogProps {
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<"summary" | "details" | "subtasks" | "recurrence" | "comments" | "history">("summary");
+  type TabKey = "summary" | "details" | "subtasks" | "recurrence" | "comments" | "history";
+  const TAB_STORAGE_KEY = "taskDetailDialog.activeTab";
+  const validTabs: TabKey[] = ["summary", "details", "subtasks", "recurrence", "comments", "history"];
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (typeof window === "undefined") return "summary";
+    const saved = window.localStorage.getItem(TAB_STORAGE_KEY) as TabKey | null;
+    return saved && validTabs.includes(saved) ? saved : "summary";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(TAB_STORAGE_KEY, activeTab);
+    }
+  }, [activeTab]);
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
