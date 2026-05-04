@@ -296,18 +296,28 @@ export function TaskAnexos({ tarefaId }: Props) {
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {uploadQueue.map((q) => (
               <div key={q.id} className="flex items-start gap-2 text-xs py-1">
-                <Icon
-                  name={
-                    q.status === 'done'
-                      ? 'solar:check-circle-bold'
-                      : q.status === 'error'
-                      ? 'solar:close-circle-bold'
-                      : 'solar:upload-linear'
-                  }
-                  className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                    q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
-                  }`}
-                />
+                {q.status === 'error' && q.file ? (
+                  <div className="mt-0.5 shrink-0">
+                    <Checkbox
+                      checked={selectedErrors.has(q.id)}
+                      onCheckedChange={() => toggleErrorSelected(q.id)}
+                      aria-label={`Selecionar ${q.name} para reenvio`}
+                    />
+                  </div>
+                ) : (
+                  <Icon
+                    name={
+                      q.status === 'done'
+                        ? 'solar:check-circle-bold'
+                        : q.status === 'error'
+                        ? 'solar:close-circle-bold'
+                        : 'solar:upload-linear'
+                    }
+                    className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
+                      q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
+                    }`}
+                  />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="truncate font-medium text-stone-700" title={q.name}>{q.name}</div>
                   {q.status === 'error' ? (
