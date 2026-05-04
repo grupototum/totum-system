@@ -117,7 +117,7 @@ export function UserDetailSheet({
       commission_type: form.commission_type || "percentual",
     };
 
-    const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
+    const { error } = await supabase.from("profiles").update(updates as any).eq("id", profile.id);
 
     if (error) {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
