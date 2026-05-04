@@ -111,9 +111,19 @@ export function TaskAnexos({ tarefaId }: Props) {
       </div>
 
       {/* Upload queue */}
-      {uploadQueue.length > 0 && (
+      {uploadQueue.length > 0 && (() => {
+        const usedBytes = uploadQueue.reduce((s, x) => s + x.size, 0);
+        const usedPct = Math.min(100, (usedBytes / MAX_BATCH_TOTAL_BYTES) * 100);
+        return (
         <div className="space-y-2 bg-white/60 rounded-lg p-3 border border-stone-200">
-          <div className="flex items-center justify-between text-xs text-stone-600">
+          <div className="flex items-center justify-between text-[11px] text-stone-600">
+            <span>Tamanho do lote</span>
+            <span className={usedBytes > MAX_BATCH_TOTAL_BYTES ? 'text-red-500 font-medium' : ''}>
+              {formatBytes(usedBytes)} / {formatBytes(MAX_BATCH_TOTAL_BYTES)}
+            </span>
+          </div>
+          <Progress value={usedPct} className="h-1" />
+          <div className="flex items-center justify-between text-xs text-stone-600 pt-1">
             <span>{doneCount}/{uploadQueue.length} concluídos</span>
             <span>{totalProgress}%</span>
           </div>
