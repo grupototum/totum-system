@@ -26,7 +26,7 @@ export default function AgentDetail() {
         setLoading(true);
         
         // Load all agents for hierarchy
-        const { data: allAgentsData, error: agentsError } = await supabase
+        const { data: allAgentsData, error: agentsError } = await (supabase as any)
           .from('agents')
           .select('*');
 

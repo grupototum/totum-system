@@ -17,7 +17,7 @@ export const useAlexandria = () => {
       setError(null);
 
       // Carregar documentos RAG
-      const { data: documentsData, error: docsError } = await supabase
+      const { data: documentsData, error: docsError } = await (supabase as any)
         .from('rag_documents')
         .select('*')
         .order('created_at', { ascending: false });
@@ -25,7 +25,7 @@ export const useAlexandria = () => {
       if (docsError) throw docsError;
 
       // Carregar skills ativas
-      const { data: skillsData, error: skillsError } = await supabase
+      const { data: skillsData, error: skillsError } = await (supabase as any)
         .from('skills')
         .select('*')
         .eq('status', 'active')
@@ -34,7 +34,7 @@ export const useAlexandria = () => {
       if (skillsError) throw skillsError;
 
       // Carregar agentes ativos
-      const { data: agentsData, error: agentsError } = await supabase
+      const { data: agentsData, error: agentsError } = await (supabase as any)
         .from('agents_config')
         .select('*')
         .eq('status', 'active')
