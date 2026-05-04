@@ -123,7 +123,7 @@ export const useTranscriptionProcessing = () => {
       .select('*')
       .order('imported_at', { ascending: false })
       .limit(100);
-    return (data || []) as TranscriptionImport[];
+    return (data || []) as unknown as TranscriptionImport[];
   }, []);
 
   return { ...state, parseCSV, processTranscriptions, loadImports };

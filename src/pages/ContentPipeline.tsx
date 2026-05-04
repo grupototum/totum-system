@@ -129,7 +129,7 @@ export default function ContentPipeline() {
 
       if (data) {
         const grouped: PipelineBoard = { ideas: [], script: [], thumbnail: [], filming: [], editing: [] };
-        (data as ContentCard[]).forEach((card) => {
+        (data as unknown as ContentCard[]).forEach((card) => {
           if (grouped[card.stage as StageId]) grouped[card.stage as StageId].push(card);
         });
         setBoard(grouped);

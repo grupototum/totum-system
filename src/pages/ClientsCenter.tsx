@@ -100,7 +100,7 @@ export default function ClientsCenter() {
 
   const fetchClients = useCallback(async () => {
     const { data } = await supabase.from("clients").select("*").order("created_at", { ascending: false });
-    if (data) setClients(data as Client[]);
+    if (data) setClients(data as unknown as Client[]);
     setLoading(false);
   }, []);
 
