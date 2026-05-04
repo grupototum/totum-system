@@ -39,6 +39,10 @@ export function TaskAnexos({ tarefaId }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dragDepth = useRef(0);
+
+  const hasFiles = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer?.types || []).includes('Files');
 
   const filtered = useMemo(
     () =>
@@ -72,22 +76,37 @@ export function TaskAnexos({ tarefaId }: Props) {
   };
 
   return (
-    <div className="p-6 space-y-5">
+    <div
+      className="relative p-6 space-y-5"
+      onDragEnter={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current++;
+        setDragOver(true);
+      }}
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }}
+      onDragLeave={(e) => {
+        if (!hasFiles(e)) return;
+        dragDepth.current = Math.max(0, dragDepth.current - 1);
+        if (dragDepth.current === 0) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current = 0;
+        setDragOver(false);
+        handleFiles(e.dataTransfer.files);
+      }}
+    >
       {/* Drop zone */}
       <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          handleFiles(e.dataTransfer.files);
-        }}
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-stone-900 bg-stone-100' : 'border-stone-300 bg-white/40 hover:bg-white/60'
+          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-stone-300 bg-white/40 hover:bg-white/60'
         }`}
       >
         <Icon name="solar:cloud-upload-linear" className="w-8 h-8 text-stone-500 mx-auto mb-2" />
@@ -254,6 +273,17 @@ export function TaskAnexos({ tarefaId }: Props) {
           onIndexChange={setLightboxIndex}
           onClose={() => setLightboxIndex(null)}
         />
+      )}
+
+      {/* Global drop overlay */}
+      {dragOver && (
+        <div className="absolute inset-0 z-40 rounded-xl border-2 border-dashed border-[#ff3b3b] bg-stone-900/40 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
+          <Icon name="solar:cloud-upload-bold" className="w-16 h-16 text-[#ff3b3b] mb-3" />
+          <div className="text-base font-semibold text-white">Solte para anexar imagens</div>
+          <div className="text-xs text-white/80 mt-1">
+            Até {MAX_BATCH} arquivos · {formatBytes(MAX_SIZE_BYTES)} por arquivo · {formatBytes(MAX_BATCH_TOTAL_BYTES)} por lote
+          </div>
+        </div>
       )}
     </div>
   );
