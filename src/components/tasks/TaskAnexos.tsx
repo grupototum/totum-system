@@ -149,6 +149,27 @@ export function TaskAnexos({ tarefaId }: Props) {
   const allDone =
     uploadQueue.length > 0 && uploadQueue.every((q) => q.status === 'done');
 
+  const [selectedErrors, setSelectedErrors] = useState<Set<string>>(new Set());
+
+  // Drop ids that are no longer in error state (e.g. after a successful retry)
+  useEffect(() => {
+    setSelectedErrors((prev) => {
+      const valid = new Set(
+        uploadQueue.filter((q) => q.status === 'error' && q.file).map((q) => q.id)
+      );
+      const next = new Set<string>();
+      prev.forEach((id) => valid.has(id) && next.add(id));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [uploadQueue]);
+
+  const toggleErrorSelected = (id: string) =>
+    setSelectedErrors((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
   useEffect(() => {
     if (allDone) {
       const t = setTimeout(() => clearQueue(), 1500);
@@ -161,6 +182,14 @@ export function TaskAnexos({ tarefaId }: Props) {
     for (const id of ids) {
       await retryOne(id);
     }
+  };
+
+  const retrySelectedErrors = async () => {
+    const ids = Array.from(selectedErrors);
+    for (const id of ids) {
+      await retryOne(id);
+    }
+    setSelectedErrors(new Set());
   };
 
   return (
@@ -238,6 +267,17 @@ export function TaskAnexos({ tarefaId }: Props) {
               )}
             </span>
             <div className="flex items-center gap-2">
+              {selectedErrors.size > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={retrySelectedErrors}
+                  className="h-6 px-2 text-xs gap-1 text-[#ff3b3b] hover:text-[#ff3b3b]/80"
+                >
+                  <Icon name="solar:refresh-linear" className="w-3 h-3" />
+                  Repetir selecionados ({selectedErrors.size})
+                </Button>
+              )}
               {errorCount > 0 && (
                 <Button
                   variant="ghost"
@@ -256,18 +296,28 @@ export function TaskAnexos({ tarefaId }: Props) {
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {uploadQueue.map((q) => (
               <div key={q.id} className="flex items-start gap-2 text-xs py-1">
-                <Icon
-                  name={
-                    q.status === 'done'
-                      ? 'solar:check-circle-bold'
-                      : q.status === 'error'
-                      ? 'solar:close-circle-bold'
-                      : 'solar:upload-linear'
-                  }
-                  className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-                    q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
-                  }`}
-                />
+                {q.status === 'error' && q.file ? (
+                  <div className="mt-0.5 shrink-0">
+                    <Checkbox
+                      checked={selectedErrors.has(q.id)}
+                      onCheckedChange={() => toggleErrorSelected(q.id)}
+                      aria-label={`Selecionar ${q.name} para reenvio`}
+                    />
+                  </div>
+                ) : (
+                  <Icon
+                    name={
+                      q.status === 'done'
+                        ? 'solar:check-circle-bold'
+                        : q.status === 'error'
+                        ? 'solar:close-circle-bold'
+                        : 'solar:upload-linear'
+                    }
+                    className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
+                      q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
+                    }`}
+                  />
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="truncate font-medium text-stone-700" title={q.name}>{q.name}</div>
                   {q.status === 'error' ? (
