@@ -72,13 +72,52 @@ async function signUrl(path: string) {
   return data?.signedUrl;
 }
 
+type QueueStatus = 'pending' | 'uploading' | 'done' | 'error';
+type ErrorCode = 'size' | 'type' | 'empty' | 'batch_limit' | 'storage' | 'db' | 'network' | 'unknown';
+
+export interface UploadQueueItem {
+  id: string;
+  name: string;
+  size: number;
+  progress: number;
+  status: QueueStatus;
+  error?: string;
+  errorCode?: ErrorCode;
+  file?: File;
+}
+
+function friendlyError(code: ErrorCode, raw?: string): string {
+  const r = (raw || '').toLowerCase();
+  switch (code) {
+    case 'size':
+      return raw || 'Arquivo excede o tamanho máximo permitido (2MB).';
+    case 'type':
+      return raw || 'Tipo de arquivo não suportado. Use JPG, PNG, WEBP, GIF ou SVG.';
+    case 'empty':
+      return 'Arquivo vazio ou ilegível.';
+    case 'batch_limit':
+      return 'Lote excede 20MB no total — clique em Repetir para enviar este arquivo isolado.';
+    case 'storage':
+      if (r.includes('duplicate')) return 'Já existe um arquivo com este nome no destino.';
+      if (r.includes('payload') || r.includes('too large')) return 'Arquivo recusado pelo servidor por ser muito grande.';
+      if (r.includes('mime')) return 'Tipo MIME bloqueado pelo servidor.';
+      if (r.includes('permission') || r.includes('unauthorized') || r.includes('forbidden'))
+        return 'Sem permissão para enviar para este destino.';
+      return `Falha no upload: ${raw || 'erro desconhecido'}`;
+    case 'db':
+      return `Falha ao registrar o anexo no banco: ${raw || 'erro desconhecido'}`;
+    case 'network':
+      return 'Falha de rede. Verifique sua conexão e tente novamente.';
+    default:
+      return raw || 'Erro desconhecido durante o envio.';
+  }
+}
+
 export function useTaskAttachments(tarefaId: string | undefined | null) {
   const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
   const [history, setHistory] = useState<AttachmentHistory[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploadQueue, setUploadQueue] = useState<
-    { id: string; name: string; size: number; progress: number; status: 'pending' | 'uploading' | 'done' | 'error'; error?: string }[]
-  >([]);
+  const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
 
   const load = useCallback(async () => {
     if (!tarefaId) return;
@@ -100,63 +139,34 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
     load();
   }, [load]);
 
-  const uploadMany = useCallback(
-    async (files: File[]) => {
-      if (!tarefaId) return { accepted: 0, skippedTotalLimit: [] as string[] };
-      const batch = files.slice(0, MAX_BATCH);
-      const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
+  const setItem = useCallback((qid: string, patch: Partial<UploadQueueItem>) => {
+    setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, ...patch } : x)));
+  }, []);
 
-      // Aggregate batch size cap: include in original order until cap, rest goes to skipped
-      const accepted: File[] = [];
-      const skipped: string[] = [];
-      let running = 0;
-      for (const f of batch) {
-        if (running + f.size <= MAX_BATCH_TOTAL_BYTES) {
-          accepted.push(f);
-          running += f.size;
-        } else {
-          skipped.push(f.name);
-        }
+  const uploadOne = useCallback(
+    async (qid: string, file: File, userId?: string | null) => {
+      const validation = validateImageFile(file);
+      if (!validation.ok) {
+        const code: ErrorCode = /excede/i.test(validation.error || '')
+          ? 'size'
+          : /vazio/i.test(validation.error || '')
+          ? 'empty'
+          : 'type';
+        setItem(qid, { status: 'error', errorCode: code, error: friendlyError(code, validation.error) });
+        return false;
       }
-
-      const queue = accepted.map((f) => ({
-        id: crypto.randomUUID(),
-        name: f.name,
-        size: f.size,
-        progress: 0,
-        status: 'pending' as const,
-      }));
-      // Add skipped entries as errors so user sees them in the queue
-      const skippedQueue = skipped.map((name) => ({
-        id: crypto.randomUUID(),
-        name,
-        size: 0,
-        progress: 0,
-        status: 'error' as const,
-        error: `Lote excede ${(MAX_BATCH_TOTAL_BYTES / 1024 / 1024).toFixed(0)}MB — arquivo ignorado`,
-      }));
-      setUploadQueue([...queue, ...skippedQueue]);
-
-      for (let i = 0; i < accepted.length; i++) {
-        const file = accepted[i];
-        const qid = queue[i].id;
-        const validation = validateImageFile(file);
-        if (!validation.ok) {
-          setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, status: 'error', error: validation.error } : x)));
-          continue;
-        }
-        setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, status: 'uploading', progress: 10 } : x)));
-        const ext = file.name.split('.').pop();
-        const path = `${tarefaId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+      setItem(qid, { status: 'uploading', progress: 10, error: undefined, errorCode: undefined });
+      const ext = file.name.split('.').pop();
+      const path = `${tarefaId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+      try {
         const up = await (supabase.storage as any)
           .from('task-attachments')
           .upload(path, file, { contentType: file.type, upsert: false });
         if (up.error) {
-          setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, status: 'error', error: up.error.message } : x)));
-          continue;
+          setItem(qid, { status: 'error', errorCode: 'storage', error: friendlyError('storage', up.error.message) });
+          return false;
         }
-        setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, progress: 70 } : x)));
+        setItem(qid, { progress: 70 });
         const ins = await (supabase as any).from('tarefa_anexos').insert({
           tarefa_id: tarefaId,
           storage_path: path,
@@ -167,16 +177,80 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
         });
         if (ins.error) {
           await (supabase.storage as any).from('task-attachments').remove([path]);
-          setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, status: 'error', error: ins.error.message } : x)));
-          continue;
+          setItem(qid, { status: 'error', errorCode: 'db', error: friendlyError('db', ins.error.message) });
+          return false;
         }
-        setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, progress: 100, status: 'done' } : x)));
+        setItem(qid, { progress: 100, status: 'done', error: undefined, errorCode: undefined });
+        return true;
+      } catch (e: any) {
+        setItem(qid, { status: 'error', errorCode: 'network', error: friendlyError('network', e?.message) });
+        return false;
       }
-      await load();
-      return { accepted: accepted.length, skippedTotalLimit: skipped, totalBytes: running };
     },
-    [tarefaId, load]
+    [tarefaId, setItem]
   );
+
+  const uploadMany = useCallback(
+    async (files: File[]) => {
+      if (!tarefaId) return { accepted: 0, skippedTotalLimit: [] as string[] };
+      const batch = files.slice(0, MAX_BATCH);
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+
+      const accepted: File[] = [];
+      const skipped: File[] = [];
+      let running = 0;
+      for (const f of batch) {
+        if (running + f.size <= MAX_BATCH_TOTAL_BYTES) {
+          accepted.push(f);
+          running += f.size;
+        } else {
+          skipped.push(f);
+        }
+      }
+
+      const queue: UploadQueueItem[] = accepted.map((f) => ({
+        id: crypto.randomUUID(),
+        name: f.name,
+        size: f.size,
+        progress: 0,
+        status: 'pending',
+        file: f,
+      }));
+      const skippedQueue: UploadQueueItem[] = skipped.map((f) => ({
+        id: crypto.randomUUID(),
+        name: f.name,
+        size: f.size,
+        progress: 0,
+        status: 'error',
+        errorCode: 'batch_limit',
+        error: friendlyError('batch_limit'),
+        file: f,
+      }));
+      setUploadQueue([...queue, ...skippedQueue]);
+
+      let anySuccess = false;
+      for (let i = 0; i < accepted.length; i++) {
+        const ok = await uploadOne(queue[i].id, accepted[i], userId);
+        if (ok) anySuccess = true;
+      }
+      if (anySuccess) await load();
+      return { accepted: accepted.length, skippedTotalLimit: skipped.map((f) => f.name), totalBytes: running };
+    },
+    [tarefaId, load, uploadOne]
+  );
+
+  const retryOne = useCallback(
+    async (qid: string) => {
+      const item = uploadQueue.find((x) => x.id === qid);
+      if (!item || !item.file) return;
+      const { data: userData } = await supabase.auth.getUser();
+      const ok = await uploadOne(qid, item.file, userData.user?.id);
+      if (ok) await load();
+    },
+    [uploadQueue, uploadOne, load]
+  );
+
 
   const remove = useCallback(
     async (anexo: TaskAttachment) => {
@@ -217,6 +291,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
     totalProgress,
     doneCount,
     uploadMany,
+    retryOne,
     remove,
     removeMany,
     reload: load,
