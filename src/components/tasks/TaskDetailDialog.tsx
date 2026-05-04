@@ -17,7 +17,7 @@ import {
 } from "./taskData";
 import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
-  MessageSquare, History, ChevronDown, Send, RefreshCw,
+  MessageSquare, History, ChevronDown, Send, RefreshCw, FileText, ListTree,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
