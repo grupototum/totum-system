@@ -51,9 +51,9 @@ export const useAlexandria = () => {
       };
 
       setData({
-        documents: (documentsData || []) as RagDocument[],
-        skills: (skillsData || []) as Skill[],
-        agents: (agentsData || []) as Agent[],
+        documents: (documentsData || []) as unknown as RagDocument[],
+        skills: (skillsData || []) as unknown as Skill[],
+        agents: (agentsData || []) as unknown as Agent[],
         stats,
       });
     } catch (err) {
