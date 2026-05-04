@@ -2231,6 +2231,69 @@ export type Database = {
         }
         Relationships: []
       }
+      tarefa_anexos: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tarefa_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tarefa_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string
+          size_bytes?: number
+          storage_path?: string
+          tarefa_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      tarefa_anexos_historico: {
+        Row: {
+          acao: string
+          anexo_id: string | null
+          created_at: string
+          file_name: string
+          id: string
+          tarefa_id: string
+          user_id: string | null
+        }
+        Insert: {
+          acao: string
+          anexo_id?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          tarefa_id: string
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          anexo_id?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          tarefa_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       task_checklist_items: {
         Row: {
           completed: boolean
