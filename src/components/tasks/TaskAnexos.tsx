@@ -149,6 +149,27 @@ export function TaskAnexos({ tarefaId }: Props) {
   const allDone =
     uploadQueue.length > 0 && uploadQueue.every((q) => q.status === 'done');
 
+  const [selectedErrors, setSelectedErrors] = useState<Set<string>>(new Set());
+
+  // Drop ids that are no longer in error state (e.g. after a successful retry)
+  useEffect(() => {
+    setSelectedErrors((prev) => {
+      const valid = new Set(
+        uploadQueue.filter((q) => q.status === 'error' && q.file).map((q) => q.id)
+      );
+      const next = new Set<string>();
+      prev.forEach((id) => valid.has(id) && next.add(id));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [uploadQueue]);
+
+  const toggleErrorSelected = (id: string) =>
+    setSelectedErrors((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
   useEffect(() => {
     if (allDone) {
       const t = setTimeout(() => clearQueue(), 1500);
@@ -161,6 +182,14 @@ export function TaskAnexos({ tarefaId }: Props) {
     for (const id of ids) {
       await retryOne(id);
     }
+  };
+
+  const retrySelectedErrors = async () => {
+    const ids = Array.from(selectedErrors);
+    for (const id of ids) {
+      await retryOne(id);
+    }
+    setSelectedErrors(new Set());
   };
 
   return (
