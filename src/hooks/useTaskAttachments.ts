@@ -187,6 +187,22 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
     [load]
   );
 
+  const removeMany = useCallback(
+    async (anexos: TaskAttachment[]) => {
+      if (!anexos.length) return { removed: 0, failed: 0 };
+      const paths = anexos.map((a) => a.storage_path);
+      const ids = anexos.map((a) => a.id);
+      let failed = 0;
+      const st = await (supabase.storage as any).from('task-attachments').remove(paths);
+      if (st?.error) failed = anexos.length;
+      const del = await (supabase as any).from('tarefa_anexos').delete().in('id', ids);
+      if (del?.error) failed = Math.max(failed, anexos.length);
+      await load();
+      return { removed: anexos.length - failed, failed };
+    },
+    [load]
+  );
+
   const totalProgress =
     uploadQueue.length > 0
       ? Math.round(uploadQueue.reduce((s, x) => s + x.progress, 0) / uploadQueue.length)
