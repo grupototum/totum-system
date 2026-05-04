@@ -80,7 +80,7 @@ export function ExecutionLog({ execution, className }: ExecutionLogProps) {
             <Terminal className="h-4 w-4" />
             Log de Execução
           </CardTitle>
-          <Badge variant={execution.success ? 'default' : 'error'}>
+          <Badge variant={execution.success ? 'default' : 'destructive'}>
             {execution.success ? 'Concluído' : 'Falhou'}
           </Badge>
         </div>
