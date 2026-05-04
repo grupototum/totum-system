@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tarefa, Projeto, StatusTarefa, PrioridadeTarefa, COLUNAS_KANBAN, PRIORIDADES } from '@/hooks/useTasks';
 import { TaskSubtarefas } from './TaskSubtarefas';
 import { TaskComentarios } from './TaskComentarios';
+import { TaskAnexos } from './TaskAnexos';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,7 +50,7 @@ export function TaskModal({
   const [mode, setMode] = useState<'view' | 'create' | 'edit'>(initialMode);
   const [formData, setFormData] = useState<Partial<Tarefa>>({});
   const [tagInput, setTagInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'detalhes' | 'subtarefas' | 'comentarios'>('detalhes');
+  const [activeTab, setActiveTab] = useState<'detalhes' | 'subtarefas' | 'comentarios' | 'anexos'>('detalhes');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -154,6 +155,7 @@ export function TaskModal({
                   { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
                   { id: 'subtarefas', label: 'Subtarefas', icon: 'solar:checklist-linear' },
                   { id: 'comentarios', label: 'Comentários', icon: 'solar:chat-dots-linear' },
+                  { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -345,6 +347,8 @@ export function TaskModal({
                   onAddComentario={onAddComentario}
                   currentUser={currentUser}
                 />
+              ) : activeTab === 'anexos' && tarefa ? (
+                <TaskAnexos tarefaId={tarefa.id} />
               ) : null}
             </div>
           </motion.div>

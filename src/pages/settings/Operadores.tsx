@@ -46,7 +46,7 @@ export default function Operadores() {
 
   const loadOperadores = async () => {
     setIsLoading(true);
-    const { data } = await supabase.from('operadores').select('*').order('nome');
+    const { data } = await (supabase as any).from('operadores').select('*').order('nome');
     setOperadores((data || []) as Operador[]);
     setIsLoading(false);
   };
@@ -67,9 +67,9 @@ export default function Operadores() {
     setSaving(true);
     try {
       if (editing) {
-        await supabase.from('operadores').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id);
+        await (supabase as any).from('operadores').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editing.id);
       } else {
-        await supabase.from('operadores').insert({ ...form, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
+        await (supabase as any).from('operadores').insert({ ...form, created_at: new Date().toISOString(), updated_at: new Date().toISOString() });
       }
       await loadOperadores();
       setDialogOpen(false);
@@ -80,7 +80,7 @@ export default function Operadores() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Remover operador?')) return;
-    await supabase.from('operadores').delete().eq('id', id);
+    await (supabase as any).from('operadores').delete().eq('id', id);
     await loadOperadores();
   };
 

@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Tarefa, PRIORIDADES } from '@/hooks/useTasks';
 import { Icon } from '@/components/shared/Icon';
+import type { AttachmentSummary } from '@/hooks/useTaskAttachments';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface KanbanCardProps {
   tarefa: Tarefa;
   projetoNome?: string | null;
   onClick: () => void;
+  attachmentSummary?: AttachmentSummary;
 }
 
 const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -41,7 +45,7 @@ const getPrioridadeColor = (prioridade: string) => {
   return p?.cor || '#78716C';
 };
 
-export function KanbanCard({ tarefa, projetoNome, onClick }: KanbanCardProps) {
+export function KanbanCard({ tarefa, projetoNome, onClick, attachmentSummary }: KanbanCardProps) {
   const [isDragging, setIsDragging] = useState(false);
   
   const subtarefasConcluidas = (tarefa.subtarefas || []).filter(st => st.concluida).length;
@@ -183,6 +187,16 @@ export function KanbanCard({ tarefa, projetoNome, onClick }: KanbanCardProps) {
           </span>
         )}
       </div>
+
+      {attachmentSummary && attachmentSummary.count > 0 && (
+        <div
+          className="mt-2 flex items-center gap-1 text-[10px] text-stone-500"
+          title={attachmentSummary.lastUpdatedAt ? `Última atualização: ${format(new Date(attachmentSummary.lastUpdatedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}` : ''}
+        >
+          <Icon name="solar:paperclip-linear" className="w-3 h-3" />
+          <span>{attachmentSummary.count} {attachmentSummary.count === 1 ? 'anexo' : 'anexos'}</span>
+        </div>
+      )}
     </div>
   );
 }

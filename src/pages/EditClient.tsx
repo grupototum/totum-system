@@ -70,7 +70,8 @@ export default function EditClient() {
   useEffect(() => {
     async function load() {
       if (!clientId) { setLoading(false); return; }
-      const { data } = await supabase.from("clients").select("*").eq("id", clientId).single();
+      const { data: raw } = await supabase.from("clients").select("*").eq("id", clientId).single();
+      const data = raw as any;
       if (data) {
         setForm({
           company_name: data.company_name ?? "",
