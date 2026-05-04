@@ -102,21 +102,44 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
 
   const uploadMany = useCallback(
     async (files: File[]) => {
-      if (!tarefaId) return;
+      if (!tarefaId) return { accepted: 0, skippedTotalLimit: [] as string[] };
       const batch = files.slice(0, MAX_BATCH);
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
-      const queue = batch.map((f) => ({
+
+      // Aggregate batch size cap: include in original order until cap, rest goes to skipped
+      const accepted: File[] = [];
+      const skipped: string[] = [];
+      let running = 0;
+      for (const f of batch) {
+        if (running + f.size <= MAX_BATCH_TOTAL_BYTES) {
+          accepted.push(f);
+          running += f.size;
+        } else {
+          skipped.push(f.name);
+        }
+      }
+
+      const queue = accepted.map((f) => ({
         id: crypto.randomUUID(),
         name: f.name,
         size: f.size,
         progress: 0,
         status: 'pending' as const,
       }));
-      setUploadQueue(queue);
+      // Add skipped entries as errors so user sees them in the queue
+      const skippedQueue = skipped.map((name) => ({
+        id: crypto.randomUUID(),
+        name,
+        size: 0,
+        progress: 0,
+        status: 'error' as const,
+        error: `Lote excede ${(MAX_BATCH_TOTAL_BYTES / 1024 / 1024).toFixed(0)}MB — arquivo ignorado`,
+      }));
+      setUploadQueue([...queue, ...skippedQueue]);
 
-      for (let i = 0; i < batch.length; i++) {
-        const file = batch[i];
+      for (let i = 0; i < accepted.length; i++) {
+        const file = accepted[i];
         const qid = queue[i].id;
         const validation = validateImageFile(file);
         if (!validation.ok) {
@@ -150,6 +173,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
         setUploadQueue((q) => q.map((x) => (x.id === qid ? { ...x, progress: 100, status: 'done' } : x)));
       }
       await load();
+      return { accepted: accepted.length, skippedTotalLimit: skipped, totalBytes: running };
     },
     [tarefaId, load]
   );
