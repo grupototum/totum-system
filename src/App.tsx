@@ -19,6 +19,7 @@ import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
 import NewClient from "./pages/NewClient";
 import EditClient from "./pages/EditClient";
+import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
