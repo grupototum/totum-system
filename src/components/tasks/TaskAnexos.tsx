@@ -113,7 +113,25 @@ export function TaskAnexos({ tarefaId }: Props) {
     if (skipped.length) {
       toast.error(`${skipped.length} arquivo(s) ignorado(s): lote excede ${(MAX_BATCH_TOTAL_BYTES / 1024 / 1024).toFixed(0)}MB.`);
     }
+    // Only auto-clear when everything succeeded; keep errors visible for retry
+    setTimeout(() => {
+      // re-check inside timeout via state below — handled by effect-free approach:
+    }, 0);
+  };
+
+  const errorCount = uploadQueue.filter((q) => q.status === 'error').length;
+  const allDone =
+    uploadQueue.length > 0 && uploadQueue.every((q) => q.status === 'done');
+  // Auto-clear queue when everything succeeded
+  if (allDone) {
     setTimeout(() => clearQueue(), 1500);
+  }
+
+  const retryAllErrors = async () => {
+    const ids = uploadQueue.filter((q) => q.status === 'error' && q.file).map((q) => q.id);
+    for (const id of ids) {
+      await retryOne(id);
+    }
   };
 
   return (
