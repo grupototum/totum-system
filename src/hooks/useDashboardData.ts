@@ -99,7 +99,7 @@ export function useDashboardData(): DashboardData {
   }, []);
 
   const refetchAgents = useCallback(async () => {
-    const { data } = await supabase.from("agents").select("*");
+    const { data } = await (supabase as any).from("agents").select("*");
     if (data) setAgents(data as Agent[]);
   }, []);
 

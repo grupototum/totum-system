@@ -146,7 +146,7 @@ export default function AgentProfile() {
   useEffect(() => {
     async function load() {
       if (!hierarchyAgent) { setLoading(false); return; }
-      const { data } = await supabase.from("agents").select("*").ilike("name", `%${hierarchyAgent.name.split(" ")[0]}%`).limit(1);
+      const { data } = await (supabase as any).from("agents").select("*").ilike("name", `%${hierarchyAgent.name.split(" ")[0]}%`).limit(1);
       if (data && data.length > 0) setDbAgent(data[0]);
       setLoading(false);
     }
