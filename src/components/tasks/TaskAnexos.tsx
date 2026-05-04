@@ -39,6 +39,8 @@ interface Props {
   tarefaId: string;
 }
 
+type SortKey = 'recent' | 'oldest' | 'name_asc' | 'name_desc';
+
 export function TaskAnexos({ tarefaId }: Props) {
   const {
     attachments,
