@@ -267,6 +267,17 @@ export function TaskAnexos({ tarefaId }: Props) {
               )}
             </span>
             <div className="flex items-center gap-2">
+              {selectedErrors.size > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={retrySelectedErrors}
+                  className="h-6 px-2 text-xs gap-1 text-[#ff3b3b] hover:text-[#ff3b3b]/80"
+                >
+                  <Icon name="solar:refresh-linear" className="w-3 h-3" />
+                  Repetir selecionados ({selectedErrors.size})
+                </Button>
+              )}
               {errorCount > 0 && (
                 <Button
                   variant="ghost"
