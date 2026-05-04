@@ -1,0 +1,244 @@
+import { useMemo, useRef, useState } from 'react';
+import { Icon } from '@/components/shared/Icon';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import {
+  useTaskAttachments,
+  ACCEPT_ATTR,
+  MAX_BATCH,
+  MAX_SIZE_BYTES,
+  formatBytes,
+  validateImageFile,
+} from '@/hooks/useTaskAttachments';
+import { AttachmentLightbox } from './AttachmentLightbox';
+
+interface Props {
+  tarefaId: string;
+}
+
+export function TaskAnexos({ tarefaId }: Props) {
+  const {
+    attachments,
+    history,
+    loading,
+    uploadQueue,
+    totalProgress,
+    doneCount,
+    uploadMany,
+    remove,
+    clearQueue,
+  } = useTaskAttachments(tarefaId);
+
+  const [search, setSearch] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const filtered = useMemo(
+    () =>
+      attachments.filter((a) =>
+        a.file_name.toLowerCase().includes(search.toLowerCase())
+      ),
+    [attachments, search]
+  );
+
+  const handleFiles = async (files: FileList | File[]) => {
+    const arr = Array.from(files);
+    if (!arr.length) return;
+    if (arr.length > MAX_BATCH) {
+      toast.warning(`Máximo de ${MAX_BATCH} arquivos por vez. Apenas os primeiros ${MAX_BATCH} serão processados.`);
+    }
+    const invalid = arr.slice(0, MAX_BATCH).map((f) => ({ f, v: validateImageFile(f) }));
+    const errors = invalid.filter((x) => !x.v.ok);
+    if (errors.length) {
+      errors.forEach((e) => toast.error(`${e.f.name}: ${e.v.error}`));
+    }
+    const valid = invalid.filter((x) => x.v.ok).map((x) => x.f);
+    if (!valid.length) return;
+    await uploadMany(valid);
+    const ok = valid.length;
+    toast.success(`${ok} ${ok === 1 ? 'imagem enviada' : 'imagens enviadas'} com sucesso.`);
+    setTimeout(() => clearQueue(), 1500);
+  };
+
+  return (
+    <div className="p-6 space-y-5">
+      {/* Drop zone */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+        onClick={() => inputRef.current?.click()}
+        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+          dragOver ? 'border-stone-900 bg-stone-100' : 'border-stone-300 bg-white/40 hover:bg-white/60'
+        }`}
+      >
+        <Icon name="solar:cloud-upload-linear" className="w-8 h-8 text-stone-500 mx-auto mb-2" />
+        <div className="text-sm font-medium text-stone-700">
+          Arraste imagens aqui ou clique para selecionar
+        </div>
+        <div className="text-xs text-stone-500 mt-1">
+          JPG, PNG, WEBP, GIF, SVG · até {formatBytes(MAX_SIZE_BYTES)} por arquivo · máx {MAX_BATCH} por vez
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPT_ATTR}
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            if (e.target.files) handleFiles(e.target.files);
+            e.target.value = '';
+          }}
+        />
+      </div>
+
+      {/* Upload queue */}
+      {uploadQueue.length > 0 && (
+        <div className="space-y-2 bg-white/60 rounded-lg p-3 border border-stone-200">
+          <div className="flex items-center justify-between text-xs text-stone-600">
+            <span>{doneCount}/{uploadQueue.length} concluídos</span>
+            <span>{totalProgress}%</span>
+          </div>
+          <Progress value={totalProgress} className="h-1.5" />
+          <div className="space-y-1.5 max-h-40 overflow-y-auto">
+            {uploadQueue.map((q) => (
+              <div key={q.id} className="flex items-center gap-2 text-xs">
+                <Icon
+                  name={
+                    q.status === 'done'
+                      ? 'solar:check-circle-bold'
+                      : q.status === 'error'
+                      ? 'solar:close-circle-bold'
+                      : 'solar:upload-linear'
+                  }
+                  className={`w-3.5 h-3.5 ${
+                    q.status === 'done' ? 'text-emerald-600' : q.status === 'error' ? 'text-red-500' : 'text-stone-500'
+                  }`}
+                />
+                <span className="truncate flex-1">{q.name}</span>
+                {q.status === 'error' ? (
+                  <span className="text-red-500 truncate max-w-[40%]" title={q.error}>{q.error}</span>
+                ) : (
+                  <Progress value={q.progress} className="h-1 w-20" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search */}
+      {attachments.length > 0 && (
+        <div className="relative">
+          <Icon name="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+          <Input
+            placeholder="Buscar por nome de arquivo..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 bg-white border-stone-300"
+          />
+        </div>
+      )}
+
+      {/* Grid */}
+      {loading ? (
+        <div className="text-sm text-stone-500 text-center py-6">Carregando…</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-sm text-stone-400 text-center py-6">
+          {attachments.length === 0 ? 'Nenhum anexo ainda.' : 'Nenhum arquivo corresponde à busca.'}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {filtered.map((a, i) => (
+            <div key={a.id} className="group relative bg-white rounded-lg border border-stone-200 overflow-hidden">
+              <button
+                onClick={() => setLightboxIndex(filtered.findIndex((x) => x.id === a.id))}
+                className="block w-full aspect-square bg-stone-100"
+              >
+                {a.url && (
+                  <img src={a.url} alt={a.file_name} className="w-full h-full object-cover" loading="lazy" />
+                )}
+              </button>
+              <div className="p-2 text-xs">
+                <div className="truncate font-medium text-stone-700" title={a.file_name}>
+                  {a.file_name}
+                </div>
+                <div className="text-stone-400 flex items-center justify-between mt-0.5">
+                  <span>{formatBytes(a.size_bytes)}</span>
+                  <span>{format(new Date(a.created_at), 'dd/MM HH:mm', { locale: ptBR })}</span>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  if (confirm('Remover anexo?')) await remove(a);
+                }}
+                className="absolute top-1 right-1 p-1 bg-white/90 hover:bg-red-50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Remover"
+              >
+                <Icon name="solar:trash-bin-trash-linear" className="w-3.5 h-3.5 text-red-500" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* History */}
+      {history.length > 0 && (
+        <div className="border-t border-stone-200 pt-4">
+          <button
+            onClick={() => setShowHistory((s) => !s)}
+            className="flex items-center gap-2 text-xs font-semibold text-stone-600 uppercase tracking-wider hover:text-stone-900"
+          >
+            <Icon
+              name={showHistory ? 'solar:alt-arrow-down-linear' : 'solar:alt-arrow-right-linear'}
+              className="w-3.5 h-3.5"
+            />
+            Histórico ({history.length})
+          </button>
+          {showHistory && (
+            <ul className="mt-3 space-y-2 max-h-60 overflow-y-auto">
+              {history.map((h) => (
+                <li key={h.id} className="flex items-start gap-2 text-xs text-stone-600">
+                  <Icon
+                    name={h.acao === 'upload' ? 'solar:upload-linear' : 'solar:trash-bin-trash-linear'}
+                    className={`w-3.5 h-3.5 mt-0.5 ${h.acao === 'upload' ? 'text-emerald-600' : 'text-red-500'}`}
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium">{h.acao === 'upload' ? 'Anexou' : 'Removeu'}</span>{' '}
+                    <span className="text-stone-500">{h.file_name}</span>
+                    <div className="text-[10px] text-stone-400">
+                      {format(new Date(h.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <AttachmentLightbox
+          items={filtered}
+          index={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
+    </div>
+  );
+}
