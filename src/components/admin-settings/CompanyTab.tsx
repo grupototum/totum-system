@@ -18,11 +18,12 @@ export function CompanyTab() {
   const [address, setAddress] = useState("");
 
   useEffect(() => {
-    if (settings) {
-      setName(settings.name || "");
-      setEmail(settings.email || "");
-      setPhone(settings.phone || "");
-      setAddress(settings.address || "");
+    const s = settings as any;
+    if (s) {
+      setName(s.name || "");
+      setEmail(s.email || "");
+      setPhone(s.phone || "");
+      setAddress(s.address || "");
     }
   }, [settings]);
 
