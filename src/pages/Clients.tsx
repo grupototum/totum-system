@@ -143,7 +143,19 @@ export default function Clients() {
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum cliente encontrado</td></tr>
+                  <tr><td colSpan={7} className="p-0">
+                    <EmptyState
+                      title="Nenhum cliente encontrado"
+                      description={search || managerFilter !== "all" ? "Ajuste a busca ou os filtros." : "Cadastre o primeiro cliente para começar."}
+                      icon={<Users className="h-6 w-6" />}
+                      action={
+                        <Button onClick={() => navigate("/clientes/novo")} size="sm">
+                          <Plus className="h-4 w-4 mr-2" /> Novo Cliente
+                        </Button>
+                      }
+                      className="m-4"
+                    />
+                  </td></tr>
                 ) : filtered.map((client) => {
                   const mrr = getMrr(client);
                   const displayName = getClientDisplayName(client);
