@@ -126,7 +126,7 @@ export const useAgentExecution = (options: UseAgentExecutionOptions) => {
         // Log execution to logs_execucao_agente table
         try {
           const { data: userData } = await supabase.auth.getUser();
-          await supabase
+          await (supabase as any)
             .from('logs_execucao_agente')
             .insert([{
               agente_id: agentId,

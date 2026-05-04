@@ -79,7 +79,7 @@ export default function AgentsDashboard() {
     async function load() {
       try {
         const [agRes, intRes] = await Promise.all([
-          supabase.from("agents").select("*"),
+          (supabase as any).from("agents").select("*"),
           supabase.from("agent_interactions").select("*").order("date"),
         ]);
         
@@ -100,7 +100,7 @@ export default function AgentsDashboard() {
       .channel("agents-dash")
       .on("postgres_changes" as any, { event: "*", schema: "public", table: "agents" }, () => {
         if (!isMounted) return;
-        supabase.from("agents").select("*").then(({ data }) => { 
+        (supabase as any).from("agents").select("*").then(({ data }) => { 
           if (data && isMounted) setAgents(data as Agent[]); 
         });
       })
