@@ -275,9 +275,22 @@ export function TaskAnexos({ tarefaId }: Props) {
                       {q.error}
                     </div>
                   ) : q.status === 'done' ? (
-                    <div className="text-[11px] text-emerald-600">Enviado</div>
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-emerald-600">
+                      <span>Concluído</span>
+                      <span>{formatBytes(q.size)}</span>
+                    </div>
                   ) : (
-                    <Progress value={q.progress} className="h-1 w-full mt-1" />
+                    <div className="mt-1 space-y-1">
+                      <Progress
+                        value={q.progress}
+                        aria-valuenow={q.progress}
+                        className="h-1.5 w-full"
+                      />
+                      <div className="flex items-center justify-between text-[10px] text-stone-500">
+                        <span>{q.status === 'pending' ? 'Aguardando…' : 'Enviando…'}</span>
+                        <span className="tabular-nums">{q.progress}%</span>
+                      </div>
+                    </div>
                   )}
                 </div>
                 {q.status === 'error' && q.file && (
