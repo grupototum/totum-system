@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import {
   BarChart,
@@ -140,7 +140,7 @@ export function AgentStats({ agents }: AgentStatsProps) {
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
-                    <Icon icon={stat.icon} className={`w-5 h-5 ${stat.color}`} />
+                    <Icon name={stat.icon} className={`w-5 h-5 ${stat.color}`} />
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-wider text-stone-500">{stat.label}</p>

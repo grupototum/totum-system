@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
 
@@ -160,7 +160,7 @@ function HierarchyItem({ node, level, index, onAgentClick, isSelected, selectedA
                   className="w-6 h-6 rounded-full bg-stone-200 hover:bg-stone-300 flex items-center justify-center transition-colors"
                 >
                   <Icon 
-                    icon="solar:alt-arrow-down-linear" 
+                    name="solar:alt-arrow-down-linear" 
                     className={`w-4 h-4 text-stone-600 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
                   />
                 </button>
@@ -200,7 +200,7 @@ function HierarchyItem({ node, level, index, onAgentClick, isSelected, selectedA
                   )}
                   {agent.is_orchestrator && (
                     <Badge variant="outline" className="text-[9px] uppercase tracking-wider border-amber-400 text-amber-600">
-                      <Icon icon="solar:crown-linear" className="w-3 h-3 mr-1" />
+                      <Icon name="solar:crown-linear" className="w-3 h-3 mr-1" />
                       Orquestrador
                     </Badge>
                   )}
@@ -213,18 +213,18 @@ function HierarchyItem({ node, level, index, onAgentClick, isSelected, selectedA
                 variant="outline" 
                 className={`${classification.bgColor} ${classification.color} ${classification.borderColor} text-[10px] uppercase tracking-wider hidden sm:flex`}
               >
-                <Icon icon={classification.icon} className="w-3 h-3 mr-1" />
+                <Icon name={classification.icon} className="w-3 h-3 mr-1" />
                 {classification.label}
               </Badge>
 
               {/* Stats */}
               <div className="hidden md:flex items-center gap-4 text-xs text-stone-500">
                 <span className="flex items-center gap-1">
-                  <Icon icon="solar:check-circle-linear" className="w-3.5 h-3.5" />
+                  <Icon name="solar:check-circle-linear" className="w-3.5 h-3.5" />
                   {agent.success_rate || 0}%
                 </span>
                 <span className="flex items-center gap-1">
-                  <Icon icon="solar:task-square-linear" className="w-3.5 h-3.5" />
+                  <Icon name="solar:task-square-linear" className="w-3.5 h-3.5" />
                   {agent.daily_tasks || 0}
                 </span>
               </div>

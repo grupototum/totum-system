@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tarefa, PRIORIDADES } from '@/hooks/useTasks';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 
 interface KanbanCardProps {
   tarefa: Tarefa;
@@ -98,7 +98,7 @@ export function KanbanCard({ tarefa, projetoNome, onClick }: KanbanCardProps) {
         )}
         <div className="flex items-center gap-1 ml-auto">
           <Icon 
-            icon={getPrioridadeIcon(tarefa.prioridade)} 
+            name={getPrioridadeIcon(tarefa.prioridade)} 
             className="w-3.5 h-3.5" 
             style={{ color: getPrioridadeColor(tarefa.prioridade) }} 
           />
@@ -178,7 +178,7 @@ export function KanbanCard({ tarefa, projetoNome, onClick }: KanbanCardProps) {
             text-[10px] flex items-center gap-1
             ${isAtrasada ? 'text-red-500 font-medium' : 'text-stone-400'}
           `}>
-            <Icon icon="solar:calendar-linear" className="w-3 h-3" />
+            <Icon name="solar:calendar-linear" className="w-3 h-3" />
             {formatarData(dataLimite)}
           </span>
         )}

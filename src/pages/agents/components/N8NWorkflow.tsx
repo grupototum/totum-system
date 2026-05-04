@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Agent } from '@/hooks/useAgents';
 
@@ -233,7 +233,7 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
               onClick={saveN8NConfig}
               className="bg-stone-900 hover:bg-stone-800"
             >
-              <Icon icon="solar:check-circle-linear" className="w-4 h-4 mr-2" />
+              <Icon name="solar:check-circle-linear" className="w-4 h-4 mr-2" />
               Conectar
             </Button>
           </div>        </CardContent>
@@ -253,7 +253,7 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
                 onClick={() => setWorkflows(MOCK_WORKFLOWS)}
                 className="border-stone-300"
               >
-                <Icon icon="solar:refresh-linear" className="w-4 h-4 mr-1" />
+                <Icon name="solar:refresh-linear" className="w-4 h-4 mr-1" />
                 Atualizar
               </Button>
             </div>
@@ -298,7 +298,7 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
                           }}
                         >
                           <Icon 
-                            icon={workflow.status === 'active' ? 'solar:pause-linear' : 'solar:play-linear'} 
+                            name={workflow.status === 'active' ? 'solar:pause-linear' : 'solar:play-linear'} 
                             className="w-4 h-4 text-stone-600"
                           />
                         </Button>
@@ -312,7 +312,7 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
                           }}
                           disabled={isExecuting}
                         >
-                          <Icon icon="solar:play-circle-linear" className="w-4 h-4 text-stone-600" />
+                          <Icon name="solar:play-circle-linear" className="w-4 h-4 text-stone-600" />
                         </Button>
                       </div>
                     </div>
@@ -383,12 +383,12 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
             >
               {isExecuting ? (
                 <>
-                  <Icon icon="solar:refresh-linear" className="w-4 h-4 mr-2 animate-spin" />
+                  <Icon name="solar:refresh-linear" className="w-4 h-4 mr-2 animate-spin" />
                   Executando...
                 </>
               ) : (
                 <>
-                  <Icon icon="solar:play-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:play-linear" className="w-4 h-4 mr-2" />
                   Executar Comando
                 </>
               )}
@@ -416,7 +416,7 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
               onClick={() => setLogs([])}
               className="border-stone-300"
             >
-              <Icon icon="solar:trash-bin-linear" className="w-4 h-4 mr-1" />
+              <Icon name="solar:trash-bin-linear" className="w-4 h-4 mr-1" />
               Limpar
             </Button>
           </div>

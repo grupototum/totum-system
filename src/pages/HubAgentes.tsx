@@ -6,7 +6,7 @@ import { useAgents } from '@/hooks/useAgents';
 import { useAgentClassification, classifyAgent } from '@/hooks/useAgentClassification';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { useNavigate } from 'react-router-dom';
 import type { Agent } from '@/hooks/useAgents';
 
@@ -97,7 +97,7 @@ export default function HubAgentes() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center">
-                    <Icon icon="solar:graph-new-linear" className="w-5 h-5 text-white" />
+                    <Icon name="solar:graph-new-linear" className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h1 className="text-3xl font-medium text-stone-900 tracking-tighter">
@@ -116,7 +116,7 @@ export default function HubAgentes() {
                   onClick={() => navigate('/painel-agentes')}
                   className="border-stone-300"
                 >
-                  <Icon icon="solar:users-group-rounded-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:users-group-rounded-linear" className="w-4 h-4 mr-2" />
                   Ver Painel
                 </Button>
                 <Button
@@ -124,7 +124,7 @@ export default function HubAgentes() {
                   onClick={() => navigate('/estrutura-time')}
                   className="border-stone-300"
                 >
-                  <Icon icon="solar:diagram-up-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:diagram-up-linear" className="w-4 h-4 mr-2" />
                   Hierarquia
                 </Button>
               </div>
@@ -152,11 +152,11 @@ export default function HubAgentes() {
                 <span className="text-xs text-stone-600">Em espera</span>
               </div>
               <div className="flex items-center gap-2">
-                <Icon icon="solar:chat-round-dots-linear" className="w-4 h-4 text-emerald-600" />
+                <Icon name="solar:chat-round-dots-linear" className="w-4 h-4 text-emerald-600" />
                 <span className="text-xs text-stone-600">Conversacional</span>
               </div>
               <div className="flex items-center gap-2">
-                <Icon icon="solar:cpu-bolt-linear" className="w-4 h-4 text-amber-600" />
+                <Icon name="solar:cpu-bolt-linear" className="w-4 h-4 text-amber-600" />
                 <span className="text-xs text-stone-600">Processamento</span>
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function HubAgentes() {
                             px-2 py-0.5 rounded-full border flex items-center gap-1
                             ${classification.bgColor} ${classification.borderColor}
                           `}>
-                            <Icon icon={classification.icon} className={`w-3 h-3 ${classification.color}`} />
+                            <Icon name={classification.icon} className={`w-3 h-3 ${classification.color}`} />
                           </div>
                         </button>
 
@@ -326,7 +326,7 @@ export default function HubAgentes() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-4 bg-white rounded-lg border border-stone-300">
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon icon="solar:diagram-up-linear" className="w-5 h-5 text-stone-600" />
+                  <Icon name="solar:diagram-up-linear" className="w-5 h-5 text-stone-600" />
                   <h3 className="font-medium text-stone-900">Fluxo Orquestrado</h3>
                 </div>
                 <p className="text-sm text-stone-500">
@@ -337,7 +337,7 @@ export default function HubAgentes() {
 
               <div className="p-4 bg-white rounded-lg border border-stone-300">
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon icon="solar:chat-round-dots-linear" className="w-5 h-5 text-emerald-600" />
+                  <Icon name="solar:chat-round-dots-linear" className="w-5 h-5 text-emerald-600" />
                   <h3 className="font-medium text-stone-900">Agentes Conversacionais</h3>
                 </div>
                 <p className="text-sm text-stone-500">
@@ -348,7 +348,7 @@ export default function HubAgentes() {
 
               <div className="p-4 bg-white rounded-lg border border-stone-300">
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon icon="solar:cpu-bolt-linear" className="w-5 h-5 text-amber-600" />
+                  <Icon name="solar:cpu-bolt-linear" className="w-5 h-5 text-amber-600" />
                   <h3 className="font-medium text-stone-900">Agentes de Processamento</h3>
                 </div>
                 <p className="text-sm text-stone-500">

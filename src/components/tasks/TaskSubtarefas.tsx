@@ -3,7 +3,7 @@ import { Tarefa } from '@/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TaskSubtarefasProps {
@@ -71,7 +71,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
           disabled={!novaSubtarefa.trim() || adicionando}
           className="bg-stone-900 hover:bg-stone-800 shrink-0"
         >
-          <Icon icon="solar:add-circle-linear" className="w-5 h-5" />
+          <Icon name="solar:add-circle-linear" className="w-5 h-5" />
         </Button>
       </div>
 
@@ -85,7 +85,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
               exit={{ opacity: 0 }}
               className="text-center py-8 text-stone-400"
             >
-              <Icon icon="solar:checklist-minimalistic-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <Icon name="solar:checklist-minimalistic-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm">Nenhuma subtarefa ainda</p>
               <p className="text-xs">Adicione itens ao checklist</p>
             </motion.div>
@@ -123,7 +123,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
                   className="p-1.5 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
                   style={{ opacity: 1 }}
                 >
-                  <Icon icon="solar:trash-bin-trash-linear" className="w-4 h-4" />
+                  <Icon name="solar:trash-bin-trash-linear" className="w-4 h-4" />
                 </button>
               </motion.div>
             ))

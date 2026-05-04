@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useAgents } from '@/hooks/useAgents';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { useNavigate } from 'react-router-dom';
 
 export default function EstruturaTime() {
@@ -39,7 +39,7 @@ export default function EstruturaTime() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center">
-                    <Icon icon="solar:diagram-up-linear" className="w-5 h-5 text-white" />
+                    <Icon name="solar:diagram-up-linear" className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h1 className="text-3xl font-medium text-stone-900 tracking-tighter">
@@ -58,7 +58,7 @@ export default function EstruturaTime() {
                   onClick={() => navigate('/painel-agentes')}
                   className="border-stone-300"
                 >
-                  <Icon icon="solar:users-group-rounded-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:users-group-rounded-linear" className="w-4 h-4 mr-2" />
                   Painel
                 </Button>
                 <Button
@@ -66,7 +66,7 @@ export default function EstruturaTime() {
                   onClick={() => navigate('/hub-agentes')}
                   className="border-stone-300"
                 >
-                  <Icon icon="solar:graph-new-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:graph-new-linear" className="w-4 h-4 mr-2" />
                   Hub N8N
                 </Button>
               </div>
@@ -83,7 +83,7 @@ export default function EstruturaTime() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-stone-300">
                 <div className="w-12 h-12 rounded-full bg-stone-900 flex items-center justify-center">
-                  <Icon icon="solar:crown-linear" className="w-6 h-6 text-white" />
+                  <Icon name="solar:crown-linear" className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-stone-900">Orquestrador</p>
@@ -93,7 +93,7 @@ export default function EstruturaTime() {
 
               <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-stone-300">
                 <div className="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center">
-                  <Icon icon="solar:users-group-two-rounded-linear" className="w-6 h-6 text-stone-700" />
+                  <Icon name="solar:users-group-two-rounded-linear" className="w-6 h-6 text-stone-700" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-stone-900">Modos de Operação</p>
@@ -103,7 +103,7 @@ export default function EstruturaTime() {
 
               <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-stone-300">
                 <div className="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center">
-                  <Icon icon="solar:stars-linear" className="w-6 h-6 text-stone-700" />
+                  <Icon name="solar:stars-linear" className="w-6 h-6 text-stone-700" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-stone-900">Agentes Especializados</p>
@@ -196,16 +196,16 @@ export default function EstruturaTime() {
 
                             <div className="hidden sm:flex items-center gap-4 text-xs text-stone-500">
                               <span className="flex items-center gap-1">
-                                <Icon icon="solar:check-circle-linear" className="w-4 h-4" />
+                                <Icon name="solar:check-circle-linear" className="w-4 h-4" />
                                 {agent.success_rate || 0}%
                               </span>
                               <span className="flex items-center gap-1">
-                                <Icon icon="solar:task-square-linear" className="w-4 h-4" />
+                                <Icon name="solar:task-square-linear" className="w-4 h-4" />
                                 {agent.daily_tasks || 0}
                               </span>
                             </div>
 
-                            <Icon icon="solar:alt-arrow-right-linear" className="w-5 h-5 text-stone-400" />
+                            <Icon name="solar:alt-arrow-right-linear" className="w-5 h-5 text-stone-400" />
                           </div>
                         </motion.div>
                       ))}

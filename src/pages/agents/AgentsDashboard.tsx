@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@iconify/react";
+import { Icon } from '@/components/shared/Icon';
 import {
   Bot, Zap, Users, TrendingUp, Search, LayoutGrid, List, BarChart3,
   ChevronRight, Plus, FileText, Filter,

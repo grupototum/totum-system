@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { 
   LineChart, 
   Line, 
@@ -109,7 +109,7 @@ export default function AgenteDetail() {
         <div className="min-h-screen bg-[#EAEAE5] flex items-center justify-center">
           <div className="text-center">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-200 flex items-center justify-center">
-              <Icon icon="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
+              <Icon name="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
             </div>
             <h1 className="text-2xl font-medium text-stone-900 mb-2">Agente não encontrado</h1>
             <p className="text-stone-500 mb-6">O agente solicitado não existe ou foi removido.</p>
@@ -141,7 +141,7 @@ export default function AgenteDetail() {
                   onClick={() => navigate(-1)}
                   className="shrink-0"
                 >
-                  <Icon icon="solar:arrow-left-linear" className="w-5 h-5" />
+                  <Icon name="solar:arrow-left-linear" className="w-5 h-5" />
                 </Button>
 
                 <div className="relative">
@@ -172,7 +172,7 @@ export default function AgenteDetail() {
                     )}
                     {agent.is_orchestrator && (
                       <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">
-                        <Icon icon="solar:crown-linear" className="w-3 h-3 mr-1" />
+                        <Icon name="solar:crown-linear" className="w-3 h-3 mr-1" />
                         Orquestrador
                       </Badge>
                     )}
@@ -183,7 +183,7 @@ export default function AgenteDetail() {
                       variant="outline" 
                       className={`${classification?.bgColor} ${classification?.color} ${classification?.borderColor} text-[10px]`}
                     >
-                      <Icon icon={classification?.icon || ''} className="w-3 h-3 mr-1" />
+                      <Icon name={classification?.icon || ''} className="w-3 h-3 mr-1" />
                       {classification?.label}
                     </Badge>
                     <span className="text-xs text-stone-400">
@@ -199,14 +199,14 @@ export default function AgenteDetail() {
                   onClick={() => navigate('/hub-agentes')}
                   className="border-stone-300"
                 >
-                  <Icon icon="solar:graph-new-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:graph-new-linear" className="w-4 h-4 mr-2" />
                   Ver no Hub
                 </Button>
                 <Button
                   onClick={() => setActiveTab('chat')}
                   className="bg-stone-900 hover:bg-stone-800"
                 >
-                  <Icon icon="solar:chat-dots-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:chat-dots-linear" className="w-4 h-4 mr-2" />
                   Conversar
                 </Button>
               </div>
@@ -239,7 +239,7 @@ export default function AgenteDetail() {
                       text-sm font-medium
                     "
                   >
-                    <Icon icon={tab.icon} className="w-4 h-4 mr-2" />
+                    <Icon name={tab.icon} className="w-4 h-4 mr-2" />
                     {tab.label}
                   </TabsTrigger>
                 ))}
@@ -262,7 +262,7 @@ export default function AgenteDetail() {
                         <Card key={i} className="border-stone-300 bg-white">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3">
-                              <Icon icon={stat.icon} className={`w-5 h-5 ${stat.color}`} />
+                              <Icon name={stat.icon} className={`w-5 h-5 ${stat.color}`} />
                               <div>
                                 <p className="text-[10px] uppercase tracking-widest text-stone-400">{stat.label}</p>
                                 <p className="text-xl font-medium text-stone-900">{stat.value}</p>
@@ -635,7 +635,7 @@ export default function AgenteDetail() {
                               Nível {parentAgent.hierarchy_level}
                             </Badge>
                           </div>
-                          <Icon icon="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
+                          <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
                         </div>
                       </CardContent>
                     </Card>
@@ -671,7 +671,7 @@ export default function AgenteDetail() {
                                 <span className="text-xs text-stone-500">
                                   ✓ {child.success_rate || 0}%
                                 </span>
-                                <Icon icon="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
+                                <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
                               </div>
                             </div>
                           ))}
@@ -695,7 +695,7 @@ export default function AgenteDetail() {
                                 </div>
                                 <p className="text-xs text-stone-500 mt-2">{parentAgent.name}</p>
                               </div>
-                              <Icon icon="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
+                              <Icon name="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
                             </>
                           )}
                           
@@ -709,7 +709,7 @@ export default function AgenteDetail() {
                           
                           {childAgents.length > 0 && (
                             <>
-                              <Icon icon="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
+                              <Icon name="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
                               <div className="text-center">
                                 <div className="flex -space-x-2">
                                   {childAgents.slice(0, 3).map((child, i) => (

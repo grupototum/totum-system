@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { AgentClassification, classifyAgent } from '@/hooks/useAgentClassification';
 
@@ -75,7 +75,7 @@ export function AgentCard({
               </div>
               {showClassification && (
                 <Icon 
-                  icon={classification.icon} 
+                  name={classification.icon} 
                   className={`w-4 h-4 ${classification.color}`}
                 />
               )}
@@ -123,7 +123,7 @@ export function AgentCard({
                 variant="outline" 
                 className={`${classification.bgColor} ${classification.color} ${classification.borderColor} text-[10px] uppercase tracking-wider`}
               >
-                <Icon icon={classification.icon} className="w-3 h-3 mr-1" />
+                <Icon name={classification.icon} className="w-3 h-3 mr-1" />
                 {classification.label}
               </Badge>
             )}

@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type ViewType = 'kanban' | 'lista';
@@ -177,7 +177,7 @@ export default function QuadroTarefas() {
                   </div>
                 </div>
                 <Button onClick={handleNovaTarefa} className="bg-stone-900 hover:bg-stone-800 text-white">
-                  <Icon icon="solar:add-circle-linear" className="w-5 h-5 mr-2" />
+                  <Icon name="solar:add-circle-linear" className="w-5 h-5 mr-2" />
                   Nova Tarefa
                 </Button>
               </div>
@@ -190,19 +190,19 @@ export default function QuadroTarefas() {
           <div className="max-w-[1400px] mx-auto px-6 py-3">
             <div className="flex items-center gap-4 flex-wrap">
               <div className="relative flex-1 min-w-[200px] max-w-sm">
-                <Icon icon="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Icon name="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar tarefas..." className="pl-10 bg-white border-stone-300" />
               </div>
               <div className="flex items-center bg-stone-100 rounded-lg p-1">
                 <button onClick={() => setViewType('kanban')} className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewType === 'kanban' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}>
-                  <Icon icon="solar:kanban-linear" className="w-4 h-4" /> Kanban
+                  <Icon name="solar:kanban-linear" className="w-4 h-4" /> Kanban
                 </button>
                 <button onClick={() => setViewType('lista')} className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewType === 'lista' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700'}`}>
-                  <Icon icon="solar:list-linear" className="w-4 h-4" /> Lista
+                  <Icon name="solar:list-linear" className="w-4 h-4" /> Lista
                 </button>
               </div>
               <button onClick={() => setShowFilters(!showFilters)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${showFilters || temFiltrosAtivos ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}>
-                <Icon icon="solar:filter-linear" className="w-4 h-4" /> Filtros
+                <Icon name="solar:filter-linear" className="w-4 h-4" /> Filtros
                 {temFiltrosAtivos && <span className="ml-1 w-2 h-2 rounded-full bg-emerald-400" />}
               </button>
               {temFiltrosAtivos && (
@@ -274,7 +274,7 @@ export default function QuadroTarefas() {
                       {tarefasFiltradas.length === 0 ? (
                         <tr>
                           <td colSpan={4} className="py-12 text-center text-stone-400">
-                            <Icon icon="solar:inbox-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                            <Icon name="solar:inbox-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
                             <p>Nenhuma tarefa encontrada</p>
                           </td>
                         </tr>
