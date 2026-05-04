@@ -213,7 +213,18 @@ export default function Clients() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           {filtered.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-muted-foreground">Nenhum cliente encontrado</div>
+            <div className="col-span-full">
+              <EmptyState
+                title="Nenhum cliente encontrado"
+                description={search || managerFilter !== "all" ? "Ajuste a busca ou os filtros." : "Cadastre o primeiro cliente para começar."}
+                icon={<Users className="h-6 w-6" />}
+                action={
+                  <Button onClick={() => navigate("/clientes/novo")} size="sm">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Cliente
+                  </Button>
+                }
+              />
+            </div>
           ) : filtered.map((client, i) => {
             const mrr = getMrr(client);
             const displayName = getClientDisplayName(client);
