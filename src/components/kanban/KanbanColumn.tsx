@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { KanbanCard } from './KanbanCard';
 import { StatusTarefa, Tarefa, Projeto } from '@/hooks/useTasks';
 import { Icon } from '@/components/shared/Icon';
+import { useTaskAttachmentsSummary } from '@/hooks/useTaskAttachments';
 
 interface KanbanColumnProps {
   id: StatusTarefa;
@@ -27,6 +28,8 @@ export function KanbanColumn({
 }: KanbanColumnProps) {
   const [isOver, setIsOver] = useState(false);
   const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null);
+  const tarefaIds = useMemo(() => tarefas.map((t) => t.id), [tarefas]);
+  const summaries = useTaskAttachmentsSummary(tarefaIds);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -125,6 +128,7 @@ export function KanbanColumn({
                 tarefa={tarefa}
                 projetoNome={getProjetoNome(tarefa.projeto_id)}
                 onClick={() => onCardClick(tarefa)}
+                attachmentSummary={summaries[tarefa.id]}
               />
             </div>
           ))}
