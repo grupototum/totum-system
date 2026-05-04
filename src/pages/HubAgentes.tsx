@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AgentNode, NodeConnector } from '@/components/agents';
 import { useAgents } from '@/hooks/useAgents';
 import { useAgentClassification, classifyAgent } from '@/hooks/useAgentClassification';

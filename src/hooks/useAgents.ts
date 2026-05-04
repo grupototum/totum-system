@@ -58,7 +58,7 @@ export const useAgents = () => {
 
         if (error) throw error;
 
-        const agents: Agent[] = (data || []).map((row) => ({
+        const agents: Agent[] = ((data || []) as any[]).map((row: any) => ({
           id: row.id,
           name: row.name,
           role: row.role,

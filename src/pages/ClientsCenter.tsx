@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -100,7 +100,7 @@ export default function ClientsCenter() {
 
   const fetchClients = useCallback(async () => {
     const { data } = await supabase.from("clients").select("*").order("created_at", { ascending: false });
-    if (data) setClients(data as Client[]);
+    if (data) setClients(data as unknown as Client[]);
     setLoading(false);
   }, []);
 

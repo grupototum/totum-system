@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AgentMetrics, AgentCard } from '@/components/agents';
 import { useAgents } from '@/hooks/useAgents';
 import { useAgentClassification } from '@/hooks/useAgentClassification';

@@ -96,7 +96,7 @@ export function useSystemSettings() {
     queryKey: ["system_settings", isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return demoSystemSettings;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("system_settings")
         .select("*")
         .limit(1)
@@ -114,9 +114,9 @@ export function useUpdateSystemSettings() {
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (isDemoMode) { toast(DEMO_TOAST); return; }
-      const { data: existing } = await supabase.from("system_settings").select("id").limit(1).single();
+      const { data: existing } = await (supabase as any).from("system_settings").select("id").limit(1).single();
       if (!existing) throw new Error("Configurações não encontradas");
-      const { error } = await supabase.from("system_settings").update(updates as any).eq("id", existing.id);
+      const { error } = await (supabase as any).from("system_settings").update(updates as any).eq("id", existing.id);
       if (error) throw error;
     },
     onSuccess: () => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { AgentChat } from '@/components/agents';
 import { useAgents } from '@/hooks/useAgents';
 import { useAgentClassification, classifyAgent } from '@/hooks/useAgentClassification';

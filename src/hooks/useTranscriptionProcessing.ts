@@ -82,8 +82,8 @@ export const useTranscriptionProcessing = () => {
   ) => {
     try {
       // Insere importação
-      const { data: importData } = await supabase
-        .from('transcription_imports')
+      const { data: importData } = await (supabase as any)
+        .from("transcription_imports")
         .insert({
           subject: row.Subject,
           transcricao: row.Transcrição,
@@ -110,7 +110,7 @@ export const useTranscriptionProcessing = () => {
         }));
 
       if (analyses.length > 0) {
-        await supabase.from('transcription_analysis').insert(analyses);
+        await (supabase as any).from("transcription_analysis").insert(analyses);
       }
     } catch (err) {
       console.error('[Supabase] Erro ao salvar transcrição:', err);
@@ -118,12 +118,12 @@ export const useTranscriptionProcessing = () => {
   };
 
   const loadImports = useCallback(async (): Promise<TranscriptionImport[]> => {
-    const { data } = await supabase
-      .from('transcription_imports')
+    const { data } = await (supabase as any)
+      .from("transcription_imports")
       .select('*')
       .order('imported_at', { ascending: false })
       .limit(100);
-    return (data || []) as TranscriptionImport[];
+    return (data || []) as unknown as TranscriptionImport[];
   }, []);
 
   return { ...state, parseCSV, processTranscriptions, loadImports };

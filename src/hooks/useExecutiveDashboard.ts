@@ -206,7 +206,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
     const historyStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
     const { data: historyEntries } = await supabase
       .from("financial_entries")
-      .select("value, type, due_date, status, entry_class, nature")
+      .select("value, type, due_date, status")
       .gte("due_date", historyStart)
       .lt("due_date", periodEnd)
       .eq("status", "pago");

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import {
   DragDropContext,
   Droppable,
@@ -121,7 +121,7 @@ export default function ContentPipeline() {
   useEffect(() => {
     if (!user) return;
     const fetchCards = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("content_pipeline")
         .select("*")
         .eq("user_id", user.id)
@@ -129,7 +129,7 @@ export default function ContentPipeline() {
 
       if (data) {
         const grouped: PipelineBoard = { ideas: [], script: [], thumbnail: [], filming: [], editing: [] };
-        (data as ContentCard[]).forEach((card) => {
+        (data as unknown as ContentCard[]).forEach((card) => {
           if (grouped[card.stage as StageId]) grouped[card.stage as StageId].push(card);
         });
         setBoard(grouped);
@@ -164,7 +164,7 @@ export default function ContentPipeline() {
     }));
 
     // Persist
-    await supabase.from("content_pipeline").update({ stage: dstCol, sort_order: moved.sort_order }).eq("id", moved.id);
+    await (supabase as any).from("content_pipeline").update({ stage: dstCol, sort_order: moved.sort_order }).eq("id", moved.id);
   };
 
   // Upload image
@@ -201,7 +201,7 @@ export default function ContentPipeline() {
     
     setErrors({});
     const maxOrder = board[dialogStage].length;
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("content_pipeline")
       .insert({
         title: newTitle.trim(),
@@ -227,14 +227,14 @@ export default function ContentPipeline() {
   };
 
   const deleteCard = async (id: string, stage: StageId) => {
-    await supabase.from("content_pipeline").delete().eq("id", id);
+    await (supabase as any).from("content_pipeline").delete().eq("id", id);
     setBoard((prev) => ({ ...prev, [stage]: prev[stage].filter((c) => c.id !== id) }));
   };
 
   const cycleApproval = async (card: ContentCard) => {
     const order: ApprovalStatus[] = ["pending", "approved", "rejected"];
     const next = order[(order.indexOf(card.approval_status as ApprovalStatus) + 1) % 3];
-    await supabase.from("content_pipeline").update({ approval_status: next }).eq("id", card.id);
+    await (supabase as any).from("content_pipeline").update({ approval_status: next }).eq("id", card.id);
     setBoard((prev) => ({
       ...prev,
       [card.stage]: prev[card.stage].map((c) => (c.id === card.id ? { ...c, approval_status: next } : c)),

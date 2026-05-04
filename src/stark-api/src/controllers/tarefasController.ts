@@ -22,8 +22,8 @@ export class TarefasController {
         ordem = 'desc'
       } = req.query as ListarTarefasQuery;
 
-      let query = supabase
-        .from('tarefas')
+      let query = (supabase as any)
+        .from("tarefas")
         .select('*');
 
       // Aplicar filtros
@@ -76,8 +76,8 @@ export class TarefasController {
     try {
       const { id } = req.params;
 
-      const { data, error } = await supabase
-        .from('tarefas')
+      const { data, error } = await (supabase as any)
+        .from("tarefas")
         .select('*')
         .eq('id', id)
         .single();
@@ -127,8 +127,8 @@ export class TarefasController {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('tarefas')
+      const { data, error } = await (supabase as any)
+        .from("tarefas")
         .insert([{
           titulo: dto.titulo.trim(),
           descricao: dto.descricao?.trim() || null,
@@ -176,8 +176,8 @@ export class TarefasController {
       const dto: AtualizarTarefaDTO = req.body;
 
       // Verificar se a tarefa existe
-      const { data: existente, error: erroBusca } = await supabase
-        .from('tarefas')
+      const { data: existente, error: erroBusca } = await (supabase as any)
+        .from("tarefas")
         .select('id')
         .eq('id', id)
         .single();
@@ -204,8 +204,8 @@ export class TarefasController {
       // Atualizar updated_at automaticamente
       atualizacao.updated_at = new Date().toISOString();
 
-      const { data, error } = await supabase
-        .from('tarefas')
+      const { data, error } = await (supabase as any)
+        .from("tarefas")
         .update(atualizacao)
         .eq('id', id)
         .select()
@@ -246,8 +246,8 @@ export class TarefasController {
       const { id } = req.params;
 
       // Verificar se a tarefa existe
-      const { data: existente, error: erroBusca } = await supabase
-        .from('tarefas')
+      const { data: existente, error: erroBusca } = await (supabase as any)
+        .from("tarefas")
         .select('id')
         .eq('id', id)
         .single();
@@ -261,8 +261,8 @@ export class TarefasController {
         return;
       }
 
-      const { error } = await supabase
-        .from('tarefas')
+      const { error } = await (supabase as any)
+        .from("tarefas")
         .delete()
         .eq('id', id);
 
@@ -298,8 +298,8 @@ export class TarefasController {
    */
   async estatisticas(_req: Request, res: Response): Promise<void> {
     try {
-      const { data: todas, error } = await supabase
-        .from('tarefas')
+      const { data: todas, error } = await (supabase as any)
+        .from("tarefas")
         .select('status, prioridade');
 
       if (error) {

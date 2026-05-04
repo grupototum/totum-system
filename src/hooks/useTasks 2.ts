@@ -108,7 +108,7 @@ export const useTasks = () => {
     setError(null);
 
     try {
-      let query = supabase
+      let query = (supabase as any)
         .from('tarefas')
         .select('*')
         .order('created_at', { ascending: false });
@@ -158,7 +158,7 @@ export const useTasks = () => {
         deadline: tarefa.data_limite || tarefa.deadline,
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('tarefas')
         .insert([dbData])
         .select()
@@ -189,7 +189,7 @@ export const useTasks = () => {
       if (updates.data_limite !== undefined) dbUpdates.deadline = updates.data_limite;
       if (updates.deadline !== undefined) dbUpdates.deadline = updates.deadline;
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('tarefas')
         .update(dbUpdates)
         .eq('id', id);
@@ -207,7 +207,7 @@ export const useTasks = () => {
 
   const deletarTarefa = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('tarefas')
         .delete()
         .eq('id', id);

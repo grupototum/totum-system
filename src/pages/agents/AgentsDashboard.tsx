@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -74,7 +74,7 @@ export default function AgentsDashboard() {
       try {
         const [agRes, intRes] = await Promise.all([
           (supabase as any).from("agents").select("*"),
-          supabase.from("agent_interactions").select("*").order("date"),
+          (supabase as any).from("agent_interactions").select("*").order("date"),
         ]);
         
         if (!isMounted) return;
@@ -144,7 +144,7 @@ export default function AgentsDashboard() {
       })
       .on("postgres_changes" as any, { event: "*", schema: "public", table: "agent_interactions" }, () => {
         if (!isMounted) return;
-        supabase.from("agent_interactions").select("*").order("date").then(({ data }) => { 
+        (supabase as any).from("agent_interactions").select("*").order("date").then(({ data }) => { 
           if (data && isMounted) setInteractions(data as Interaction[]); 
         });
       });
