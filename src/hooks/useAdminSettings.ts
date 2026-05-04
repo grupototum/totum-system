@@ -73,7 +73,7 @@ export function useUpdateCompanySettings() {
 
       const { data: existing } = await supabase.from("company_settings").select("id").limit(1).single();
       if (!existing) throw new Error("Configurações não encontradas");
-      const { error } = await supabase.from("company_settings").update(updates).eq("id", existing.id);
+      const { error } = await supabase.from("company_settings").update(updates as any).eq("id", existing.id);
       if (error) throw error;
     },
     onSuccess: () => {
