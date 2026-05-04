@@ -2,8 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-  Search, Plus, MoreHorizontal, ArrowUpDown, Loader2, Pencil, Trash2,
-  LayoutGrid, List, Mail, Phone, Building2
+  Search, Plus, MoreHorizontal, ArrowUpDown, Pencil, Trash2,
+  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useClients, ClientRow } from "@/hooks/useClients";
 import { useProfiles } from "@/hooks/useProfiles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserCheck } from "lucide-react";
 import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
+import { PageHeader, EmptyState, LoadingState } from "@/components/shared";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
