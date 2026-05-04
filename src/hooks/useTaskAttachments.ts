@@ -155,18 +155,31 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
         setItem(qid, { status: 'error', errorCode: code, error: friendlyError(code, validation.error) });
         return false;
       }
-      setItem(qid, { status: 'uploading', progress: 10, error: undefined, errorCode: undefined });
+      setItem(qid, { status: 'uploading', progress: 5, error: undefined, errorCode: undefined });
       const ext = file.name.split('.').pop();
       const path = `${tarefaId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+      // Smooth synthetic progress while supabase-js does the upload (no native progress events).
+      let current = 5;
+      const ticker = setInterval(() => {
+        // Decelerate as we approach 85%.
+        const remaining = 85 - current;
+        if (remaining <= 1) return;
+        const step = Math.max(1, Math.round(remaining * 0.12));
+        current = Math.min(85, current + step);
+        setItem(qid, { progress: current });
+      }, 200);
+
       try {
         const up = await (supabase.storage as any)
           .from('task-attachments')
           .upload(path, file, { contentType: file.type, upsert: false });
+        clearInterval(ticker);
         if (up.error) {
           setItem(qid, { status: 'error', errorCode: 'storage', error: friendlyError('storage', up.error.message) });
           return false;
         }
-        setItem(qid, { progress: 70 });
+        setItem(qid, { progress: 90 });
         const ins = await (supabase as any).from('tarefa_anexos').insert({
           tarefa_id: tarefaId,
           storage_path: path,
@@ -183,8 +196,11 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
         setItem(qid, { progress: 100, status: 'done', error: undefined, errorCode: undefined });
         return true;
       } catch (e: any) {
+        clearInterval(ticker);
         setItem(qid, { status: 'error', errorCode: 'network', error: friendlyError('network', e?.message) });
         return false;
+      } finally {
+        clearInterval(ticker);
       }
     },
     [tarefaId, setItem]
