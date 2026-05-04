@@ -67,13 +67,34 @@ export function TaskAnexos({ tarefaId }: Props) {
   const hasFiles = (e: React.DragEvent) =>
     Array.from(e.dataTransfer?.types || []).includes('Files');
 
-  const filtered = useMemo(
-    () =>
-      attachments.filter((a) =>
-        a.file_name.toLowerCase().includes(search.toLowerCase())
-      ),
-    [attachments, search]
-  );
+  const [sortBy, setSortBy] = useState<SortKey>(() => {
+    if (typeof window === 'undefined') return 'recent';
+    const v = window.localStorage.getItem('task-anexos-sort');
+    return (v === 'recent' || v === 'oldest' || v === 'name_asc' || v === 'name_desc') ? v : 'recent';
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('task-anexos-sort', sortBy); } catch {}
+  }, [sortBy]);
+
+  const filtered = useMemo(() => {
+    const list = attachments.filter((a) =>
+      a.file_name.toLowerCase().includes(search.toLowerCase())
+    );
+    const sorted = [...list].sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return a.created_at.localeCompare(b.created_at);
+        case 'name_asc':
+          return a.file_name.localeCompare(b.file_name, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        case 'name_desc':
+          return b.file_name.localeCompare(a.file_name, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        case 'recent':
+        default:
+          return b.created_at.localeCompare(a.created_at);
+      }
+    });
+    return sorted;
+  }, [attachments, search, sortBy]);
 
   const selectionMode = selected.size > 0;
   const toggleOne = (id: string) =>
