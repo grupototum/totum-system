@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          category: string | null
+          created_at: string
+          daily_tasks: number | null
+          emoji: string | null
+          id: string
+          name: string
+          role: string
+          status: string
+          success_rate: number | null
+          tasks: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          daily_tasks?: number | null
+          emoji?: string | null
+          id?: string
+          name: string
+          role?: string
+          status?: string
+          success_rate?: number | null
+          tasks?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          daily_tasks?: number | null
+          emoji?: string | null
+          id?: string
+          name?: string
+          role?: string
+          status?: string
+          success_rate?: number | null
+          tasks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       asaas_config: {
         Row: {
           api_key: string
@@ -1327,6 +1369,42 @@ export type Database = {
           status?: string
           total_records?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      logs_execucao_agente: {
+        Row: {
+          agente_id: string
+          created_at: string
+          duracao_ms: number | null
+          erro: string | null
+          finalizado_em: string | null
+          id: string
+          iniciado_em: string
+          resultado: string | null
+          status: string
+        }
+        Insert: {
+          agente_id: string
+          created_at?: string
+          duracao_ms?: number | null
+          erro?: string | null
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          resultado?: string | null
+          status?: string
+        }
+        Update: {
+          agente_id?: string
+          created_at?: string
+          duracao_ms?: number | null
+          erro?: string | null
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          resultado?: string | null
+          status?: string
         }
         Relationships: []
       }
