@@ -1,46 +1,64 @@
-## Revisão de UX/UI — plano em fases
+## Plano consolidado: Anexos de imagem em tarefas
 
-O projeto tem 60+ páginas. Uma revisão "tudo de uma vez" geraria uma mudança massiva, difícil de validar e arriscada. Proponho dividir em fases incrementais, começando pela base global (que afeta todas as telas) e depois agrupando páginas por domínio.
+Implementação completa em uma única leva, cobrindo upload, preview, busca/filtro, validação, histórico e múltiplos arquivos.
 
-### Fase 0 — Auditoria base (sem mudanças de código)
-- Listar problemas recorrentes: tipografia, espaçamentos, contraste, headers inconsistentes, botões sem hierarquia, loaders/empty states ausentes, formulários longos, responsividade mobile.
-- Verificar uso de tokens HSL (`bg-background`, `text-foreground`, `border-border`) vs cores hardcoded.
-- Conferir Sora (headings) + Inter (body) e acentos `#ff3b3b` em todo lugar.
+### 1. Backend (migration)
 
-### Fase 1 — Sistema de design (impacto global)
-1. Padronizar `PageHeader` (título, subtítulo, ações) e aplicar nas páginas que ainda usam header solto.
-2. Padronizar `EmptyState`, `LoadingState`, `ErrorState` reutilizáveis.
-3. Revisar variantes de `Button`, `Card`, `Badge` e densidade (alturas, paddings).
-4. Garantir foco visível, área de toque ≥40px em mobile, scrollbars finas consistentes.
+**Bucket de Storage**
+- `task-attachments` (privado), limite 2MB, MIMEs: jpeg/png/webp/gif/svg+xml.
+- Policies RLS em `storage.objects`: usuários autenticados leem/escrevem; delete restrito ao uploader ou admin.
 
-### Fase 2 — Navegação e layout
-- Sidebar (`AppSidebar`) e Mobile Sidebar: agrupamento, ícones, estado ativo, badges de notificação.
-- Breadcrumbs nas páginas internas (Cliente → Editar, Projeto → Tarefa, etc).
-- Topbar: busca global, notificações, avatar/menu.
+**Tabela `tarefa_anexos`**
+- `id` uuid PK, `tarefa_id` uuid (idx), `storage_path` text, `file_name` text, `mime_type` text, `size_bytes` int, `width` int, `height` int, `uploaded_by` uuid, `created_at` timestamptz.
+- RLS: SELECT/INSERT autenticados; DELETE uploader ou admin.
 
-### Fase 3 — Páginas por domínio (uma fase por grupo)
-A. **Auth**: Login, SignUp, ForgotPassword, ResetPassword, SetupPage.
-B. **Dashboard/Visão**: Dashboard, ExecutiveDashboard, Index, Hub.
-C. **Clientes**: Clients, ClientsCenter, ClientHub, NewClient, EditClient.
-D. **Operação**: Tasks, TasksBoard, QuadroTarefas, Projects, Fulfillment, Templates.
-E. **Comercial/Financeiro**: Contracts, Financial, Products, Packages, Reports.
-F. **Equipe/Admin**: Team, TeamStructure, EstruturaTime, UsersPermissions, AdminSettings, Settings, Registries.
-G. **Conhecimento/IA**: PopSla, PopLibrary, SlaRules, alexandria/*, agents/*, iatools/*, ada/*, workspace/*.
+**Tabela `tarefa_anexos_historico`**
+- `id`, `tarefa_id`, `anexo_id` (nullable), `acao` ('upload'|'remocao'), `file_name`, `user_id`, `created_at`.
+- Trigger AFTER INSERT/DELETE em `tarefa_anexos` registra automaticamente.
+- RLS SELECT autenticados; INSERT só via trigger.
 
-Em cada subfase: ajuste de hierarquia visual, espaçamentos, estados (loading/empty/erro), responsividade, microcopys e remoção de cores hardcoded.
+**Trigger de validação** em `tarefa_anexos`:
+- Bloqueia `mime_type` fora da lista permitida e `size_bytes > 2097152` com mensagens específicas.
 
-### Fase 4 — Mobile / responsivo
-Passada dedicada em ≤414px: tabelas viram cards, diálogos viram sheets, filtros colapsam, CTAs ancoram embaixo.
+### 2. Hook `useTaskAttachments.ts`
 
-### Fase 5 — Acessibilidade e polimento
-- Contrastes AA, labels em inputs, `aria-*` em ícones-botão, navegação por teclado, prefers-reduced-motion.
-- Microanimações com framer-motion em transições de aba/rota.
+Exporta:
+- `ACCEPTED_IMAGE_TYPES`, `ACCEPTED_EXTENSIONS`, `MAX_SIZE_BYTES = 2*1024*1024`, `MAX_BATCH = 20`.
+- `validateImageFile(file)` → checa MIME + extensão + magic bytes; retorna `{ ok, error }` com mensagem específica ("Formato não suportado: .bmp", "Arquivo excede 2MB (3.4MB)", etc.).
+- `useTaskAttachments(tarefaId)`: lista anexos, histórico, `uploadMany(files, onProgress)` com progresso individual + agregado, `remove(anexo)`, `getSignedUrl(path)`.
+- `useTaskAttachmentsSummary(tarefaIds[])`: retorna `{ count, lastUpdatedAt, lastAuthor }` por tarefa para badges/filtros.
 
-### Como quero proceder
-Pelo escopo, prefiro **começar pela Fase 1 (sistema de design)** porque corrige inconsistências em todas as páginas com pouco código. Depois seguimos por domínio na ordem que você priorizar.
+### 3. UI
 
-### Decisões que preciso de você
-1. Por onde começar? Fase 1 (design system global) ou pular direto para um domínio específico (ex.: Clientes, Tarefas, Financeiro)?
-2. Há alguma página que dá mais dor hoje e deve ter prioridade?
-3. Posso remover páginas duplicadas com sufixo " 2" (ex.: `AgentProfile 2.tsx`, `WikiAlexandria 2.tsx`) durante a revisão?
-4. Manter visual atual (dark `#1e1516` + acento vermelho) ou abrir espaço para refinar paleta/tipografia?
+**`TaskAnexos.tsx`** (nova aba "Anexos" no `TaskModal`):
+- Drop zone + input `multiple accept="image/..."`.
+- Fila de upload com barra individual por arquivo + barra agregada + contador "X/Y concluídos".
+- Erros por arquivo exibidos inline; toasts de resumo.
+- Grid responsivo de thumbnails com nome, tamanho, autor, data.
+- Busca local por nome de arquivo dentro da tarefa.
+- Botão remover (com confirmação).
+- Seção "Histórico" colapsável: timeline com ícone, ação, nome do arquivo, autor, data relativa.
+
+**Lightbox** (componente `AttachmentLightbox`):
+- Dialog fullscreen, zoom (scroll/botões), pan (drag), navegação ← →, fechar (Esc/X), download.
+
+**Indicadores em cards/listas**:
+- `KanbanCard.tsx` e `TaskListView.tsx`: badge com ícone clipe + contagem quando `count > 0`; tooltip mostra última atualização e autor.
+
+**Filtros em `TaskFilters.tsx`**:
+- Toggle "Apenas com anexos".
+- Input "Buscar por nome de arquivo" (busca cruzada nas tarefas).
+- Ordenação adicional: "Anexo mais recente".
+
+### 4. Integração
+
+- `TaskModal.tsx`: nova aba "Anexos" com contador.
+- `QuadroTarefas.tsx`/`TasksBoard.tsx`: carrega `useTaskAttachmentsSummary` para tarefas visíveis e passa para cards/filtros.
+
+### Arquivos
+
+**Novos**: `src/hooks/useTaskAttachments.ts`, `src/components/tasks/TaskAnexos.tsx`, `src/components/tasks/AttachmentLightbox.tsx`, migration SQL.
+
+**Editados**: `TaskModal.tsx`, `KanbanCard.tsx`, `TaskListView.tsx`, `TaskFilters.tsx`, `QuadroTarefas.tsx`/`TasksBoard.tsx`.
+
+Posso prosseguir com a implementação?
