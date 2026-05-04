@@ -118,9 +118,7 @@ export default function Clients() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        </div>
+        <LoadingState variant="cards" rows={6} />
       ) : viewMode === "list" ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
