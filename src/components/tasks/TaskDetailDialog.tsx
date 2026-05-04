@@ -163,7 +163,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-[1px] ${
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-[1px] whitespace-nowrap ${
                 activeTab === tab.key
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground/70 hover:text-muted-foreground"
