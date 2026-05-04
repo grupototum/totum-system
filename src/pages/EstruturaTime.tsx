@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { useAgents } from '@/hooks/useAgents';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

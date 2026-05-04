@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { centralResources } from "@/data/agentHierarchy";
 import { Badge } from "@/components/ui/badge";

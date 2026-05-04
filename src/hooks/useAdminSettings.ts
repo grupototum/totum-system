@@ -96,7 +96,7 @@ export function useSystemSettings() {
     queryKey: ["system_settings", isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return demoSystemSettings;
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("system_settings")
         .select("*")
         .limit(1)

@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { FileCheck, Bell, BarChart3, Clock, AlertTriangle, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

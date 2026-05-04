@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { Lightbulb, ExternalLink } from "lucide-react";
 import { tipCategories } from "@/data/agentHierarchy";
