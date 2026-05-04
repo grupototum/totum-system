@@ -110,7 +110,7 @@ export const useTranscriptionProcessing = () => {
         }));
 
       if (analyses.length > 0) {
-        await supabase.from('transcription_analysis').insert(analyses);
+        await (supabase as any).from("transcription_analysis").insert(analyses);
       }
     } catch (err) {
       console.error('[Supabase] Erro ao salvar transcrição:', err);
