@@ -42,6 +42,7 @@ export function TaskAnexos({ tarefaId }: Props) {
     doneCount,
     uploadMany,
     remove,
+    removeMany,
     clearQueue,
   } = useTaskAttachments(tarefaId);
 
@@ -49,6 +50,9 @@ export function TaskAnexos({ tarefaId }: Props) {
   const [dragOver, setDragOver] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const dragDepth = useRef(0);
 
@@ -62,6 +66,31 @@ export function TaskAnexos({ tarefaId }: Props) {
       ),
     [attachments, search]
   );
+
+  const selectionMode = selected.size > 0;
+  const toggleOne = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  const allFilteredSelected = filtered.length > 0 && filtered.every((a) => selected.has(a.id));
+  const toggleAll = () => {
+    if (allFilteredSelected) setSelected(new Set());
+    else setSelected(new Set(filtered.map((a) => a.id)));
+  };
+
+  const handleBulkDelete = async () => {
+    const items = attachments.filter((a) => selected.has(a.id));
+    if (!items.length) return;
+    setBulkDeleting(true);
+    const res = await removeMany(items);
+    setBulkDeleting(false);
+    setConfirmOpen(false);
+    setSelected(new Set());
+    if (res.removed > 0) toast.success(`${res.removed} anexo(s) excluído(s).`);
+    if (res.failed > 0) toast.error(`${res.failed} anexo(s) não puderam ser excluídos.`);
+  };
 
   const handleFiles = async (files: FileList | File[]) => {
     const arr = Array.from(files);
