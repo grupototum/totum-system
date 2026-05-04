@@ -76,22 +76,37 @@ export function TaskAnexos({ tarefaId }: Props) {
   };
 
   return (
-    <div className="p-6 space-y-5">
+    <div
+      className="relative p-6 space-y-5"
+      onDragEnter={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current++;
+        setDragOver(true);
+      }}
+      onDragOver={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }}
+      onDragLeave={(e) => {
+        if (!hasFiles(e)) return;
+        dragDepth.current = Math.max(0, dragDepth.current - 1);
+        if (dragDepth.current === 0) setDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (!hasFiles(e)) return;
+        e.preventDefault();
+        dragDepth.current = 0;
+        setDragOver(false);
+        handleFiles(e.dataTransfer.files);
+      }}
+    >
       {/* Drop zone */}
       <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          handleFiles(e.dataTransfer.files);
-        }}
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-stone-900 bg-stone-100' : 'border-stone-300 bg-white/40 hover:bg-white/60'
+          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-stone-300 bg-white/40 hover:bg-white/60'
         }`}
       >
         <Icon name="solar:cloud-upload-linear" className="w-8 h-8 text-stone-500 mx-auto mb-2" />
