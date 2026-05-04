@@ -12,6 +12,7 @@ export const ACCEPTED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.
 export const ACCEPT_ATTR = ACCEPTED_IMAGE_TYPES.join(',');
 export const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 export const MAX_BATCH = 20;
+export const MAX_BATCH_TOTAL_BYTES = 20 * 1024 * 1024;
 
 export interface TaskAttachment {
   id: string;
