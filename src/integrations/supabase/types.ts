@@ -523,7 +523,6 @@ export type Database = {
           marketing_analysis: string | null
           name: string
           notes: string | null
-          organization_id: string
           phone: string | null
           status: string
           updated_at: string
@@ -540,7 +539,6 @@ export type Database = {
           marketing_analysis?: string | null
           name: string
           notes?: string | null
-          organization_id?: string
           phone?: string | null
           status?: string
           updated_at?: string
@@ -557,7 +555,6 @@ export type Database = {
           marketing_analysis?: string | null
           name?: string
           notes?: string | null
-          organization_id?: string
           phone?: string | null
           status?: string
           updated_at?: string
@@ -695,7 +692,6 @@ export type Database = {
           end_date: string | null
           id: string
           notes: string | null
-          organization_id: string
           plan_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["contract_status"]
@@ -713,7 +709,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
-          organization_id?: string
           plan_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -731,7 +726,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
-          organization_id?: string
           plan_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -1146,7 +1140,6 @@ export type Database = {
           import_batch_id: string | null
           installment_number: number | null
           notes: string | null
-          organization_id: string
           payment_date: string | null
           recurrence: Database["public"]["Enums"]["expense_recurrence"] | null
           status: Database["public"]["Enums"]["financial_entry_status"]
@@ -1172,7 +1165,6 @@ export type Database = {
           import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
-          organization_id?: string
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
           status?: Database["public"]["Enums"]["financial_entry_status"]
@@ -1198,7 +1190,6 @@ export type Database = {
           import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
-          organization_id?: string
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
           status?: Database["public"]["Enums"]["financial_entry_status"]
@@ -1800,7 +1791,6 @@ export type Database = {
           due_date: string | null
           id: string
           name: string
-          organization_id: string
           project_type_id: string | null
           responsible_id: string | null
           start_date: string | null
@@ -1815,7 +1805,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           name: string
-          organization_id?: string
           project_type_id?: string | null
           responsible_id?: string | null
           start_date?: string | null
@@ -1830,7 +1819,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           name?: string
-          organization_id?: string
           project_type_id?: string | null
           responsible_id?: string | null
           start_date?: string | null
@@ -2434,7 +2422,6 @@ export type Database = {
           id: string
           is_recurring: boolean
           last_generated_at: string | null
-          organization_id: string
           parent_task_id: string | null
           plan_id: string | null
           pop_id: string | null
@@ -2466,7 +2453,6 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           last_generated_at?: string | null
-          organization_id?: string
           parent_task_id?: string | null
           plan_id?: string | null
           pop_id?: string | null
@@ -2498,7 +2484,6 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           last_generated_at?: string | null
-          organization_id?: string
           parent_task_id?: string | null
           plan_id?: string | null
           pop_id?: string | null
