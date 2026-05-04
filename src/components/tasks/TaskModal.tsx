@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -127,7 +127,7 @@ export function TaskModal({
             <div className="flex items-center justify-between px-6 py-4 border-b border-stone-300 bg-white/50">
               <div className="flex items-center gap-3">
                 <button onClick={onClose} className="p-2 hover:bg-stone-200/50 rounded-lg transition-colors">
-                  <Icon icon="solar:arrow-right-linear" className="w-5 h-5 text-stone-600" />
+                  <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-600" />
                 </button>
                 <span className="text-sm font-medium text-stone-500">
                   {mode === 'create' ? 'Nova Tarefa' : mode === 'edit' ? 'Editar Tarefa' : 'Detalhes'}
@@ -137,10 +137,10 @@ export function TaskModal({
                 {mode === 'view' && tarefa && (
                   <>
                     <button onClick={() => setMode('edit')} className="p-2 hover:bg-stone-200/50 rounded-lg transition-colors" title="Editar">
-                      <Icon icon="solar:pen-linear" className="w-5 h-5 text-stone-600" />
+                      <Icon name="solar:pen-linear" className="w-5 h-5 text-stone-600" />
                     </button>
                     <button onClick={handleDelete} className="p-2 hover:bg-red-100/50 rounded-lg transition-colors" title="Excluir">
-                      <Icon icon="solar:trash-bin-trash-linear" className="w-5 h-5 text-red-500" />
+                      <Icon name="solar:trash-bin-trash-linear" className="w-5 h-5 text-red-500" />
                     </button>
                   </>
                 )}
@@ -163,7 +163,7 @@ export function TaskModal({
                         ? 'text-stone-900 border-b-2 border-stone-900 bg-white/50' 
                         : 'text-stone-500 hover:text-stone-700 hover:bg-stone-200/30'}`}
                   >
-                    <Icon icon={tab.icon} className="w-4 h-4" />
+                    <Icon name={tab.icon} className="w-4 h-4" />
                     {tab.label}
                   </button>
                 ))}
@@ -229,7 +229,7 @@ export function TaskModal({
                         </select>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <Icon icon="solar:flag-bold" className="w-4 h-4" style={{ color: PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.cor }} />
+                          <Icon name="solar:flag-bold" className="w-4 h-4" style={{ color: PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.cor }} />
                           <span className="text-sm text-stone-700">{PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.label}</span>
                         </div>
                       )}

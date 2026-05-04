@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Comentario } from '@/hooks/useTasks';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,11 +54,11 @@ export function TaskComentarios({ tarefa, onAddComentario, currentUser = 'Usuár
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4">
         {carregando ? (
           <div className="flex items-center justify-center h-32">
-            <Icon icon="solar:refresh-circle-bold" className="w-6 h-6 text-stone-400 animate-spin" />
+            <Icon name="solar:refresh-circle-bold" className="w-6 h-6 text-stone-400 animate-spin" />
           </div>
         ) : comentarios.length === 0 ? (
           <div className="text-center py-12 text-stone-400">
-            <Icon icon="solar:chat-dots-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <Icon name="solar:chat-dots-linear" className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="text-sm">Nenhum comentário ainda</p>
             <p className="text-xs">Seja o primeiro a comentar</p>
           </div>
@@ -110,10 +110,10 @@ export function TaskComentarios({ tarefa, onAddComentario, currentUser = 'Usuár
             <span className="text-xs text-stone-400">Cmd + Enter para enviar</span>
             <Button onClick={handleSubmit} disabled={!novoComentario.trim() || enviando || !onAddComentario} size="sm" className="bg-stone-900 hover:bg-stone-800">
               {enviando ? (
-                <Icon icon="solar:refresh-circle-bold" className="w-4 h-4 animate-spin" />
+                <Icon name="solar:refresh-circle-bold" className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  <Icon icon="solar:paper-plane-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:paper-plane-linear" className="w-4 h-4 mr-2" />
                   Enviar
                 </>
               )}

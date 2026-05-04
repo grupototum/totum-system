@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -237,12 +237,12 @@ export function AgentChat({ agent, onClose }: AgentChatProps) {
               onClick={clearChat}
               title="Limpar chat"
             >
-              <Icon icon="solar:trash-bin-linear" className="w-4 h-4 text-stone-500" />
+              <Icon name="solar:trash-bin-linear" className="w-4 h-4 text-stone-500" />
             </Button>
             
             {onClose && (
               <Button variant="ghost" size="icon" onClick={onClose}>
-                <Icon icon="solar:close-circle-linear" className="w-5 h-5 text-stone-500" />
+                <Icon name="solar:close-circle-linear" className="w-5 h-5 text-stone-500" />
               </Button>
             )}
           </div>
@@ -345,7 +345,7 @@ export function AgentChat({ agent, onClose }: AgentChatProps) {
             disabled={!input.trim() || isTyping || !hasConfig}
             className="bg-stone-900 hover:bg-stone-800 text-white"
           >
-            <Icon icon="solar:plain-linear" className="w-4 h-4" />
+            <Icon name="solar:plain-linear" className="w-4 h-4" />
           </Button>
         </div>
         

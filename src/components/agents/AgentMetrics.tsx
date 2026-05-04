@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { Progress } from '@/components/ui/progress';
 import type { AgentMetrics as Metrics } from '@/hooks/useAgents';
 
@@ -100,7 +100,7 @@ export function AgentMetrics({ metrics, loading = false }: AgentMetricsProps) {
                     w-11 h-11 rounded-lg flex items-center justify-center border
                     ${card.bgColor} ${card.borderColor}
                   `}>
-                    <Icon icon={card.icon} className={`w-5 h-5 ${card.color}`} />
+                    <Icon name={card.icon} className={`w-5 h-5 ${card.color}`} />
                   </div>
                   {card.subtext && (
                     <span className="text-[10px] uppercase tracking-wider text-stone-400">
@@ -157,7 +157,7 @@ export function AgentMetrics({ metrics, loading = false }: AgentMetricsProps) {
                           w-8 h-8 rounded-lg flex items-center justify-center border
                           ${type.bgColor} ${type.borderColor}
                         `}>
-                          <Icon icon={type.icon} className={`w-4 h-4 ${type.color}`} />
+                          <Icon name={type.icon} className={`w-4 h-4 ${type.color}`} />
                         </div>
                         <span className="text-sm font-medium text-stone-700">
                           {type.type}

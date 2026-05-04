@@ -6,7 +6,7 @@ import { useAgents } from '@/hooks/useAgents';
 import { useAgentClassification } from '@/hooks/useAgentClassification';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { useNavigate } from 'react-router-dom';
 
 const FILTERS = ['Todos', 'Conversacional', 'Processamento', 'Online', 'Novo'] as const;
@@ -62,7 +62,7 @@ export default function PainelAgentes() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-stone-900 flex items-center justify-center">
-                    <Icon icon="solar:users-group-rounded-linear" className="w-5 h-5 text-white" />
+                    <Icon name="solar:users-group-rounded-linear" className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h1 className="text-3xl font-medium text-stone-900 tracking-tighter">
@@ -83,7 +83,7 @@ export default function PainelAgentes() {
                 </div>
                 {newAgentsCount > 0 && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-stone-900 rounded-lg">
-                    <Icon icon="solar:sparkles-linear" className="w-4 h-4 text-white" />
+                    <Icon name="solar:sparkles-linear" className="w-4 h-4 text-white" />
                     <span className="text-sm text-white">{newAgentsCount} novo{newAgentsCount > 1 ? 's' : ''}</span>
                   </div>
                 )}
@@ -144,7 +144,7 @@ export default function PainelAgentes() {
               <div className="flex-1 max-w-md">
                 <div className="relative">
                   <Icon 
-                    icon="solar:magnifer-linear" 
+                    name="solar:magnifer-linear" 
                     className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" 
                   />
                   <Input
@@ -173,7 +173,7 @@ export default function PainelAgentes() {
                 className="text-center py-16"
               >
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-200 flex items-center justify-center">
-                  <Icon icon="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
+                  <Icon name="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
                 </div>
                 <h3 className="text-lg font-medium text-stone-900 mb-1">Nenhum agente encontrado</h3>
                 <p className="text-sm text-stone-500">Tente ajustar os filtros ou a busca</p>
