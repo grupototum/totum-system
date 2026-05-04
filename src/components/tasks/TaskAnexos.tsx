@@ -15,6 +15,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -31,6 +38,8 @@ import { AttachmentLightbox } from './AttachmentLightbox';
 interface Props {
   tarefaId: string;
 }
+
+type SortKey = 'recent' | 'oldest' | 'name_asc' | 'name_desc';
 
 export function TaskAnexos({ tarefaId }: Props) {
   const {
@@ -60,13 +69,34 @@ export function TaskAnexos({ tarefaId }: Props) {
   const hasFiles = (e: React.DragEvent) =>
     Array.from(e.dataTransfer?.types || []).includes('Files');
 
-  const filtered = useMemo(
-    () =>
-      attachments.filter((a) =>
-        a.file_name.toLowerCase().includes(search.toLowerCase())
-      ),
-    [attachments, search]
-  );
+  const [sortBy, setSortBy] = useState<SortKey>(() => {
+    if (typeof window === 'undefined') return 'recent';
+    const v = window.localStorage.getItem('task-anexos-sort');
+    return (v === 'recent' || v === 'oldest' || v === 'name_asc' || v === 'name_desc') ? v : 'recent';
+  });
+  useEffect(() => {
+    try { window.localStorage.setItem('task-anexos-sort', sortBy); } catch {}
+  }, [sortBy]);
+
+  const filtered = useMemo(() => {
+    const list = attachments.filter((a) =>
+      a.file_name.toLowerCase().includes(search.toLowerCase())
+    );
+    const sorted = [...list].sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return a.created_at.localeCompare(b.created_at);
+        case 'name_asc':
+          return a.file_name.localeCompare(b.file_name, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        case 'name_desc':
+          return b.file_name.localeCompare(a.file_name, 'pt-BR', { numeric: true, sensitivity: 'base' });
+        case 'recent':
+        default:
+          return b.created_at.localeCompare(a.created_at);
+      }
+    });
+    return sorted;
+  }, [attachments, search, sortBy]);
 
   const selectionMode = selected.size > 0;
   const toggleOne = (id: string) =>
@@ -268,16 +298,32 @@ export function TaskAnexos({ tarefaId }: Props) {
         );
       })()}
 
-      {/* Search */}
+      {/* Search + Sort */}
       {attachments.length > 0 && (
-        <div className="relative">
-          <Icon name="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-          <Input
-            placeholder="Buscar por nome de arquivo..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-white border-stone-300"
-          />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Icon name="solar:magnifer-linear" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <Input
+              placeholder="Buscar por nome de arquivo..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 bg-white border-stone-300"
+            />
+          </div>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
+            <SelectTrigger className="w-full sm:w-[200px] bg-white border-stone-300">
+              <div className="flex items-center gap-2">
+                <Icon name="solar:sort-vertical-linear" className="w-4 h-4 text-stone-500" />
+                <SelectValue />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Mais recentes</SelectItem>
+              <SelectItem value="oldest">Mais antigos</SelectItem>
+              <SelectItem value="name_asc">Nome (A → Z)</SelectItem>
+              <SelectItem value="name_desc">Nome (Z → A)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
