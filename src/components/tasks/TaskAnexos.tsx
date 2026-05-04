@@ -39,6 +39,10 @@ export function TaskAnexos({ tarefaId }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dragDepth = useRef(0);
+
+  const hasFiles = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer?.types || []).includes('Files');
 
   const filtered = useMemo(
     () =>
