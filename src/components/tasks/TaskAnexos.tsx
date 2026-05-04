@@ -228,6 +228,42 @@ export function TaskAnexos({ tarefaId }: Props) {
         </div>
       )}
 
+      {/* Selection bar */}
+      {attachments.length > 0 && (
+        <div className="flex items-center justify-between gap-2 text-xs">
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="flex items-center gap-2 text-stone-600 hover:text-stone-900"
+          >
+            <Checkbox checked={allFilteredSelected} className="pointer-events-none" />
+            <span>{allFilteredSelected ? 'Limpar seleção' : 'Selecionar todos'}</span>
+          </button>
+          {selectionMode && (
+            <div className="flex items-center gap-2">
+              <span className="text-stone-600">{selected.size} selecionado(s)</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelected(new Set())}
+                className="h-7 text-xs"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmOpen(true)}
+                className="h-7 text-xs gap-1"
+              >
+                <Icon name="solar:trash-bin-trash-linear" className="w-3.5 h-3.5" />
+                Excluir selecionados
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Grid */}
       {loading ? (
         <div className="text-sm text-stone-500 text-center py-6">Carregando…</div>
@@ -237,16 +273,38 @@ export function TaskAnexos({ tarefaId }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {filtered.map((a, i) => (
-            <div key={a.id} className="group relative bg-white rounded-lg border border-stone-200 overflow-hidden">
+          {filtered.map((a) => {
+            const isSel = selected.has(a.id);
+            return (
+            <div
+              key={a.id}
+              className={`group relative bg-white rounded-lg border overflow-hidden transition-all ${
+                isSel ? 'border-[#ff3b3b] ring-2 ring-[#ff3b3b]' : 'border-stone-200'
+              }`}
+            >
               <button
-                onClick={() => setLightboxIndex(filtered.findIndex((x) => x.id === a.id))}
+                onClick={() => {
+                  if (selectionMode) toggleOne(a.id);
+                  else setLightboxIndex(filtered.findIndex((x) => x.id === a.id));
+                }}
                 className="block w-full aspect-square bg-stone-100"
               >
                 {a.url && (
                   <img src={a.url} alt={a.file_name} className="w-full h-full object-cover" loading="lazy" />
                 )}
               </button>
+              {/* Selection checkbox */}
+              <div
+                className={`absolute top-1 left-1 p-1 bg-white/90 rounded-md transition-opacity ${
+                  selectionMode || isSel ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleOne(a.id);
+                }}
+              >
+                <Checkbox checked={isSel} className="pointer-events-none" />
+              </div>
               <div className="p-2 text-xs">
                 <div className="truncate font-medium text-stone-700" title={a.file_name}>
                   {a.file_name}
@@ -266,9 +324,35 @@ export function TaskAnexos({ tarefaId }: Props) {
                 <Icon name="solar:trash-bin-trash-linear" className="w-3.5 h-3.5 text-red-500" />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
+
+      {/* Bulk delete confirmation */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir {selected.size} anexo(s)?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Os arquivos serão removidos permanentemente e a operação será registrada no histórico.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                handleBulkDelete();
+              }}
+              disabled={bulkDeleting}
+              className="bg-[#ff3b3b] hover:bg-[#ff3b3b]/90"
+            >
+              {bulkDeleting ? 'Excluindo…' : 'Excluir'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* History */}
       {history.length > 0 && (
