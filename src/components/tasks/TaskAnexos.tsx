@@ -11,6 +11,7 @@ import {
   ACCEPT_ATTR,
   MAX_BATCH,
   MAX_SIZE_BYTES,
+  MAX_BATCH_TOTAL_BYTES,
   formatBytes,
   validateImageFile,
 } from '@/hooks/useTaskAttachments';
@@ -60,9 +61,13 @@ export function TaskAnexos({ tarefaId }: Props) {
     }
     const valid = invalid.filter((x) => x.v.ok).map((x) => x.f);
     if (!valid.length) return;
-    await uploadMany(valid);
-    const ok = valid.length;
-    toast.success(`${ok} ${ok === 1 ? 'imagem enviada' : 'imagens enviadas'} com sucesso.`);
+    const result = await uploadMany(valid);
+    const ok = result?.accepted ?? 0;
+    const skipped = result?.skippedTotalLimit ?? [];
+    if (ok > 0) toast.success(`${ok} ${ok === 1 ? 'imagem enviada' : 'imagens enviadas'} com sucesso.`);
+    if (skipped.length) {
+      toast.error(`${skipped.length} arquivo(s) ignorado(s): lote excede ${(MAX_BATCH_TOTAL_BYTES / 1024 / 1024).toFixed(0)}MB.`);
+    }
     setTimeout(() => clearQueue(), 1500);
   };
 
@@ -90,7 +95,7 @@ export function TaskAnexos({ tarefaId }: Props) {
           Arraste imagens aqui ou clique para selecionar
         </div>
         <div className="text-xs text-stone-500 mt-1">
-          JPG, PNG, WEBP, GIF, SVG · até {formatBytes(MAX_SIZE_BYTES)} por arquivo · máx {MAX_BATCH} por vez
+          JPG, PNG, WEBP, GIF, SVG · até {formatBytes(MAX_SIZE_BYTES)} por arquivo · máx {MAX_BATCH} por lote · lote total até {formatBytes(MAX_BATCH_TOTAL_BYTES)}
         </div>
         <input
           ref={inputRef}
@@ -106,9 +111,19 @@ export function TaskAnexos({ tarefaId }: Props) {
       </div>
 
       {/* Upload queue */}
-      {uploadQueue.length > 0 && (
+      {uploadQueue.length > 0 && (() => {
+        const usedBytes = uploadQueue.reduce((s, x) => s + x.size, 0);
+        const usedPct = Math.min(100, (usedBytes / MAX_BATCH_TOTAL_BYTES) * 100);
+        return (
         <div className="space-y-2 bg-white/60 rounded-lg p-3 border border-stone-200">
-          <div className="flex items-center justify-between text-xs text-stone-600">
+          <div className="flex items-center justify-between text-[11px] text-stone-600">
+            <span>Tamanho do lote</span>
+            <span className={usedBytes > MAX_BATCH_TOTAL_BYTES ? 'text-red-500 font-medium' : ''}>
+              {formatBytes(usedBytes)} / {formatBytes(MAX_BATCH_TOTAL_BYTES)}
+            </span>
+          </div>
+          <Progress value={usedPct} className="h-1" />
+          <div className="flex items-center justify-between text-xs text-stone-600 pt-1">
             <span>{doneCount}/{uploadQueue.length} concluídos</span>
             <span>{totalProgress}%</span>
           </div>
@@ -138,7 +153,8 @@ export function TaskAnexos({ tarefaId }: Props) {
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Search */}
       {attachments.length > 0 && (
