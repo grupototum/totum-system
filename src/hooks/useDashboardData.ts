@@ -89,38 +89,38 @@ export function useDashboardData(): DashboardData {
   const [loading, setLoading] = useState(true);
 
   const refetchVps = useCallback(async () => {
-    const { data } = await supabase.from("vps_servers").select("*");
-    if (data) setVps(data as VpsServer[]);
+    const { data } = await (supabase as any).from("vps_servers").select("*");
+    if (data) setVps(data as unknown as VpsServer[]);
   }, []);
 
   const refetchApps = useCallback(async () => {
-    const { data } = await supabase.from("dashboard_apps").select("*").order("sort_order");
-    if (data) setApps(data as DashboardApp[]);
+    const { data } = await (supabase as any).from("dashboard_apps").select("*").order("sort_order");
+    if (data) setApps(data as unknown as DashboardApp[]);
   }, []);
 
   const refetchAgents = useCallback(async () => {
     const { data } = await (supabase as any).from("agents").select("*");
-    if (data) setAgents(data as Agent[]);
+    if (data) setAgents(data as unknown as Agent[]);
   }, []);
 
   const refetchCosts = useCallback(async () => {
-    const { data } = await supabase.from("dashboard_costs").select("*");
-    if (data) setCosts(data as DashboardCost[]);
+    const { data } = await (supabase as any).from("dashboard_costs").select("*");
+    if (data) setCosts(data as unknown as DashboardCost[]);
   }, []);
 
   const refetchActivities = useCallback(async () => {
-    const { data } = await supabase.from("dashboard_activities").select("*").order("created_at", { ascending: false }).limit(20);
-    if (data) setActivities(data as DashboardActivity[]);
+    const { data } = await (supabase as any).from("dashboard_activities").select("*").order("created_at", { ascending: false }).limit(20);
+    if (data) setActivities(data as unknown as DashboardActivity[]);
   }, []);
 
   const refetchMex = useCallback(async () => {
-    const { data } = await supabase.from("mex_sync").select("*");
-    if (data) setMex(data as MexSyncEntry[]);
+    const { data } = await (supabase as any).from("mex_sync").select("*");
+    if (data) setMex(data as unknown as MexSyncEntry[]);
   }, []);
 
   const refetchGithub = useCallback(async () => {
-    const { data } = await supabase.from("github_config").select("*").limit(1).single();
-    if (data) setGitHub(data as GitHubConfig);
+    const { data } = await (supabase as any).from("github_config").select("*").limit(1).single();
+    if (data) setGitHub(data as unknown as GitHubConfig);
   }, []);
 
   useEffect(() => {
