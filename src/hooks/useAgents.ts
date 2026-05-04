@@ -51,7 +51,7 @@ export const useAgents = () => {
       try {
         setState(prev => ({ ...prev, isLoading: true }));
         
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('agents')
           .select('*')
           .order('created_at', { ascending: false });
