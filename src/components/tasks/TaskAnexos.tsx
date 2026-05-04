@@ -274,6 +274,17 @@ export function TaskAnexos({ tarefaId }: Props) {
           onClose={() => setLightboxIndex(null)}
         />
       )}
+
+      {/* Global drop overlay */}
+      {dragOver && (
+        <div className="absolute inset-0 z-40 rounded-xl border-2 border-dashed border-[#ff3b3b] bg-stone-900/40 backdrop-blur-sm flex flex-col items-center justify-center pointer-events-none">
+          <Icon name="solar:cloud-upload-bold" className="w-16 h-16 text-[#ff3b3b] mb-3" />
+          <div className="text-base font-semibold text-white">Solte para anexar imagens</div>
+          <div className="text-xs text-white/80 mt-1">
+            Até {MAX_BATCH} arquivos · {formatBytes(MAX_SIZE_BYTES)} por arquivo · {formatBytes(MAX_BATCH_TOTAL_BYTES)} por lote
+          </div>
+        </div>
+      )}
     </div>
   );
 }
