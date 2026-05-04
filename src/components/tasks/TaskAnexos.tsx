@@ -153,7 +153,8 @@ export function TaskAnexos({ tarefaId }: Props) {
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Search */}
       {attachments.length > 0 && (
