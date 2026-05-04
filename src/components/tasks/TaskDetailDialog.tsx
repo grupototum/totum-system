@@ -31,7 +31,7 @@ interface TaskDetailDialogProps {
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
+  const [activeTab, setActiveTab] = useState<"summary" | "details" | "subtasks" | "recurrence" | "comments" | "history">("summary");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
