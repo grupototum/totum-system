@@ -17,7 +17,7 @@ import {
 } from "./taskData";
 import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
-  MessageSquare, History, ChevronDown, Send, RefreshCw, FileText, ListTree,
+  MessageSquare, History, ChevronDown, Send, RefreshCw,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -31,7 +31,7 @@ interface TaskDetailDialogProps {
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<"summary" | "details" | "subtasks" | "recurrence" | "comments" | "history">("summary");
+  const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
@@ -108,9 +108,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
   const selectItemClasses = "text-xs focus:bg-white/[0.06] focus:text-foreground";
 
   const tabs = [
-    { key: "summary", label: "Resumo", icon: ChevronDown },
-    { key: "details", label: "Detalhes", icon: FileText },
-    { key: "subtasks", label: `Subtarefas (${task.subtasks.length})`, icon: ListTree },
+    { key: "detail", label: "Detalhes", icon: ChevronDown },
     { key: "recurrence", label: "Recorrência", icon: RefreshCw },
     { key: "comments", label: `Comentários (${task.comments.length})`, icon: MessageSquare },
     { key: "history", label: `Histórico (${task.history.length})`, icon: History },
@@ -163,8 +161,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
           ))}
         </div>
 
-        {/* Summary Tab */}
-        {activeTab === "summary" && (
+        {/* Detail Tab */}
+        {activeTab === "detail" && (
           <div className="space-y-5 mt-3">
             {/* Status & Priority Row */}
             <div className="grid grid-cols-2 gap-3">
@@ -240,19 +238,14 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 />
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Details Tab */}
-        {activeTab === "details" && (
-          <div className="space-y-5 mt-3">
-            {/* Description (5x larger) */}
+            {/* Description */}
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
               <Textarea
                 value={task.description}
                 onChange={(e) => update({ description: e.target.value })}
-                className="bg-muted/50 border-border rounded-lg text-xs min-h-[300px] resize-y focus:border-primary/50"
+                className="bg-muted/50 border-border rounded-lg text-xs min-h-[60px] resize-none focus:border-primary/50"
               />
             </div>
 
@@ -302,12 +295,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 </Button>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Subtasks Tab */}
-        {activeTab === "subtasks" && (
-          <div className="space-y-5 mt-3">
+            {/* Subtasks */}
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Subtarefas</label>
               <div className="space-y-1">
