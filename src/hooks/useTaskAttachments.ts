@@ -315,6 +315,57 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
   };
 }
 
+/**
+ * Standalone upload helper for use outside the hook (e.g. immediately after
+ * creating a task that didn't have an id yet).
+ * Returns per-file results so the caller can surface failures.
+ */
+export async function uploadTaskAttachmentFiles(
+  tarefaId: string,
+  files: File[]
+): Promise<{ name: string; ok: boolean; error?: string }[]> {
+  if (!tarefaId || !files.length) return [];
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id ?? null;
+  const results: { name: string; ok: boolean; error?: string }[] = [];
+
+  for (const file of files.slice(0, MAX_BATCH)) {
+    const v = validateImageFile(file);
+    if (!v.ok) {
+      results.push({ name: file.name, ok: false, error: v.error });
+      continue;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `${tarefaId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    try {
+      const up = await (supabase.storage as any)
+        .from('task-attachments')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (up.error) {
+        results.push({ name: file.name, ok: false, error: friendlyError('storage', up.error.message) });
+        continue;
+      }
+      const ins = await (supabase as any).from('tarefa_anexos').insert({
+        tarefa_id: tarefaId,
+        storage_path: path,
+        file_name: file.name,
+        mime_type: file.type,
+        size_bytes: file.size,
+        uploaded_by: userId,
+      });
+      if (ins.error) {
+        await (supabase.storage as any).from('task-attachments').remove([path]);
+        results.push({ name: file.name, ok: false, error: friendlyError('db', ins.error.message) });
+        continue;
+      }
+      results.push({ name: file.name, ok: true });
+    } catch (e: any) {
+      results.push({ name: file.name, ok: false, error: friendlyError('network', e?.message) });
+    }
+  }
+  return results;
+}
+
 export function useTaskAttachmentsSummary(tarefaIds: string[]) {
   const [summary, setSummary] = useState<Record<string, AttachmentSummary>>({});
 
