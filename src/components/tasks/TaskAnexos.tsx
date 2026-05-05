@@ -273,6 +273,17 @@ export function TaskAnexos({ tarefaId }: Props) {
               )}
             </span>
             <div className="flex items-center gap-2">
+              {errorCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleSelectAllErrors}
+                  className="h-6 px-2 text-xs gap-1 text-stone-600 hover:text-stone-800"
+                >
+                  <Checkbox checked={allErrorsSelected} className="pointer-events-none h-3 w-3" />
+                  {allErrorsSelected ? 'Limpar seleção' : `Selecionar falhas (${errorCount})`}
+                </Button>
+              )}
               {selectedErrors.size > 0 && (
                 <Button
                   variant="ghost"
