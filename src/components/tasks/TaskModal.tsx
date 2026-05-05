@@ -201,7 +201,7 @@ export function TaskModal({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
-              {(activeTab === 'detalhes' && (isEditing || mode === 'view')) || (isEditing && activeTab !== 'anexos') ? (
+              {activeTab === 'detalhes' || (isEditing && mode === 'edit') ? (
                 <div className="p-6 space-y-6">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Título</Label>
