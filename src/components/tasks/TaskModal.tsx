@@ -56,6 +56,7 @@ export function TaskModal({
   const [tagInput, setTagInput] = useState('');
   const [activeTab, setActiveTab] = useState<'detalhes' | 'subtarefas' | 'comentarios' | 'anexos'>('detalhes');
   const [saving, setSaving] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (tarefa) {
@@ -72,14 +73,27 @@ export function TaskModal({
     }
     setMode(initialMode);
     setActiveTab('detalhes');
+    setPendingFiles([]);
   }, [tarefa, isOpen, initialMode]);
 
   const handleSave = async () => {
     if (!formData.titulo?.trim()) return;
     setSaving(true);
-    const success = await onSave(formData);
+    const result = await onSave(formData);
+    const ok = !!result;
+    const newId = typeof result === 'string' ? result : null;
+
+    // If we created the task and the user picked attachments, upload them now.
+    if (ok && mode === 'create' && pendingFiles.length > 0 && newId) {
+      const res = await uploadTaskAttachmentFiles(newId, pendingFiles);
+      const failures = res.filter((r) => !r.ok);
+      const successes = res.length - failures.length;
+      if (successes > 0) toast.success(`${successes} anexo(s) enviado(s).`);
+      failures.forEach((f) => toast.error(`${f.name}: ${f.error || 'falha ao enviar'}`));
+    }
+
     setSaving(false);
-    if (success) onClose();
+    if (ok) onClose();
   };
 
   const handleDelete = async () => {
