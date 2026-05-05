@@ -376,6 +376,21 @@ export function TaskModal({
                 />
               ) : activeTab === 'anexos' && tarefa ? (
                 <TaskAnexos tarefaId={tarefa.id} />
+              ) : activeTab === 'anexos' && mode === 'create' ? (
+                <div className="p-6 space-y-4">
+                  <div className="text-xs text-stone-500">
+                    Os anexos selecionados serão enviados automaticamente após criar a tarefa.
+                  </div>
+                  <PendingAttachmentsPicker files={pendingFiles} onChange={setPendingFiles} />
+                  <div className="flex gap-3 pt-2">
+                    <Button onClick={handleSave} disabled={saving || !formData.titulo?.trim()} className="flex-1 bg-stone-900 hover:bg-stone-800">
+                      {saving ? 'Salvando...' : 'Criar tarefa e enviar anexos'}
+                    </Button>
+                    <Button variant="outline" onClick={onClose} disabled={saving}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
               ) : null}
             </div>
           </motion.div>
