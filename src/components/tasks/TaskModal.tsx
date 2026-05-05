@@ -4,12 +4,15 @@ import { Tarefa, Projeto, StatusTarefa, PrioridadeTarefa, COLUNAS_KANBAN, PRIORI
 import { TaskSubtarefas } from './TaskSubtarefas';
 import { TaskComentarios } from './TaskComentarios';
 import { TaskAnexos } from './TaskAnexos';
+import { PendingAttachmentsPicker } from './PendingAttachmentsPicker';
+import { uploadTaskAttachmentFiles } from '@/hooks/useTaskAttachments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/shared/Icon';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -18,7 +21,8 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   projetos: Projeto[];
-  onSave: (tarefa: Partial<Tarefa>) => Promise<boolean>;
+  /** Returns the created/updated task id on success, falsy on failure. */
+  onSave: (tarefa: Partial<Tarefa>) => Promise<string | boolean | null>;
   onDelete: (id: string) => Promise<boolean>;
   onToggleSubtarefa: (tarefaId: string, subtarefaId: string) => Promise<boolean>;
   onAddSubtarefa: (tarefaId: string, titulo: string) => Promise<boolean>;
@@ -52,6 +56,7 @@ export function TaskModal({
   const [tagInput, setTagInput] = useState('');
   const [activeTab, setActiveTab] = useState<'detalhes' | 'subtarefas' | 'comentarios' | 'anexos'>('detalhes');
   const [saving, setSaving] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   useEffect(() => {
     if (tarefa) {
@@ -68,14 +73,27 @@ export function TaskModal({
     }
     setMode(initialMode);
     setActiveTab('detalhes');
+    setPendingFiles([]);
   }, [tarefa, isOpen, initialMode]);
 
   const handleSave = async () => {
     if (!formData.titulo?.trim()) return;
     setSaving(true);
-    const success = await onSave(formData);
+    const result = await onSave(formData);
+    const ok = !!result;
+    const newId = typeof result === 'string' ? result : null;
+
+    // If we created the task and the user picked attachments, upload them now.
+    if (ok && mode === 'create' && pendingFiles.length > 0 && newId) {
+      const res = await uploadTaskAttachmentFiles(newId, pendingFiles);
+      const failures = res.filter((r) => !r.ok);
+      const successes = res.length - failures.length;
+      if (successes > 0) toast.success(`${successes} anexo(s) enviado(s).`);
+      failures.forEach((f) => toast.error(`${f.name}: ${f.error || 'falha ao enviar'}`));
+    }
+
     setSaving(false);
-    if (success) onClose();
+    if (ok) onClose();
   };
 
   const handleDelete = async () => {
@@ -149,14 +167,20 @@ export function TaskModal({
             </div>
 
             {/* Tabs */}
-            {mode === 'view' && tarefa && (
+            {(mode === 'create' || (mode === 'view' && tarefa)) && (
               <div className="flex border-b border-stone-300 bg-white/30">
-                {[
-                  { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
-                  { id: 'subtarefas', label: 'Subtarefas', icon: 'solar:checklist-linear' },
-                  { id: 'comentarios', label: 'Comentários', icon: 'solar:chat-dots-linear' },
-                  { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
-                ].map((tab) => (
+                {(mode === 'create'
+                  ? [
+                      { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
+                      { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
+                    ]
+                  : [
+                      { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
+                      { id: 'subtarefas', label: 'Subtarefas', icon: 'solar:checklist-linear' },
+                      { id: 'comentarios', label: 'Comentários', icon: 'solar:chat-dots-linear' },
+                      { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
+                    ]
+                ).map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
@@ -167,6 +191,9 @@ export function TaskModal({
                   >
                     <Icon name={tab.icon} className="w-4 h-4" />
                     {tab.label}
+                    {tab.id === 'anexos' && mode === 'create' && pendingFiles.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{pendingFiles.length}</Badge>
+                    )}
                   </button>
                 ))}
               </div>
@@ -174,7 +201,7 @@ export function TaskModal({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
-              {activeTab === 'detalhes' || isEditing ? (
+              {activeTab === 'detalhes' ? (
                 <div className="p-6 space-y-6">
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Título</Label>
@@ -349,6 +376,21 @@ export function TaskModal({
                 />
               ) : activeTab === 'anexos' && tarefa ? (
                 <TaskAnexos tarefaId={tarefa.id} />
+              ) : activeTab === 'anexos' && mode === 'create' ? (
+                <div className="p-6 space-y-4">
+                  <div className="text-xs text-stone-500">
+                    Os anexos selecionados serão enviados automaticamente após criar a tarefa.
+                  </div>
+                  <PendingAttachmentsPicker files={pendingFiles} onChange={setPendingFiles} />
+                  <div className="flex gap-3 pt-2">
+                    <Button onClick={handleSave} disabled={saving || !formData.titulo?.trim()} className="flex-1 bg-stone-900 hover:bg-stone-800">
+                      {saving ? 'Salvando...' : 'Criar tarefa e enviar anexos'}
+                    </Button>
+                    <Button variant="outline" onClick={onClose} disabled={saving}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
               ) : null}
             </div>
           </motion.div>

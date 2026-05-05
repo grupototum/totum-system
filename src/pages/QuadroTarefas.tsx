@@ -98,10 +98,10 @@ export default function QuadroTarefas() {
     await atualizarTarefa(tarefaId, { status: novoStatus });
   };
 
-  const handleSaveTarefa = async (tarefaData: Partial<Tarefa>): Promise<boolean> => {
+  const handleSaveTarefa = async (tarefaData: Partial<Tarefa>): Promise<string | boolean | null> => {
     if (modalMode === 'create') {
       const result = await criarTarefa(tarefaData);
-      return !!result;
+      return result?.id ?? null;
     } else if (tarefaSelecionada) {
       return await atualizarTarefa(tarefaSelecionada.id, tarefaData);
     }
