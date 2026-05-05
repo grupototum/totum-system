@@ -4,12 +4,15 @@ import { Tarefa, Projeto, StatusTarefa, PrioridadeTarefa, COLUNAS_KANBAN, PRIORI
 import { TaskSubtarefas } from './TaskSubtarefas';
 import { TaskComentarios } from './TaskComentarios';
 import { TaskAnexos } from './TaskAnexos';
+import { PendingAttachmentsPicker } from './PendingAttachmentsPicker';
+import { uploadTaskAttachmentFiles } from '@/hooks/useTaskAttachments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@/components/shared/Icon';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -18,7 +21,8 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   projetos: Projeto[];
-  onSave: (tarefa: Partial<Tarefa>) => Promise<boolean>;
+  /** Returns the created/updated task id on success, falsy on failure. */
+  onSave: (tarefa: Partial<Tarefa>) => Promise<string | boolean | null>;
   onDelete: (id: string) => Promise<boolean>;
   onToggleSubtarefa: (tarefaId: string, subtarefaId: string) => Promise<boolean>;
   onAddSubtarefa: (tarefaId: string, titulo: string) => Promise<boolean>;
