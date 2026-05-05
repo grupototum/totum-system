@@ -4,7 +4,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { KanbanColumn } from '@/components/kanban';
 import { TaskModal } from '@/components/tasks';
 import { useTasks, Tarefa, StatusTarefa, COLUNAS_KANBAN, PRIORIDADES } from '@/hooks/useTasks';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -98,14 +98,14 @@ export default function QuadroTarefas() {
     await atualizarTarefa(tarefaId, { status: novoStatus });
   };
 
-  const handleSaveTarefa = async (tarefaData: Partial<Tarefa>): Promise<boolean> => {
+  const handleSaveTarefa = async (tarefaData: Partial<Tarefa>): Promise<Tarefa | null> => {
     if (modalMode === 'create') {
-      const result = await criarTarefa(tarefaData);
-      return !!result;
+      return await criarTarefa(tarefaData);
     } else if (tarefaSelecionada) {
-      return await atualizarTarefa(tarefaSelecionada.id, tarefaData);
+      const ok = await atualizarTarefa(tarefaSelecionada.id, tarefaData);
+      return ok ? tarefaSelecionada : null;
     }
-    return false;
+    return null;
   };
 
   const handleDeleteTarefa = async (id: string): Promise<boolean> => {
