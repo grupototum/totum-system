@@ -192,6 +192,12 @@ export function TaskAnexos({ tarefaId }: Props) {
     setSelectedErrors(new Set());
   };
 
+  const errorIds = uploadQueue.filter((q) => q.status === 'error' && q.file).map((q) => q.id);
+  const allErrorsSelected = errorIds.length > 0 && errorIds.every((id) => selectedErrors.has(id));
+  const toggleSelectAllErrors = () => {
+    setSelectedErrors(allErrorsSelected ? new Set() : new Set(errorIds));
+  };
+
   return (
     <div
       className="relative p-6 space-y-5"
