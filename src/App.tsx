@@ -39,6 +39,14 @@ import SlaRules from "./pages/SlaRules";
 import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
+import PixelSystemsLanding from "./pages/PixelSystemsLanding";
+
+const AGENCY_HOST = "agencia.pixelsystem.online";
+const PIXEL_HOST = "pixelsystem.online";
+
+function getRootHost() {
+  return typeof window !== "undefined" ? window.location.hostname : "";
+}
 
 const queryClient = new QueryClient();
 
@@ -72,7 +80,8 @@ function ProtectedRoutes() {
   }
 
   if (!session) {
-    if (location.pathname === "/") return <LandingPage />;
+    const host = getRootHost();
+    if (location.pathname === "/" && host === AGENCY_HOST) return <LandingPage />;
     return <Navigate to="/login" replace />;
   }
 
@@ -130,6 +139,30 @@ function SetupRoute() {
   return <SetupPage />;
 }
 
+function PublicRoutes() {
+  const host = getRootHost();
+  const isPixelHost = host === PIXEL_HOST;
+
+  if (isPixelHost) {
+    return (
+      <Routes>
+        <Route path="/" element={<PixelSystemsLanding />} />
+        <Route path="/setup" element={<SetupRoute />} />
+        <Route path="/*" element={<PixelSystemsLanding />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/login" element={<AuthRoutes />} />
+      <Route path="/setup" element={<SetupRoute />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/*" element={<ProtectedRoutes />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -141,12 +174,7 @@ const App = () => (
             <BrowserRouter>
               <TenantProvider>
                 <AuthProvider>
-                  <Routes>
-                    <Route path="/login" element={<AuthRoutes />} />
-                    <Route path="/setup" element={<SetupRoute />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/*" element={<ProtectedRoutes />} />
-                  </Routes>
+                  <PublicRoutes />
                 </AuthProvider>
               </TenantProvider>
             </BrowserRouter>
