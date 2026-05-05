@@ -167,14 +167,20 @@ export function TaskModal({
             </div>
 
             {/* Tabs */}
-            {mode === 'view' && tarefa && (
+            {(mode === 'create' || (mode === 'view' && tarefa)) && (
               <div className="flex border-b border-stone-300 bg-white/30">
-                {[
-                  { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
-                  { id: 'subtarefas', label: 'Subtarefas', icon: 'solar:checklist-linear' },
-                  { id: 'comentarios', label: 'Comentários', icon: 'solar:chat-dots-linear' },
-                  { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
-                ].map((tab) => (
+                {(mode === 'create'
+                  ? [
+                      { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
+                      { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
+                    ]
+                  : [
+                      { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
+                      { id: 'subtarefas', label: 'Subtarefas', icon: 'solar:checklist-linear' },
+                      { id: 'comentarios', label: 'Comentários', icon: 'solar:chat-dots-linear' },
+                      { id: 'anexos', label: 'Anexos', icon: 'solar:paperclip-linear' },
+                    ]
+                ).map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
@@ -185,6 +191,9 @@ export function TaskModal({
                   >
                     <Icon name={tab.icon} className="w-4 h-4" />
                     {tab.label}
+                    {tab.id === 'anexos' && mode === 'create' && pendingFiles.length > 0 && (
+                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{pendingFiles.length}</Badge>
+                    )}
                   </button>
                 ))}
               </div>
