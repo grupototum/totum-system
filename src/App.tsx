@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -38,6 +38,7 @@ import PopLibrary from "./pages/PopLibrary";
 import SlaRules from "./pages/SlaRules";
 import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
+import LandingPage from "./pages/LandingPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ function useHasAdmin() {
 
 function ProtectedRoutes() {
   const { session, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -69,7 +71,10 @@ function ProtectedRoutes() {
     );
   }
 
-  if (!session) return <Navigate to="/login" replace />;
+  if (!session) {
+    if (location.pathname === "/") return <LandingPage />;
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <AppLayout>
