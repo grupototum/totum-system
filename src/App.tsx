@@ -47,6 +47,7 @@ const queryClient = new QueryClient();
 // Multi-tenant: hostname-based routing
 const AGENCY_HOST = "agencia.pixelsystem.online";
 const PIXEL_HOST = "pixelsystem.online";
+const OLA_HOST = "ola.pixelsystem.online"; // modo demonstração
 
 function getRootHost() {
   return typeof window !== "undefined" ? window.location.hostname : "";
@@ -144,9 +145,9 @@ function SetupRoute() {
 // Multi-tenant: roteamento por hostname
 function PublicRoutes() {
   const host = getRootHost();
-  const isPixelHost = host === PIXEL_HOST;
 
-  if (isPixelHost) {
+  // pixelsystem.online → landing institucional Pixel Systems
+  if (host === PIXEL_HOST) {
     return (
       <Routes>
         <Route path="/" element={<PixelSystemsLanding />} />
@@ -156,6 +157,8 @@ function PublicRoutes() {
     );
   }
 
+  // ola.pixelsystem.online → app normal mas com demo mode já ativo (via DemoContext)
+  // totum.pixelsystem.online + agencia.pixelsystem.online → app normal
   return (
     <Routes>
       <Route path="/login" element={<AuthRoutes />} />

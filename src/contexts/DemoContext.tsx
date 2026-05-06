@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { toast } from "@/hooks/use-toast";
 
+// ola.pixelsystem.online entra automaticamente em modo demo
+const OLA_HOST = "ola.pixelsystem.online";
+const isOlaHost = typeof window !== "undefined" && window.location.hostname === OLA_HOST;
+
 interface DemoContextType {
   isDemoMode: boolean;
   enableDemo: () => void;
@@ -18,7 +22,8 @@ const DemoContext = createContext<DemoContextType>({
 export const useDemo = () => useContext(DemoContext);
 
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  // Se for o host de demonstração, começa já em modo demo
+  const [isDemoMode, setIsDemoMode] = useState(isOlaHost);
 
   const enableDemo = useCallback(() => {
     setIsDemoMode(true);
