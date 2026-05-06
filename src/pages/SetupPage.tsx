@@ -4,29 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import logoRed from "@/assets/logo-red.png";
-import { Mail, Lock, Eye, EyeOff, Loader2, User, ShieldCheck, KeyRound } from "lucide-react";
-
-const MASTER_KEY = import.meta.env.VITE_MASTER_SETUP_KEY ?? "pixel@master2026";
+import { Mail, Lock, Eye, EyeOff, Loader2, User, ShieldCheck } from "lucide-react";
 
 export default function SetupPage() {
-  const [masterKey, setMasterKey] = useState("");
-  const [masterUnlocked, setMasterUnlocked] = useState(false);
-  const [showMasterKey, setShowMasterKey] = useState(false);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const handleMasterUnlock = () => {
-    if (masterKey === MASTER_KEY) {
-      setMasterUnlocked(true);
-    } else {
-      toast({ title: "Chave master incorreta", variant: "destructive" });
-      setMasterKey("");
-    }
-  };
 
   const handleSetup = async () => {
     if (!email || !password || !fullName) {
@@ -66,97 +51,65 @@ export default function SetupPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
-          <img src={logoRed} alt="Pixel Systems" className="h-10" />
+          <img src={logoRed} alt="Totum" className="h-10" />
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
             <ShieldCheck className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="font-heading text-lg font-semibold text-foreground">
-            {masterUnlocked ? "Configuração Inicial" : "Acesso Restrito"}
-          </h1>
+          <h1 className="font-heading text-lg font-semibold text-foreground">Configuração Inicial</h1>
           <p className="text-sm text-muted-foreground text-center">
-            {masterUnlocked
-              ? "Crie o primeiro usuário administrador do sistema."
-              : "Esta área é exclusiva para administradores master da Pixel Systems."}
+            Nenhum administrador encontrado. Crie o primeiro usuário administrador para começar.
           </p>
         </div>
 
-        {!masterUnlocked ? (
-          <div className="glass-card rounded-2xl p-6 space-y-4">
-            <div className="relative">
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-              <Input
-                type={showMasterKey ? "text" : "password"}
-                value={masterKey}
-                onChange={(e) => setMasterKey(e.target.value)}
-                placeholder="Chave master de acesso"
-                className={inputCls}
-                onKeyDown={(e) => e.key === "Enter" && handleMasterUnlock()}
-              />
-              <button
-                onClick={() => setShowMasterKey(!showMasterKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground"
-              >
-                {showMasterKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            <Button
-              onClick={handleMasterUnlock}
-              className="w-full gradient-primary border-0 text-white font-semibold rounded-xl h-11"
-            >
-              Verificar acesso
-            </Button>
+        <div className="glass-card rounded-2xl p-6 space-y-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+            <Input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Nome completo"
+              className={inputCls}
+            />
           </div>
-        ) : (
-          <div className="glass-card rounded-2xl p-6 space-y-4">
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Nome completo"
-                className={inputCls}
-              />
-            </div>
 
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email do administrador"
-                className={inputCls}
-              />
-            </div>
-
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-              <Input
-                type={showPass ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha (mín. 6 caracteres)"
-                className={inputCls}
-                onKeyDown={(e) => e.key === "Enter" && handleSetup()}
-              />
-              <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
-                {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-
-            <Button
-              onClick={handleSetup}
-              disabled={loading}
-              className="w-full gradient-primary border-0 text-white font-semibold rounded-xl h-11"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Criar Administrador
-            </Button>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email do administrador"
+              className={inputCls}
+            />
           </div>
-        )}
+
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+            <Input
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Senha (mín. 6 caracteres)"
+              className={inputCls}
+              onKeyDown={(e) => e.key === "Enter" && handleSetup()}
+            />
+            <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground">
+              {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <Button
+            onClick={handleSetup}
+            disabled={loading}
+            className="w-full gradient-primary border-0 text-white font-semibold rounded-xl h-11"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Criar Administrador
+          </Button>
+        </div>
 
         <p className="text-center text-[10px] text-muted-foreground/60">
-          Pixel Systems · Acesso exclusivo ao painel master
+          Este usuário terá acesso total ao sistema.
         </p>
       </div>
     </div>

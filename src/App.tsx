@@ -20,6 +20,8 @@ import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
 import NewClient from "./pages/NewClient";
 import EditClient from "./pages/EditClient";
+import LandingPage from "./pages/LandingPage";
+import PixelSystemsLanding from "./pages/PixelSystemsLanding";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
@@ -39,17 +41,16 @@ import PopLibrary from "./pages/PopLibrary";
 import SlaRules from "./pages/SlaRules";
 import DataImport from "./pages/DataImport";
 import NotFound from "./pages/NotFound";
-import LandingPage from "./pages/LandingPage";
-import PixelSystemsLanding from "./pages/PixelSystemsLanding";
 
+const queryClient = new QueryClient();
+
+// Multi-tenant: hostname-based routing
 const AGENCY_HOST = "agencia.pixelsystem.online";
 const PIXEL_HOST = "pixelsystem.online";
 
 function getRootHost() {
   return typeof window !== "undefined" ? window.location.hostname : "";
 }
-
-const queryClient = new QueryClient();
 
 function useHasAdmin() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
@@ -140,6 +141,7 @@ function SetupRoute() {
   return <SetupPage />;
 }
 
+// Multi-tenant: roteamento por hostname
 function PublicRoutes() {
   const host = getRootHost();
   const isPixelHost = host === PIXEL_HOST;
