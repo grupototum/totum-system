@@ -1,6 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const VERCEL_TOKEN      = Deno.env.get("VERCEL_TOKEN")!;
+const VERCEL_TOKEN      = Deno.env.get("VERCEL_TOKEN") ?? Deno.env.get("Verce_token") ?? "";
 const VERCEL_PROJECT_ID = Deno.env.get("VERCEL_PROJECT_ID") ?? "prj_qguwQfF2l6ibecnLdpCXND3A6ZrM";
 const VERCEL_TEAM_ID    = Deno.env.get("VERCEL_TEAM_ID")    ?? "team_rR93irV9qw4tvRoJy8ESDohW";
 const BASE_DOMAIN       = Deno.env.get("BASE_DOMAIN")       ?? "pixelsystem.online";
