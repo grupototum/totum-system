@@ -93,7 +93,7 @@ export function PendingAttachmentsPicker({ files, onChange }: Props) {
           addFiles(e.dataTransfer.files);
         }}
         className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-stone-300 bg-white/40 hover:bg-white/60'
+          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-border bg-background/40 hover:bg-background/60'
         }`}
       >
         <Icon name="solar:cloud-upload-linear" className="w-7 h-7 text-stone-500 mx-auto mb-2" />
@@ -117,7 +117,7 @@ export function PendingAttachmentsPicker({ files, onChange }: Props) {
       </div>
 
       {files.length > 0 && (
-        <div className="bg-white/60 rounded-lg p-3 border border-stone-200 space-y-2">
+        <div className="bg-background/60 rounded-lg p-3 border border-border space-y-2">
           <div className="flex items-center justify-between text-[11px] text-stone-600">
             <span>
               {files.length} arquivo(s) pendente(s)

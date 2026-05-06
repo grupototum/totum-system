@@ -35,10 +35,10 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
   return (
     <div className="p-6 space-y-6">
       {/* Progresso */}
-      <div className="bg-white rounded-lg border border-stone-200 p-4">
+      <div className="bg-background rounded-lg border border-border p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-stone-700">Progresso</span>
-          <span className="text-sm font-semibold text-stone-900">
+          <span className="text-sm font-medium text-foreground">Progresso</span>
+          <span className="text-sm font-semibold text-foreground">
             {subtarefasConcluidas}/{tarefa.subtarefas.length}
           </span>
         </div>
@@ -50,7 +50,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
             transition={{ duration: 0.3 }}
           />
         </div>
-        <p className="text-xs text-stone-500 mt-2">
+        <p className="text-xs text-muted-foreground mt-2">
           {progresso === 100 
             ? '✅ Todas as subtarefas concluídas!' 
             : `${Math.round(progresso)}% completo`}
@@ -64,7 +64,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
           onChange={(e) => setNovaSubtarefa(e.target.value)}
           placeholder="Adicionar nova subtarefa..."
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="bg-white border-stone-300"
+          className="bg-background border-border"
         />
         <Button
           onClick={handleAdd}
@@ -101,8 +101,8 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
                 className={`
                   flex items-center gap-3 p-3 rounded-lg border transition-all
                   ${subtarefa.concluida 
-                    ? 'bg-stone-50 border-stone-200' 
-                    : 'bg-white border-stone-200 hover:border-stone-300'}
+                    ? 'bg-muted border-border'
+                    : 'bg-background border-border hover:border-border'}
                 `}
               >
                 <Checkbox
@@ -113,7 +113,7 @@ export function TaskSubtarefas({ tarefa, onToggle, onAdd, onRemove }: TaskSubtar
                 
                 <span className={`
                   flex-1 text-sm transition-all
-                  ${subtarefa.concluida ? 'line-through text-stone-400' : 'text-stone-700'}
+                  ${subtarefa.concluida ? 'line-through text-muted-foreground' : 'text-foreground'}
                 `}>
                   {subtarefa.titulo}
                 </span>

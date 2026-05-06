@@ -132,7 +132,7 @@ export function TaskModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-stone-900/30 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50"
           />
 
           <motion.div
@@ -143,20 +143,20 @@ export function TaskModal({
             className="fixed right-0 top-0 h-full w-full max-w-lg bg-[#EAEAE5] shadow-2xl z-50 overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-stone-300 bg-white/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-background/50">
               <div className="flex items-center gap-3">
-                <button onClick={onClose} className="p-2 hover:bg-stone-200/50 rounded-lg transition-colors">
-                  <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-600" />
+                <button onClick={onClose} className="p-2 hover:bg-accent/50 rounded-lg transition-colors">
+                  <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-muted-foreground" />
                 </button>
-                <span className="text-sm font-medium text-stone-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   {mode === 'create' ? 'Nova Tarefa' : mode === 'edit' ? 'Editar Tarefa' : 'Detalhes'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 {mode === 'view' && tarefa && (
                   <>
-                    <button onClick={() => setMode('edit')} className="p-2 hover:bg-stone-200/50 rounded-lg transition-colors" title="Editar">
-                      <Icon name="solar:pen-linear" className="w-5 h-5 text-stone-600" />
+                    <button onClick={() => setMode('edit')} className="p-2 hover:bg-accent/50 rounded-lg transition-colors" title="Editar">
+                      <Icon name="solar:pen-linear" className="w-5 h-5 text-muted-foreground" />
                     </button>
                     <button onClick={handleDelete} className="p-2 hover:bg-red-100/50 rounded-lg transition-colors" title="Excluir">
                       <Icon name="solar:trash-bin-trash-linear" className="w-5 h-5 text-red-500" />
@@ -168,7 +168,7 @@ export function TaskModal({
 
             {/* Tabs */}
             {(mode === 'create' || (mode === 'view' && tarefa)) && (
-              <div className="flex border-b border-stone-300 bg-white/30">
+              <div className="flex border-b border-border bg-background/30">
                 {(mode === 'create'
                   ? [
                       { id: 'detalhes', label: 'Detalhes', icon: 'solar:document-text-linear' },
@@ -185,9 +185,9 @@ export function TaskModal({
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors
-                      ${activeTab === tab.id 
-                        ? 'text-stone-900 border-b-2 border-stone-900 bg-white/50' 
-                        : 'text-stone-500 hover:text-stone-700 hover:bg-stone-200/30'}`}
+                      ${activeTab === tab.id
+                        ? 'text-foreground border-b-2 border-foreground bg-background/50'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'}`}
                   >
                     <Icon name={tab.icon} className="w-4 h-4" />
                     {tab.label}
@@ -204,27 +204,27 @@ export function TaskModal({
               {activeTab === 'detalhes' ? (
                 <div className="p-6 space-y-6">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Título</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Título</Label>
                     {isEditing ? (
                       <Input
                         value={formData.titulo || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
                         placeholder="Nome da tarefa"
-                        className="bg-white border-stone-300 focus:border-stone-500"
+                        className="bg-background border-border focus:border-primary"
                       />
                     ) : (
-                      <h2 className="text-xl font-semibold text-stone-900">{tarefa?.titulo}</h2>
+                      <h2 className="text-xl font-semibold text-foreground">{tarefa?.titulo}</h2>
                     )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Status</Label>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</Label>
                       {isEditing ? (
                         <select
                           value={formData.status}
                           onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as StatusTarefa }))}
-                          className="w-full h-10 px-3 rounded-md border border-stone-300 bg-white text-sm"
+                          className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
                         >
                           {COLUNAS_KANBAN.map(c => (
                             <option key={c.id} value={c.id}>{c.titulo}</option>
@@ -245,12 +245,12 @@ export function TaskModal({
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Prioridade</Label>
+                      <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Prioridade</Label>
                       {isEditing ? (
                         <select
                           value={formData.prioridade}
                           onChange={(e) => setFormData(prev => ({ ...prev, prioridade: e.target.value as PrioridadeTarefa }))}
-                          className="w-full h-10 px-3 rounded-md border border-stone-300 bg-white text-sm"
+                          className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm"
                         >
                           {PRIORIDADES.map(p => (
                             <option key={p.id} value={p.id}>{p.label}</option>
@@ -259,23 +259,23 @@ export function TaskModal({
                       ) : (
                         <div className="flex items-center gap-2">
                           <Icon name="solar:flag-bold" className="w-4 h-4" style={{ color: PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.cor }} />
-                          <span className="text-sm text-stone-700">{PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.label}</span>
+                          <span className="text-sm text-foreground">{PRIORIDADES.find(p => p.id === tarefa?.prioridade)?.label}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Data Limite</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Data Limite</Label>
                     {isEditing ? (
                       <Input
                         type="date"
                         value={formData.data_limite ? formData.data_limite.split('T')[0] : formData.deadline ? formData.deadline.split('T')[0] : ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, data_limite: e.target.value || undefined }))}
-                        className="bg-white border-stone-300"
+                        className="bg-background border-border"
                       />
                     ) : (
-                      <div className="text-sm text-stone-700">
+                      <div className="text-sm text-foreground">
                         {(tarefa?.data_limite || tarefa?.deadline)
                           ? format(new Date(tarefa.data_limite || tarefa.deadline!), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
                           : 'Sem data limite'}
@@ -284,23 +284,23 @@ export function TaskModal({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Descrição</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Descrição</Label>
                     {isEditing ? (
                       <Textarea
                         value={formData.descricao || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
                         placeholder="Descreva os detalhes da tarefa..."
                         rows={4}
-                        className="bg-white border-stone-300 resize-none"
+                        className="bg-background border-border resize-none"
                       />
                     ) : (
-                      <div className="text-sm text-stone-700 whitespace-pre-wrap">{tarefa?.descricao || 'Sem descrição'}</div>
+                      <div className="text-sm text-foreground whitespace-pre-wrap">{tarefa?.descricao || 'Sem descrição'}</div>
                     )}
                   </div>
 
                   {/* Tags */}
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Tags</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tags</Label>
                     {isEditing ? (
                       <div className="space-y-2">
                         <div className="flex flex-wrap gap-1">
@@ -313,7 +313,7 @@ export function TaskModal({
                         <select
                           value={tagInput}
                           onChange={(e) => addTag(e.target.value)}
-                          className="w-full h-9 px-3 rounded-md border border-stone-300 bg-white text-sm"
+                          className="w-full h-9 px-3 rounded-md border border-border bg-background text-sm"
                         >
                           <option value="">Adicionar tag...</option>
                           {TAG_OPTIONS.filter(t => !(formData.tags || []).includes(t)).map(t => (
@@ -336,7 +336,7 @@ export function TaskModal({
 
                   {/* Meta info */}
                   {mode === 'view' && tarefa && (
-                    <div className="pt-4 border-t border-stone-300 space-y-1">
+                    <div className="pt-4 border-t border-border space-y-1">
                       {tarefa.created_at && (
                         <div className="text-xs text-stone-400">
                           Criado em: {format(new Date(tarefa.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
@@ -378,7 +378,7 @@ export function TaskModal({
                 <TaskAnexos tarefaId={tarefa.id} />
               ) : activeTab === 'anexos' && mode === 'create' ? (
                 <div className="p-6 space-y-4">
-                  <div className="text-xs text-stone-500">
+                  <div className="text-xs text-muted-foreground">
                     Os anexos selecionados serão enviados automaticamente após criar a tarefa.
                   </div>
                   <PendingAttachmentsPicker files={pendingFiles} onChange={setPendingFiles} />
