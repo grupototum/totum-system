@@ -1,15 +1,13 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
-// Fallbacks for when .env is gitignored and missing in published builds.
-// These are publishable (anon) credentials — safe to embed.
+// Fallbacks para quando .env não existe no build (credenciais anon — seguro embedar).
 const FALLBACK_ENV = {
-  VITE_SUPABASE_URL: "https://sugulxjfkhibuddmoyzr.supabase.co",
+  VITE_SUPABASE_URL: "https://fgosozxvhbdhqigwzqih.supabase.co",
   VITE_SUPABASE_PUBLISHABLE_KEY:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3VseGpma2hpYnVkZG1veXpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODUwOTEsImV4cCI6MjA4OTM2MTA5MX0.Skr8cZ1_WIyY-lzaprmFfitGPrv24dvcFOPIgXtV2yQ",
-  VITE_SUPABASE_PROJECT_ID: "sugulxjfkhibuddmoyzr",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnb3Nvenh2aGJkaHFpZ3d6cWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDkyNzksImV4cCI6MjA5MDAyNTI3OX0.F92C_qDXYrflzbziYtZIjDmy0X2GyMgqDaaGPlUcrpY",
+  VITE_SUPABASE_PROJECT_ID: "fgosozxvhbdhqigwzqih",
 };
 
 // https://vitejs.dev/config/
@@ -21,7 +19,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       hmr: { overlay: false },
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [react()].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { TenantProvider } from "@/contexts/TenantContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SetupPage from "./pages/SetupPage";
@@ -19,7 +20,8 @@ import Clients from "./pages/Clients";
 import ClientHub from "./pages/ClientHub";
 import NewClient from "./pages/NewClient";
 import EditClient from "./pages/EditClient";
-import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
+import LandingPage from "./pages/LandingPage";
+import PixelSystemsLanding from "./pages/PixelSystemsLanding";
 import Fulfillment from "./pages/Fulfillment";
 import Contracts from "./pages/Contracts";
 import Projects from "./pages/Projects";
@@ -42,6 +44,15 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Multi-tenant: hostname-based routing
+const AGENCY_HOST = "agencia.pixelsystem.online";
+const PIXEL_HOST = "pixelsystem.online";
+const OLA_HOST = "ola.pixelsystem.online"; // modo demonstração
+
+function getRootHost() {
+  return typeof window !== "undefined" ? window.location.hostname : "";
+}
+
 function useHasAdmin() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
 
@@ -61,6 +72,7 @@ function useHasAdmin() {
 
 function ProtectedRoutes() {
   const { session, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -70,7 +82,11 @@ function ProtectedRoutes() {
     );
   }
 
-  if (!session) return <Navigate to="/login" replace />;
+  if (!session) {
+    const host = getRootHost();
+    if (location.pathname === "/" && host === AGENCY_HOST) return <LandingPage />;
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <AppLayout>
@@ -126,6 +142,33 @@ function SetupRoute() {
   return <SetupPage />;
 }
 
+// Multi-tenant: roteamento por hostname
+function PublicRoutes() {
+  const host = getRootHost();
+
+  // pixelsystem.online → landing institucional Pixel Systems
+  if (host === PIXEL_HOST) {
+    return (
+      <Routes>
+        <Route path="/" element={<PixelSystemsLanding />} />
+        <Route path="/setup" element={<SetupRoute />} />
+        <Route path="/*" element={<PixelSystemsLanding />} />
+      </Routes>
+    );
+  }
+
+  // ola.pixelsystem.online → app normal mas com demo mode já ativo (via DemoContext)
+  // totum.pixelsystem.online + agencia.pixelsystem.online → app normal
+  return (
+    <Routes>
+      <Route path="/login" element={<AuthRoutes />} />
+      <Route path="/setup" element={<SetupRoute />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/*" element={<ProtectedRoutes />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -137,12 +180,7 @@ const App = () => (
             <BrowserRouter>
               <TenantProvider>
                 <AuthProvider>
-                  <Routes>
-                    <Route path="/login" element={<AuthRoutes />} />
-                    <Route path="/setup" element={<SetupRoute />} />
-                    <Route path="/reset-password" element={<ResetPasswordPage />} />
-                    <Route path="/*" element={<ProtectedRoutes />} />
-                  </Routes>
+                  <PublicRoutes />
                 </AuthProvider>
               </TenantProvider>
             </BrowserRouter>

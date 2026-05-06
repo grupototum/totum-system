@@ -14,9 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Sora", "Manrope", "sans-serif"],
-        body: ["Inter", "sans-serif"],
-        mono: ["Geist Mono", "JetBrains Mono", "monospace"],
+        sans:    ["Inter", "Helvetica Neue", "Segoe UI", "sans-serif"],
+        heading: ["Inter", "Helvetica Neue", "Segoe UI", "sans-serif"],
+        body:    ["Inter", "Helvetica Neue", "Segoe UI", "sans-serif"],
+        mono:    ["Geist Mono", "JetBrains Mono", "monospace"],
       },
       colors: {
         border: {
@@ -72,12 +73,22 @@ export default {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        xl: "1.125rem",
-        "2xl": "1.5rem",
-        "3xl": "2rem",
+        none: "0px",           /* Netflix square — buttons */
+        sm:   "0.25rem",       /* 4px — inputs, badges (--radius) */
+        DEFAULT: "0.25rem",    /* 4px */
+        md:   "0.5rem",        /* 8px — small cards */
+        lg:   "0.5rem",        /* 8px — cards (alinhado com glass-card) */
+        xl:   "0.75rem",
+        "2xl": "1rem",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        sm:     "0 0.125rem 0.25rem 0 rgba(0,0,0,0.6)",
+        DEFAULT:"0 0.25rem 0.5rem 0 rgba(0,0,0,0.8)",
+        md:     "0 0.25rem 0.5rem 0 rgba(0,0,0,0.8)",
+        lg:     "0 0.5rem 1rem 0 rgba(0,0,0,0.9)",
+        xl:     "0 1rem 2rem 0 rgba(0,0,0,1)",
+        accent: "0 0.25rem 0.5rem 0 rgba(224,0,0,0.3)",
       },
       keyframes: {
         "accordion-down": {
