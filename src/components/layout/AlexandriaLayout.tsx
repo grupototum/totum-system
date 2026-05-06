@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import {
   useAuth
-} from '@/contexts/AuthContext';
+} from '@/hooks/useAuth';
 
 interface AlexandriaLayoutProps {
   children: React.ReactNode;

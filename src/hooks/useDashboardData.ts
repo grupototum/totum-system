@@ -119,7 +119,7 @@ export function useDashboardData(): DashboardData {
   }, []);
 
   const refetchGithub = useCallback(async () => {
-    const { data } = await (supabase as any).from("github_config").select("*").limit(1).single();
+    const { data } = await (supabase as any).from("github_config").select("*").limit(1).maybeSingle();
     if (data) setGitHub(data as unknown as GitHubConfig);
   }, []);
 

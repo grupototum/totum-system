@@ -65,15 +65,17 @@ export default function Tasks() {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (clientFilter.length > 0 && !clientFilter.includes(t.clientId)) return false;
       if (responsibleFilter.length > 0) {
-        if (responsibleFilter.includes("unassigned") && !t.responsible) return true;
-        if (!t.responsible || !responsibleFilter.includes(t.responsible)) return false;
+        const passesResponsible = (responsibleFilter.includes("unassigned") && !t.responsible) ||
+          (t.responsible != null && responsibleFilter.includes(t.responsible));
+        if (!passesResponsible) return false;
       }
       if (statusFilter.length > 0 && !statusFilter.includes(t.status)) return false;
       if (priorityFilter.length > 0 && !priorityFilter.includes(t.priority)) return false;
       if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
       if (managerFilter.length > 0) {
-        if (managerFilter.includes("unassigned") && !t.clientManagerId) return true;
-        if (!t.clientManagerId || !managerFilter.includes(t.clientManagerId)) return false;
+        const passesManager = (managerFilter.includes("unassigned") && !t.clientManagerId) ||
+          (t.clientManagerId != null && managerFilter.includes(t.clientManagerId));
+        if (!passesManager) return false;
       }
       return true;
     });

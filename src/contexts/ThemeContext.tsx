@@ -59,6 +59,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === 'totum-theme' && e.newValue) {
+        const newTheme = e.newValue as Theme;
+        setThemeState(newTheme);
+        applyTheme(newTheme);
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
+
+  useEffect(() => {
     if (theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => applyTheme("system");

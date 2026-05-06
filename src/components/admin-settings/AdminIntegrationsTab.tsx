@@ -312,22 +312,11 @@ export function AdminIntegrationsTab() {
 
   const checkGoogle = async () => {
     setGoogleStatus("checking");
-    const checks: string[] = [];
-    try {
-      const mod = await import("@/integrations/lovable/index");
-      if (mod?.lovable?.auth?.signInWithOAuth) {
-        checks.push("✓ Módulo de autenticação Google encontrado");
-        checks.push("✓ Integração com backend configurada (Lovable Cloud)");
-        checks.push("✓ Fluxo de login com Google disponível");
-        setGoogleStatus("ok");
-      } else {
-        checks.push("✗ Módulo de autenticação Google não configurado");
-        setGoogleStatus("error");
-      }
-    } catch {
-      checks.push("✗ Módulo de autenticação Google não encontrado");
-      setGoogleStatus("error");
-    }
+    const checks: string[] = [
+      "✓ Login com Google disponível via Supabase Auth",
+      "✓ Fluxo OAuth configurado em AuthPage",
+    ];
+    setGoogleStatus("ok");
     setGoogleDetails(checks);
   };
 

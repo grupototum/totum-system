@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import logoRed from "@/assets/logo-red.png";
 import { Mail, Lock, Eye, EyeOff, Loader2, User, ShieldCheck } from "lucide-react";
 
 export default function SetupPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -37,6 +39,8 @@ export default function SetupPage() {
       const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
       if (loginError) {
         toast({ title: "Conta criada! Faça login manualmente.", description: loginError.message, variant: "destructive" });
+      } else {
+        navigate("/", { replace: true });
       }
     } catch (err: any) {
       toast({ title: "Erro ao criar administrador", description: err.message, variant: "destructive" });

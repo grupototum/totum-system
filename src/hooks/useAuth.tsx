@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from("profiles")
           .select("*, roles(name, permissions), departments(name)")
           .eq("user_id", userId)
-          .single();
+          .maybeSingle();
 
         if (!mounted) return;
 

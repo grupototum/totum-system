@@ -33,8 +33,7 @@ export function useCompanySettings() {
       const { data, error } = await supabase
         .from("company_settings")
         .select("*")
-        .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -71,7 +70,7 @@ export function useUpdateCompanySettings() {
         return;
       }
 
-      const { data: existing } = await supabase.from("company_settings").select("id").limit(1).single();
+      const { data: existing } = await supabase.from("company_settings").select("id").limit(1).maybeSingle();
       if (!existing) throw new Error("Configurações não encontradas");
       const { error } = await supabase.from("company_settings").update(updates as any).eq("id", existing.id);
       if (error) throw error;
@@ -99,8 +98,7 @@ export function useSystemSettings() {
       const { data, error } = await (supabase as any)
         .from("system_settings")
         .select("*")
-        .limit(1)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -114,7 +112,7 @@ export function useUpdateSystemSettings() {
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (isDemoMode) { toast(DEMO_TOAST); return; }
-      const { data: existing } = await (supabase as any).from("system_settings").select("id").limit(1).single();
+      const { data: existing } = await (supabase as any).from("system_settings").select("id").limit(1).maybeSingle();
       if (!existing) throw new Error("Configurações não encontradas");
       const { error } = await (supabase as any).from("system_settings").update(updates as any).eq("id", existing.id);
       if (error) throw error;
