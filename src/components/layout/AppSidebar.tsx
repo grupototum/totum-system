@@ -87,8 +87,7 @@ const navGroups = [
     title: "Financeiro",
     icon: DollarSign,
     items: [
-      { title: "Painel Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
-      { title: "Lançamentos", url: "/financeiro/lancamentos", icon: List, permKey: "fin_geral.visualizar" },
+      { title: "Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
     ]
   },
   {
