@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,37 +12,54 @@ import { TenantProvider } from "@/contexts/TenantContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
-import AuthPage from "./pages/AuthPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import SetupPage from "./pages/SetupPage";
-import Index from "./pages/Index";
-import Clients from "./pages/Clients";
-import ClientHub from "./pages/ClientHub";
-import NewClient from "./pages/NewClient";
-import EditClient from "./pages/EditClient";
-import LandingPage from "./pages/LandingPage";
-import PixelSystemsLanding from "./pages/PixelSystemsLanding";
-import Fulfillment from "./pages/Fulfillment";
-import Contracts from "./pages/Contracts";
-import Projects from "./pages/Projects";
-import Financial from "./pages/Financial";
-import Products from "./pages/Products";
-import Reports from "./pages/Reports";
-import Team from "./pages/Team";
-import SettingsPage from "./pages/SettingsPage";
-import AdminSettings from "./pages/AdminSettings";
-import Registries from "./pages/Registries";
-import Tasks from "./pages/Tasks";
-import UsersPermissions from "./pages/UsersPermissions";
-import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-import Packages from "./pages/Packages";
-import Templates from "./pages/Templates";
-import PopLibrary from "./pages/PopLibrary";
-import SlaRules from "./pages/SlaRules";
-import DataImport from "./pages/DataImport";
-import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Lazy-loaded pages — each becomes its own chunk (~40–120 KB each)
+const AuthPage            = lazy(() => import("./pages/AuthPage"));
+const ResetPasswordPage   = lazy(() => import("./pages/ResetPasswordPage"));
+const SetupPage           = lazy(() => import("./pages/SetupPage"));
+const Index               = lazy(() => import("./pages/Index"));
+const Clients             = lazy(() => import("./pages/Clients"));
+const ClientHub           = lazy(() => import("./pages/ClientHub"));
+const NewClient           = lazy(() => import("./pages/NewClient"));
+const EditClient          = lazy(() => import("./pages/EditClient"));
+const LandingPage         = lazy(() => import("./pages/LandingPage"));
+const PixelSystemsLanding = lazy(() => import("./pages/PixelSystemsLanding"));
+const Fulfillment         = lazy(() => import("./pages/Fulfillment"));
+const Contracts           = lazy(() => import("./pages/Contracts"));
+const Projects            = lazy(() => import("./pages/Projects"));
+const Financial           = lazy(() => import("./pages/Financial"));
+const Products            = lazy(() => import("./pages/Products"));
+const Reports             = lazy(() => import("./pages/Reports"));
+const Team                = lazy(() => import("./pages/Team"));
+const SettingsPage        = lazy(() => import("./pages/SettingsPage"));
+const AdminSettings       = lazy(() => import("./pages/AdminSettings"));
+const Registries          = lazy(() => import("./pages/Registries"));
+const Tasks               = lazy(() => import("./pages/Tasks"));
+const UsersPermissions    = lazy(() => import("./pages/UsersPermissions"));
+const ExecutiveDashboard  = lazy(() => import("./pages/ExecutiveDashboard"));
+const Packages            = lazy(() => import("./pages/Packages"));
+const Templates           = lazy(() => import("./pages/Templates"));
+const PopLibrary          = lazy(() => import("./pages/PopLibrary"));
+const SlaRules            = lazy(() => import("./pages/SlaRules"));
+const DataImport          = lazy(() => import("./pages/DataImport"));
+const NotFound            = lazy(() => import("./pages/NotFound"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+    },
+  },
+});
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(var(--background))" }}>
+      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  );
+}
 
 // Multi-tenant: hostname-based routing
 const AGENCY_HOST = "agencia.pixelsystem.online";
@@ -54,20 +71,16 @@ function getRootHost() {
 }
 
 function useHasAdmin() {
-  const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    (supabase.rpc as any)("has_any_admin")
-      .then(({ data }: { data: boolean }) => {
-        setHasAdmin(data === true);
-      })
-      .catch((err: any) => {
-        console.error("[App] Erro ao verificar admin:", err);
-        setHasAdmin(false);
-      });
-  }, []);
-
-  return hasAdmin;
+  const { data, isLoading } = useQuery({
+    queryKey: ["has_any_admin"],
+    queryFn: async () => {
+      const { data } = await (supabase.rpc as any)("has_any_admin");
+      return data === true;
+    },
+    staleTime: 60_000,
+    retry: 1,
+  });
+  return isLoading ? null : (data ?? false);
 }
 
 function ProtectedRoutes() {
@@ -90,36 +103,38 @@ function ProtectedRoutes() {
 
   return (
     <AppLayout>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/clientes" element={<Clients />} />
-        <Route path="/clientes/novo" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
-        <Route path="/clientes/:id" element={<ClientHub />} />
-        <Route path="/clientes/:clientId/editar" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
-        <Route path="/clients" element={<Clients />} />
-        <Route path="/clients/:id" element={<ClientHub />} />
-        <Route path="/new-client" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
-        <Route path="/edit-client/:clientId" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
-        <Route path="/tarefas" element={<Tasks />} />
-        <Route path="/entregas" element={<Fulfillment />} />
-        <Route path="/contratos" element={<Contracts />} />
-        <Route path="/projetos" element={<Projects />} />
-        <Route path="/financeiro" element={<Financial />} />
-        <Route path="/produtos" element={<Products />} />
-        <Route path="/pacotes" element={<Packages />} />
-        <Route path="/relatorios" element={<Reports />} />
-        <Route path="/equipe" element={<Team />} />
-        <Route path="/cadastros" element={<Registries />} />
-        <Route path="/usuarios" element={<UsersPermissions />} />
-        <Route path="/configuracoes" element={<SettingsPage />} />
-        <Route path="/admin" element={<AdminSettings />} />
-        <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
-        <Route path="/templates" element={<Templates />} />
-        <Route path="/pops" element={<PopLibrary />} />
-        <Route path="/sla" element={<SlaRules />} />
-        <Route path="/importar" element={<DataImport />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/clientes" element={<Clients />} />
+          <Route path="/clientes/novo" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
+          <Route path="/clientes/:id" element={<ClientHub />} />
+          <Route path="/clientes/:clientId/editar" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
+          <Route path="/clients" element={<Clients />} />
+          <Route path="/clients/:id" element={<ClientHub />} />
+          <Route path="/new-client" element={<RouteErrorBoundary routeName="NewClient"><NewClient /></RouteErrorBoundary>} />
+          <Route path="/edit-client/:clientId" element={<RouteErrorBoundary routeName="EditClient"><EditClient /></RouteErrorBoundary>} />
+          <Route path="/tarefas" element={<Tasks />} />
+          <Route path="/entregas" element={<Fulfillment />} />
+          <Route path="/contratos" element={<Contracts />} />
+          <Route path="/projetos" element={<Projects />} />
+          <Route path="/financeiro" element={<Financial />} />
+          <Route path="/produtos" element={<Products />} />
+          <Route path="/pacotes" element={<Packages />} />
+          <Route path="/relatorios" element={<Reports />} />
+          <Route path="/equipe" element={<Team />} />
+          <Route path="/cadastros" element={<Registries />} />
+          <Route path="/usuarios" element={<UsersPermissions />} />
+          <Route path="/configuracoes" element={<SettingsPage />} />
+          <Route path="/admin" element={<AdminSettings />} />
+          <Route path="/dashboard-executivo" element={<ExecutiveDashboard />} />
+          <Route path="/templates" element={<Templates />} />
+          <Route path="/pops" element={<PopLibrary />} />
+          <Route path="/sla" element={<SlaRules />} />
+          <Route path="/importar" element={<DataImport />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </AppLayout>
   );
 }
@@ -149,23 +164,27 @@ function PublicRoutes() {
   // pixelsystem.online → landing institucional Pixel Systems
   if (host === PIXEL_HOST) {
     return (
-      <Routes>
-        <Route path="/" element={<PixelSystemsLanding />} />
-        <Route path="/setup" element={<SetupRoute />} />
-        <Route path="/*" element={<PixelSystemsLanding />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<PixelSystemsLanding />} />
+          <Route path="/setup" element={<SetupRoute />} />
+          <Route path="/*" element={<PixelSystemsLanding />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   // ola.pixelsystem.online → app normal mas com demo mode já ativo (via DemoContext)
   // totum.pixelsystem.online + agencia.pixelsystem.online → app normal
   return (
-    <Routes>
-      <Route path="/login" element={<AuthRoutes />} />
-      <Route path="/setup" element={<SetupRoute />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/*" element={<ProtectedRoutes />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/login" element={<AuthRoutes />} />
+        <Route path="/setup" element={<SetupRoute />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/*" element={<ProtectedRoutes />} />
+      </Routes>
+    </Suspense>
   );
 }
 
