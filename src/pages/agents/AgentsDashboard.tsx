@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { motion } from "framer-motion";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@iconify/react";
+import { Icon } from '@/components/shared/Icon';
 import {
   Bot, Zap, Users, TrendingUp, Search, LayoutGrid, List, BarChart3,
   ChevronRight, Plus, FileText, Filter,
@@ -73,8 +73,8 @@ export default function AgentsDashboard() {
     async function load() {
       try {
         const [agRes, intRes] = await Promise.all([
-          supabase.from("agents").select("*"),
-          supabase.from("agent_interactions").select("*").order("date"),
+          (supabase as any).from("agents").select("*"),
+          (supabase as any).from("agent_interactions").select("*").order("date"),
         ]);
         
         if (!isMounted) return;
@@ -116,7 +116,7 @@ export default function AgentsDashboard() {
       .channel("agents-dash")
       .on("postgres_changes" as any, { event: "*", schema: "public", table: "agents" }, () => {
         if (!isMounted) return;
-        supabase.from("agents").select("*").then(({ data }) => { 
+        (supabase as any).from("agents").select("*").then(({ data }) => { 
           if (data && isMounted) {
             const typedAgents = (data || []).map(agent => ({
               id: agent.id,
@@ -144,7 +144,7 @@ export default function AgentsDashboard() {
       })
       .on("postgres_changes" as any, { event: "*", schema: "public", table: "agent_interactions" }, () => {
         if (!isMounted) return;
-        supabase.from("agent_interactions").select("*").order("date").then(({ data }) => { 
+        (supabase as any).from("agent_interactions").select("*").order("date").then(({ data }) => { 
           if (data && isMounted) setInteractions(data as Interaction[]); 
         });
       });

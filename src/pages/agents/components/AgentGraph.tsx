@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
 
@@ -139,7 +139,7 @@ export function AgentGraph({ agents, onAgentClick, selectedAgentId }: AgentGraph
           onClick={() => setZoom(prev => Math.min(2, prev * 1.2))}
           className="bg-white/90 border-stone-300"
         >
-          <Icon icon="solar:plus-linear" className="w-4 h-4" />
+          <Icon name="solar:plus-linear" className="w-4 h-4" />
         </Button>
         <Button
           variant="outline"
@@ -147,7 +147,7 @@ export function AgentGraph({ agents, onAgentClick, selectedAgentId }: AgentGraph
           onClick={() => setZoom(prev => Math.max(0.5, prev * 0.8))}
           className="bg-white/90 border-stone-300"
         >
-          <Icon icon="solar:minus-linear" className="w-4 h-4" />
+          <Icon name="solar:minus-linear" className="w-4 h-4" />
         </Button>
         <Button
           variant="outline"
@@ -155,7 +155,7 @@ export function AgentGraph({ agents, onAgentClick, selectedAgentId }: AgentGraph
           onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
           className="bg-white/90 border-stone-300"
         >
-          <Icon icon="solar:restart-linear" className="w-4 h-4" />
+          <Icon name="solar:restart-linear" className="w-4 h-4" />
         </Button>
       </div>
 

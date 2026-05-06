@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
 
@@ -88,7 +88,7 @@ export function AgentList({ agents, onAgentClick, selectedAgentId }: AgentListPr
                       )}
                       {agent.is_orchestrator && (
                         <Badge variant="outline" className="text-[9px] border-amber-400 text-amber-600 shrink-0">
-                          <Icon icon="solar:crown-linear" className="w-3 h-3 mr-1" />
+                          <Icon name="solar:crown-linear" className="w-3 h-3 mr-1" />
                           Orquestrador
                         </Badge>
                       )}
@@ -101,22 +101,22 @@ export function AgentList({ agents, onAgentClick, selectedAgentId }: AgentListPr
                     variant="outline" 
                     className={`${classification.bgColor} ${classification.color} ${classification.borderColor} text-[10px] uppercase tracking-wider hidden sm:flex shrink-0`}
                   >
-                    <Icon icon={classification.icon} className="w-3 h-3 mr-1" />
+                    <Icon name={classification.icon} className="w-3 h-3 mr-1" />
                     {classification.label}
                   </Badge>
 
                   {/* Stats */}
                   <div className="hidden md:flex items-center gap-4 text-xs text-stone-500 shrink-0">
                     <span className="flex items-center gap-1" title="Taxa de sucesso">
-                      <Icon icon="solar:check-circle-linear" className="w-3.5 h-3.5" />
+                      <Icon name="solar:check-circle-linear" className="w-3.5 h-3.5" />
                       {agent.success_rate || 0}%
                     </span>
                     <span className="flex items-center gap-1" title="Tarefas hoje">
-                      <Icon icon="solar:task-square-linear" className="w-3.5 h-3.5" />
+                      <Icon name="solar:task-square-linear" className="w-3.5 h-3.5" />
                       {agent.daily_tasks || 0}
                     </span>
                     <span className="flex items-center gap-1" title="Créditos usados">
-                      <Icon icon="solar:wallet-money-linear" className="w-3.5 h-3.5" />
+                      <Icon name="solar:wallet-money-linear" className="w-3.5 h-3.5" />
                       {agent.credits_used || 0}
                     </span>
                   </div>
@@ -131,7 +131,7 @@ export function AgentList({ agents, onAgentClick, selectedAgentId }: AgentListPr
 
                   {/* Arrow */}
                   <Icon 
-                    icon="solar:alt-arrow-right-linear" 
+                    name="solar:alt-arrow-right-linear" 
                     className={`w-5 h-5 shrink-0 transition-colors ${isSelected ? 'text-stone-900' : 'text-stone-400'}`} 
                   />
                 </div>
@@ -143,7 +143,7 @@ export function AgentList({ agents, onAgentClick, selectedAgentId }: AgentListPr
 
       {agents.length === 0 && (
         <div className="text-center py-12">
-          <Icon icon="solar:ghost-linear" className="w-12 h-12 mx-auto text-stone-400 mb-3" />
+          <Icon name="solar:ghost-linear" className="w-12 h-12 mx-auto text-stone-400 mb-3" />
           <p className="text-sm text-stone-500">Nenhum agente encontrado</p>
         </div>
       )}

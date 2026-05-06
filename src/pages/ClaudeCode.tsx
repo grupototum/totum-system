@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Terminal, Cpu, Zap, Clock, FolderOpen, GitBranch, Sparkles, Send, RotateCcw, StopCircle, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";

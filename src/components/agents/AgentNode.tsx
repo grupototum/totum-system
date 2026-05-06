@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
 
@@ -106,7 +106,7 @@ export function AgentNode({
           ${classification.bgColor} ${classification.borderColor}
           flex items-center gap-1
         `}>
-          <Icon icon={classification.icon} className={`w-3 h-3 ${classification.color}`} />
+          <Icon name={classification.icon} className={`w-3 h-3 ${classification.color}`} />
           <span className={`text-[9px] uppercase tracking-wider ${classification.color}`}>
             {classification.label.slice(0, 4)}
           </span>

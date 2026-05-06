@@ -24,21 +24,21 @@ export default function SyncButton({ onSyncComplete }: SyncButtonProps) {
       setSyncLog([...log]);
 
       // 1. Verifica conexão com Supabase
-      const { error: pingError } = await supabase.from('skills').select('id').limit(1);
+      const { error: pingError } = await (supabase as any).from('skills').select('id').limit(1);
       if (pingError) throw new Error('Supabase indisponível');
       log.push('✅ Supabase: conectado');
       setSyncLog([...log]);
 
       // 2. Recarrega dados das tabelas principais
-      await supabase.from('agents_config').select('count', { count: 'exact', head: true });
+      await (supabase as any).from('agents_config').select('count', { count: 'exact', head: true });
       log.push('✅ agents_config: sincronizado');
       setSyncLog([...log]);
 
-      await supabase.from('rag_documents').select('count', { count: 'exact', head: true });
+      await (supabase as any).from('rag_documents').select('count', { count: 'exact', head: true });
       log.push('✅ rag_documents: sincronizado');
       setSyncLog([...log]);
 
-      await supabase.from('skills').select('count', { count: 'exact', head: true });
+      await (supabase as any).from('skills').select('count', { count: 'exact', head: true });
       log.push('✅ skills: sincronizado');
       setSyncLog([...log]);
 

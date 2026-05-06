@@ -18,7 +18,7 @@ import {
   ChevronLeft,
   BrainCircuit
 } from 'lucide-react';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 interface Message {
   id: string;

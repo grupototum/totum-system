@@ -30,7 +30,7 @@ export function useChartData(vpsName: string) {
   const [loading, setLoading] = useState(true);
 
   const fetchVps = useCallback(async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("vps_usage_history")
       .select("*")
       .eq("vps_name", vpsName)
@@ -48,7 +48,7 @@ export function useChartData(vpsName: string) {
   }, [vpsName]);
 
   const fetchCosts = useCallback(async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("cost_history")
       .select("*")
       .order("month", { ascending: true });
@@ -65,7 +65,7 @@ export function useChartData(vpsName: string) {
   }, []);
 
   const fetchActivity = useCallback(async () => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("activity_stats")
       .select("*")
       .order("date", { ascending: true });

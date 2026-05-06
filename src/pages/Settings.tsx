@@ -1,4 +1,4 @@
-import AppLayout from "@/components/layout/AppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Settings as SettingsIcon, User, Bell, Shield, Palette } from "lucide-react";
 import { motion } from "framer-motion";
 

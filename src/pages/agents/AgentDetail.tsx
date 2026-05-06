@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
@@ -26,7 +26,7 @@ export default function AgentDetail() {
         setLoading(true);
         
         // Load all agents for hierarchy
-        const { data: allAgentsData, error: agentsError } = await supabase
+        const { data: allAgentsData, error: agentsError } = await (supabase as any)
           .from('agents')
           .select('*');
 
@@ -143,7 +143,7 @@ export default function AgentDetail() {
         <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EAEAE5' }}>
           <div className="text-center">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-stone-200 flex items-center justify-center">
-              <Icon icon="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
+              <Icon name="solar:ghost-linear" className="w-8 h-8 text-stone-400" />
             </div>
             <h1 className="text-2xl font-medium text-stone-900 mb-2">Agente não encontrado</h1>
             <p className="text-stone-500 mb-6">O agente solicitado não existe ou foi removido.</p>
@@ -178,7 +178,7 @@ export default function AgentDetail() {
                   onClick={() => navigate(-1)}
                   className="shrink-0 border-stone-300 bg-white"
                 >
-                  <Icon icon="solar:arrow-left-linear" className="w-5 h-5" />
+                  <Icon name="solar:arrow-left-linear" className="w-5 h-5" />
                 </Button>
 
                 <div className="relative">
@@ -211,7 +211,7 @@ export default function AgentDetail() {
                     
                     {agent.is_orchestrator && (
                       <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">
-                        <Icon icon="solar:crown-linear" className="w-3 h-3 mr-1" />
+                        <Icon name="solar:crown-linear" className="w-3 h-3 mr-1" />
                         Orquestrador
                       </Badge>
                     )}
@@ -224,7 +224,7 @@ export default function AgentDetail() {
                       variant="outline" 
                       className={`${classification?.bgColor} ${classification?.color} ${classification?.borderColor} text-[10px]`}
                     >
-                      <Icon icon={classification?.icon || ''} className="w-3 h-3 mr-1" />
+                      <Icon name={classification?.icon || ''} className="w-3 h-3 mr-1" />
                       {classification?.label}
                     </Badge>
                     
@@ -241,7 +241,7 @@ export default function AgentDetail() {
                   onClick={() => navigate('/agents')}
                   className="border-stone-300 bg-white"
                 >
-                  <Icon icon="solar:graph-new-linear" className="w-4 h-4 mr-2" />
+                  <Icon name="solar:graph-new-linear" className="w-4 h-4 mr-2" />
                   Ver no Dashboard
                 </Button>
               </div>

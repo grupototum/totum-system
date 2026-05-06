@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { KanbanCard } from './KanbanCard';
 import { StatusTarefa, Tarefa, Projeto } from '@/hooks/useTasks';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
+import { useTaskAttachmentsSummary } from '@/hooks/useTaskAttachments';
 
 interface KanbanColumnProps {
   id: StatusTarefa;
@@ -27,6 +28,8 @@ export function KanbanColumn({
 }: KanbanColumnProps) {
   const [isOver, setIsOver] = useState(false);
   const [dropIndicatorIndex, setDropIndicatorIndex] = useState<number | null>(null);
+  const tarefaIds = useMemo(() => tarefas.map((t) => t.id), [tarefas]);
+  const summaries = useTaskAttachmentsSummary(tarefaIds);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -99,7 +102,7 @@ export function KanbanColumn({
           </span>
         </div>
         <button className="p-1 hover:bg-stone-200/50 rounded transition-colors">
-          <Icon icon="solar:add-circle-linear" className="w-5 h-5 text-stone-400 hover:text-stone-600" />
+          <Icon name="solar:add-circle-linear" className="w-5 h-5 text-stone-400 hover:text-stone-600" />
         </button>
       </div>
 
@@ -125,6 +128,7 @@ export function KanbanColumn({
                 tarefa={tarefa}
                 projetoNome={getProjetoNome(tarefa.projeto_id)}
                 onClick={() => onCardClick(tarefa)}
+                attachmentSummary={summaries[tarefa.id]}
               />
             </div>
           ))}
@@ -133,7 +137,7 @@ export function KanbanColumn({
           )}
           {tarefas.length === 0 && !isDragging && (
             <div className="flex flex-col items-center justify-center py-8 text-stone-400">
-              <Icon icon="solar:inbox-linear" className="w-8 h-8 mb-2 opacity-50" />
+              <Icon name="solar:inbox-linear" className="w-8 h-8 mb-2 opacity-50" />
               <span className="text-xs">Sem tarefas</span>
             </div>
           )}

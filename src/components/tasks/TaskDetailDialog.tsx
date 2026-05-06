@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -17,7 +17,7 @@ import {
 } from "./taskData";
 import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
-  MessageSquare, History, ChevronDown, Send, RefreshCw,
+  MessageSquare, History, ChevronDown, Send, RefreshCw, FileText, ListTree,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -31,7 +31,19 @@ interface TaskDetailDialogProps {
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<"detail" | "recurrence" | "comments" | "history">("detail");
+  type TabKey = "summary" | "details" | "subtasks" | "recurrence" | "comments" | "history";
+  const TAB_STORAGE_KEY = "taskDetailDialog.activeTab";
+  const validTabs: TabKey[] = ["summary", "details", "subtasks", "recurrence", "comments", "history"];
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (typeof window === "undefined") return "summary";
+    const saved = window.localStorage.getItem(TAB_STORAGE_KEY) as TabKey | null;
+    return saved && validTabs.includes(saved) ? saved : "summary";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(TAB_STORAGE_KEY, activeTab);
+    }
+  }, [activeTab]);
   const [newComment, setNewComment] = useState("");
   const [newCheckItem, setNewCheckItem] = useState("");
   const [newSubtask, setNewSubtask] = useState("");
@@ -108,7 +120,9 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
   const selectItemClasses = "text-xs focus:bg-white/[0.06] focus:text-foreground";
 
   const tabs = [
-    { key: "detail", label: "Detalhes", icon: ChevronDown },
+    { key: "summary", label: "Resumo", icon: ChevronDown },
+    { key: "details", label: "Detalhes", icon: FileText },
+    { key: "subtasks", label: `Subtarefas (${task.subtasks.length})`, icon: ListTree },
     { key: "recurrence", label: "Recorrência", icon: RefreshCw },
     { key: "comments", label: `Comentários (${task.comments.length})`, icon: MessageSquare },
     { key: "history", label: `Histórico (${task.history.length})`, icon: History },
@@ -116,7 +130,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border text-foreground max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-thin">
+      <DialogContent className="bg-card border-border text-foreground max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="font-heading text-lg pr-8 flex items-center gap-2">
             {task.title}
@@ -149,7 +163,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-[1px] ${
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-b-2 -mb-[1px] whitespace-nowrap ${
                 activeTab === tab.key
                   ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground/70 hover:text-muted-foreground"
@@ -161,8 +175,8 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
           ))}
         </div>
 
-        {/* Detail Tab */}
-        {activeTab === "detail" && (
+        {/* Summary Tab */}
+        {activeTab === "summary" && (
           <div className="space-y-5 mt-3">
             {/* Status & Priority Row */}
             <div className="grid grid-cols-2 gap-3">
@@ -238,14 +252,19 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 />
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Description */}
+        {/* Details Tab */}
+        {activeTab === "details" && (
+          <div className="space-y-5 mt-3">
+            {/* Description (5x larger) */}
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
               <Textarea
                 value={task.description}
                 onChange={(e) => update({ description: e.target.value })}
-                className="bg-muted/50 border-border rounded-lg text-xs min-h-[60px] resize-none focus:border-primary/50"
+                className="bg-muted/50 border-border rounded-lg text-xs min-h-[300px] resize-y focus:border-primary/50"
               />
             </div>
 
@@ -295,8 +314,12 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
                 </Button>
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Subtasks */}
+        {/* Subtasks Tab */}
+        {activeTab === "subtasks" && (
+          <div className="space-y-5 mt-3">
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-2 block">Subtarefas</label>
               <div className="space-y-1">

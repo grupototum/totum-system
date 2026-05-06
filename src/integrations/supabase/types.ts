@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          category: string | null
+          created_at: string
+          daily_tasks: number | null
+          emoji: string | null
+          id: string
+          name: string
+          role: string
+          status: string
+          success_rate: number | null
+          tasks: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          daily_tasks?: number | null
+          emoji?: string | null
+          id?: string
+          name: string
+          role?: string
+          status?: string
+          success_rate?: number | null
+          tasks?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          daily_tasks?: number | null
+          emoji?: string | null
+          id?: string
+          name?: string
+          role?: string
+          status?: string
+          success_rate?: number | null
+          tasks?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       asaas_config: {
         Row: {
           api_key: string
@@ -523,7 +565,6 @@ export type Database = {
           marketing_analysis: string | null
           name: string
           notes: string | null
-          organization_id: string
           phone: string | null
           status: string
           updated_at: string
@@ -540,7 +581,6 @@ export type Database = {
           marketing_analysis?: string | null
           name: string
           notes?: string | null
-          organization_id?: string
           phone?: string | null
           status?: string
           updated_at?: string
@@ -557,7 +597,6 @@ export type Database = {
           marketing_analysis?: string | null
           name?: string
           notes?: string | null
-          organization_id?: string
           phone?: string | null
           status?: string
           updated_at?: string
@@ -695,7 +734,6 @@ export type Database = {
           end_date: string | null
           id: string
           notes: string | null
-          organization_id: string
           plan_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["contract_status"]
@@ -713,7 +751,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
-          organization_id?: string
           plan_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -731,7 +768,6 @@ export type Database = {
           end_date?: string | null
           id?: string
           notes?: string | null
-          organization_id?: string
           plan_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_status"]
@@ -1146,7 +1182,6 @@ export type Database = {
           import_batch_id: string | null
           installment_number: number | null
           notes: string | null
-          organization_id: string
           payment_date: string | null
           recurrence: Database["public"]["Enums"]["expense_recurrence"] | null
           status: Database["public"]["Enums"]["financial_entry_status"]
@@ -1172,7 +1207,6 @@ export type Database = {
           import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
-          organization_id?: string
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
           status?: Database["public"]["Enums"]["financial_entry_status"]
@@ -1198,7 +1232,6 @@ export type Database = {
           import_batch_id?: string | null
           installment_number?: number | null
           notes?: string | null
-          organization_id?: string
           payment_date?: string | null
           recurrence?: Database["public"]["Enums"]["expense_recurrence"] | null
           status?: Database["public"]["Enums"]["financial_entry_status"]
@@ -1336,6 +1369,42 @@ export type Database = {
           status?: string
           total_records?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      logs_execucao_agente: {
+        Row: {
+          agente_id: string
+          created_at: string
+          duracao_ms: number | null
+          erro: string | null
+          finalizado_em: string | null
+          id: string
+          iniciado_em: string
+          resultado: string | null
+          status: string
+        }
+        Insert: {
+          agente_id: string
+          created_at?: string
+          duracao_ms?: number | null
+          erro?: string | null
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          resultado?: string | null
+          status?: string
+        }
+        Update: {
+          agente_id?: string
+          created_at?: string
+          duracao_ms?: number | null
+          erro?: string | null
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          resultado?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -1800,7 +1869,6 @@ export type Database = {
           due_date: string | null
           id: string
           name: string
-          organization_id: string
           project_type_id: string | null
           responsible_id: string | null
           start_date: string | null
@@ -1815,7 +1883,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           name: string
-          organization_id?: string
           project_type_id?: string | null
           responsible_id?: string | null
           start_date?: string | null
@@ -1830,7 +1897,6 @@ export type Database = {
           due_date?: string | null
           id?: string
           name?: string
-          organization_id?: string
           project_type_id?: string | null
           responsible_id?: string | null
           start_date?: string | null
@@ -2165,6 +2231,69 @@ export type Database = {
         }
         Relationships: []
       }
+      tarefa_anexos: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tarefa_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type: string
+          size_bytes: number
+          storage_path: string
+          tarefa_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string
+          size_bytes?: number
+          storage_path?: string
+          tarefa_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      tarefa_anexos_historico: {
+        Row: {
+          acao: string
+          anexo_id: string | null
+          created_at: string
+          file_name: string
+          id: string
+          tarefa_id: string
+          user_id: string | null
+        }
+        Insert: {
+          acao: string
+          anexo_id?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          tarefa_id: string
+          user_id?: string | null
+        }
+        Update: {
+          acao?: string
+          anexo_id?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          tarefa_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       task_checklist_items: {
         Row: {
           completed: boolean
@@ -2434,7 +2563,6 @@ export type Database = {
           id: string
           is_recurring: boolean
           last_generated_at: string | null
-          organization_id: string
           parent_task_id: string | null
           plan_id: string | null
           pop_id: string | null
@@ -2466,7 +2594,6 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           last_generated_at?: string | null
-          organization_id?: string
           parent_task_id?: string | null
           plan_id?: string | null
           pop_id?: string | null
@@ -2498,7 +2625,6 @@ export type Database = {
           id?: string
           is_recurring?: boolean
           last_generated_at?: string | null
-          organization_id?: string
           parent_task_id?: string | null
           plan_id?: string | null
           pop_id?: string | null

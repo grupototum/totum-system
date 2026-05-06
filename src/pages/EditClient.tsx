@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState, EmptyState } from "@/components/shared";
 import { toast } from "@/hooks/use-toast";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -70,7 +70,8 @@ export default function EditClient() {
   useEffect(() => {
     async function load() {
       if (!clientId) { setLoading(false); return; }
-      const { data } = await supabase.from("clients").select("*").eq("id", clientId).single();
+      const { data: raw } = await supabase.from("clients").select("*").eq("id", clientId).single();
+      const data = raw as any;
       if (data) {
         setForm({
           company_name: data.company_name ?? "",
@@ -115,23 +116,22 @@ export default function EditClient() {
   }, [clientId]);
 
   if (loading) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-12 w-full rounded-xl" />
-        <Skeleton className="h-96 rounded-xl" />
-      </div>
-    );
+    return <LoadingState variant="page" className="max-w-7xl mx-auto" />;
   }
 
   if (!form) {
     return (
-      <div className="p-6 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
-        <Building2 className="w-16 h-16 text-muted-foreground/40 mb-4" />
-        <p className="text-muted-foreground">Cliente não encontrado</p>
-        <Button variant="outline" className="mt-4 border-border/40" onClick={() => navigate("/clientes")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
-        </Button>
+      <div className="p-6 max-w-7xl mx-auto">
+        <EmptyState
+          title="Cliente não encontrado"
+          description="O cliente solicitado não existe ou foi removido."
+          icon={<Building2 className="h-6 w-6" />}
+          action={
+            <Button variant="outline" onClick={() => navigate("/clientes")}>
+              <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para clientes
+            </Button>
+          }
+        />
       </div>
     );
   }

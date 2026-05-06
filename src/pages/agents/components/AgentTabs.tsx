@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Icon } from '@iconify/react';
+import { Icon } from '@/components/shared/Icon';
 import type { Agent } from '@/hooks/useAgents';
 import { classifyAgent } from '@/hooks/useAgentClassification';
 import { AgentChat } from '@/components/agents/AgentChat';
@@ -112,7 +112,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                 transition-all
               "
             >
-              <Icon icon={tab.icon} className="w-4 h-4 mr-2" />
+              <Icon name={tab.icon} className="w-4 h-4 mr-2" />
               {tab.label}
             </TabsTrigger>
           ))}
@@ -135,7 +135,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                   <Card key={i} className="border-stone-300 bg-[#EAEAE5]">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <Icon icon={stat.icon} className={`w-5 h-5 ${stat.color}`} />
+                        <Icon name={stat.icon} className={`w-5 h-5 ${stat.color}`} />
                         <div>
                           <p className="text-[10px] uppercase tracking-widest text-stone-400">{stat.label}</p>
                           <p className="text-xl font-medium text-stone-900">{stat.value}</p>
@@ -504,7 +504,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                         Nível {parentAgent.hierarchy_level}
                       </Badge>
                     </div>
-                    <Icon icon="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
+                    <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
                   </div>
                 </CardContent>
               </Card>
@@ -540,7 +540,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                           <span className="text-xs text-stone-500">
                             ✓ {child.success_rate || 0}%
                           </span>
-                          <Icon icon="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
+                          <Icon name="solar:arrow-right-linear" className="w-5 h-5 text-stone-400" />
                         </div>
                       </div>
                     ))}
@@ -564,7 +564,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                           </div>
                           <p className="text-xs text-stone-500 mt-2">{parentAgent.name}</p>
                         </div>
-                        <Icon icon="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
+                        <Icon name="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
                       </>
                     )}
                     
@@ -578,7 +578,7 @@ export function AgentTabs({ agent, agents, parentAgent, childAgents }: AgentTabs
                     
                     {childAgents.length > 0 && (
                       <>
-                        <Icon icon="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
+                        <Icon name="solar:alt-arrow-right-linear" className="w-6 h-6 text-stone-400" />
                         <div className="text-center">
                           <div className="flex -space-x-2">
                             {childAgents.slice(0, 3).map((child, i) => (
