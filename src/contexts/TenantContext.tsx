@@ -7,7 +7,11 @@ export interface TenantRecord {
   organization_slug: string;
   organization_name: string;
   display_name: string;
-  logo_url: string | null;
+  logo_url: string | null;       // dark-mode logo
+  logo_url_light: string | null; // light-mode logo
+  primary_color: string | null;  // e.g. "#2d3655"
+  bg_color: string | null;       // auth page background
+  card_color: string | null;     // auth form card color
   primary_hostname: string;
   matched_hostname: string;
   match_type: string;
@@ -31,6 +35,10 @@ function buildFallbackTenant(host: string): TenantRecord {
     organization_name: "Totum System",
     display_name: "Totum System",
     logo_url: null,
+    logo_url_light: null,
+    primary_color: null,
+    bg_color: null,
+    card_color: null,
     primary_hostname: host,
     matched_hostname: host,
     match_type: "fallback",
@@ -68,6 +76,10 @@ export function TenantProvider({ children }: { children: ReactNode }) {
         organization_name: resolved.organization_name ?? resolved.display_name ?? "Totum System",
         display_name: resolved.display_name ?? resolved.organization_name ?? "Totum System",
         logo_url: resolved.logo_url ?? null,
+        logo_url_light: resolved.logo_url_light ?? null,
+        primary_color: resolved.primary_color ?? null,
+        bg_color: resolved.bg_color ?? null,
+        card_color: resolved.card_color ?? null,
         primary_hostname: resolved.primary_hostname ?? host,
         matched_hostname: resolved.matched_hostname ?? host,
         match_type: resolved.match_type ?? "exact",

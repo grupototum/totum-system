@@ -6,11 +6,33 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/contexts/TenantContext";
 import logoRed from "@/assets/logo-red.png";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Mail, Lock, Eye, EyeOff, Loader2, Clock, User } from "lucide-react";
 
 export default function AuthPage() {
   const { isPending } = useAuth();
   const { tenant } = useTenant();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  // Logo: prefer tenant-specific, fall back to Totum default
+  const logoSrc = isDark
+    ? (tenant?.logo_url ?? logoRed)
+    : (tenant?.logo_url_light ?? tenant?.logo_url ?? logoRed);
+
+  // Background color: tenant override or default
+  const bgStyle = tenant?.bg_color
+    ? { backgroundColor: tenant.bg_color }
+    : undefined;
+
+  // Card color: tenant override
+  const cardClass = tenant?.card_color ? "tenant-card" : "";
+  const cardStyle = tenant?.card_color
+    ? { backgroundColor: tenant.card_color }
+    : undefined;
+
+  // Whether to apply tenant text-light overrides
+  const hasTenantBg = !!tenant?.bg_color;
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,24 +113,18 @@ export default function AuthPage() {
   const inputCls = "bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 ${hasTenantBg ? "auth-page-bg" : "bg-background"}`}
+      style={bgStyle}
+    >
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
           <img
-            src={tenant?.logo_url ?? logoRed}
+            src={logoSrc}
             alt={tenant?.display_name ?? "Totum"}
-            className="h-10 max-w-[160px] object-contain"
+            className="h-12 max-w-[200px] object-contain"
           />
-          <div className="text-center">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Ambiente</p>
-            <p className="font-medium text-foreground">
-              {tenant?.display_name || "Totum System"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {tenant?.matched_hostname || window.location.hostname}
-            </p>
-          </div>
-          <p className="text-sm text-muted-foreground">
+          <p className={`text-sm ${hasTenantBg ? "text-white/60" : "text-muted-foreground"}`}>
             {mode === "login" ? "Acesse sua conta" : mode === "signup" ? "Criar nova conta" : "Recuperar senha"}
           </p>
         </div>
@@ -135,7 +151,7 @@ export default function AuthPage() {
 
         {!showPendingMessage && (
           <>
-            <div className="glass-card rounded-2xl p-6 space-y-4">
+            <div className={`glass-card rounded-2xl p-6 space-y-4 ${cardClass}`} style={cardStyle}>
               {mode === "signup" && (
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />

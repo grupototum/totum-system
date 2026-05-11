@@ -9,6 +9,7 @@ import { GlobalLoadingProvider } from "@/contexts/GlobalLoadingContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { TenantProvider } from "@/contexts/TenantContext";
+import { TenantTheme } from "@/contexts/TenantTheme";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
@@ -215,9 +216,11 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <TenantProvider>
-                <AuthProvider>
-                  <PublicRoutes />
-                </AuthProvider>
+                <TenantTheme>
+                  <AuthProvider>
+                    <PublicRoutes />
+                  </AuthProvider>
+                </TenantTheme>
               </TenantProvider>
             </BrowserRouter>
           </DemoProvider>

@@ -120,8 +120,14 @@ export function AppSidebar() {
   const { resolvedTheme } = useTheme();
   const { isAdmin, hasPermission, hasAnyPermission } = usePermissions();
   const { tenant } = useTenant();
+
+  // Per-tenant logos: dark mode = logo_url (white version), light mode = logo_url_light (dark version)
   const defaultLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
-  const currentLogo = tenant?.logo_url ?? defaultLogo;
+  const tenantLogoDark = tenant?.logo_url;
+  const tenantLogoLight = tenant?.logo_url_light ?? tenant?.logo_url;
+  const currentLogo = resolvedTheme === "dark"
+    ? (tenantLogoDark ?? defaultLogo)
+    : (tenantLogoLight ?? defaultLogo);
   const location = useLocation();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 

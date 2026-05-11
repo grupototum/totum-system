@@ -306,3 +306,49 @@
     text-transform: uppercase;
   }
 }
+
+/* ── Tenant Theme Overrides ───────────────────────────────── */
+/* Applied when data-tenant is set on <html> */
+[data-tenant] .tenant-bg {
+  background-color: hsl(var(--tenant-bg, var(--background)));
+}
+
+[data-tenant] .tenant-card {
+  background-color: hsl(var(--tenant-card, var(--card))) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* Auth page full background override per tenant */
+[data-tenant] .auth-page-bg {
+  background-color: hsl(var(--tenant-bg, var(--background))) !important;
+}
+
+/* Text stays light on dark tenant backgrounds */
+[data-tenant] .auth-page-bg .text-foreground,
+[data-tenant] .auth-page-bg h1,
+[data-tenant] .auth-page-bg p,
+[data-tenant] .auth-page-bg label {
+  color: rgba(255,255,255,0.95);
+}
+
+[data-tenant] .auth-page-bg .text-muted-foreground {
+  color: rgba(255,255,255,0.55);
+}
+
+/* Input fields on tenant dark bg */
+[data-tenant] .auth-page-bg input {
+  background-color: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: rgba(255,255,255,0.95) !important;
+}
+
+[data-tenant] .auth-page-bg input::placeholder {
+  color: rgba(255,255,255,0.35) !important;
+}
+
+/* Glass card glass effect */
+[data-tenant] .tenant-card {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+}
