@@ -80,14 +80,14 @@ export function TaskComentarios({ tarefa, onAddComentario, currentUser = 'Usuár
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-stone-900">{autorNome}</span>
+                      <span className="text-sm font-medium text-foreground">{autorNome}</span>
                       {dataComentario && (
                         <span className="text-xs text-stone-400">
                           {format(new Date(dataComentario), "dd MMM 'às' HH:mm", { locale: ptBR })}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-stone-700 whitespace-pre-wrap">{comentario.conteudo}</p>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{comentario.conteudo}</p>
                   </div>
                 </motion.div>
               );
@@ -96,14 +96,14 @@ export function TaskComentarios({ tarefa, onAddComentario, currentUser = 'Usuár
         )}
       </div>
 
-      <div className="border-t border-stone-300 p-4 bg-white/50">
+      <div className="border-t border-border p-4 bg-background/50">
         <div className="space-y-3">
           <Textarea
             value={novoComentario}
             onChange={(e) => setNovoComentario(e.target.value)}
             placeholder="Escreva um comentário..."
             rows={3}
-            className="bg-white border-stone-300 resize-none"
+            className="bg-background border-border resize-none"
             onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) handleSubmit(); }}
           />
           <div className="flex justify-between items-center">

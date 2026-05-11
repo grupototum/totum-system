@@ -229,7 +229,7 @@ export function TaskAnexos({ tarefaId }: Props) {
       <div
         onClick={() => inputRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
-          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-stone-300 bg-white/40 hover:bg-white/60'
+          dragOver ? 'border-[#ff3b3b] bg-[#ff3b3b]/5' : 'border-border bg-background/40 hover:bg-background/60'
         }`}
       >
         <Icon name="solar:cloud-upload-linear" className="w-8 h-8 text-stone-500 mx-auto mb-2" />
@@ -257,7 +257,7 @@ export function TaskAnexos({ tarefaId }: Props) {
         const usedBytes = uploadQueue.reduce((s, x) => s + x.size, 0);
         const usedPct = Math.min(100, (usedBytes / MAX_BATCH_TOTAL_BYTES) * 100);
         return (
-        <div className="space-y-2 bg-white/60 rounded-lg p-3 border border-stone-200">
+        <div className="space-y-2 bg-background/60 rounded-lg p-3 border border-border">
           <div className="flex items-center justify-between text-[11px] text-stone-600">
             <span>Tamanho do lote</span>
             <span className={usedBytes > MAX_BATCH_TOTAL_BYTES ? 'text-red-500 font-medium' : ''}>
@@ -387,11 +387,11 @@ export function TaskAnexos({ tarefaId }: Props) {
               placeholder="Buscar por nome de arquivo..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 bg-white border-stone-300"
+              className="pl-9 bg-background border-border"
             />
           </div>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
-            <SelectTrigger className="w-full sm:w-[200px] bg-white border-stone-300">
+            <SelectTrigger className="w-full sm:w-[200px] bg-background border-border">
               <div className="flex items-center gap-2">
                 <Icon name="solar:sort-vertical-linear" className="w-4 h-4 text-stone-500" />
                 <SelectValue />
@@ -457,8 +457,8 @@ export function TaskAnexos({ tarefaId }: Props) {
             return (
             <div
               key={a.id}
-              className={`group relative bg-white rounded-lg border overflow-hidden transition-all ${
-                isSel ? 'border-[#ff3b3b] ring-2 ring-[#ff3b3b]' : 'border-stone-200'
+              className={`group relative bg-background rounded-lg border overflow-hidden transition-all ${
+                isSel ? 'border-[#ff3b3b] ring-2 ring-[#ff3b3b]' : 'border-border'
               }`}
             >
               <button
@@ -535,7 +535,7 @@ export function TaskAnexos({ tarefaId }: Props) {
 
       {/* History */}
       {history.length > 0 && (
-        <div className="border-t border-stone-200 pt-4">
+        <div className="border-t border-border pt-4">
           <button
             onClick={() => setShowHistory((s) => !s)}
             className="flex items-center gap-2 text-xs font-semibold text-stone-600 uppercase tracking-wider hover:text-stone-900"

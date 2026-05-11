@@ -80,15 +80,12 @@ export default function AuthPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
+      options: { redirectTo: window.location.origin },
     });
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
-      setLoading(false);
     }
-    // Se não houver erro, o browser vai redirecionar — não limpa o loading
+    setLoading(false);
   };
 
   const inputCls = "bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground";

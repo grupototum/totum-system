@@ -87,8 +87,7 @@ const navGroups = [
     title: "Financeiro",
     icon: DollarSign,
     items: [
-      { title: "Painel Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
-      { title: "Lançamentos", url: "/financeiro", icon: List, permKey: "fin_geral.visualizar" },
+      { title: "Financeiro", url: "/financeiro", icon: DollarSign, permKey: "fin_geral.visualizar" },
     ]
   },
   {
@@ -120,10 +119,11 @@ export function AppSidebar() {
   const { resolvedTheme } = useTheme();
   const { isAdmin, hasPermission, hasAnyPermission } = usePermissions();
   const currentLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
+  const location = useLocation();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setHasExecDashboard(false); return; }
     if (isAdmin) { setHasExecDashboard(true); return; }
     const perms = profile?.roles?.permissions as Record<string, boolean> | null;
     if (perms?.acessar_dashboard_executivo) setHasExecDashboard(true);

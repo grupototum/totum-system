@@ -1,10 +1,8 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
-// Fallbacks for when .env is gitignored and missing in published builds.
-// These are publishable (anon) credentials — safe to embed.
+// Fallbacks para quando .env não existe no build (credenciais anon — seguro embedar).
 const FALLBACK_ENV = {
   VITE_SUPABASE_URL: "https://fgosozxvhbdhqigwzqih.supabase.co",
   VITE_SUPABASE_PUBLISHABLE_KEY:
@@ -21,7 +19,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       hmr: { overlay: false },
     },
-    plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+    plugins: [react()].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
