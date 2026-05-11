@@ -78,8 +78,11 @@ export default function PixelSystemsLanding() {
                 Contato
               </a>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/nova-agencia">Cadastrar agência</Link>
+            </Button>
             <Button asChild size="sm">
-              <a href="https://agencia.pixelsystem.online" target="_blank" rel="noopener noreferrer">
+              <a href="https://totum.pixelsystem.online" target="_blank" rel="noopener noreferrer">
                 Acessar Totum
               </a>
             </Button>

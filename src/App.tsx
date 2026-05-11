@@ -160,12 +160,15 @@ function SetupRoute() {
 function PublicRoutes() {
   const host = getRootHost();
 
-  // pixelsystem.online → landing institucional Pixel Systems
+  // pixelsystem.online → landing institucional Pixel Systems + rota de cadastro de nova agência
   if (host === PIXEL_HOST) {
     return (
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<PixelSystemsLanding />} />
+          <Route path="/nova-agencia" element={<NovaAgenciaPage />} />
+          <Route path="/login" element={<AuthRoutes />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/setup" element={<SetupRoute />} />
           <Route path="/*" element={<PixelSystemsLanding />} />
         </Routes>
@@ -173,7 +176,8 @@ function PublicRoutes() {
     );
   }
 
-  // agencia.pixelsystem.online → landing pública + cadastro de nova agência (master-protected)
+  // agencia.pixelsystem.online → landing pública do Totum + cadastro de nova agência
+  // (quando o domínio estiver apontando para este projeto no Vercel)
   if (host === AGENCY_HOST) {
     return (
       <Suspense fallback={<PageLoader />}>
