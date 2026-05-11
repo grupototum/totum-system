@@ -15,10 +15,15 @@ export default function AuthPage() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
 
-  // Logo: prefer tenant-specific, fall back to Totum default
-  const logoSrc = isDark
+  // Whether to apply tenant text-light overrides (declared first — used in logoSrc)
+  const hasTenantBg = !!tenant?.bg_color;
+
+  // Logo: when tenant has a custom dark bg always use the dark logo (logo_url)
+  const logoSrc = hasTenantBg
     ? (tenant?.logo_url ?? logoRed)
-    : (tenant?.logo_url_light ?? tenant?.logo_url ?? logoRed);
+    : isDark
+      ? (tenant?.logo_url ?? logoRed)
+      : (tenant?.logo_url_light ?? tenant?.logo_url ?? logoRed);
 
   // Background color: tenant override or default
   const bgStyle = tenant?.bg_color
@@ -30,9 +35,6 @@ export default function AuthPage() {
   const cardStyle = tenant?.card_color
     ? { backgroundColor: tenant.card_color }
     : undefined;
-
-  // Whether to apply tenant text-light overrides
-  const hasTenantBg = !!tenant?.bg_color;
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,7 +112,7 @@ export default function AuthPage() {
     setLoading(false);
   };
 
-  const inputCls = "bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20 text-foreground placeholder:text-muted-foreground";
+  const inputCls = `bg-secondary border-border rounded-xl h-11 text-sm pl-10 focus:border-primary/50 focus:ring-primary/20 text-foreground ${hasTenantBg ? "placeholder:text-white" : "placeholder:text-muted-foreground"}`;
 
   return (
     <div
@@ -208,7 +210,13 @@ export default function AuthPage() {
                     <span className="text-[10px] text-muted-foreground uppercase">ou</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
-                  <Button onClick={handleGoogleLogin} variant="outline" disabled={loading} className="w-full border-border bg-secondary hover:bg-accent text-foreground rounded-xl h-11">
+                  <Button
+                    onClick={handleGoogleLogin}
+                    variant="outline"
+                    disabled={loading}
+                    className={`w-full rounded-xl h-11 ${hasTenantBg ? "text-white border-white/20 hover:border-white/40" : "border-border bg-secondary hover:bg-accent text-foreground"}`}
+                    style={hasTenantBg ? { backgroundColor: tenant?.bg_color ?? undefined } : undefined}
+                  >
                     <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
