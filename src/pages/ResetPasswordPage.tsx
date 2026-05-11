@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import logoRed from "@/assets/logo-red.png";
 import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useTenant } from "@/contexts/TenantContext";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { tenant } = useTenant();
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -42,7 +44,11 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
-          <img src={logoRed} alt="Totum" className="h-10" />
+          <img
+            src={tenant?.logo_url ?? logoRed}
+            alt={tenant?.display_name ?? "Totum"}
+            className="h-10 max-w-[160px] object-contain"
+          />
           <p className="text-sm text-muted-foreground">Redefinir senha</p>
         </div>
         <div className="glass-card rounded-2xl p-6 space-y-4">

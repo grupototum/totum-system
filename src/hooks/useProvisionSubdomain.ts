@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface InitialUser {
+  email: string;
+  password: string;
+  full_name?: string;
+}
+
 export interface ProvisionResult {
   success: boolean;
   organization?: Record<string, unknown>;
@@ -8,6 +14,7 @@ export interface ProvisionResult {
   message?: string;
   error?: string;
   vercel_error?: string;
+  created_users?: Array<{ email: string; status: string; error?: string }>;
 }
 
 /**
@@ -26,11 +33,12 @@ export async function checkSubdomainAvailable(subdomain: string): Promise<boolea
 }
 
 /**
- * Hook para provisionar um novo subdomínio para um tenant.
+ * Hook para provisionar um novo tenant completo.
  * Chama a Edge Function provision-subdomain que:
- *  1. Verifica disponibilidade
- *  2. Cria a org no banco
+ *  1. Verifica disponibilidade do subdomínio
+ *  2. Cria a org no banco (com logo_url e primary_color opcionais)
  *  3. Adiciona o domínio no Vercel via API
+ *  4. Cria os usuários iniciais do tenant (com organization_id já setado no profile)
  */
 export function useProvisionSubdomain() {
   const [loading, setLoading] = useState(false);
@@ -40,6 +48,9 @@ export function useProvisionSubdomain() {
     subdomain: string;
     org_name: string;
     org_slug: string;
+    logo_url?: string;
+    primary_color?: string;
+    initial_users?: InitialUser[];
   }): Promise<ProvisionResult> => {
     setLoading(true);
     setResult(null);
@@ -61,6 +72,16 @@ export function useProvisionSubdomain() {
           body: JSON.stringify(params),
         }
       );
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const r: ProvisionResult = {
+          success: false,
+          error: (errData as any)?.error ?? `HTTP ${res.status}`,
+        };
+        setResult(r);
+        return r;
+      }
 
       const data: ProvisionResult = await res.json();
       setResult(data);

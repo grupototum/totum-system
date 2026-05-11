@@ -94,7 +94,11 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-3">
-          <img src={logoRed} alt="Totum" className="h-10" />
+          <img
+            src={tenant?.logo_url ?? logoRed}
+            alt={tenant?.display_name ?? "Totum"}
+            className="h-10 max-w-[160px] object-contain"
+          />
           <div className="text-center">
             <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Ambiente</p>
             <p className="font-medium text-foreground">

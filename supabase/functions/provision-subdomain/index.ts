@@ -10,18 +10,25 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface InitialUser {
+  email: string;
+  password: string;
+  full_name?: string;
+  is_admin?: boolean;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Autenticar via Supabase JWT
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    // Authenticate via Supabase JWT — must be master user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -41,11 +48,35 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Verify caller is master
+    const { data: callerProfile } = await supabase
+      .from("profiles")
+      .select("is_master")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!callerProfile?.is_master) {
+      return new Response(JSON.stringify({ error: "Forbidden: only master users can provision tenants" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
-    const { subdomain, org_name, org_slug } = body as {
+    const {
+      subdomain,
+      org_name,
+      org_slug,
+      logo_url,
+      primary_color,
+      initial_users = [],
+    } = body as {
       subdomain: string;
       org_name: string;
       org_slug: string;
+      logo_url?: string;
+      primary_color?: string;
+      initial_users?: InitialUser[];
     };
 
     if (!subdomain || !org_name || !org_slug) {
@@ -58,7 +89,7 @@ Deno.serve(async (req) => {
     const cleanSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, "").trim();
     const hostname = `${cleanSubdomain}.${BASE_DOMAIN}`;
 
-    // 1. Verificar disponibilidade
+    // 1. Check subdomain availability
     const { data: available } = await supabase.rpc("check_subdomain_available", {
       _subdomain: cleanSubdomain,
     });
@@ -70,14 +101,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Criar org no banco com status pending
+    // 2. Create org in DB
     const { data: org, error: orgError } = await supabase
       .from("organizations")
       .insert({
         name: org_name,
         slug: org_slug,
         subdomain: cleanSubdomain,
+        logo_url: logo_url ?? null,
+        primary_color: primary_color ?? null,
         vercel_domain_status: "pending",
+        is_active: true,
       })
       .select()
       .single();
@@ -89,7 +123,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 3. Adicionar domínio no Vercel
+    // 3. Add domain to Vercel
     let vercelStatus = "active";
     let vercelError  = null;
 
@@ -118,11 +152,38 @@ Deno.serve(async (req) => {
       console.warn("[provision-subdomain] VERCEL_TOKEN não configurado");
     }
 
-    // 4. Atualizar status da org
+    // 4. Update org with final Vercel status
     await supabase
       .from("organizations")
       .update({ vercel_domain_status: vercelStatus })
       .eq("id", org.id);
+
+    // 5. Create initial users for the new tenant (if provided)
+    const createdUsers: Array<{ email: string; status: string; error?: string }> = [];
+
+    for (const u of initial_users) {
+      try {
+        const { data: newUser, error: userErr } = await supabase.auth.admin.createUser({
+          email: u.email,
+          password: u.password,
+          email_confirm: true,
+          user_metadata: {
+            full_name: u.full_name ?? u.email.split("@")[0],
+            organization_id: org.id,
+            client_id: org_slug,
+            is_master: false,
+          },
+        });
+
+        if (userErr) {
+          createdUsers.push({ email: u.email, status: "error", error: userErr.message });
+        } else {
+          createdUsers.push({ email: u.email, status: "created" });
+        }
+      } catch (err) {
+        createdUsers.push({ email: u.email, status: "error", error: String(err) });
+      }
+    }
 
     return new Response(
       JSON.stringify({
@@ -130,6 +191,7 @@ Deno.serve(async (req) => {
         organization: { ...org, vercel_domain_status: vercelStatus },
         hostname,
         vercel_error: vercelError,
+        created_users: createdUsers,
         message: vercelStatus === "active"
           ? `Subdomínio ${hostname} provisionado com sucesso!`
           : `Organização criada. Configure o DNS manualmente: CNAME ${hostname} → cname.vercel-dns.com`,

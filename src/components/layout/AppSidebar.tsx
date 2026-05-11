@@ -33,6 +33,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useTenant } from "@/contexts/TenantContext";
 import { UserAvatar } from "@/components/shared/AvatarUpload";
 import {
   Sidebar,
@@ -118,7 +119,9 @@ export function AppSidebar() {
   const { isDemoMode, toggleDemo } = useDemo();
   const { resolvedTheme } = useTheme();
   const { isAdmin, hasPermission, hasAnyPermission } = usePermissions();
-  const currentLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
+  const { tenant } = useTenant();
+  const defaultLogo = resolvedTheme === "dark" ? logoWhite : logoRed;
+  const currentLogo = tenant?.logo_url ?? defaultLogo;
   const location = useLocation();
   const [hasExecDashboard, setHasExecDashboard] = useState(false);
 
@@ -146,7 +149,11 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarHeader className="p-4 pb-6">
         <div className="flex items-center gap-3">
-          <img src={currentLogo} alt="Totum" className={`${collapsed ? "h-6" : "h-7"} transition-opacity duration-300`} />
+          <img
+            src={currentLogo}
+            alt={tenant?.display_name ?? "Totum"}
+            className={`${collapsed ? "h-6" : "h-7"} max-w-[140px] object-contain transition-opacity duration-300`}
+          />
         </div>
       </SidebarHeader>
 
