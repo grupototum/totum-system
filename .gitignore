@@ -61,3 +61,9 @@ Desktop.ini
 *.backup
 backups/
 .vercel
+
+# stark-api — servidor Express separado (não faz parte do bundle Vite)
+src/stark-api/node_modules/
+src/stark-api/dist/
+stark-api/node_modules/
+stark-api/dist/
