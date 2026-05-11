@@ -64,10 +64,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 1. Fetch active contracts with plan
+    // 1. Fetch active contracts with plan (include organization_id via client)
     let query = supabase
       .from("contracts")
-      .select("id, client_id, plan_id, billing_frequency, plans(id, name, frequency)")
+      .select("id, client_id, plan_id, billing_frequency, organization_id, plans(id, name, frequency)")
       .eq("status", "ativo")
       .not("plan_id", "is", null);
 
@@ -113,7 +113,18 @@ Deno.serve(async (req) => {
       if (modelErr) throw modelErr;
       if (!modelItems || modelItems.length === 0) continue;
 
-      // 4. Create checklist
+      // 4. Create checklist (include organization_id for RLS / multi-tenant)
+      // Derive organization_id from contracts table first; fallback to clients table
+      let orgId: string | null = (contract as any).organization_id ?? null;
+      if (!orgId) {
+        const { data: clientRow } = await supabase
+          .from("clients")
+          .select("organization_id")
+          .eq("id", contract.client_id)
+          .single();
+        orgId = clientRow?.organization_id ?? null;
+      }
+
       const { data: checklist, error: clErr } = await supabase
         .from("delivery_checklists")
         .insert({
@@ -122,6 +133,8 @@ Deno.serve(async (req) => {
           plan_id: contract.plan_id,
           period,
           frequency: freq,
+          fulfillment_pct: 0,
+          organization_id: orgId,
         })
         .select("id")
         .single();

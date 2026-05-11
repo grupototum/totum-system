@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Box, Plus, Loader2, Pencil, MoreHorizontal, Trash2, TrendingUp, Info } from "lucide-react";
+import { Box, Plus, Loader2, Pencil, MoreHorizontal, Trash2, TrendingUp, Info, ListChecks, GripVertical, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { usePackages, PackageRow } from "@/hooks/usePackages";
 import { useProducts } from "@/hooks/useProducts";
@@ -21,10 +22,33 @@ const formatCurrency = (value: string | number | null | undefined) => {
 };
 
 export default function Packages() {
-  const { packages, loading, addPackage, updatePackage, deletePackage } = usePackages();
+  const { packages, loading, addPackage, updatePackage, deletePackage, addDeliveryItem, updateDeliveryItem, deleteDeliveryItem } = usePackages();
   const { products } = useProducts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<PackageRow | null>(null);
+
+  // Delivery items dialog
+  const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
+  const [itemsPkg, setItemsPkg] = useState<PackageRow | null>(null);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemType, setNewItemType] = useState("outro");
+  const [newItemPriority, setNewItemPriority] = useState("media");
+  const [savingItem, setSavingItem] = useState(false);
+
+  const openItemsDialog = (pkg: PackageRow) => {
+    setItemsPkg(packages.find(p => p.id === pkg.id) || pkg);
+    setNewItemName(""); setNewItemType("outro"); setNewItemPriority("media");
+    setItemsDialogOpen(true);
+  };
+
+  const handleAddItem = async () => {
+    if (!itemsPkg || !newItemName.trim() || savingItem) return;
+    setSavingItem(true);
+    await addDeliveryItem(itemsPkg.id, { name: newItemName.trim(), task_type: newItemType, suggested_priority: newItemPriority });
+    // Refresh local reference from updated packages list
+    setNewItemName("");
+    setSavingItem(false);
+  };
 
   // Form state
   const [name, setName] = useState("");
@@ -155,6 +179,7 @@ export default function Packages() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => openEdit(pkg)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openItemsDialog(pkg)}><ListChecks className="h-4 w-4 mr-2" /> Gerenciar Entregas</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => deletePackage(pkg.id)} className="text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -175,14 +200,120 @@ export default function Packages() {
               </div>
 
               <div className="pt-4 border-t border-border flex justify-between items-center">
-                <div className="text-xs text-muted-foreground">
-                  {(pkg as any).items?.length || 0} Itens
-                </div>
+                <button
+                  onClick={() => openItemsDialog(pkg)}
+                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <ListChecks className="h-3.5 w-3.5" />
+                  {(pkg as any).items?.length || 0} {(pkg as any).items?.length === 1 ? "entrega" : "entregas"}
+                </button>
               </div>
             </motion.div>
           ))}
         </div>
       )}
+
+      {/* Delivery Items Dialog */}
+      <Dialog open={itemsDialogOpen} onOpenChange={open => {
+        setItemsDialogOpen(open);
+        if (!open) setItemsPkg(null);
+      }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-3">
+            <DialogTitle className="text-xl font-heading flex items-center gap-2">
+              <ListChecks className="h-5 w-5 text-primary" />
+              Itens de Entrega — {itemsPkg?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Estes itens serão gerados automaticamente nos checklists de entrega ao ativar um contrato com este pacote.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto px-6 py-2 space-y-4">
+            {/* Existing items list */}
+            {(() => {
+              const currentPkg = packages.find(p => p.id === itemsPkg?.id);
+              const items = currentPkg?.items || [];
+              return items.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground/50 border-2 border-dashed rounded-xl text-sm">
+                  Nenhum item de entrega cadastrado
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {items.map((item, idx) => (
+                    <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-accent/30 hover:bg-accent/50 transition-colors group">
+                      <GripVertical className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                      <span className="flex-1 text-sm font-medium">{item.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{(item as any).task_type || "outro"}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{(item as any).suggested_priority || "media"}</span>
+                      <button
+                        onClick={() => deleteDeliveryItem(item.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        title="Remover item"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Add new item form */}
+            <div className="border-t border-border pt-4 space-y-3">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">Adicionar novo item</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={newItemName}
+                  onChange={e => setNewItemName(e.target.value)}
+                  placeholder="Ex: Relatório mensal de performance..."
+                  className="flex-1"
+                  onKeyDown={e => e.key === "Enter" && handleAddItem()}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Select value={newItemType} onValueChange={setNewItemType}>
+                  <SelectTrigger className="flex-1 h-9 text-xs">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="conteudo">Conteúdo</SelectItem>
+                    <SelectItem value="trafego">Tráfego</SelectItem>
+                    <SelectItem value="reuniao">Reunião</SelectItem>
+                    <SelectItem value="relatorio">Relatório</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="desenvolvimento">Desenvolvimento</SelectItem>
+                    <SelectItem value="outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={newItemPriority} onValueChange={setNewItemPriority}>
+                  <SelectTrigger className="flex-1 h-9 text-xs">
+                    <SelectValue placeholder="Prioridade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="baixa">Baixa</SelectItem>
+                    <SelectItem value="media">Média</SelectItem>
+                    <SelectItem value="alta">Alta</SelectItem>
+                    <SelectItem value="urgente">Urgente</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleAddItem}
+                  disabled={!newItemName.trim() || savingItem}
+                  className="gradient-primary border-0 text-white gap-1.5 rounded-xl px-4 h-9 text-xs font-semibold"
+                >
+                  {savingItem ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                  Adicionar
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 border-t border-border flex justify-end">
+            <Button variant="outline" onClick={() => setItemsDialogOpen(false)} className="rounded-full">Fechar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Package Form Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

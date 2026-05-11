@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,19 @@ const statusIcons: Record<UIStatus, { icon: typeof CheckCircle2; color: string; 
 
 const statusOptions: Enums<"delivery_item_status">[] = ["entregue", "entregue_parcialmente", "nao_entregue", "nao_aplicavel"];
 
+/** Debounce — fires fn only after `delay` ms of silence. */
+function useDebouncedCallback<T extends (...args: any[]) => any>(fn: T, delay = 400) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  return useCallback(
+    (...args: Parameters<T>) => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => fn(...args), delay);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fn, delay]
+  );
+}
+
 interface Props { clientId: string; }
 
 export function ClientHubDeliveries({ clientId }: Props) {
@@ -42,7 +55,16 @@ export function ClientHubDeliveries({ clientId }: Props) {
       .select("*, plans(name), delivery_checklist_items(*)")
       .eq("client_id", clientId)
       .order("created_at", { ascending: false });
-    setChecklists(data || []);
+
+    // Sort items inside each checklist by sort_order
+    const sorted = (data || []).map((c: any) => ({
+      ...c,
+      delivery_checklist_items: (c.delivery_checklist_items || [])
+        .slice()
+        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+    }));
+
+    setChecklists(sorted);
     setLoading(false);
   }, [clientId, isDemoMode]);
 
@@ -63,15 +85,25 @@ export function ClientHubDeliveries({ clientId }: Props) {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
     const updates: any = { status };
     if (status === "entregue") updates.completed_at = new Date().toISOString();
+    else updates.completed_at = null;
     await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
     await fetch();
   };
 
-  const updateJustification = async (itemId: string, justification: string) => {
+  // Silent justification save — debounced 400ms, no full refetch spinner
+  const _saveJustification = useCallback(async (itemId: string, justification: string) => {
     if (isDemoMode) return;
     await supabase.from("delivery_checklist_items").update({ justification }).eq("id", itemId);
-    await fetch();
-  };
+    // Optimistic local update only — no full refetch to avoid flicker while typing
+    setChecklists(prev => prev.map(c => ({
+      ...c,
+      delivery_checklist_items: (c.delivery_checklist_items || []).map((i: any) =>
+        i.id === itemId ? { ...i, justification } : i
+      ),
+    })));
+  }, [isDemoMode]);
+
+  const updateJustification = useDebouncedCallback(_saveJustification, 400);
 
   const finalizeChecklist = async (checklistId: string) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
@@ -174,9 +206,12 @@ export function ClientHubDeliveries({ clientId }: Props) {
                               {(uiStatus === "entregue_parcialmente" || uiStatus === "nao_entregue") && (
                                 <div className={`ml-9 mr-2 mb-2 rounded-lg border-l-2 ${needsJust ? "border-primary" : "border-border"}`}>
                                   <textarea
-                                    value={item.justification || ""} onChange={e => updateJustification(item.id, e.target.value)}
-                                    placeholder="Justificativa obrigatória" disabled={!!checklist.completed_at}
-                                    className="w-full p-2 text-sm bg-white/[0.03] border-0 resize-none placeholder:text-muted-foreground focus:outline-none min-h-[50px]" />
+                                    defaultValue={item.justification || ""}
+                                    onChange={e => updateJustification(item.id, e.target.value)}
+                                    placeholder="Justificativa obrigatória"
+                                    disabled={!!checklist.completed_at}
+                                    className="w-full p-2 text-sm bg-white/[0.03] border-0 resize-none placeholder:text-muted-foreground focus:outline-none min-h-[50px]"
+                                  />
                                   {needsJust && <p className="px-2 pb-1 text-xs text-primary">Justificativa obrigatória</p>}
                                 </div>
                               )}

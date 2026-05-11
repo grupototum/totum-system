@@ -36,6 +36,13 @@ export async function generateChecklistForClient(clientId: string, period: strin
     }
 
     // 3. Criar o cabeçalho do checklist
+    // Resolve organization_id via clients table (service-role bypasses RLS)
+    const { data: clientRow } = await supabase
+      .from("clients")
+      .select("organization_id")
+      .eq("id", clientId)
+      .single();
+
     const { data: checklist, error: checklistErr } = await supabase
       .from("delivery_checklists")
       .insert({
@@ -45,6 +52,7 @@ export async function generateChecklistForClient(clientId: string, period: strin
         period: period,
         frequency: contract.billing_frequency || "mensal",
         fulfillment_pct: 0,
+        organization_id: clientRow?.organization_id ?? null,
       })
       .select("id")
       .single();
@@ -66,9 +74,9 @@ export async function generateChecklistForClient(clientId: string, period: strin
         checklist_id: checklist.id,
         delivery_model_item_id: item.id,
         name: item.name,
-        status: "pendente",
-        sort_order: item.sort_order,
-        responsible_id: item.suggested_responsible_id,
+        // status: null → valid (enum has no "pendente"; NULL = not yet assessed)
+        sort_order: item.sort_order ?? 0,
+        responsible_id: item.suggested_responsible_id ?? null,
       }));
 
       const { error: itemsErr } = await supabase
