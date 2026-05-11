@@ -81,6 +81,9 @@ export default function LandingPage() {
             <Button asChild variant="ghost" size="sm">
               <Link to="/login">Entrar</Link>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/nova-agencia">Cadastrar agência</Link>
+            </Button>
             <Button asChild size="sm">
               <a
                 href="https://wa.me/5511999999999"
@@ -223,13 +226,9 @@ export default function LandingPage() {
               variant="outline"
               className="w-full sm:w-auto border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10"
             >
-              <a
-                href="https://wa.me/5511999999999"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Falar pelo WhatsApp
-              </a>
+              <Link to="/nova-agencia">
+                Cadastrar nova agência
+              </Link>
             </Button>
           </div>
         </div>

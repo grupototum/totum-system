@@ -43,6 +43,7 @@ const PopLibrary          = lazy(() => import("./pages/PopLibrary"));
 const SlaRules            = lazy(() => import("./pages/SlaRules"));
 const DataImport          = lazy(() => import("./pages/DataImport"));
 const NotFound            = lazy(() => import("./pages/NotFound"));
+const NovaAgenciaPage     = lazy(() => import("./pages/NovaAgenciaPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,8 +97,6 @@ function ProtectedRoutes() {
   }
 
   if (!session) {
-    const host = getRootHost();
-    if (location.pathname === "/" && host === AGENCY_HOST) return <LandingPage />;
     return <Navigate to="/login" replace />;
   }
 
@@ -174,8 +173,22 @@ function PublicRoutes() {
     );
   }
 
-  // ola.pixelsystem.online → app normal mas com demo mode já ativo (via DemoContext)
-  // totum.pixelsystem.online + agencia.pixelsystem.online → app normal
+  // agencia.pixelsystem.online → landing pública + cadastro de nova agência (master-protected)
+  if (host === AGENCY_HOST) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/nova-agencia" element={<NovaAgenciaPage />} />
+          <Route path="/login" element={<AuthRoutes />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/*" element={<ProtectedRoutes />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
+  // ola.pixelsystem.online + totum.pixelsystem.online + subdomínios de tenants → app normal
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
