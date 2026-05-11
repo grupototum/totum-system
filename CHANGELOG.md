@@ -1,0 +1,77 @@
+# CHANGELOG — Totum System
+> Formato: Conventional Commits · Vibe Coding Totum v3.0
+
+---
+
+## [Unreleased]
+
+### chore
+- Untrack `src/stark-api/node_modules/` e `dist/` do git (2215 arquivos, ~65MB) — `948c250c`
+- Remover 23 arquivos duplicados `* 2.*` byte-identical (artefatos do Finder macOS) — `bd676aeb`
+
+### docs
+- Mover `BUGFIX_AGENTES_TELA_BRANCA.md` para `docs/fixes/` — `f5f91754`
+- Criar `CLAUDE.md`, `KIMI.md`, `BUGS.md`, `TODO.md`, `CHANGELOG.md` (Vibe Coding Totum v3.0)
+
+---
+
+## [2026-05-07]
+
+### fix
+- Corrigir cores hardcoded que quebravam dark mode em 6 componentes de tasks — `eb62740`
+  - `TaskModal`, `TaskComentarios`, `TaskSubtarefas`, `TaskAnexos`, `PendingAttachmentsPicker`, `AlexandriaLayout`
+  - Substituídos: `bg-white/stone-*/slate-*` → `bg-background/border/foreground`
+
+### perf
+- Code splitting: 29 imports estáticos → `React.lazy()` + `Suspense` — `c15595d`
+  - Bundle principal: 2.5MB → 825KB gzip (248KB)
+  - `useHasAdmin`: `useState/useEffect` → `useQuery` (cache 60s, retry 1)
+  - `QueryClient` com `defaultOptions` (staleTime 30s, retry 1)
+  - Tailwind `content` simplificado para `["./src/**/*.tsx", "./src/**/*.ts"]`
+
+### fix
+- Remover rota duplicada inexistente `/financeiro/lancamentos` do sidebar — `3add47f`
+
+### fix (auditoria completa — 38 correções)
+- `contexts/AuthContext.tsx` → re-export de `hooks/useAuth` (elimina AuthProvider duplicado)
+- `AppSidebar`: adicionar `useLocation()` (corrige active state das rotas)
+- `Tasks.tsx`: corrigir short-circuit nos filtros `responsibleFilter`/`managerFilter`
+- `SetupPage.tsx`: `useNavigate` + redirect após login bem-sucedido
+- Remover `@lovable.dev/cloud-auth-js` (não funciona fora de `*.lovable.app`)
+- `useAuth.tsx`: `.single()` → `.maybeSingle()` no carregamento do profile
+- `useAdminSettings.ts`: 4× `.single()` → `.maybeSingle()`
+- `useDashboardData.ts`: `.single()` → `.maybeSingle()` no `github_config`
+- `ThemeContext`: listener `storage` para sincronização entre abas
+- Deletar páginas mortas: `Login`, `SignUp`, `ContentPipeline`, `Hub`
+- `package.json`: remover `lovable-tagger` e `@lovable.dev/cloud-auth-js`
+- Todos os 9 importadores de `@/contexts/AuthContext` → `@/hooks/useAuth`
+- `hasExecDashboard`: reset ao fazer logout
+
+---
+
+## [2026-05-06]
+
+### fix
+- Corrigir referências ao projeto Supabase antigo (`sugulxjfkhibuddmoyzr` → `fgosozxvhbdhqigwzqih`)
+- Adicionar `vercel.json` para roteamento SPA (corrige 404 em rotas diretas)
+- Corrigir warnings do build: CSS `@import` order e Tailwind content pattern
+
+### fix (banco de dados)
+- Resolver recursão infinita na RLS policy `user_roles` (causava sidebar incompleta)
+- Adicionar `UNIQUE constraint` em `profiles.user_id` (previne perfis duplicados)
+- Atualizar trigger `handle_new_user` para `status = 'ativo'` por padrão
+- Registrar organização Totum em `organizations` table (resolve tenant lookup)
+- Criar usuário master `dev@grupototum.com` com role Master
+
+---
+
+## [2026-05-05] — Netflix Design System
+
+### feat
+- Aplicar Netflix Design System (dark-first, #000/#fff/#e00000)
+- Multi-tenant subdomain provisioning automático via Vercel API
+- Google OAuth nativo + demo mode em `ola.pixelsystem.online`
+
+---
+
+*Histórico anterior disponível via `git log --oneline`*
