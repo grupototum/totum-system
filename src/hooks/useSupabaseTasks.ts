@@ -145,7 +145,7 @@ export function useSupabaseTasks() {
     if (isDemoMode) return;
     const { data } = await supabase.from("clients").select("id, name").eq("status", "ativo").order("name");
     setClients(data || []);
-  }, [isDemoMode, tenant?.organization_id]);
+  }, [isDemoMode]);
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
@@ -257,11 +257,19 @@ export function useSupabaseTasks() {
       return true;
     }
 
-    // Delete related records first
-    await supabase.from("task_checklist_items").delete().eq("task_id", taskId);
-    await supabase.from("task_comments").delete().eq("task_id", taskId);
-    await supabase.from("task_history").delete().eq("task_id", taskId);
-    await supabase.from("subtasks").delete().eq("task_id", taskId);
+    // Delete related records in parallel before deleting the task
+    const cascadeResults = await Promise.all([
+      supabase.from("task_checklist_items").delete().eq("task_id", taskId),
+      supabase.from("task_comments").delete().eq("task_id", taskId),
+      supabase.from("task_history").delete().eq("task_id", taskId),
+      supabase.from("subtasks").delete().eq("task_id", taskId),
+    ]);
+
+    const cascadeError = cascadeResults.find(r => r.error);
+    if (cascadeError?.error) {
+      toast({ title: "Erro ao excluir registros relacionados", description: cascadeError.error.message, variant: "destructive" });
+      return false;
+    }
 
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
 

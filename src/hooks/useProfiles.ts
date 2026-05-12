@@ -63,7 +63,7 @@ export function useProfiles() {
     fetch();
   }, [fetch]);
 
-  const updateProfile = async (id: string, updates: Partial<Tables<"profiles">>) => {
+  const updateProfile = useCallback(async (id: string, updates: Partial<Tables<"profiles">>) => {
     if (isDemoMode) {
       toast(DEMO_TOAST);
       return true;
@@ -75,21 +75,21 @@ export function useProfiles() {
     }
     await fetch();
     return true;
-  };
+  }, [isDemoMode, fetch]);
 
-  const deleteProfile = async (id: string) => {
+  const deleteProfile = useCallback(async (id: string) => {
     if (isDemoMode) {
       toast(DEMO_TOAST);
       return true;
     }
-    const { error } = await supabase.from("profiles").update({ status: "inativo" as any }).eq("id", id);
+    const { error } = await supabase.from("profiles").update({ status: "inativo" as Tables<"profiles">["status"] }).eq("id", id);
     if (error) {
       toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
       return false;
     }
     await fetch();
     return true;
-  };
+  }, [isDemoMode, fetch]);
 
   return { profiles, loading, refetch: fetch, updateProfile, deleteProfile };
 }

@@ -10,6 +10,7 @@ import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
 import { useTenant } from "@/contexts/TenantContext";
+import { toast } from "@/hooks/use-toast";
 
 interface TaskDef {
   title: string;
@@ -62,6 +63,9 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
         setProjectTemplates(tpl.data || []);
+      }).catch((err) => {
+        console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
+        toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
       });
       if (initialData) {
         setForm({
@@ -80,7 +84,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setTasks([]);
       }
     }
-  }, [open]);
+  }, [open, tenant?.organization_id]);
 
   const filteredContracts = form.client_id
     ? contracts.filter((c) => c.client_id === form.client_id)
