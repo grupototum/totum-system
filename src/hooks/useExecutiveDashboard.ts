@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { demoExecutiveDashboardData } from "@/data/demoData";
 import { format, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -43,6 +44,7 @@ export interface PeriodFilter {
 
 export function useExecutiveDashboard(periodFilter: PeriodFilter) {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [data, setData] = useState<ExecutiveDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -152,9 +154,10 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       .from("tasks")
       .select("id, title, status, priority, due_date, responsible_id, clients(*)");
 
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("user_id, full_name, avatar_url");
+    // Scope to current tenant org — master user bypasses RLS and would see all orgs
+    let profilesQuery = supabase.from("profiles").select("user_id, full_name, avatar_url");
+    if (tenant?.organization_id) profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
+    const { data: profiles } = await profilesQuery;
     const profileMap = new Map<string, { name: string; avatar?: string }>();
     (profiles || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
 
@@ -268,7 +271,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
     } finally {
       setLoading(false);
     }
-  }, [periodFilter, isDemoMode]);
+  }, [periodFilter, isDemoMode, tenant?.organization_id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

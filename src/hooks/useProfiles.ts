@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { demoProfilesList, demoRolesList, demoAuditLogsList, demoDepartmentsList } from "@/data/demoData";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -17,6 +18,7 @@ const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação sim
 
 export function useProfiles() {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,10 +31,18 @@ export function useProfiles() {
     }
 
     try {
-      const { data, error } = await supabase
+      // Explicit org filter on top of RLS: master users bypass RLS and would
+      // otherwise see profiles from ALL organizations.
+      let query = supabase
         .from("profiles")
         .select("*, roles(name, permissions), departments(name)")
         .order("full_name");
+
+      if (tenant?.organization_id) {
+        query = query.eq("organization_id", tenant.organization_id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching profiles:", error);
@@ -47,7 +57,7 @@ export function useProfiles() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => {
     fetch();

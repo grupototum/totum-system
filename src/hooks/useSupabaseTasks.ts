@@ -65,10 +65,15 @@ export function useSupabaseTasks() {
 
       if (error) throw error;
 
-      // Fetch ALL org profiles for name resolution (including master for history display)
-      const { data: profileRows } = await supabase
+      // Fetch profiles scoped to current tenant for name resolution
+      // Explicit org filter is belt-and-suspenders over RLS (master user bypasses RLS)
+      let profileQuery = supabase
         .from("profiles")
         .select("user_id, full_name, avatar_url");
+      if (tenant?.organization_id) {
+        profileQuery = profileQuery.eq("organization_id", tenant.organization_id);
+      }
+      const { data: profileRows } = await profileQuery;
 
       const profileMap = new Map<string, { name: string; avatar: string | null }>();
       (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
@@ -144,13 +149,19 @@ export function useSupabaseTasks() {
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
-    // Exclude is_master=true (Dev Admin) from regular dropdowns — they are sys admins, not account managers
-    const { data } = await supabase
+    // Scope explicitly to current tenant org AND exclude is_master accounts (sys admins).
+    // Double-guard: RLS handles normal users; explicit org filter handles master users
+    // who bypass RLS and would otherwise see profiles from ALL orgs.
+    let q = supabase
       .from("profiles")
       .select("user_id, full_name")
       .eq("status", "ativo")
       .eq("is_master", false)
       .order("full_name");
+    if (tenant?.organization_id) {
+      q = q.eq("organization_id", tenant.organization_id);
+    }
+    const { data } = await q;
     setProfiles(data || []);
   }, [isDemoMode, tenant?.organization_id]);
 

@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
+import { useTenant } from "@/contexts/TenantContext";
 import { demoClientObservations, demoProfilesList } from "@/data/demoData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -21,6 +22,7 @@ interface TimelineEntry {
 
 export function ClientHubTimeline({ clientId }: Props) {
   const { isDemoMode } = useDemo();
+  const { tenant } = useTenant();
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [newObs, setNewObs] = useState("");
@@ -61,8 +63,10 @@ export function ClientHubTimeline({ clientId }: Props) {
       .order("created_at", { ascending: false })
       .limit(50);
 
-    // Get profiles for user names
-    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name");
+    // Get profiles for user names — scoped to org to prevent cross-tenant leakage
+    let profileQuery = supabase.from("profiles").select("user_id, full_name");
+    if (tenant?.organization_id) profileQuery = profileQuery.eq("organization_id", tenant.organization_id);
+    const { data: profiles } = await profileQuery;
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
 
     const obsEntries: TimelineEntry[] = (obs || []).map((o: any) => ({

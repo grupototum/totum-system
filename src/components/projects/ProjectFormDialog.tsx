@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
+import { useTenant } from "@/contexts/TenantContext";
 
 interface TaskDef {
   title: string;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
+  const { tenant } = useTenant();
   const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
@@ -41,11 +43,15 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
 
   useEffect(() => {
     if (open) {
+      // Scope profiles to current tenant org (belt-and-suspenders over RLS)
+      let profilesQuery = supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").eq("is_master", false).order("full_name");
+      if (tenant?.organization_id) profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
+
       Promise.all([
         supabase.from("clients").select("*"),
         supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
         supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
-        supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name"),
+        profilesQuery,
         supabase.from("project_templates").select("*, project_template_tasks(*)").order("name"),
       ]).then(([c, ct, pt, p, tpl]) => {
         const activeClients = ((c.data as any[]) || [])
