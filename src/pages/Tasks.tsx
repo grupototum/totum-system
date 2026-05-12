@@ -371,6 +371,7 @@ export default function Tasks() {
             managerFilter={managerFilter} onManagerFilterChange={setManagerFilter}
             tasks={tasks}
             profiles={profiles}
+            clients={clients}
           />
         )}
       </div>

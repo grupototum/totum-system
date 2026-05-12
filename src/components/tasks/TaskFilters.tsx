@@ -2,7 +2,7 @@ import { Search, X } from "lucide-react";
 import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "./MultiSelect";
-import { clientPlans, statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
+import { statusConfig, priorityConfig, typeLabels, TaskStatus, TaskPriority, TaskType, Task } from "./taskData";
 
 interface TaskFiltersProps {
   search: string;
@@ -21,6 +21,7 @@ interface TaskFiltersProps {
   onManagerFilterChange: (v: string[]) => void;
   tasks?: Task[];
   profiles?: { user_id: string; full_name: string }[];
+  clients?: { id: string; name: string }[];
 }
 
 export function TaskFilters({
@@ -33,6 +34,7 @@ export function TaskFilters({
   managerFilter, onManagerFilterChange,
   tasks = [],
   profiles = [],
+  clients = [],
 }: TaskFiltersProps) {
   const hasFilters = clientFilter.length > 0 || responsibleFilter.length > 0 || statusFilter.length > 0 || priorityFilter.length > 0 || typeFilter.length > 0 || managerFilter.length > 0;
 
@@ -68,7 +70,13 @@ export function TaskFilters({
     return { client, status, priority, type, responsible, manager };
   }, [tasks]);
 
-  const clientOptions = clientPlans.length > 0 ? clientPlans.map((c) => ({ value: c.clientId, label: c.clientName, count: counts.client[c.clientId] || 0 })) : [];
+  // Use real clients from DB (unique by id, derived from task list when no clients prop given)
+  const clientList = clients.length > 0
+    ? clients
+    : Array.from(
+        new Map(tasks.map(t => [t.clientId, { id: t.clientId, name: t.clientName || t.clientId }])).values()
+      );
+  const clientOptions = clientList.map((c) => ({ value: c.id, label: c.name, count: counts.client[c.id] || 0 }));
   
   const responsibleOptions = [
     { value: "unassigned", label: "Sem responsável", count: counts.responsible["unassigned"] || 0 },

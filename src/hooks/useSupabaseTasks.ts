@@ -65,6 +65,7 @@ export function useSupabaseTasks() {
 
       if (error) throw error;
 
+      // Fetch ALL org profiles for name resolution (including master for history display)
       const { data: profileRows } = await supabase
         .from("profiles")
         .select("user_id, full_name, avatar_url");
@@ -143,7 +144,13 @@ export function useSupabaseTasks() {
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
-    const { data } = await supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name");
+    // Exclude is_master=true (Dev Admin) from regular dropdowns — they are sys admins, not account managers
+    const { data } = await supabase
+      .from("profiles")
+      .select("user_id, full_name")
+      .eq("status", "ativo")
+      .eq("is_master", false)
+      .order("full_name");
     setProfiles(data || []);
   }, [isDemoMode, tenant?.organization_id]);
 
