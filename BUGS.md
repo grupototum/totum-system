@@ -15,6 +15,7 @@
 | B-008 | ✅ RESOLVIDO | `src/App.tsx` | 2.5MB bundle único — sem code splitting | `c15595d` |
 | B-009 | ✅ RESOLVIDO | `src/stark-api/node_modules/` | 2187 arquivos binários (~65MB) trackeados no git | `948c250c` |
 | B-010 | ✅ RESOLVIDO | 23 arquivos `* 2.*` | Duplicatas byte-identical causavam 695+ erros de lint e risco de import errado | `bd676aeb` |
+| B-024 | ✅ RESOLVIDO | Supabase RLS | Policies de filhos de tarefas/checklists e storage `task-attachments` tinham inserts amplos para `authenticated` | Hotfix remoto `20260513_remote_task_child_rls_hotfix.sql` |
 
 ## 🟡 ALTOS (esta sprint)
 
@@ -29,6 +30,7 @@
 | B-017 | 🟡 ABERTO | `src/components/clients/ClientFormDialog.tsx:75` | Chamada Supabase sem `.catch()` | Média |
 | B-018 | 🟡 ABERTO | `supabase/functions/asaas-webhook/` | Sem validação HMAC da assinatura do Asaas | Média |
 | B-019 | 🟡 ABERTO | `package.json` — `xlsx@0.18.5` | Prototype Pollution + ReDoS (sem fix upstream) | Média |
+| B-025 | 🔴 ABERTO | `supabase/migrations/` | Histórico local/remoto divergente bloqueia `supabase db push`; reconciliar com dump/pull antes de novos pushes | Alta |
 
 ## 🟢 MÉDIOS (próximas semanas)
 

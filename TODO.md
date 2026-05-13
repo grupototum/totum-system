@@ -16,6 +16,7 @@
 - [ ] **B-017** Adicionar `try/catch` + toast em `ClientFormDialog.tsx:75`
 - [ ] **B-018** Implementar validação HMAC do webhook Asaas — **⚠️ No-Fly Zone, aprovação obrigatória**
 - [ ] **B-019** Avaliar substituição do `xlsx@0.18.5` por `exceljs` (Prototype Pollution)
+- [ ] **B-025** Reconciliar histórico de migrations Supabase local/remoto sem `repair` às cegas
 - [ ] Regenerar types Supabase via MCP e remover `as any` em `TenantContext.tsx:52`
 - [ ] Ativar `noImplicitAny: true` e corrigir erros emergentes em pequenos grupos
 
@@ -50,3 +51,4 @@
 - [x] Deletar 23 arquivos duplicados `* 2.*` (artefatos do Finder)
 - [x] Registrar organização Totum no banco (`organizations` table)
 - [x] Criar usuários Israel, Mylena, Matheus Felipe
+- [x] Hotfix RLS remoto para filhos de tarefas/checklists e storage `task-attachments`
