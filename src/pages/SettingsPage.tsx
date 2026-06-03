@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { User, Shield, Puzzle, Camera, Loader2, CheckCircle2, AlertCircle, Clock, LogOut } from "lucide-react";
+import { User, Shield, Puzzle, Camera, Loader2, CheckCircle2, AlertCircle, Clock, LogOut, KeyRound } from "lucide-react";
+import { ApiKeysTab } from "@/components/admin-settings/ApiKeysTab";
 import { AvatarUpload } from "@/components/shared/AvatarUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -427,6 +428,10 @@ export default function SettingsPage() {
             <Puzzle className="h-3.5 w-3.5" />
             Integrações
           </TabsTrigger>
+          <TabsTrigger value="api" className="gap-1.5">
+            <KeyRound className="h-3.5 w-3.5" />
+            API
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
@@ -443,6 +448,12 @@ export default function SettingsPage() {
 
         <TabsContent value="integrations">
           <IntegrationsTab />
+        </TabsContent>
+
+        <TabsContent value="api">
+          <div className="glass-card rounded-xl p-6">
+            <ApiKeysTab />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

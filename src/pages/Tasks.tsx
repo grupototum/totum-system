@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TaskFilters } from "@/components/tasks/TaskFilters";
 import { TaskKanban } from "@/components/tasks/TaskKanban";
 import { TaskListView } from "@/components/tasks/TaskListView";
@@ -49,13 +51,13 @@ export default function Tasks() {
   const [search, setSearch] = useState("");
   const [clientFilter, setClientFilter] = useState<string[]>([]);
   const [responsibleFilter, setResponsibleFilter] = useState<string[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [priorityFilter, setPriorityFilter] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [managerFilter, setManagerFilter] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<"dueDate" | "clientName" | "status" | "type" | "responsible">("dueDate");
 
   const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
+    const result = tasks.filter((t) => {
       // Archive filter: if not showing archived, hide them; if showing archived, ONLY show archived
       if (showArchived) {
         if (t.status !== "arquivado") return false;
@@ -69,7 +71,6 @@ export default function Tasks() {
           (t.responsible != null && responsibleFilter.includes(t.responsible));
         if (!passesResponsible) return false;
       }
-      if (statusFilter.length > 0 && !statusFilter.includes(t.status)) return false;
       if (priorityFilter.length > 0 && !priorityFilter.includes(t.priority)) return false;
       if (typeFilter.length > 0 && !typeFilter.includes(t.type)) return false;
       if (managerFilter.length > 0) {
@@ -79,7 +80,29 @@ export default function Tasks() {
       }
       return true;
     });
-  }, [tasks, search, clientFilter, responsibleFilter, statusFilter, priorityFilter, typeFilter, managerFilter, showArchived]);
+
+    const collator = new Intl.Collator("pt-BR", { sensitivity: "base", numeric: true });
+    const sorted = [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "clientName":
+          return collator.compare(a.clientName || "", b.clientName || "");
+        case "status":
+          return collator.compare(a.status || "", b.status || "");
+        case "type":
+          return collator.compare(a.type || "", b.type || "");
+        case "responsible":
+          return collator.compare(a.responsible || "", b.responsible || "");
+        case "dueDate":
+        default: {
+          // Sem prazo vai para o fim
+          const da = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+          const db = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+          return da - db;
+        }
+      }
+    });
+    return sorted;
+  }, [tasks, search, clientFilter, responsibleFilter, priorityFilter, typeFilter, managerFilter, showArchived, sortBy]);
 
   const archivedCount = useMemo(() => tasks.filter(t => t.status === "arquivado").length, [tasks]);
 
@@ -343,29 +366,56 @@ export default function Tasks() {
 
       {/* View Toggle + Filters */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-border w-fit overflow-x-auto">
-          {viewButtons.map((v) => (
-            <button
-              key={v.key}
-              onClick={() => setView(v.key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
-                view === v.key
-                  ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
-                  : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-white/[0.04] border border-transparent"
-              }`}
-            >
-              <v.icon className="h-3.5 w-3.5" />
-              {v.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-border w-fit overflow-x-auto">
+            {viewButtons.map((v) => (
+              <button
+                key={v.key}
+                onClick={() => setView(v.key)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
+                  view === v.key
+                    ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
+                    : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-white/[0.04] border border-transparent"
+                }`}
+              >
+                <v.icon className="h-3.5 w-3.5" />
+                {v.label}
+              </button>
+            ))}
+          </div>
+
+          {view !== "dashboard" && view !== "templates" && view !== "goals" && (
+            <div className="flex items-center gap-2 lg:shrink-0">
+              <div className="relative flex-1 lg:flex-none lg:w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                <Input
+                  placeholder="Buscar tarefas..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-8 bg-white/[0.05] border-border rounded-lg h-9 text-xs placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-primary/20"
+                />
+              </div>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                <SelectTrigger className="h-9 w-[160px] bg-white/[0.05] border-border rounded-lg text-xs">
+                  <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />
+                  <SelectValue placeholder="Ordenar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dueDate">Por data</SelectItem>
+                  <SelectItem value="clientName">Por cliente</SelectItem>
+                  <SelectItem value="status">Por status</SelectItem>
+                  <SelectItem value="type">Por tipo</SelectItem>
+                  <SelectItem value="responsible">Por responsável</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {view !== "dashboard" && view !== "templates" && view !== "goals" && (
           <TaskFilters
-            search={search} onSearchChange={setSearch}
             clientFilter={clientFilter} onClientFilterChange={setClientFilter}
             responsibleFilter={responsibleFilter} onResponsibleFilterChange={setResponsibleFilter}
-            statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
             priorityFilter={priorityFilter} onPriorityFilterChange={setPriorityFilter}
             typeFilter={typeFilter} onTypeFilterChange={setTypeFilter}
             managerFilter={managerFilter} onManagerFilterChange={setManagerFilter}

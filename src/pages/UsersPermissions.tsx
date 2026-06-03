@@ -174,6 +174,19 @@ export default function UsersPermissions() {
   const handleSaveUser = async (user: AppUser) => {
     const exists = profiles.find((p) => p.id === user.id);
     if (exists) {
+      // O e-mail de login (auth.users.email) só pode ser alterado via Admin API (Edge Function).
+      const emailChanged = user.email && user.email !== exists.email;
+      if (emailChanged && !isDemoMode) {
+        const { data, error } = await supabase.functions.invoke("admin-update-user", {
+          body: { profile_id: user.id, email: user.email },
+        });
+        const errMsg = error?.message || (data as { error?: string })?.error;
+        if (errMsg) {
+          toast({ title: "Erro ao alterar e-mail", description: errMsg, variant: "destructive" });
+          await refetchProfiles();
+          return; // mantém o e-mail antigo
+        }
+      }
       await updateProfile(user.id, {
         full_name: user.name,
         phone: user.phone || null,
@@ -200,8 +213,20 @@ export default function UsersPermissions() {
   };
 
   const handleResetPassword = async (user: AppUser) => {
+    if (isDemoMode) {
+      toast({ title: "Modo demo", description: "Ação indisponível no modo demonstração." });
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("admin-update-user", {
+      body: { profile_id: user.id, send_password_reset: true },
+    });
+    const errMsg = error?.message || (data as { error?: string })?.error;
+    if (errMsg) {
+      toast({ title: "Erro ao redefinir senha", description: errMsg, variant: "destructive" });
+      return;
+    }
     await logAudit("Senha redefinida", `Senha de ${user.name} redefinida`);
-    toast({ title: "Senha redefinida", description: `Link de redefinição enviado para ${user.email}` });
+    toast({ title: "Senha redefinida", description: `Link de redefinição gerado para ${user.email}` });
   };
 
   // ─── Roles ────
