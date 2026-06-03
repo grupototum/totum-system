@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,24 @@ export default function AuthPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPendingMessage, setShowPendingMessage] = useState(isPending);
+
+  // Surface OAuth errors (ex.: Google) que voltam na URL como ?error=... ou #error=...
+  // Sem isto, falhas de login social redirecionam para cá silenciosamente ("não acontece nada").
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const errCode = params.get("error") || hash.get("error");
+    const errDesc = params.get("error_description") || hash.get("error_description");
+    if (errCode) {
+      const desc = decodeURIComponent((errDesc || errCode).replace(/\+/g, " "));
+      const friendly = /not allowed|signups? not allowed|disabled/i.test(desc)
+        ? "Cadastro por Google indisponível ou aguardando aprovação do administrador."
+        : desc;
+      toast({ title: "Falha no login com Google", description: friendly, variant: "destructive" });
+      // Limpa os parâmetros de erro da URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) return;
