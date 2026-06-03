@@ -45,6 +45,24 @@ BEGIN
     organization_id = COALESCE(public.profiles.organization_id, EXCLUDED.organization_id),
     client_id = COALESCE(EXCLUDED.client_id, public.profiles.client_id);
 
+  IF v_status = 'pendente' THEN
+    INSERT INTO public.notifications (user_id, title, message, type, entity_type, entity_id)
+    SELECT p.user_id,
+      'Novo cadastro pendente',
+      'O usuário ' || COALESCE(
+        NEW.raw_user_meta_data->>'full_name',
+        NEW.raw_user_meta_data->>'name',
+        NEW.email
+      ) || ' aguarda aprovação.',
+      'warning',
+      'profile',
+      NEW.id
+    FROM public.profiles p
+    JOIN public.user_roles ur ON ur.user_id = p.user_id
+    WHERE ur.role = 'admin'
+      AND p.status = 'ativo';
+  END IF;
+
   RETURN NEW;
 END;
 $function$;
