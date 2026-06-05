@@ -35,7 +35,7 @@ export default function Clients() {
 
   const filtered = clients.filter((c: any) => {
     const matchesSearch = getClientDisplayName(c).toLowerCase().includes(search.toLowerCase());
-    const matchesManager = managerFilter === "all" || c.assigned_user_id === managerFilter;
+    const matchesManager = managerFilter === "all" || c.responsible_id === managerFilter;
     return matchesSearch && matchesManager;
   });
 

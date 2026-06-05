@@ -259,7 +259,6 @@ export function useDepartments() {
         const { data, error } = await supabase
           .from("departments")
           .select("*")
-          .eq("is_active", true)
           .order("name");
 
         if (error) {
