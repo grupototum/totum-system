@@ -308,3 +308,19 @@
 [data-tenant] .tenant-card {
   box-shadow: 0 8px 32px rgba(8,8,8,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
 }
+
+/* ── Sidebar icon-rail (140px) — ícones centralizados ─────────── */
+[data-collapsible="icon"] [data-sidebar="menu-button"] {
+  width: 100% !important;
+  height: 2.75rem !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+[data-collapsible="icon"] [data-sidebar="menu-button"] > span,
+[data-collapsible="icon"] [data-sidebar="menu-button"] svg.lucide-chevron-right {
+  display: none !important;
+}
+[data-collapsible="icon"] [data-sidebar="menu-button"] > svg:first-child,
+[data-collapsible="icon"] [data-sidebar="menu-button"] .lucide:first-child {
+  margin: 0 !important;
+}

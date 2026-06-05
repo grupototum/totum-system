@@ -179,7 +179,7 @@ export function AppSidebar() {
       <SidebarContent className="px-2 pt-2">
         <SidebarMenu>
           {filteredGroups.map((group) => (
-            <Collapsible key={group.title} asChild defaultOpen className="group/collapsible">
+            <Collapsible key={group.title} asChild className="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={group.title}>
@@ -188,7 +188,7 @@ export function AppSidebar() {
                     <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                   <SidebarMenuSub>
                     {group.items.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
@@ -235,7 +235,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-border">
         <button
           onClick={signOut}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:justify-center"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sair</span>}

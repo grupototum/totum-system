@@ -99,6 +99,14 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "collapsible-down": {
+          from: { height: "0", opacity: "0" },
+          to: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+        },
+        "collapsible-up": {
+          from: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+          to: { height: "0", opacity: "0" },
+        },
         "pulse-red": {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(255, 59, 59, 0)" },
           "50%": { boxShadow: "0 0 20px 4px rgba(255, 59, 59, 0.15)" },
@@ -107,6 +115,8 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "collapsible-down": "collapsible-down 0.25s ease-in-out",
+        "collapsible-up": "collapsible-up 0.25s ease-in-out",
         "pulse-red": "pulse-red 2s ease-in-out infinite",
       },
     },
