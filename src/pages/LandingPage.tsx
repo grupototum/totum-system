@@ -8,8 +8,6 @@ import {
   FileText,
   ShieldCheck,
   ArrowRight,
-  Sun,
-  Moon,
   Zap,
   Globe,
   TrendingUp,
@@ -60,7 +58,7 @@ const benefits = [
 ];
 
 export default function LandingPage() {
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const logo = isDark ? logoWhite : logoRed;
 
@@ -71,13 +69,6 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           <img src={logo} alt="Totum System" className="h-7 w-auto" />
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Alternar tema"
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/login">Entrar</Link>
             </Button>

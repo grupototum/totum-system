@@ -2,8 +2,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Sun,
-  Moon,
   Zap,
   Globe,
   LayoutDashboard,
@@ -55,7 +53,7 @@ const pillars = [
 ];
 
 export default function PixelSystemsLanding() {
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const logo = isDark ? logoWhite : logoRed;
 
@@ -66,13 +64,6 @@ export default function PixelSystemsLanding() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           <img src={logo} alt="Pixel Systems" className="h-7 w-auto" />
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Alternar tema"
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
             <Button asChild variant="ghost" size="sm">
               <a href="https://wa.me/5511999999999" target="_blank" rel="noopener noreferrer">
                 Contato

@@ -3,12 +3,11 @@ import { AppSidebar } from "./AppSidebar";
 import { NotificationCenter } from "./NotificationCenter";
 import { TaskSearch } from "./TaskSearch";
 import { DemoBanner } from "./DemoBanner";
-import { ThemeToggle } from "./ThemeToggle";
 import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex flex-col w-full">
         <DemoBanner />
         <div className="flex flex-1 min-h-0">
@@ -19,7 +18,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-1">
                 <TaskSearch />
                 <PwaInstallPrompt />
-                <ThemeToggle />
                 <NotificationCenter />
               </div>
             </header>

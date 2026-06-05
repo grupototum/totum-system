@@ -20,8 +20,6 @@ import {
   Loader2,
   ArrowLeft,
   CheckCircle2,
-  Sun,
-  Moon,
 } from "lucide-react";
 
 const BASE_DOMAIN = import.meta.env.VITE_ROOT_DOMAIN ?? "pixelsystem.online";
@@ -39,7 +37,7 @@ function slugify(text: string) {
 export default function NovaAgenciaPage() {
   const { session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { resolvedTheme, toggleTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const logo = isDark ? logoWhite : logoRed;
 
@@ -255,13 +253,6 @@ export default function NovaAgenciaPage() {
             <img src={logo} alt="Totum System" className="h-7 w-auto" />
           </Link>
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="rounded-lg p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Alternar tema"
-            >
-              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </button>
             <Button asChild variant="ghost" size="sm" className="gap-2">
               <Link to="/">
                 <ArrowLeft className="h-3.5 w-3.5" />
