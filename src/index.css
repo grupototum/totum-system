@@ -1,4 +1,5 @@
-/* Inter Variable — substituto do Netflix Sans Variable */
+/* Geomanist — fonte oficial da marca Totum (com fallback) */
+@import url('https://fonts.cdnfonts.com/css/geomanist');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap');
 
 @tailwind base;
@@ -6,145 +7,94 @@
 @tailwind utilities;
 
 /* ================================================================
-   NETFLIX DESIGN SYSTEM — CSS Variables
-   Fonte: system-design.md extraído de netflix.com (2026-05-03)
-   Paleta: Preto (#000) + Branco (#fff) + Vermelho (#e00000)
-   Dark-first: modo escuro é o padrão e único suportado
+   TOTUM RED THEME — Design System
+   Fonte: totum-red-theme- Design-System.md
+   Paleta: Surface #0e0918 · Vermelho #da2128 · Geomanist
+   Dark-only: não existe variante clara.
 ================================================================ */
 @layer base {
 
-  /* ── DARK MODE (padrão / único) ───────────────────────────── */
   :root,
   .dark {
-    /* Backgrounds */
-    --background:           0 0% 0%;        /* #000000 — Pure Black */
-    --card:                 0 0% 10%;       /* #1a1a1a — Card Surface */
-    --popover:              0 0% 10%;
-    --sidebar-background:   0 0% 6%;        /* #0f0f0f — Sidebar slightly lighter */
+    /* Backgrounds (dark stack) */
+    --background:           258 45% 6%;     /* #0e0918 — surface */
+    --card:                 254 27% 12%;    /* #1b1728 — card/nav */
+    --popover:              254 27% 12%;
+    --sidebar-background:   258 40% 7%;     /* entre surface e card */
 
     /* Text */
-    --foreground:           0 0% 100%;      /* #ffffff */
-    --card-foreground:      0 0% 100%;
-    --popover-foreground:   0 0% 100%;
-    --sidebar-foreground:   0 0% 100%;
+    --foreground:           0 4% 81%;       /* #d1cece — body */
+    --card-foreground:      0 4% 81%;
+    --popover-foreground:   0 4% 81%;
+    --sidebar-foreground:   0 4% 81%;
 
-    /* Primary — Netflix Red */
-    --primary:              0 100% 44%;     /* #e00000 */
+    /* Primary — Vermelho Totum */
+    --primary:              358 74% 49%;    /* #da2128 */
     --primary-foreground:   0 0% 100%;
-    --primary-deep:         0 100% 36%;     /* #b80000 — hover */
-    --primary-hover:        0 100% 36%;
+    --primary-deep:         358 74% 42%;    /* hover */
+    --primary-hover:        358 74% 42%;
+    --primary-bright:       2 75% 57%;      /* #e3433e — gradiente start */
 
-    /* Secondary */
-    --secondary:            0 0% 13%;       /* #222222 */
+    /* Secondary (superfície neutra elevada) */
+    --secondary:            261 25% 13%;    /* #1f192a */
     --secondary-foreground: 0 0% 100%;
 
+    /* Acentos de marca (CTAs secundários / nav) */
+    --brand-blue:           204 93% 40%;    /* #077ac7 */
+    --brand-violet:         261 87% 53%;    /* #6b21ef */
+    --brand-violet-bright:  262 88% 70%;    /* #a06ff6 */
+
     /* Muted */
-    --muted:                0 0% 13%;
-    --muted-foreground:     0 0% 66%;       /* #a9a9a9 */
+    --muted:                261 25% 13%;
+    --muted-foreground:     218 11% 65%;    /* #9ca3af */
 
     /* Accent */
-    --accent:               0 0% 16%;       /* #292929 */
+    --accent:               255 19% 17%;    /* #272333 — hover */
     --accent-foreground:    0 0% 100%;
-    --accent-success:       144 60% 45%;    /* #2bb871 */
+    --accent-success:       151 52% 43%;    /* #35a670 */
     --accent-success-foreground: 0 0% 100%;
     --accent-warning:       38 92% 50%;
     --accent-warning-foreground: 0 0% 0%;
 
     /* Destructive */
-    --destructive:          0 100% 44%;     /* #e00000 — mesmo que primary (Netflix usa o mesmo) */
+    --destructive:          0 82% 47%;      /* #d91616 */
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders & Inputs */
-    --border:               358 50% 18%;    /* #461518 — Dark Red Border */
-    --border-medium:        358 50% 22%;
-    --border-strong:        358 50% 28%;
-    --input:                358 50% 18%;
-    --input-hover:          0 100% 44%;
-    --ring:                 0 100% 44%;     /* #e00000 — focus ring always red */
+    /* Borders & Inputs (hairlines translúcidas) */
+    --border:               261 25% 13%;    /* #1f192a */
+    --border-medium:        255 19% 17%;
+    --border-strong:        258 20% 24%;
+    --input:                261 25% 13%;
+    --input-hover:          358 74% 49%;
+    --ring:                 358 74% 49%;    /* focus ring vermelho */
 
-    /* Radius — Netflix é quadrado por default */
-    --radius:               0.25rem;        /* 4px — inputs/badges */
+    /* Radius — Totum é arredondado */
+    --radius:               0.75rem;        /* 12px base (cards usam rounded-xl) */
 
-    /* Shadows — cinematic, strong alpha */
-    --shadow-sm:  0 0.125rem 0.25rem 0 rgba(0,0,0,0.6);
-    --shadow-md:  0 0.25rem  0.5rem  0 rgba(0,0,0,0.8);   /* Card shadow */
-    --shadow-lg:  0 0.5rem   1rem    0 rgba(0,0,0,0.9);   /* Dropdown */
-    --shadow-xl:  0 1rem     2rem    0 rgba(0,0,0,1);      /* Modal */
-    --shadow-accent: 0 0.25rem 0.5rem 0 rgba(224,0,0,0.3);
+    /* Shadows — elevação por glow, ambiente suave (nunca preto puro forte) */
+    --shadow-sm:  0 1px 2px rgba(8,8,8,0.30);
+    --shadow-md:  0 4px 12px rgba(8,8,8,0.35);
+    --shadow-lg:  0 12px 32px rgba(8,8,8,0.45);
+    --shadow-xl:  0 24px 64px rgba(8,8,8,0.55);
+    --shadow-accent: 0 7px 80px -12px hsl(358 74% 49% / 0.55); /* halo vermelho */
 
     /* Glass tokens */
-    --glass-fill:        0 0% 10% / 0.8;
-    --glass-fill-strong: 0 0% 10% / 0.95;
-    --glass-highlight:   0 0% 100% / 0.06;
+    --glass-fill:        254 27% 12% / 0.85;
+    --glass-fill-strong: 254 27% 12% / 0.97;
+    --glass-highlight:   0 0% 100% / 0.08;
 
     /* Sidebar */
-    --sidebar-primary:             0 100% 44%;
+    --sidebar-primary:             358 74% 49%;
     --sidebar-primary-foreground:  0 0% 100%;
-    --sidebar-accent:              0 0% 13%;
+    --sidebar-accent:              255 19% 17%;
     --sidebar-accent-foreground:   0 0% 100%;
-    --sidebar-border:              358 50% 18%;
-    --sidebar-ring:                0 100% 44%;
+    --sidebar-border:              261 25% 13%;
+    --sidebar-ring:                358 74% 49%;
 
     /* Typography */
-    --font-heading: "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
-    --font-body:    "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
-    --font-mono:    "Geist Mono", "JetBrains Mono", monospace;
-  }
-
-  /* ── LIGHT MODE — versão clara mantendo DNA Netflix ──────── */
-  .light {
-    --background:           0 0% 96%;
-    --card:                 0 0% 100%;
-    --popover:              0 0% 100%;
-    --sidebar-background:   0 0% 98%;
-
-    --foreground:           0 0% 8%;
-    --card-foreground:      0 0% 8%;
-    --popover-foreground:   0 0% 8%;
-    --sidebar-foreground:   0 0% 8%;
-
-    --primary:              0 100% 44%;
-    --primary-foreground:   0 0% 100%;
-    --primary-deep:         0 100% 36%;
-    --primary-hover:        0 100% 36%;
-
-    --secondary:            0 0% 94%;
-    --secondary-foreground: 0 0% 8%;
-
-    --muted:                0 0% 94%;
-    --muted-foreground:     0 0% 44%;
-
-    --accent:               0 0% 92%;
-    --accent-foreground:    0 0% 8%;
-    --accent-success:       144 60% 38%;
-    --accent-warning:       38 92% 45%;
-
-    --destructive:          0 100% 44%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border:               0 0% 88%;
-    --border-medium:        0 0% 80%;
-    --border-strong:        0 0% 70%;
-    --input:                0 0% 88%;
-    --input-hover:          0 100% 44%;
-    --ring:                 0 100% 44%;
-
-    --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
-    --shadow-md:  0 0.25rem 0.5rem 0 rgba(0,0,0,0.12);
-    --shadow-lg:  0 0.5rem  1rem  0 rgba(0,0,0,0.16);
-    --shadow-xl:  0 1rem    2rem  0 rgba(0,0,0,0.2);
-    --shadow-accent: 0 0.25rem 0.5rem 0 rgba(224,0,0,0.2);
-
-    --glass-fill:        0 0% 100% / 0.75;
-    --glass-fill-strong: 0 0% 100% / 0.92;
-    --glass-highlight:   0 0% 100% / 0.9;
-
-    --sidebar-primary:            0 100% 44%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent:             0 0% 94%;
-    --sidebar-accent-foreground:  0 0% 8%;
-    --sidebar-border:             0 0% 88%;
-    --sidebar-ring:               0 100% 44%;
+    --font-heading: "geomanist", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-body:    "geomanist", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono:    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   }
 }
 
@@ -162,7 +112,6 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   body {
@@ -170,114 +119,119 @@
     font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.5;
-    letter-spacing: 0.01em;
+    letter-spacing: 0em;
   }
 
-  /* Dark body background — Netflix cinematic */
+  /* Surface Totum — nunca preto puro */
   :root body,
   .dark body {
-    background-color: #000000;
+    background-color: #0e0918;
   }
 
-  h1 { font-size: 2.5rem;   font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
-  h2 { font-size: 2rem;     font-weight: 600; line-height: 1.2;  letter-spacing: -0.01em; }
-  h3 { font-size: 1.75rem;  font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
-  h4 { font-size: 1.375rem; font-weight: 500; line-height: 1.3;  letter-spacing: 0; }
-  h5 { font-size: 1.125rem; font-weight: 500; line-height: 1.35; letter-spacing: 0; }
-  h6 { font-size: 1rem;     font-weight: 500; line-height: 1.4;  letter-spacing: 0; }
+  /* Títulos: Geomanist leve (voz da marca), branco */
+  h1 { font-size: 2.5rem;   font-weight: 300; line-height: 1.1;  letter-spacing: -0.02em; }
+  h2 { font-size: 2rem;     font-weight: 300; line-height: 1.15; letter-spacing: -0.02em; }
+  h3 { font-size: 1.75rem;  font-weight: 300; line-height: 1.2;  letter-spacing: -0.02em; }
+  h4 { font-size: 1.375rem; font-weight: 400; line-height: 1.25; letter-spacing: -0.02em; }
+  h5 { font-size: 1.125rem; font-weight: 400; line-height: 1.3;  letter-spacing: 0; }
+  h6 { font-size: 1rem;     font-weight: 400; line-height: 1.4;  letter-spacing: 0; }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    color: #ffffff;
+  }
+
+  /* Ênfase: geomanist-book peso 400 — nunca bold sintético */
+  strong, b {
+    font-family: "geomanist-book", var(--font-body);
+    font-weight: 400;
   }
 }
 
 /* ================================================================
-   COMPONENT OVERRIDES — Netflix tokens
+   COMPONENT OVERRIDES — Totum tokens
 ================================================================ */
 @layer components {
 
-  /* ── Buttons ─────────────────────────────────────────────── */
-
-  /* Primary — Netflix Red, square */
+  /* ── Buttons (pills) ─────────────────────────────────────── */
   .btn-netflix-primary,
   [data-variant="netflix-primary"] {
-    background: #e00000;
+    background: linear-gradient(135deg, #e3433e 0%, #da2128 100%);
     color: #ffffff;
-    border: 1px solid #e00000;
-    border-radius: 0px;
-    padding: 12px 32px;
+    border: none;
+    border-radius: 9999px;
+    padding: 12px 24px;
     font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    transition: background 150ms ease;
+    font-weight: 400;
+    letter-spacing: 0em;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 1px 2px rgba(8,8,8,0.2);
+    transition: box-shadow 300ms ease, background 300ms ease;
   }
-  .btn-netflix-primary:hover { background: #b80000; border-color: #b80000; }
-  .btn-netflix-primary:focus-visible { outline: 2px solid #e00000; outline-offset: 2px; }
+  .btn-netflix-primary:hover { box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 7px 80px -12px #da2128; }
+  .btn-netflix-primary:focus-visible { outline: 2px solid transparent; box-shadow: 0 0 0 2px #0e0918, 0 0 0 4px #da2128; }
 
-  /* Secondary — outlined white */
   .btn-netflix-secondary {
-    background: transparent;
+    background: linear-gradient(135deg, #077ac7 0%, #6b21ef 100%);
     color: #ffffff;
-    border: 1px solid #ffffff;
-    border-radius: 0px;
-    padding: 12px 32px;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-  .btn-netflix-secondary:hover { background: rgba(255,255,255,0.1); }
-
-  /* Ghost */
-  .btn-netflix-ghost {
-    background: transparent;
-    color: #a9a9a9;
-    border: 1px solid transparent;
-    border-radius: 0px;
-    padding: 8px 16px;
+    border: none;
+    border-radius: 9999px;
+    padding: 12px 24px;
     font-size: 1rem;
     font-weight: 400;
   }
-  .btn-netflix-ghost:hover { color: #ffffff; }
+  .btn-netflix-secondary:hover { box-shadow: 0 7px 40px -12px #077ac7; }
 
-  /* ── Cards ───────────────────────────────────────────────── */
+  .btn-netflix-ghost {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 9999px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+  .btn-netflix-ghost:hover { background: hsla(0,0%,100%,0.07); }
+
+  /* ── Cards (hairline inset, sem border preta) ────────────── */
   .glass-card {
-    background: #1a1a1a;
-    border: 1px solid #461518;
-    border-radius: 8px;
-    box-shadow: 0 0.25rem 0.5rem 0 rgba(0,0,0,0.8);
+    background: #1b1728;
+    border: none;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px hsla(0,0%,100%,0.10), inset 0 1px 0 0 hsla(0,0%,100%,0.10);
   }
 
   .glass-card-strong {
-    background: #1a1a1a;
-    border: 1px solid #461518;
-    border-radius: 8px;
-    box-shadow: 0 0.5rem 1rem 0 rgba(0,0,0,0.9);
+    background: #1b1728;
+    border: none;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px hsla(0,0%,100%,0.12), 0 12px 32px rgba(8,8,8,0.45);
   }
 
   /* ── Gradients ───────────────────────────────────────────── */
   .gradient-primary {
-    background: linear-gradient(135deg, #e00000 0%, #b80000 100%);
+    background: linear-gradient(135deg, #e3433e 0%, #da2128 100%);
   }
 
   .gradient-hero-overlay {
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8));
+    background: linear-gradient(to bottom, rgba(14,9,24,0.4), rgba(14,9,24,0.85));
   }
 
   /* ── Typography utils ────────────────────────────────────── */
-  .text-netflix-hero    { font-size: 2.5rem;   font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; }
-  .text-netflix-display { font-size: 2rem;     font-weight: 400; line-height: 1.2;  }
-  .text-netflix-section { font-size: 1.75rem;  font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
-  .text-netflix-sub     { font-size: 1.125rem; font-weight: 500; line-height: 1.35; }
-  .text-netflix-body    { font-size: 1rem;     font-weight: 400; line-height: 1.5;  letter-spacing: 0.01em; }
-  .text-netflix-caption { font-size: 0.8125rem; font-weight: 400; line-height: 1.35; letter-spacing: 0.01em; }
+  .text-netflix-hero    { font-size: 2.5rem;   font-weight: 300; line-height: 1.1;  letter-spacing: -0.02em; }
+  .text-netflix-display { font-size: 2rem;     font-weight: 300; line-height: 1.15; letter-spacing: -0.02em; }
+  .text-netflix-section { font-size: 1.75rem;  font-weight: 300; line-height: 1.2;  letter-spacing: -0.02em; }
+  .text-netflix-sub     { font-size: 1.125rem; font-weight: 400; line-height: 1.3; }
+  .text-netflix-body    { font-size: 1rem;     font-weight: 400; line-height: 1.5;  letter-spacing: 0em; }
+  .text-netflix-caption { font-size: 0.8125rem; font-weight: 400; line-height: 1.35; }
   .text-netflix-muted   { color: rgba(255,255,255,0.7); }
-  .text-netflix-gray    { color: #a9a9a9; }
+  .text-netflix-gray    { color: #9ca3af; }
 
   /* ── Metric / numbers ────────────────────────────────────── */
   .metric-value {
     font-family: var(--font-heading);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.03em;
-    font-weight: 700;
+    font-weight: 400;
   }
 
   /* ── Status badges ───────────────────────────────────────── */
@@ -289,11 +243,11 @@
   /* ── Scrollbar ───────────────────────────────────────────── */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #461518 transparent;
+    scrollbar-color: #272333 transparent;
   }
 
   /* Aliases mantidos para retrocompatibilidade */
-  .text-secondary-custom { color: #a9a9a9; }
+  .text-secondary-custom { color: #9ca3af; }
   .text-muted-custom     { color: rgba(255,255,255,0.7); }
   .text-disabled-custom  { color: rgba(255,255,255,0.3); }
 
@@ -301,7 +255,7 @@
   .label-industrial {
     font-family: var(--font-body);
     font-size: 0.625rem;
-    font-weight: 600;
+    font-weight: 400;
     letter-spacing: 0.15em;
     text-transform: uppercase;
   }
@@ -350,5 +304,5 @@
 
 /* Glass card glass effect */
 [data-tenant] .tenant-card {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow: 0 8px 32px rgba(8,8,8,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
 }
