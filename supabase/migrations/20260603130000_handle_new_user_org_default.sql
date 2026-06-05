@@ -16,7 +16,7 @@ SET search_path TO 'public'
 AS $function$
 DECLARE
   v_org uuid;
-  v_status text;
+  v_status public.user_status;
 BEGIN
   IF NEW.raw_user_meta_data->>'organization_id' IS NOT NULL THEN
     v_org := (NEW.raw_user_meta_data->>'organization_id')::uuid;

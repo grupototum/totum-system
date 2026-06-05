@@ -37,16 +37,16 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Autorização: precisa ser admin.
-    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
-    if (!isAdmin) return json(403, { error: "Sem permissão" });
-
     // Resolve a organização do chamador.
     const { data: profile } = await admin
       .from("profiles")
       .select("organization_id, is_master")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    // Autorização: admin via user_roles (is_admin) OU master via profiles.is_master.
+    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: user.id });
+    if (!isAdmin && !profile?.is_master) return json(403, { error: "Sem permissão" });
 
     const body = await req.json().catch(() => ({}));
     let orgId: string | null = profile?.organization_id ?? null;

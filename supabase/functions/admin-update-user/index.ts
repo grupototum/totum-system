@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { profile_id, email, send_password_reset } = await req.json();
+    const { profile_id, email, password, send_password_reset } = await req.json();
     if (!profile_id) return json(400, { error: "profile_id é obrigatório" });
 
     // Carrega o profile alvo.
@@ -49,16 +49,18 @@ Deno.serve(async (req) => {
     if (!target?.user_id) return json(404, { error: "Usuário não encontrado" });
 
     // Autorização: admin global. Se não for master, precisa ser da mesma organização do alvo.
-    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: caller.id });
-    if (!isAdmin) return json(403, { error: "Sem permissão" });
-
     const { data: callerProfile } = await admin
       .from("profiles")
       .select("organization_id, is_master")
       .eq("user_id", caller.id)
       .maybeSingle();
+    const { data: isAdmin } = await admin.rpc("is_admin", { _user_id: caller.id });
+    const isMaster = !!callerProfile?.is_master;
+    // Admin pode vir de user_roles (is_admin) OU do flag profiles.is_master (master admin).
+    if (!isAdmin && !isMaster) return json(403, { error: "Sem permissão" });
+
     const sameOrg = callerProfile?.organization_id && callerProfile.organization_id === target.organization_id;
-    if (!callerProfile?.is_master && !sameOrg) {
+    if (!isMaster && !sameOrg) {
       return json(403, { error: "Sem permissão para gerenciar usuários de outra organização" });
     }
 
@@ -71,6 +73,13 @@ Deno.serve(async (req) => {
       if (aErr) return json(400, { error: aErr.message });
       await admin.from("profiles").update({ email }).eq("id", profile_id);
       emailChanged = true;
+    }
+
+    let passwordChanged = false;
+    if (password) {
+      const { error: pErr } = await admin.auth.admin.updateUserById(target.user_id, { password });
+      if (pErr) return json(400, { error: pErr.message });
+      passwordChanged = true;
     }
 
     let resetLink: string | undefined;
@@ -92,7 +101,7 @@ Deno.serve(async (req) => {
       });
     } catch (_) { /* log_audit é opcional */ }
 
-    return json(200, { success: true, emailChanged, resetLink });
+    return json(200, { success: true, emailChanged, passwordChanged, resetLink });
   } catch (e) {
     return json(500, { error: String(e) });
   }
