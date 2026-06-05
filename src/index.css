@@ -112,6 +112,8 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* +10% em todas as fontes do sistema (escala base rem) */
+    font-size: 110%;
   }
 
   body {
