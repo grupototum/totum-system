@@ -310,32 +310,33 @@
 }
 
 /* ── Sidebar icon-rail (140px) — TODOS os ícones centralizados ─── */
-[data-collapsible="icon"] [data-sidebar="header"] a,
-[data-collapsible="icon"] [data-sidebar="footer"] button,
-[data-collapsible="icon"] [data-sidebar="menu-button"] {
+/* Centraliza pelos contêineres (mais robusto que sobrescrever o size do botão) */
+[data-collapsible="icon"] [data-sidebar="menu-item"],
+[data-collapsible="icon"] [data-sidebar="header"] > *,
+[data-collapsible="icon"] [data-sidebar="footer"] > * {
+  display: flex !important;
   width: 100% !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+[data-collapsible="icon"] [data-sidebar="menu-button"],
+[data-collapsible="icon"] [data-sidebar="header"] a,
+[data-collapsible="icon"] [data-sidebar="footer"] button {
   justify-content: center !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
-[data-collapsible="icon"] [data-sidebar="menu-button"] {
-  height: 2.75rem !important;
-  padding: 0 !important;
-}
-/* o botão "Modo Demo" envolve um <div> com padding próprio */
 [data-collapsible="icon"] [data-sidebar="menu-button"] > div {
-  width: 100% !important;
   padding: 0 !important;
   justify-content: center !important;
 }
-/* oculta textos e chevrons no modo recolhido */
+/* oculta textos e chevrons no rail recolhido */
 [data-collapsible="icon"] [data-sidebar="header"] a > div,
 [data-collapsible="icon"] [data-sidebar="footer"] button > span,
 [data-collapsible="icon"] [data-sidebar="menu-button"] > span,
 [data-collapsible="icon"] [data-sidebar="menu-button"] svg.lucide-chevron-right {
   display: none !important;
 }
-/* zera margens dos ícones para centralização perfeita */
 [data-collapsible="icon"] [data-sidebar="menu-button"] svg,
 [data-collapsible="icon"] [data-sidebar="footer"] button svg {
   margin: 0 !important;

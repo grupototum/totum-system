@@ -56,6 +56,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const navGroups = [
   {
@@ -178,36 +183,65 @@ export function AppSidebar() {
 
       <SidebarContent className="px-2 pt-2">
         <SidebarMenu>
-          {filteredGroups.map((group) => (
-            <Collapsible key={group.title} asChild className="group/collapsible">
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={group.title}>
-                    <group.icon className="h-4 w-4 shrink-0 text-primary transition-colors" />
-                    <span>{group.title}</span>
-                    <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-                  <SidebarMenuSub>
-                    {group.items.map((item) => (
-                      <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild isActive={location.pathname === item.url}>
-                          <NavLink
-                            to={item.url}
-                            className="flex items-center gap-2 py-1.5 transition-colors"
-                            activeClassName="text-primary font-medium"
-                          >
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
+          {filteredGroups.map((group) =>
+            collapsed ? (
+              /* Rail recolhido: ícone abre um popover com as páginas */
+              <SidebarMenuItem key={group.title}>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <SidebarMenuButton tooltip={group.title} className="justify-center">
+                      <group.icon className="h-5 w-5 shrink-0 text-primary" />
+                    </SidebarMenuButton>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" align="start" sideOffset={8} className="w-56 p-1.5">
+                    <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">{group.title}</p>
+                    <div className="flex flex-col">
+                      {group.items.map((item) => (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className="rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                          activeClassName="text-primary font-medium"
+                        >
+                          {item.title}
+                        </NavLink>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </SidebarMenuItem>
-            </Collapsible>
-          ))}
+            ) : (
+              /* Expandido: submenu inline recolhível com animação fluida */
+              <Collapsible key={group.title} asChild className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={group.title}>
+                      <group.icon className="h-4 w-4 shrink-0 text-primary transition-colors" />
+                      <span>{group.title}</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
+                    <SidebarMenuSub>
+                      {group.items.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === item.url}>
+                            <NavLink
+                              to={item.url}
+                              className="flex items-center gap-2 py-1.5 transition-colors"
+                              activeClassName="text-primary font-medium"
+                            >
+                              <span>{item.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )
+          )}
         </SidebarMenu>
 
         {(isAdmin || (profile?.roles?.permissions as Record<string, boolean> | null)?.["cfg_modo_demo.visualizar"]) && (
