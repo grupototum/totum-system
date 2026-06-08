@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Task, priorityConfig } from "./taskData";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface TaskCalendarProps {
   tasks: Task[];
@@ -43,6 +44,27 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
   const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const today = new Date();
   const isToday = (day: number) => day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+  const renderTaskButton = (task: Task) => (
+    <button
+      key={task.id}
+      onClick={() => onTaskClick(task)}
+      className={`w-full text-left px-1.5 py-1 rounded text-[10px] truncate transition-colors hover:bg-white/[0.08] flex items-center gap-1 ${
+        (priorityConfig[task.priority]?.color || "text-muted-foreground")
+      }`}
+      title={`${task.title}${task.responsible ? ` — ${task.responsible}` : ""}`}
+    >
+      {task.responsible ? (
+        <Avatar className="h-3.5 w-3.5 shrink-0">
+          {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
+          <AvatarFallback className="text-[5px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
+        </Avatar>
+      ) : (
+        <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
+      )}
+      <span className="truncate">{task.title}</span>
+    </button>
+  );
 
   return (
     <div>
@@ -90,28 +112,25 @@ export function TaskCalendar({ tasks, onTaskClick, currentMonth, onMonthChange }
                     {day}
                   </div>
                   <div className="space-y-0.5">
-                    {(tasksByDay[day] || []).slice(0, 3).map((task) => (
-                      <button
-                        key={task.id}
-                        onClick={() => onTaskClick(task)}
-                        className={`w-full text-left px-1.5 py-1 rounded text-[10px] truncate transition-colors hover:bg-white/[0.08] flex items-center gap-1 ${
-                          (priorityConfig[task.priority]?.color || "text-muted-foreground")
-                        }`}
-                        title={`${task.title}${task.responsible ? ` — ${task.responsible}` : ""}`}
-                      >
-                        {task.responsible ? (
-                          <Avatar className="h-3.5 w-3.5 shrink-0">
-                            {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
-                            <AvatarFallback className="text-[5px] bg-white/[0.1]">{task.responsible[0]}</AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <span className={`inline-block h-1 w-1 rounded-full shrink-0 ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
-                        )}
-                        <span className="truncate">{task.title}</span>
-                      </button>
-                    ))}
+                    {(tasksByDay[day] || []).slice(0, 3).map((task) => renderTaskButton(task))}
                     {(tasksByDay[day] || []).length > 3 && (
-                      <span className="text-[9px] text-muted-foreground/40 px-1.5">+{(tasksByDay[day] || []).length - 3}</span>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            className="w-full text-left text-[9px] font-medium text-muted-foreground/60 hover:text-foreground hover:bg-white/[0.06] rounded px-1.5 py-0.5 transition-colors"
+                          >
+                            +{(tasksByDay[day] || []).length - 3} {(tasksByDay[day] || []).length - 3 === 1 ? "tarefa" : "tarefas"}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-64 p-2 glass-card border-white/[0.08]">
+                          <div className="text-[11px] font-heading font-semibold text-muted-foreground/70 mb-1.5 px-1">
+                            {day} de {monthNames[month]} · {(tasksByDay[day] || []).length} tarefas
+                          </div>
+                          <div className="space-y-0.5 max-h-72 overflow-y-auto">
+                            {(tasksByDay[day] || []).map((task) => renderTaskButton(task))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     )}
                   </div>
                 </>
