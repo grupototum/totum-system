@@ -101,7 +101,7 @@ BEGIN
     BEGIN
       EXECUTE 'UPDATE public.delivery_model_items SET suggested_responsible_id = $1 WHERE suggested_responsible_id = $2'
         USING main_user_id, dup.user_id;
-    EXCEPTION WHEN undefined_table THEN
+    EXCEPTION WHEN undefined_column OR undefined_table THEN
       NULL;
     END;
 
