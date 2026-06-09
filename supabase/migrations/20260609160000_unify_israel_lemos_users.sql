@@ -67,10 +67,15 @@ BEGIN
     -- 2a. Migrar todas as referências de responsible_id nas tabelas operacionais
     FOREACH tbl IN ARRAY affected_tables
     LOOP
-      EXECUTE format(
-        'UPDATE public.%I SET responsible_id = $1 WHERE responsible_id = $2',
-        tbl
-      ) USING main_user_id, dup.user_id;
+      BEGIN
+        EXECUTE format(
+          'UPDATE public.%I SET responsible_id = $1 WHERE responsible_id = $2',
+          tbl
+        ) USING main_user_id, dup.user_id;
+      EXCEPTION WHEN undefined_column THEN
+        -- tabela não possui coluna responsible_id, ignorar
+        NULL;
+      END;
     END LOOP;
 
     -- 2b. Migrar referências em clients (assigned_user_id / responsible_id)
