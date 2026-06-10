@@ -70,7 +70,7 @@ export function RegistryFormDialog({
         <DialogHeader>
           <DialogTitle className="font-heading text-lg">{title}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-3">
           {fields.map((field) => (
             <div key={field.key} className="space-y-1.5">
               <Label className="text-sm text-foreground/70">{field.label}</Label>

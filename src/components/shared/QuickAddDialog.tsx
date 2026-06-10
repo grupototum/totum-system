@@ -124,8 +124,8 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
+        <div className="space-y-5 py-5">
+          <div className="space-y-2.5">
             <Label htmlFor="name">Nome / Título</Label>
             <Input
               id="name"
@@ -142,7 +142,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
 
           {isProjectType && (
             <>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="service_type">Tipo de Serviço</Label>
                 <Select value={serviceTypeId} onValueChange={setServiceTypeId}>
                   <SelectTrigger id="service_type" className="bg-white/[0.03] border-border">
@@ -156,7 +156,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Label htmlFor="revenue_type">Tipo de Receita</Label>
                 <Select value={revenueTypeId} onValueChange={setRevenueTypeId}>
                   <SelectTrigger id="revenue_type" className="bg-white/[0.03] border-border">

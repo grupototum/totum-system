@@ -262,22 +262,22 @@ export function TaskFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-2">
+        <div className="grid gap-5 py-4">
           {/* Title */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label>Título *</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Criar post para Instagram" className="bg-white/[0.04] border-border" />
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label>Descrição</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalhes da tarefa..." rows={3} className="bg-white/[0.04] border-border resize-none" />
           </div>
 
           {/* Client + Responsible */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label>Cliente *</Label>
               <Select value={clientId} onValueChange={setClientId}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -286,7 +286,7 @@ export function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Responsável</Label>
               <Select value={responsibleId} onValueChange={setResponsibleId}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -298,8 +298,8 @@ export function TaskFormDialog({
           </div>
 
           {/* Priority + Type */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label>Prioridade</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
@@ -308,7 +308,7 @@ export function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Tipo</Label>
               <Select value={taskType} onValueChange={setTaskType}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
@@ -320,26 +320,26 @@ export function TaskFormDialog({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label>Data Início</Label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-white/[0.04] border-border" />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label>Data Entrega</Label>
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-white/[0.04] border-border" />
             </div>
           </div>
 
           {/* Recurrence */}
-          <div className="space-y-3 border border-border rounded-lg p-3">
+          <div className="space-y-4 border border-border rounded-lg p-4">
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5" /> Tarefa Recorrente</Label>
               <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
             </div>
             {isRecurring && (
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs">Frequência</Label>
                   <Select value={recurrenceType} onValueChange={setRecurrenceType}>
                     <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
@@ -350,7 +350,7 @@ export function TaskFormDialog({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <Label className="text-xs">Data Fim (opcional)</Label>
                   <Input type="date" value={recurrenceEndDate} onChange={(e) => setRecurrenceEndDate(e.target.value)} className="bg-white/[0.04] border-border" />
                 </div>
@@ -358,8 +358,8 @@ export function TaskFormDialog({
             )}
           </div>
           {/* POP + SLA Selection */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> POP</Label>
               <Select value={selectedPopId || "none"} onValueChange={(v) => {
                 if (v === "none") {
@@ -375,7 +375,7 @@ export function TaskFormDialog({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label className="flex items-center gap-1"><Shield className="h-3.5 w-3.5" /> SLA</Label>
               <Select value={selectedSlaId || "none"} onValueChange={(v) => setSelectedSlaId(v === "none" ? "" : v)}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Nenhum" /></SelectTrigger>

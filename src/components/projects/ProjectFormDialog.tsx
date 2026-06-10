@@ -154,7 +154,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         <DialogHeader>
           <DialogTitle>{initialData ? "Editar Projeto" : "Novo Projeto"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Template selector — only for new projects */}
           {isNewProject && projectTemplates.length > 0 && (
             <div>
@@ -172,12 +172,12 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div className="sm:col-span-2">
               <Label>Nome do Projeto *</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center justify-between">
                 Cliente *
                 <Button
@@ -197,7 +197,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Contrato</Label>
               <Select value={form.contract_id} onValueChange={(v) => setForm({ ...form, contract_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -206,7 +206,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label className="flex items-center justify-between">
                 Tipo de Projeto
                 <Button
@@ -226,7 +226,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Responsável</Label>
               <Select value={form.responsible_id} onValueChange={(v) => setForm({ ...form, responsible_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
@@ -235,15 +235,15 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Data Início</Label>
               <Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Data Prazo</Label>
               <Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} />
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 space-y-2">
               <Label>Descrição</Label>
               <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
             </div>
@@ -251,7 +251,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
 
           {/* Task list — required for new projects */}
           {isNewProject && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Tarefas do Projeto *</Label>
                 <span className="text-xs text-muted-foreground">{tasks.length} tarefa(s)</span>
