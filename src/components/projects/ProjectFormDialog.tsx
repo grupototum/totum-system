@@ -44,9 +44,15 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
 
   useEffect(() => {
     if (open) {
-      // Scope profiles to current tenant org (belt-and-suspenders over RLS)
-      let profilesQuery = supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").eq("is_master", false).order("full_name");
-      if (tenant?.organization_id) profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
+      // Scope profiles to current tenant org (belt-and-suspenders over RLS).
+      // Include masters that belong to this org so sys-admins who also work
+      // in their own tenant appear as assignable team members.
+      let profilesQuery = supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name");
+      if (tenant?.organization_id) {
+        profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
+      } else {
+        profilesQuery = profilesQuery.eq("is_master", false);
+      }
 
       Promise.all([
         supabase.from("clients").select("*"),

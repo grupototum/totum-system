@@ -149,17 +149,19 @@ export function useSupabaseTasks() {
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
-    // Scope explicitly to current tenant org AND exclude is_master accounts (sys admins).
-    // Double-guard: RLS handles normal users; explicit org filter handles master users
-    // who bypass RLS and would otherwise see profiles from ALL orgs.
+    // Scope explicitly to current tenant org.
+    // Normal users are filtered by RLS; master users bypass RLS so we need
+    // explicit org filter. Include masters that belong to the current org
+    // (e.g. the sys-admin who also works as a team member in their own org).
     let q = supabase
       .from("profiles")
       .select("user_id, full_name")
       .eq("status", "ativo")
-      .eq("is_master", false)
       .order("full_name");
     if (tenant?.organization_id) {
       q = q.eq("organization_id", tenant.organization_id);
+    } else {
+      q = q.eq("is_master", false);
     }
     const { data } = await q;
     setProfiles(data || []);
