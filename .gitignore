@@ -67,3 +67,4 @@ src/stark-api/node_modules/
 src/stark-api/dist/
 stark-api/node_modules/
 stark-api/dist/
+.env*.local
