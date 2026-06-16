@@ -309,15 +309,15 @@ export class TarefasController {
       const estatisticas = {
         total: todas?.length || 0,
         porStatus: {
-          pendente: todas?.filter(t => t.status === 'pendente').length || 0,
-          em_andamento: todas?.filter(t => t.status === 'em_andamento').length || 0,
-          concluida: todas?.filter(t => t.status === 'concluida').length || 0,
+          pendente: todas?.filter((t: Tarefa) => t.status === 'pendente').length || 0,
+          em_andamento: todas?.filter((t: Tarefa) => t.status === 'em_andamento').length || 0,
+          concluida: todas?.filter((t: Tarefa) => t.status === 'concluida').length || 0,
         },
         porPrioridade: {
-          baixa: todas?.filter(t => t.prioridade === 'baixa').length || 0,
-          media: todas?.filter(t => t.prioridade === 'media').length || 0,
-          alta: todas?.filter(t => t.prioridade === 'alta').length || 0,
-          critica: todas?.filter(t => t.prioridade === 'critica').length || 0,
+          baixa: todas?.filter((t: Tarefa) => t.prioridade === 'baixa').length || 0,
+          media: todas?.filter((t: Tarefa) => t.prioridade === 'media').length || 0,
+          alta: todas?.filter((t: Tarefa) => t.prioridade === 'alta').length || 0,
+          critica: todas?.filter((t: Tarefa) => t.prioridade === 'critica').length || 0,
         }
       };
 

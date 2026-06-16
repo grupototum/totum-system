@@ -119,7 +119,6 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           nature,
           category_id: categoryId || null,
           cost_center_id: costCenterId || null,
-          expense_type_id: entryClass === "receita" ? null : expenseTypeId || null,
           client_id: !clientId || clientId === "none" ? null : clientId,
           contract_id: !contractId || contractId === "none" ? null : contractId,
           value: installmentValue,

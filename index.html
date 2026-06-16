@@ -25,10 +25,15 @@
     <meta name="twitter:title" content="Totum System">
     <meta name="twitter:description" content="ERP para agência com tarefas inteligentes, financeiro, contratos, permissões e controle total de equipe e entregas.">
     <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/95d499e3-2e53-4470-b7aa-be01019a0223/id-preview-8b1674df--8f5bffad-47db-4ab4-a95b-f297ebcdc448.lovable.app-1773792514664.png">
+    <!-- Preload do logo — elemento LCP crítico na tela de login -->
+    <link rel="preload" as="image" href="/logo-red.png" />
     <!-- Preconnect para fontes externas — elimina latência de DNS/TLS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://fonts.cdnfonts.com" />
+    <!-- DNS prefetch para APIs externas -->
+    <link rel="dns-prefetch" href="https://fgosozxvhbdhqigwzqih.supabase.co" />
+    <link rel="preconnect" href="https://fgosozxvhbdhqigwzqih.supabase.co" />
     <!-- Geomanist — carregamento assíncrono (não bloqueia renderização) -->
     <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/geomanist" media="print" onload="this.media='all'" />
     <!-- Inter — carregamento assíncrono com font-display:swap -->

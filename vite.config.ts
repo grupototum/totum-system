@@ -27,12 +27,21 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: "esnext",
+      cssMinify: true,
       rollupOptions: {
         output: {
-          manualChunks: {
-            "vendor-react": ["react", "react-dom", "react-router-dom"],
-            "vendor-query": ["@tanstack/react-query"],
-            "vendor-supabase": ["@supabase/supabase-js"],
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("react-dom") || id.includes("react-router-dom")) return "vendor-react";
+              if (id.includes("react")) return "vendor-react";
+              if (id.includes("@tanstack")) return "vendor-query";
+              if (id.includes("@supabase")) return "vendor-supabase";
+              if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) return "vendor-charts";
+              if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) return "vendor-ui";
+              if (id.includes("lucide")) return "vendor-icons";
+              if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
+              if (id.includes("date-fns") || id.includes("react-day-picker")) return "vendor-date";
+            }
           },
         },
       },

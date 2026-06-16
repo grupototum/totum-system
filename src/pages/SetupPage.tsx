@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import logoRed from "@/assets/logo-red.png";
+const logoRed = "/logo-red.png";
 import { Mail, Lock, Eye, EyeOff, Loader2, User, ShieldCheck } from "lucide-react";
 
 export default function SetupPage() {

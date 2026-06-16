@@ -314,7 +314,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           registryKey="fornecedores"
           title="Novo Cliente"
           onSuccess={(id, name) => {
-            setClients([...clients, { id, name }].sort((a, b) => a.name.localeCompare(b.name)));
+            setClients([...clients, { id, name }].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')));
             setForm({ ...form, client_id: id });
           }}
         />

@@ -12,8 +12,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoWhite from "@/assets/logo-white.png";
-import logoRed from "@/assets/logo-red.png";
+const logoWhite = "/logo-white.png";
+const logoRed = "/logo-red.png";
 
 const products = [
   {

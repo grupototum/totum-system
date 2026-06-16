@@ -1,12 +1,4 @@
 {
-  "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "npx tsx src/index.ts",
-    "start": "npx tsx src/index.ts"
-  }
-}
-
-{
   "name": "stark-api",
   "version": "1.0.0",
   "description": "API Stark para gerenciamento de tarefas e integrações Totum",
@@ -14,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npx tsx src/index.ts",
-    "start": "node dist/index.js",
+    "prebuild": "rm -rf dist && mkdir -p dist",
+    "build": "tsc",
+    "postbuild": "cp package.json dist/package.json && cp .env dist/.env",
+    "start": "tsx src/index.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

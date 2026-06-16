@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/contexts/TenantContext";
-import logoRed from "@/assets/logo-red.png";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Mail, Lock, Eye, EyeOff, Loader2, Clock, User } from "lucide-react";
 
@@ -20,10 +19,10 @@ export default function AuthPage() {
 
   // Logo: when tenant has a custom dark bg always use the dark logo (logo_url)
   const logoSrc = hasTenantBg
-    ? (tenant?.logo_url ?? logoRed)
+    ? (tenant?.logo_url ?? "/logo-red.png")
     : isDark
-      ? (tenant?.logo_url ?? logoRed)
-      : (tenant?.logo_url_light ?? tenant?.logo_url ?? logoRed);
+      ? (tenant?.logo_url ?? "/logo-red.png")
+      : (tenant?.logo_url_light ?? tenant?.logo_url ?? "/logo-red.png");
 
   // Background color: tenant override or default
   const bgStyle = tenant?.bg_color
@@ -143,6 +142,9 @@ export default function AuthPage() {
             src={logoSrc}
             alt={tenant?.display_name ?? "Totum"}
             className="h-12 max-w-[200px] object-contain"
+            fetchPriority="high"
+            width={200}
+            height={48}
           />
           <p className={`text-sm ${hasTenantBg ? "text-white/60" : "text-muted-foreground"}`}>
             {mode === "login" ? "Acesse sua conta" : mode === "signup" ? "Criar nova conta" : "Recuperar senha"}

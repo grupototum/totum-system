@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
-import logoWhite from "@/assets/logo-white.png";
-import logoRed from "@/assets/logo-red.png";
+const logoWhite = "/logo-white.png";
+const logoRed = "/logo-red.png";
 import {
   User,
   Building2,

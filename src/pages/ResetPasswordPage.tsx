@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import logoRed from "@/assets/logo-red.png";
+const logoRed = "/logo-red.png";
 import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useTenant } from "@/contexts/TenantContext";
 
