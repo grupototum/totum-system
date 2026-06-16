@@ -4,22 +4,29 @@
   "description": "ERP para agência com tarefas inteligentes, financeiro, contratos, permissões e controle total de equipe e entregas.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f5f3",
-  "theme_color": "#D94432",
+  "background_color": "#0e0918",
+  "theme_color": "#da2128",
   "orientation": "any",
   "scope": "/",
+  "lang": "pt-BR",
   "icons": [
     {
       "src": "/icon-192.png",
-      "sizes": "192x192",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
