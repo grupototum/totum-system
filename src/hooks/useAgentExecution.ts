@@ -92,7 +92,6 @@ export const useAgentExecution = (options: UseAgentExecutionOptions) => {
         let contextDocuments: string[] = [];
         
         if (enableRAG) {
-          console.log('🔍 Alexandria RAG: Buscando contexto...');
           const ragResult = await retrieveAndSave(userInput, agentId, executionId, {
             type: ragType,
             limit: 5,
@@ -103,7 +102,6 @@ export const useAgentExecution = (options: UseAgentExecutionOptions) => {
           if (ragResult) {
             retrievedContext = ragResult.context;
             contextDocuments = ragResult.documents;
-            console.log(`✅ Contexto recuperado: ${contextDocuments.length} documentos`);
           }
         }
 

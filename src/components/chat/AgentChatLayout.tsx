@@ -54,8 +54,7 @@ export const AgentChatLayout: React.FC = () => {
   } = useAgentExecution({
     agentId: agentId || '',
     enableRAG: true, // 🧠 Habilitar Alexandria RAG
-    onSuccess: (result) => {
-      console.log('✅ Execução com sucesso:', result);
+    onSuccess: () => {
     },
     onError: (error) => {
       console.error('❌ Erro na execução:', error);

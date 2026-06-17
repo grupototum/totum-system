@@ -132,7 +132,6 @@ export async function executeAgent(
   
   // Modo Mock: retorna resposta simulada
   if (OPENCLAW_CONFIG.MOCK_MODE) {
-    console.log('[OpenClaw] Mock mode - simulating execution', payload);
     
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY_MS));
     
@@ -174,9 +173,7 @@ export async function executeAgent(
     
     // Retry logic
     if (retryCount < OPENCLAW_CONFIG.RETRY_ATTEMPTS) {
-      console.log(`[OpenClaw] Retrying... (${retryCount + 1}/${OPENCLAW_CONFIG.RETRY_ATTEMPTS})`);
-      
-      await new Promise(resolve => 
+      await new Promise(resolve =>
         setTimeout(resolve, OPENCLAW_CONFIG.RETRY_DELAY_MS * (retryCount + 1))
       );
       

@@ -31,7 +31,6 @@ export async function generateChecklistForClient(clientId: string, period: strin
       .single();
 
     if (existing) {
-      console.log(`Checklist para ${period} já existe para o cliente ${clientId}.`);
       return true;
     }
 

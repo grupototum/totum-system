@@ -111,7 +111,6 @@ export function N8NWorkflow({ agent, agents = [] }: N8NWorkflowProps) {
       };
 
       // In production, this would call the actual N8N webhook
-      console.log('Enviando comando para N8N:', payload);
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1500));
