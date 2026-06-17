@@ -218,7 +218,9 @@ const App = () => (
               <TenantProvider>
                 <TenantTheme>
                   <AuthProvider>
-                    <PublicRoutes />
+                    <RouteErrorBoundary routeName="App">
+                      <PublicRoutes />
+                    </RouteErrorBoundary>
                   </AuthProvider>
                 </TenantTheme>
               </TenantProvider>

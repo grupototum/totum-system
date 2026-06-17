@@ -214,8 +214,8 @@ export async function addDocument(
     let embedding = null;
     try {
       embedding = await generateEmbedding(content);
-    } catch (e) {
-      console.log('Embedding generation failed, storing without vector');
+    } catch {
+      // silently store without vector when embedding fails
     }
     
     const { data, error } = await (supabase as any)
