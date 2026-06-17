@@ -55,7 +55,8 @@ export default defineConfig(({ mode }) => {
               ) return "vendor-react";
               if (id.includes("@tanstack")) return "vendor-query";
               if (id.includes("@supabase")) return "vendor-supabase";
-              if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) return "vendor-charts";
+              // recharts/d3 têm deps circulares — deixar o Rollup resolver naturalmente evita TDZ
+              // if (id.includes("recharts") || ...) — removido intencionalmente
               if (id.includes("lucide")) return "vendor-icons";
               if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
               if (id.includes("date-fns") || id.includes("react-day-picker")) return "vendor-date";
