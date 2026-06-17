@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+      dedupe: ["react", "react-dom"],
     },
     build: {
       target: "esnext",
@@ -32,12 +33,29 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id) {
             if (id.includes("node_modules")) {
-              if (id.includes("react-dom") || id.includes("react-router-dom")) return "vendor-react";
-              if (id.includes("react")) return "vendor-react";
+              // React e tudo que depende diretamente de React vai junto para evitar
+              // que createContext seja chamado antes do React estar disponível.
+              if (
+                id.includes("react-dom") ||
+                id.includes("react-router-dom") ||
+                id.includes("react/") ||
+                /[/\\]react[/\\]/.test(id) ||
+                id.includes("@radix-ui") ||
+                id.includes("cmdk") ||
+                id.includes("vaul") ||
+                id.includes("react-resizable-panels") ||
+                id.includes("embla-carousel-react") ||
+                id.includes("react-dropzone") ||
+                id.includes("react-hook-form") ||
+                id.includes("@hookform") ||
+                id.includes("input-otp") ||
+                id.includes("next-themes") ||
+                id.includes("sonner") ||
+                id.includes("framer-motion")
+              ) return "vendor-react";
               if (id.includes("@tanstack")) return "vendor-query";
               if (id.includes("@supabase")) return "vendor-supabase";
               if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) return "vendor-charts";
-              if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) return "vendor-ui";
               if (id.includes("lucide")) return "vendor-icons";
               if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
               if (id.includes("date-fns") || id.includes("react-day-picker")) return "vendor-date";
