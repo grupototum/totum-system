@@ -66,7 +66,7 @@ export function validateImageFile(file: File): { ok: boolean; error?: string } {
 }
 
 async function signUrl(path: string) {
-  const { data } = await (supabase.storage as any)
+  const { data } = await supabase.storage
     .from('task-attachments')
     .createSignedUrl(path, 60 * 60);
   return data?.signedUrl;
@@ -171,7 +171,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
       }, 200);
 
       try {
-        const up = await (supabase.storage as any)
+        const up = await supabase.storage
           .from('task-attachments')
           .upload(path, file, { contentType: file.type, upsert: false });
         clearInterval(ticker);
@@ -189,7 +189,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
           uploaded_by: userId,
         });
         if (ins.error) {
-          await (supabase.storage as any).from('task-attachments').remove([path]);
+          await supabase.storage.from('task-attachments').remove([path]);
           setItem(qid, { status: 'error', errorCode: 'db', error: friendlyError('db', ins.error.message) });
           return false;
         }
@@ -270,7 +270,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
 
   const remove = useCallback(
     async (anexo: TaskAttachment) => {
-      await (supabase.storage as any).from('task-attachments').remove([anexo.storage_path]);
+      await supabase.storage.from('task-attachments').remove([anexo.storage_path]);
       await (supabase as any).from('tarefa_anexos').delete().eq('id', anexo.id);
       await load();
     },
@@ -283,7 +283,7 @@ export function useTaskAttachments(tarefaId: string | undefined | null) {
       const paths = anexos.map((a) => a.storage_path);
       const ids = anexos.map((a) => a.id);
       let failed = 0;
-      const st = await (supabase.storage as any).from('task-attachments').remove(paths);
+      const st = await supabase.storage.from('task-attachments').remove(paths);
       if (st?.error) failed = anexos.length;
       const del = await (supabase as any).from('tarefa_anexos').delete().in('id', ids);
       if (del?.error) failed = Math.max(failed, anexos.length);
@@ -338,7 +338,7 @@ export async function uploadTaskAttachmentFiles(
     const ext = file.name.split('.').pop();
     const path = `${tarefaId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
     try {
-      const up = await (supabase.storage as any)
+      const up = await supabase.storage
         .from('task-attachments')
         .upload(path, file, { contentType: file.type, upsert: false });
       if (up.error) {
@@ -354,7 +354,7 @@ export async function uploadTaskAttachmentFiles(
         uploaded_by: userId,
       });
       if (ins.error) {
-        await (supabase.storage as any).from('task-attachments').remove([path]);
+        await supabase.storage.from('task-attachments').remove([path]);
         results.push({ name: file.name, ok: false, error: friendlyError('db', ins.error.message) });
         continue;
       }

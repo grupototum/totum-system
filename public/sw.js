@@ -1,4 +1,4 @@
-const CACHE_NAME = 'totum-v1';
+const CACHE_NAME = 'totum-v2';
 const OFFLINE_URL = '/offline.html';
 
 const PRECACHE_URLS = [
@@ -47,8 +47,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Static assets: cache-first
-  if (request.destination === 'script' || request.destination === 'style' || request.destination === 'image' || request.destination === 'font') {
+  // Images and fonts: cache-first (stable, content-addressed)
+  // JS/CSS chunks use content-hashed filenames — always fetched from network
+  // to prevent stale bundle issues after deploy.
+  if (request.destination === 'image' || request.destination === 'font') {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
