@@ -42,6 +42,12 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showPendingMessage, setShowPendingMessage] = useState(isPending);
 
+  // isPending pode chegar de forma assíncrona (ex.: retorno do OAuth Google),
+  // depois da montagem. Sincroniza para exibir "Aguardando Aprovação" nesse caso.
+  useEffect(() => {
+    if (isPending) setShowPendingMessage(true);
+  }, [isPending]);
+
   // Surface OAuth errors (ex.: Google) que voltam na URL como ?error=... ou #error=...
   // Sem isto, falhas de login social redirecionam para cá silenciosamente ("não acontece nada").
   useEffect(() => {

@@ -51,6 +51,35 @@ export const isValidCNPJ = (cnpj: string): boolean => {
 };
 
 /**
+ * Valida CPF (formato e dígitos verificadores)
+ */
+export const isValidCPF = (cpf: string): boolean => {
+  const cleaned = cpf.replace(/[^\d]/g, "");
+  if (cleaned.length !== 11) return false;
+  if (/^(\d)\1+$/.test(cleaned)) return false;
+
+  const calcVerifier = (digits: string, factor: number) => {
+    let total = 0;
+    for (let i = 0; i < digits.length; i++) {
+      total += parseInt(digits.charAt(i)) * (factor - i);
+    }
+    const remainder = total % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  const digit1 = calcVerifier(cleaned.slice(0, 9), 10);
+  const digit2 = calcVerifier(cleaned.slice(0, 10), 11);
+  return `${digit1}${digit2}` === cleaned.slice(9);
+};
+
+export const isValidCNPJOrCPF = (value: string): boolean => {
+  const cleaned = value.replace(/[^\d]/g, "");
+  if (cleaned.length === 11) return isValidCPF(cleaned);
+  if (cleaned.length === 14) return isValidCNPJ(cleaned);
+  return false;
+};
+
+/**
  * Valida telefone brasileiro (com DDD)
  */
 export const isValidPhone = (phone: string): boolean => {
@@ -213,18 +242,16 @@ export const validateClientBasicInfo = (
   }
   
   if (!isRequired(cnpj)) {
-    errors.cnpj = "CNPJ é obrigatório";
-  } else if (!isValidCNPJ(cnpj)) {
-    errors.cnpj = "CNPJ inválido";
+    errors.cnpj = "CNPJ ou CPF é obrigatório";
+  } else if (!isValidCNPJOrCPF(cnpj)) {
+    errors.cnpj = "CNPJ ou CPF inválido";
   }
   
   if (!isRequired(contact_name)) {
     errors.contact_name = "Nome do responsável é obrigatório";
   }
   
-  if (!isRequired(email)) {
-    errors.email = "E-mail é obrigatório";
-  } else if (!isValidEmail(email)) {
+  if (email && !isValidEmail(email)) {
     errors.email = "E-mail inválido";
   }
   

@@ -32,6 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let initialized = false;
+    // Quando deslogamos um usuário pendente/inativo/bloqueado, o signOut dispara
+    // onAuthStateChange(null), que zeraria isPending antes da tela de aviso aparecer.
+    // Este flag preserva o estado "pendente" através desse signOut forçado.
+    let pendingSignOut = false;
 
     const finishInit = () => {
       if (!initialized && mounted) {
@@ -53,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data) {
           const status = data.status as string;
           if (status === "pendente" || status === "inativo" || status === "bloqueado") {
+            pendingSignOut = true;
             setIsPending(true);
             setProfile(null);
             // fire-and-forget to avoid blocking auth event processing
@@ -83,7 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         void loadProfile(nextSession.user.id);
       } else {
         setProfile(null);
-        setIsPending(false);
+        // Preserva o aviso "Aguardando Aprovação" quando o null vem do signOut
+        // forçado de um usuário pendente. Consome o flag para o próximo logout normal.
+        if (pendingSignOut) {
+          pendingSignOut = false;
+        } else {
+          setIsPending(false);
+        }
       }
     };
 

@@ -19,7 +19,7 @@ import {
   Building2, Briefcase, Target, Palette, Settings2,
   ChevronLeft, ChevronRight, Check, Loader2, User, ArrowLeft,
 } from "lucide-react";
-import { validateClientBasicInfo, isValidEmail, isValidCNPJ, isValidPhone, isValidURL, sanitizeURL, type ValidationErrors } from "@/lib/validation";
+import { validateClientBasicInfo, isValidEmail, isValidPhone, isValidURL, sanitizeURL, type ValidationErrors } from "@/lib/validation";
 
 /* ─── types ─── */
 interface FormData {
@@ -50,7 +50,22 @@ const SLA_OPTIONS = ["1h", "2h", "4h", "8h", "24h"];
 const CHANNEL_OPTIONS = ["WhatsApp", "Email", "Telefone", "Chat", "Redes Sociais"];
 const DAY_OPTIONS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-const cnpjMask = (v: string) => v.replace(/\D/g, "").replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2").slice(0, 18);
+const documentMask = (v: string) => {
+  const digits = v.replace(/\D/g, "");
+  if (digits.length <= 11) {
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4")
+      .slice(0, 14);
+  }
+  return digits
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2")
+    .slice(0, 18);
+};
 const phoneMask = (v: string) => v.replace(/\D/g, "").replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2").slice(0, 15);
 
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -210,7 +225,7 @@ export default function EditClient() {
       industry: form.industry || null, business_description: form.business_description || null, products_services: form.products_services || null, time_in_market: form.time_in_market || null, company_size: form.company_size || null, monthly_revenue: form.monthly_revenue || null,
       main_niche: form.main_niche || null, main_pains: form.main_pains || null, desires: form.desires || null, age_min: form.age_min, age_max: form.age_max, gender: form.gender, location: form.location || null, social_class: form.social_class || null, brand_tone: form.brand_tone || null,
       primary_color: form.primary_color, secondary_color: form.secondary_color, fonts: form.fonts || null, visual_elements: form.visual_elements || null, visual_personality: form.visual_personality || null,
-      support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, additional_info: form.additional_info || null, terms_accepted: form.terms_accepted,
+      support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, terms_accepted: form.terms_accepted,
       updated_at: new Date().toISOString(),
     } as any).eq("id", clientId);
     setSaving(false);
@@ -302,8 +317,8 @@ export default function EditClient() {
                             <ErrorMessage field="company_name" />
                           </div>
                           <div>
-                            <FieldLabel required>CNPJ</FieldLabel>
-                            <Input value={form.cnpj} onChange={(e) => set("cnpj", cnpjMask(e.target.value))} className={inputCls("cnpj")} placeholder="00.000.000/0000-00" />
+                            <FieldLabel required>CNPJ / CPF</FieldLabel>
+                            <Input value={form.cnpj} onChange={(e) => set("cnpj", documentMask(e.target.value))} className={inputCls("cnpj")} placeholder="000.000.000-00 ou 00.000.000/0000-00" />
                             <ErrorMessage field="cnpj" />
                           </div>
                         </div>
@@ -314,7 +329,7 @@ export default function EditClient() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <FieldLabel required>Email corporativo</FieldLabel>
+                            <FieldLabel>Email (opcional)</FieldLabel>
                             <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls("email")} placeholder="email@empresa.com" />
                             <ErrorMessage field="email" />
                           </div>
