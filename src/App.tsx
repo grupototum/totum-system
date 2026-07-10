@@ -73,15 +73,20 @@ function getRootHost() {
 }
 
 function useHasAdmin() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["has_any_admin"],
     queryFn: async () => {
-      const { data } = await (supabase.rpc as any)("has_any_admin");
+      const { data, error } = await (supabase.rpc as any)("has_any_admin");
+      if (error) throw error;
       return data === true;
     },
     staleTime: 60_000,
     retry: 1,
   });
+  // Falha-seguro: se a RPC falhar (rede, banco fora, grant), assume que admin
+  // existe e mostra o login. O contrário (false indevido) manda TODOS os
+  // visitantes para /setup e expõe o formulário de criação de admin a anônimos.
+  if (isError) return true;
   return isLoading ? null : (data ?? false);
 }
 
