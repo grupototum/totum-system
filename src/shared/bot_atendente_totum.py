@@ -55,7 +55,9 @@ except ImportError:
 
 # ==================== CONFIGURAÇÕES ====================
 
-TELEGRAM_TOKEN = "8675078490:AAHuWe-3CphyWn4vlYv-1tDKZofDS-mJScM"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+if not TELEGRAM_TOKEN:
+    raise SystemExit("TELEGRAM_TOKEN não configurado. Defina a variável de ambiente antes de rodar o bot.")
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = "llama3.2"
 

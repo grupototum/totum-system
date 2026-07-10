@@ -48,15 +48,13 @@
 ---
 
 ### 3. 🔴 Revogar token Telegram exposto
-**Local:** `.env.example` linha 1
-**Valor exposto:** `8675078490:AAHuWe-3CphyWn4vlYv-1tDKZofDS-mJScM`
+**Local original:** `.env.example` linha 1 (✅ já trocado por placeholder) e `src/shared/bot_atendente_totum.py` linha 58 (✅ já sanitizado, lê de env var). Valor real removido desta doc em 2026-07-10 — ver `API_KEYS_MAP.md` para o mapa completo de consumidores e plano de rotação.
 
-**Ação necessária:**
+**Ação necessária (ainda pendente, requer acesso externo):**
 1. Abrir @BotFather no Telegram
 2. Revogar o token atual
 3. Gerar novo token
-4. Atualizar `.env` local (nunca commitar)
-5. Atualizar `.env.example` com placeholder
+4. Atualizar `.env` local (nunca commitar) e as envs de produção/Vercel
 
 **Você precisa:** Fazer isso manualmente (não tenho acesso ao Telegram)
 
