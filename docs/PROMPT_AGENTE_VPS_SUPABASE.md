@@ -24,6 +24,20 @@ Se os números do Prompt 1 (item 3) baterem com isso e NÃO houver dados do uPix
 seguimos. Se divergirem, ou se aparecerem tabelas/dados do uPixel na mesma base → **PARAR** e me
 avisar antes de qualquer escrita (Prompt 2) ou repoint da Vercel.
 
+### ⚠️ A seção 0 do Prompt 1 pode bifurcar em DOIS caminhos — não assuma que ela só libera o Prompt 2
+
+- **Caminho H2 (stack dedicada, limpa):** counts batem com o baseline, sem tabelas do uPixel.
+  → Segue o fluxo normal: chave ANON (seção 2) → Prompt 2 (usuários) → repoint da Vercel.
+
+- **Caminho H1 (mesclada com o uPixel):** aparecem `leads`/`deals`/`pipelines`/`kommo_sync`, ou os
+  counts do Totum divergem/estão contaminados. → **NÃO** é um fix de 5 minutos e **NÃO** se resolve
+  rodando o Prompt 2. Como `system/sistema/gestao.grupototum.com` estão em 421/503 (a stack dedicada
+  `supabase-sistema` que o runbook previa não está no ar), a saída correta passa a ser **provisionar
+  do zero a stack dedicada** (subir `supabase-sistema`, restaurar o dump do Totum nela, redeploy das
+  13 edge functions, repontar webhooks) — ou seja, retomar o RUNBOOK_MIGRACAO a partir do STEP 2,
+  como um **projeto novo / segundo handoff**, não como continuação deste. Nesse caso, PARE aqui e
+  escale — não crie usuário nem reaponte a Vercel para a stack mesclada.
+
 ---
 
 ## PROMPT 1 — Diagnóstico + identidade da stack (somente leitura, NÃO altere nada)
