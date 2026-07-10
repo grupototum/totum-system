@@ -47,16 +47,16 @@
 
 ---
 
-### 3. 🔴 Revogar token Telegram exposto
-**Local original:** `.env.example` linha 1 (✅ já trocado por placeholder) e `src/shared/bot_atendente_totum.py` linha 58 (✅ já sanitizado, lê de env var). Valor real removido desta doc em 2026-07-10 — ver `API_KEYS_MAP.md` para o mapa completo de consumidores e plano de rotação.
+### 3. 🟡 Limpar resíduos de token de bot Telegram descontinuado
+**Status:** bot antigo (provavelmente `@totum_agents_bot`) confirmado **descontinuado** em 2026-07-10 — não é mais rotação ativa, é limpeza de credencial morta.
+**Local original:** `.env.example` linha 1 (✅ já trocado por placeholder) e `src/shared/bot_atendente_totum.py` linha 58 (✅ já sanitizado, lê de env var). Valor real removido desta doc. Ver `API_KEYS_MAP.md` para o mapa completo de consumidores.
 
-**Ação necessária (ainda pendente, requer acesso externo):**
-1. Abrir @BotFather no Telegram
-2. Revogar o token atual
-3. Gerar novo token
-4. Atualizar `.env` local (nunca commitar) e as envs de produção/Vercel
+**Ação necessária (requer acesso externo):**
+1. Confirmar se existe env `TELEGRAM_TOKEN` / `VITE_TELEGRAM_BOT_TOKEN` antiga configurada em Vercel, VPS ou n8n.
+2. Se existir, remover — **não gerar token novo** para esse bot.
+3. Não é necessário acessar o @BotFather para revogar (bot já não existe).
 
-**Você precisa:** Fazer isso manualmente (não tenho acesso ao Telegram)
+**Você precisa:** Checar Vercel/VPS/n8n e remover envs antigas, se existirem.
 
 ---
 

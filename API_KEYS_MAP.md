@@ -12,7 +12,7 @@
 | VITE_TIKTOK_REDIRECT_URI | TikTok API | Não | local/staging/prod | URI de callback OAuth |
 | VITE_TIKTOK_MODE | TikTok API | Não | local/staging/prod | sandbox ou production |
 | VITE_TIKTOK_REFRESH_TOKEN | TikTok API | Não | local/staging/prod | Renovação automática |
-| TELEGRAM_TOKEN | Telegram Bot (script Python) | Sim* | local/staging/prod | *Nenhum código TS/JS lê essa var hoje; consumidor real é o script Python `bot_atendente_totum.py` (token hardcoded lá, ver Nota Crítica) |
+| TELEGRAM_TOKEN | Telegram Bot (script Python) — **bot descontinuado** | Não | local/staging/prod | Consumidor é `bot_atendente_totum.py`. Bot antigo não existe mais (confirmado 2026-07-10) — não preencher com token novo, ver Nota Crítica |
 | VITE_TELEGRAM_BOT_TOKEN | Telegram Bot (frontend) | Não | local/staging/prod | Lida em `src/services/telegramService.ts`, chama `api.telegram.org` direto do browser — variável `VITE_` vai pro bundle público |
 | OLLAMA_URL | Ollama (IA local) | Não | local | API local de LLM |
 | OLLAMA_MODEL | Ollama | Não | local | Modelo padrão |
@@ -35,38 +35,32 @@
 
 | Risco | Mitigação |
 |---|---|
-| Token Telegram exposto | Revogar no BotFather e gerar novo |
+| Token Telegram exposto (bot `@totum_agents_bot`, descontinuado) | Não gerar token novo — confirmar e remover envs antigas em Vercel/VPS/n8n, se existirem |
 | Supabase key pública | Usar RLS + policies restritas |
 | TikTok secrets no frontend | Mover para backend/Edge Function |
 | Ollama exposto | Rodar apenas em localhost, não expor porta |
 
-## ⚠️ NOTA CRÍTICA — token Telegram comprometido
+## ⚠️ NOTA CRÍTICA — token Telegram exposto, bot DESCONTINUADO
 
-**Status:** token tratado como comprometido desde ~abril/2026 (exposto no histórico do git). Ainda **não revogado no @BotFather** — a rotação real do valor continua pendente de autorização externa.
+**Status: 🟢 ENCERRADO como incidente ativo.** O token real foi exposto no histórico do git desde ~abril/2026, mas o bot ao qual ele pertencia (provavelmente `@totum_agents_bot`) **não existe mais**, segundo confirmação humana em 2026-07-10. Trata-se de credencial antiga/descomissionada — não há rotação ativa a fazer, porque não há serviço vivo para reapontar.
 
-**Onde o valor real aparecia na árvore atual (sem reproduzir o valor aqui):**
-1. `.env.example` linha 1 — ✅ **corrigido** (placeholder).
-2. `src/shared/bot_atendente_totum.py` linha 58 — ✅ **corrigido em 2026-07-10**: agora lê `os.getenv("TELEGRAM_TOKEN")` e falha com `SystemExit` (mensagem clara, sem imprimir segredo) se a env var não estiver definida. **Importante:** isso só sanitiza a árvore de trabalho atual — o valor antigo continua legível no histórico do git (commits anteriores a esta correção). Rotacionar o token de verdade no @BotFather continua sendo a única forma de neutralizar o vazamento.
+**Onde o valor real aparecia na árvore atual (sem reproduzir o valor aqui) — todos sanitizados:**
+1. `.env.example` linha 1 — ✅ placeholder.
+2. `src/shared/bot_atendente_totum.py` linha 58 — ✅ lê `os.getenv("TELEGRAM_TOKEN")`, falha com `SystemExit` sem env var (sem imprimir segredo).
+3. `TAREFAS_PENDENTES.md` — ✅ valor literal removido, substituído por referência a este arquivo.
 
-**Consumidores mapeados (quem quebra se o token for trocado sem atualizar):**
-- `src/shared/bot_atendente_totum.py` — bot Python via `python-telegram-bot`, hoje sem nenhum caller no app (script standalone/órfão). Agora exige `TELEGRAM_TOKEN` no ambiente para rodar; sem essa env var o script não sobe (antes rodava com o token hardcoded, sem esse guard).
-- `src/services/telegramService.ts` → `src/hooks/useTelegramNotification.ts` → `src/components/workspace/TelegramNotification.tsx` → `src/pages/workspace/TaskRecurrence.tsx` — cadeia frontend que usa `VITE_TELEGRAM_BOT_TOKEN` (variável diferente, ver tabela acima). `TaskRecurrence.tsx` está em uma subpasta não roteada em `App.tsx` hoje, então provavelmente não está no bundle de produção — **precisa confirmação via build**, não presumir.
+**Nota permanente:** o valor antigo continua legível no histórico do git (commits anteriores às correções acima). Como o bot está descontinuado, isso não representa mais um caminho de exploração ativo — não há API viva por trás desse token para um invasor usar. Reescrita de histórico do git é uma ação separada, destrutiva, e não foi feita.
+
+**Consumidores mapeados (histórico, mantido para rastreabilidade):**
+- `src/shared/bot_atendente_totum.py` — bot Python via `python-telegram-bot`, script órfão sem caller no app. Agora exige `TELEGRAM_TOKEN` no ambiente para rodar; como o bot está descontinuado, não há necessidade de fornecer essa env var em lugar nenhum.
+- `src/services/telegramService.ts` → `src/hooks/useTelegramNotification.ts` → `src/components/workspace/TelegramNotification.tsx` → `src/pages/workspace/TaskRecurrence.tsx` — cadeia frontend que usa `VITE_TELEGRAM_BOT_TOKEN` (variável diferente). Página não roteada em `App.tsx` hoje. Se esse fluxo for reaproveitado no futuro, precisa de um bot novo e de mover a chamada para backend/Edge Function — não reaproveitar o token antigo.
 - Nenhum uso encontrado em `stark-api/`, `supabase/functions/`, docs de n8n, ou scripts `.sh`.
-- Configuração real de produção (Vercel env vars) **não é visível a partir do repo** — checar manualmente no dashboard da Vercel antes de rotacionar.
 
-**Plano de rotação coordenada (não executar sem autorização explícita, ordem sugerida):**
-1. **Mapear consumidores** — ✅ feito nesta auditoria (lista acima).
-2. **Preparar novo token no @BotFather** — gerar um novo token para o bot, sem revogar o antigo ainda (evita downtime).
-3. **Atualizar ambientes** — colocar o novo valor em `.env` local (nunca commitar) e nas envs de staging/produção (Vercel dashboard, e onde `bot_atendente_totum.py` roda, se for reativado).
-4. **Reiniciar apenas os serviços necessários** — se o script Python estiver rodando em algum servidor/PM2, reiniciar só esse processo; frontend não precisa de restart, só novo build/deploy quando o env mudar.
-5. **Testar envio/recebimento** — enviar uma mensagem de teste via `sendTelegramMessage`/`sendTelegramNotification` (ou diretamente `curl https://api.telegram.org/bot<NOVO_TOKEN>/getMe`) antes de considerar concluído.
-6. **Monitorar erros** — checar logs do bot Python (se ativo) e o `console.warn('[Telegram] BOT_TOKEN não configurado')` do frontend por um tempo após a troca.
-7. **Só depois disso**, considerar revogar o token antigo no @BotFather e avaliar limpeza de histórico do git (ação separada, destrutiva, precisa aprovação explícita à parte).
-
-**Riscos:**
-- Revogar o token antes de atualizar todos os consumidores quebra silenciosamente o bot Python (se estiver ativo em produção) e o fluxo `TaskRecurrence`/notificações (se estiver de fato em uso).
-- `VITE_TELEGRAM_BOT_TOKEN` sendo lido direto no browser é um risco arquitetural à parte da rotação — mesmo com token novo, se essa página entrar em produção o token fica público no bundle. Considerar mover para uma Edge Function antes de reativar essa página.
-- Sem acesso ao dashboard da Vercel não dá para confirmar se há uma cópia do token configurada lá também.
+**Ações restantes (não é rotação — é limpeza de resíduos de uma credencial morta):**
+1. Confirmar se existe alguma env `TELEGRAM_TOKEN` / `VITE_TELEGRAM_BOT_TOKEN` ainda configurada no dashboard da Vercel, em algum VPS, ou em workflow n8n.
+2. Se existir, **remover** essa env (não substituir por token novo — o bot não existe mais).
+3. **Não gerar token novo** e **não acessar o @BotFather** para esse bot — não há para onde rotacionar.
+4. Se no futuro um bot novo for criado para o mesmo propósito, tratar como credencial nova (nome de variável novo, mapeamento novo), não como "renovação" desta.
 
 **Comandos seguros de validação (não destrutivos):**
 ```bash
@@ -76,13 +70,10 @@ grep -n "^TELEGRAM_TOKEN=" .env.example
 # Confirmar que o .env real (se existir localmente) está ignorado pelo git
 git check-ignore -v .env
 
-# Testar um token novo sem afetar o antigo (rodar manualmente, fora do repo)
-curl -s "https://api.telegram.org/bot<NOVO_TOKEN>/getMe"
-
-# Depois de atualizar bot_atendente_totum.py para ler de env var (mudança separada, fora deste escopo):
+# Confirmar que o script exige a env var (sem token hardcoded)
 grep -n "TELEGRAM_TOKEN" src/shared/bot_atendente_totum.py
 ```
 
 ---
 
-*Última atualização: 2026-07-10 (sanitização do hardcode em `bot_atendente_totum.py`, sem revogar nada — nota: manteve o nome `TELEGRAM_TOKEN` já existente no `.env.example`/tabela acima, em vez de introduzir `TELEGRAM_BOT_TOKEN`, para não criar uma terceira variante de nome para o mesmo segredo)*
+*Última atualização: 2026-07-10 — bot antigo confirmado descontinuado pelo responsável do projeto; incidente fechado como credencial morta, sem rotação ativa.*
