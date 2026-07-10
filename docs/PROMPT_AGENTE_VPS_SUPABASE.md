@@ -1,31 +1,78 @@
 # Prompts para o agente de IA da VPS — Incidente Totum System
-> Gerado em 2026-07-10. Contexto: produção (totum.pixelsystem.online, Vercel) aponta para
-> o Supabase cloud antigo `fgosozxvhbdhqigwzqih.supabase.co`, que não existe mais (NXDOMAIN).
-> O banco foi migrado para Supabase self-hosted em `https://supa.grupototum.com` (Coolify).
-> Gateway Kong responde (401 sem apikey = saudável); `/functions/v1/*` retorna 500.
+> Gerado em 2026-07-10, revisado após leitura de RUNBOOK_MIGRACAO / AUDITORIA_TOTUM-SYSTEM (03/jul).
+> Contexto: produção (totum.pixelsystem.online, Vercel) aponta para o Supabase Cloud antigo
+> `fgosozxvhbdhqigwzqih.supabase.co`, que não existe mais (NXDOMAIN). O banco foi migrado para
+> self-hosted na VPS (Coolify). Kong responde em `https://supa.grupototum.com` (401 sem apikey =
+> saudável); `system/sistema/gestao.grupototum.com` retornam 421/503 (não servem).
+
+## 🔴 ALERTA CRÍTICO — validar a IDENTIDADE da stack ANTES de repontar/criar usuário
+
+O runbook de migração definia o destino como **`system.grupototum.com`** (stack Coolify
+`supabase-sistema`, uuid `uoj4asr9z1div18acqrrf0tl`) — NÃO `supa.grupototum.com`. A auditoria
+recomendou **NÃO mesclar o totum-system na `supa`**, que é a stack compartilhada com o uPixel
+(tem tabelas de nome colidente: `tasks`, `profiles`, `organizations`, `notifications`, `audit_logs`).
+
+Como o Kong vivo está em `supa`, há duas hipóteses e o diagnóstico precisa distinguir qual é:
+- (H1) o cutover caiu na stack `supa` compartilhada → **risco de colisão com dados do uPixel**;
+- (H2) `supa` na verdade é a stack dedicada do Totum (só o nome do domínio confunde).
+
+**Impressão digital do totum-system, registrada pela auditoria de 03/jul (o banco certo bate com estes números):**
+7 auth users · 65 tabelas · 20 funcs · 7 triggers · tasks **139** · task_history **247** ·
+asaas_payments **51** · products **37** · clients **16** · contracts **13** · organizations **2** · 3 buckets storage.
+
+Se os números do Prompt 1 (item 3) baterem com isso e NÃO houver dados do uPixel misturados,
+seguimos. Se divergirem, ou se aparecerem tabelas/dados do uPixel na mesma base → **PARAR** e me
+avisar antes de qualquer escrita (Prompt 2) ou repoint da Vercel.
 
 ---
 
-## PROMPT 1 — Diagnóstico (somente leitura, NÃO altere nada)
+## PROMPT 1 — Diagnóstico + identidade da stack (somente leitura, NÃO altere nada)
 
 ```
-Você vai diagnosticar a stack Supabase self-hosted do Totum System que roda neste servidor
-via Coolify, respondendo em https://supa.grupototum.com. NÃO altere nenhuma configuração,
-NÃO reinicie serviços, NÃO rode UPDATE/INSERT/DELETE — apenas leitura. Me devolva um
-relatório com os itens abaixo.
+Você vai diagnosticar a stack Supabase self-hosted que responde em https://supa.grupototum.com
+(rodando via Coolify neste servidor) e CONFIRMAR se ela é a stack dedicada do Totum System ou a
+stack compartilhada com o uPixel. NÃO altere config, NÃO reinicie serviços, NÃO rode
+UPDATE/INSERT/DELETE — apenas leitura. Relatório em markdown com todas as seções abaixo.
+
+0. IDENTIDADE DA STACK (decisivo — rode primeiro)
+   - No Coolify/Docker, diga o NOME e UUID da stack a que pertence o container de Postgres que
+     atende https://supa.grupototum.com (esperado pelo runbook: `supabase-sistema`,
+     uuid uoj4asr9z1div18acqrrf0tl — confirme se é este mesmo ou outro).
+   - Quantos bancos/stacks Supabase existem neste servidor? Liste nome + domínio de cada um
+     (procuro saber se `supa`, `system`, `sistema`, `gestao` são a MESMA stack ou stacks distintas).
+   - No Postgres desta stack, rode (só SELECT) para detectar contaminação com uPixel:
+       select current_database();
+       -- marcadores de que é o banco do TOTUM (devem existir):
+       select to_regclass('public.asaas_payments') as tem_asaas,
+              to_regclass('public.contracts')       as tem_contracts,
+              to_regclass('public.company_settings') as tem_company_settings;
+       -- marcadores de que seria o banco do uPixel/CRM (NÃO deveriam existir aqui):
+       select to_regclass('public.leads')     as tem_leads,
+              to_regclass('public.deals')     as tem_deals,
+              to_regclass('public.pipelines') as tem_pipelines,
+              to_regclass('public.kommo_sync') as tem_kommo;
+   - Compare as CONTAGENS abaixo com o baseline da auditoria (tasks 139, task_history 247,
+     asaas_payments 51, products 37, clients 16, contracts 13, organizations 2):
+       select 'tasks' t, count(*) from public.tasks
+       union all select 'task_history', count(*) from public.task_history
+       union all select 'asaas_payments', count(*) from public.asaas_payments
+       union all select 'products', count(*) from public.products
+       union all select 'clients', count(*) from public.clients
+       union all select 'contracts', count(*) from public.contracts
+       union all select 'organizations', count(*) from public.organizations;
+   → Se `tem_leads/deals/pipelines/kommo` vierem preenchidos (tabela existe) E os counts do Totum
+     divergirem muito do baseline, é a stack ERRADA (uPixel) — PARE e me avise.
 
 1. SAÚDE DA STACK
-   - Liste os containers da stack Supabase no Coolify/Docker (db, kong, auth/gotrue,
-     rest/postgrest, functions, studio) e o estado de cada um.
-   - Últimas ~30 linhas de log do container de functions (o endpoint /functions/v1
-     está retornando 500) e do gotrue (auth).
+   - Containers da stack (db, kong, auth/gotrue, rest/postgrest, functions/edge-runtime, storage,
+     studio) e estado de cada um.
+   - Últimas ~30 linhas de log do container de functions (o /functions/v1 retorna 500 — quero a causa)
+     e do gotrue (auth).
 
-2. CHAVES (para reconectar o frontend)
-   - Me informe a URL pública da API (deve ser https://supa.grupototum.com) e a chave
-     ANON (a chave pública que vai no frontend). NÃO inclua a service_role key na
-     resposta — ela fica só no servidor.
+2. CHAVES (para reconectar o frontend) — só se a seção 0 confirmar que é o banco do Totum
+   - URL pública da API e a chave ANON (pública, vai no frontend). NÃO inclua a service_role key.
 
-3. DADOS (rode no Postgres da stack, ex.: docker exec <container-db> psql -U postgres, só SELECTs)
+3. DADOS
    select count(*) as usuarios_auth from auth.users;
    select count(*) as perfis from public.profiles;
    select count(*) filter (where organization_id is null) as perfis_orfaos from public.profiles;
@@ -42,30 +89,28 @@ relatório com os itens abaixo.
 
 4. CONFIG DO AUTH (GoTrue) — só ler variáveis de ambiente do container auth:
    - GOTRUE_SITE_URL (deveria ser https://totum.pixelsystem.online)
-   - GOTRUE_URI_ALLOW_LIST (deveria incluir https://totum.pixelsystem.online e subdomínios *.pixelsystem.online)
+   - GOTRUE_URI_ALLOW_LIST (deveria incluir https://totum.pixelsystem.online e *.pixelsystem.online)
    - GOTRUE_EXTERNAL_GOOGLE_ENABLED / CLIENT_ID configurado? (login Google depende disso)
    - GOTRUE_DISABLE_SIGNUP
-   - Os valores de GOTRUE_JWT_SECRET NÃO devem ser incluídos na resposta — apenas confirme
-     que a chave ANON informada no item 2 foi assinada com o JWT secret atual da stack
-     (ou seja, que a stack não teve o JWT secret trocado depois da geração das chaves).
+   - NÃO inclua GOTRUE_JWT_SECRET na resposta — apenas confirme que a chave ANON do item 2 foi
+     assinada com o JWT secret atual da stack (stack não teve o secret trocado após gerar as chaves).
 
 5. FUNCTIONS
-   - Liste quais edge functions estão deployadas no container de functions
-     (esperadas: bootstrap-admin, admin-update-user, api-v1, asaas-proxy, asaas-webhook,
-     archive-tasks, generate-api-key, generate-checklists, generate-recurring-tasks,
-     generate-tasks, provision-subdomain).
+   - Quais edge functions estão deployadas (esperadas 13: bootstrap-admin, admin-update-user,
+     generate-api-key, api-v1, asaas-proxy, asaas-webhook, whatsapp-webhook, provision-subdomain,
+     generate-tasks, generate-checklists, archive-tasks, generate-recurring-tasks).
 
-Formato da resposta: um relatório em markdown com cada seção acima, incluindo os
-resultados brutos das queries. Não execute nada além do que foi pedido.
+Formato: relatório markdown com cada seção, resultados brutos das queries. Nada além do pedido.
 ```
 
 ---
 
-## PROMPT 2 — Criação de usuários (SÓ rodar depois do relatório do Prompt 1, se os dados estiverem lá)
+## PROMPT 2 — Criação de usuários (SÓ rodar se o Prompt 1 seção 0 confirmar que É o banco do Totum, sem contaminação uPixel)
 
 ```
-Contexto: mesma stack Supabase self-hosted (https://supa.grupototum.com). O diagnóstico
-anterior confirmou que o banco do Totum System está íntegro nesta stack. Agora execute,
+Contexto: a stack self-hosted foi CONFIRMADA como o banco do Totum System (seção 0 do diagnóstico
+bateu com o baseline da auditoria e sem tabelas/dados do uPixel misturados). Use o host que o
+diagnóstico apontou como correto. Agora execute,
 usando a service_role key LOCALMENTE (sem expô-la na resposta):
 
 1. Criar/garantir o usuário master:
@@ -99,12 +144,22 @@ Não altere mais nada além do descrito. Não exponha a service_role key nem sen
 
 ## Depois disso — passos na Vercel (Israel, manual, ~2 min)
 
+**Só execute após o Prompt 1 confirmar a identidade da stack.** Use como `VITE_SUPABASE_URL` o
+host que o diagnóstico apontou como o banco DEDICADO do Totum — provavelmente `https://supa.grupototum.com`
+se a seção 0 confirmar que não há contaminação com uPixel; senão, o host da stack `supabase-sistema`
+(o runbook previa `https://system.grupototum.com`, que hoje não está servindo — pode precisar ser
+levantada/repontada antes).
+
 1. https://vercel.com → projeto do Totum System → **Settings → Environment Variables** (ambiente Production):
-   - `VITE_SUPABASE_URL` = `https://supa.grupototum.com`
+   - `VITE_SUPABASE_URL` = `<host confirmado pelo diagnóstico>`
    - `VITE_SUPABASE_PUBLISHABLE_KEY` = `<chave ANON devolvida pelo Prompt 1>`
 2. **Deployments → Redeploy** no último deployment (as env vars só entram no bundle num build novo).
 3. Testar em aba anônima: `https://totum.pixelsystem.online/login` deve mostrar o formulário
    e aceitar os logins antigos (os usuários migrados continuam com as senhas de sempre).
 
+> Nota: os fixes de código desta branch (`useHasAdmin` falha-seguro + visibilidade de órfãos) já
+> ajudam mesmo antes do repoint — mas o login só volta de fato quando `VITE_SUPABASE_URL` apontar
+> para um banco vivo e correto. O repoint da env é o passo que resolve o incidente.
+
 > Segurança: a senha compartilhada Totum@ADM2026 já apareceu em chats/docs — depois que
-> o acesso voltar, recomendo cada usuário trocar a própria senha, e trocar a do admin.
+> o acesso voltar, cada usuário deve trocar a própria senha, e a do admin deve ser rotacionada.
