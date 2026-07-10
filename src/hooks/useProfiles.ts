@@ -39,7 +39,12 @@ export function useProfiles() {
         .order("full_name");
 
       if (tenant?.organization_id) {
-        query = query.eq("organization_id", tenant.organization_id);
+        // Inclui perfis com organization_id NULL (órfãos de signups antigos):
+        // .eq() nunca casa NULL, o que os tornava invisíveis para o admin em
+        // /usuarios — impossibilitando aprová-los ou corrigi-los pela UI.
+        query = query.or(
+          `organization_id.eq.${tenant.organization_id},organization_id.is.null`
+        );
       }
 
       const { data, error } = await query;
