@@ -4,11 +4,17 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Schema do PostgREST. Default 'public'; configurável por env para deploys
+// cujo banco exponha as tabelas do app em outro schema.
+const SUPABASE_SCHEMA = import.meta.env.VITE_SUPABASE_SCHEMA || 'public';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  db: {
+    schema: SUPABASE_SCHEMA as 'public',
+  },
   auth: {
     storage: localStorage,
     persistSession: true,
