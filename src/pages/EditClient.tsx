@@ -225,7 +225,7 @@ export default function EditClient() {
       industry: form.industry || null, business_description: form.business_description || null, products_services: form.products_services || null, time_in_market: form.time_in_market || null, company_size: form.company_size || null, monthly_revenue: form.monthly_revenue || null,
       main_niche: form.main_niche || null, main_pains: form.main_pains || null, desires: form.desires || null, age_min: form.age_min, age_max: form.age_max, gender: form.gender, location: form.location || null, social_class: form.social_class || null, brand_tone: form.brand_tone || null,
       primary_color: form.primary_color, secondary_color: form.secondary_color, fonts: form.fonts || null, visual_elements: form.visual_elements || null, visual_personality: form.visual_personality || null,
-      support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, terms_accepted: form.terms_accepted,
+      support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, additional_info: form.additional_info || null, terms_accepted: form.terms_accepted,
       updated_at: new Date().toISOString(),
     } as any).eq("id", clientId);
     setSaving(false);
