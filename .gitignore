@@ -68,3 +68,6 @@ src/stark-api/dist/
 stark-api/node_modules/
 stark-api/dist/
 .env*.local
+
+# Claude Code local config
+.claude/

@@ -240,7 +240,7 @@ function AsaasConfigPanel() {
           />
           <p className="text-xs text-muted-foreground">
             URL do webhook: <code className="text-xs bg-muted px-1 py-0.5 rounded">
-              https://fgosozxvhbdhqigwzqih.supabase.co/functions/v1/asaas-webhook
+              {import.meta.env.VITE_SUPABASE_URL}/functions/v1/asaas-webhook
             </code>
           </p>
         </div>
