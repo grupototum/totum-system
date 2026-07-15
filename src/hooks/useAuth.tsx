@@ -1,11 +1,18 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+// Formato da query em loadProfile: "*, roles(name, permissions), departments(name)"
+export type Profile = Tables<"profiles"> & {
+  roles: Pick<Tables<"roles">, "name" | "permissions"> | null;
+  departments: Pick<Tables<"departments">, "name"> | null;
+};
 
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  profile: any | null;
+  profile: Profile | null;
   loading: boolean;
   isPending: boolean;
   signOut: () => Promise<void>;
@@ -25,7 +32,7 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
 
