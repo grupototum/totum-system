@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateChecklistForClient } from "./checklistService";
 
 // URL base da Edge Function proxy (resolve CORS)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://fgosozxvhbdhqigwzqih.supabase.co";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ASAAS_PROXY_URL = `${SUPABASE_URL}/functions/v1/asaas-proxy`;
 
 // ─── TIPOS (baseados na API oficial Asaas v3) ─────────────────────────────────
