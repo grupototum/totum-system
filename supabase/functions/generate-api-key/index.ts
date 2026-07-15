@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
 
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
       auth: { autoRefreshToken: false, persistSession: false },
+      db: { schema: "totum_system" },
     });
 
     // Resolve a organização do chamador.
