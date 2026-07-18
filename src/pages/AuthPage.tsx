@@ -6,7 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/contexts/TenantContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Mail, Lock, Eye, EyeOff, Loader2, Clock, User } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2, Clock } from "lucide-react";
 
 export default function AuthPage() {
   const { isPending } = useAuth();
@@ -34,10 +34,12 @@ export default function AuthPage() {
   const cardStyle = tenant?.card_color
     ? { backgroundColor: tenant.card_color }
     : undefined;
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  // Signup público removido: usuários são criados por admin (provision-subdomain /
+  // admin-update-user). O fecho autoritativo é GOTRUE_DISABLE_SIGNUP=true no self-host;
+  // isto só remove a affordance da UI. Ver split-brain de schema / org default fixa.
+  const [mode, setMode] = useState<"login" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPendingMessage, setShowPendingMessage] = useState(isPending);
@@ -87,27 +89,6 @@ export default function AuthPage() {
     }, 1500);
   };
 
-  const handleSignup = async () => {
-    if (!email || !password || !fullName) return;
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
-    } else {
-      setShowPendingMessage(true);
-      await supabase.auth.signOut();
-      setMode("login");
-    }
-  };
-
   const handleForgotPassword = async () => {
     if (!email) return;
     setLoading(true);
@@ -153,7 +134,7 @@ export default function AuthPage() {
             height={48}
           />
           <p className={`text-sm ${hasTenantBg ? "text-white/60" : "text-muted-foreground"}`}>
-            {mode === "login" ? "Acesse sua conta" : mode === "signup" ? "Criar nova conta" : "Recuperar senha"}
+            {mode === "login" ? "Acesse sua conta" : "Recuperar senha"}
           </p>
         </div>
 
@@ -180,20 +161,6 @@ export default function AuthPage() {
         {!showPendingMessage && (
           <>
             <div className={`glass-card rounded-2xl p-6 space-y-4 ${cardClass}`} style={cardStyle}>
-              {mode === "signup" && (
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" aria-hidden="true" />
-                  <Input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Nome completo"
-                    aria-label="Nome completo"
-                    autoComplete="name"
-                    className={inputCls}
-                  />
-                </div>
-              )}
-
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" aria-hidden="true" />
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Endereço de e-mail" autoComplete="email" className={inputCls} />
@@ -210,7 +177,7 @@ export default function AuthPage() {
                     aria-label="Senha"
                     autoComplete={mode === "login" ? "current-password" : "new-password"}
                     className={inputCls}
-                    onKeyDown={(e) => e.key === "Enter" && (mode === "login" ? handleLogin() : handleSignup())}
+                    onKeyDown={(e) => e.key === "Enter" && (mode === "login" ? handleLogin() : handleForgotPassword())}
                   />
                   <button
                     type="button"
@@ -230,12 +197,12 @@ export default function AuthPage() {
               )}
 
               <Button
-                onClick={mode === "login" ? handleLogin : mode === "signup" ? handleSignup : handleForgotPassword}
+                onClick={mode === "login" ? handleLogin : handleForgotPassword}
                 disabled={loading}
                 className="w-full gradient-primary border-0 text-white font-semibold rounded-xl h-11"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {mode === "login" ? "Entrar" : mode === "signup" ? "Criar Conta" : "Enviar Link"}
+                {mode === "login" ? "Entrar" : "Enviar Link"}
               </Button>
 
               {mode !== "forgot" && (
@@ -264,13 +231,11 @@ export default function AuthPage() {
               )}
             </div>
 
-            <p className="text-center text-xs text-muted-foreground">
-              {mode === "login" ? (
-                <>Não tem conta? <button onClick={() => setMode("signup")} className="text-primary/70 hover:text-primary">Criar conta</button></>
-              ) : (
-                <>Já tem conta? <button onClick={() => setMode("login")} className="text-primary/70 hover:text-primary">Entrar</button></>
-              )}
-            </p>
+            {mode !== "login" && (
+              <p className="text-center text-xs text-muted-foreground">
+                <button onClick={() => setMode("login")} className="text-primary/70 hover:text-primary">Voltar ao login</button>
+              </p>
+            )}
           </>
         )}
       </div>
