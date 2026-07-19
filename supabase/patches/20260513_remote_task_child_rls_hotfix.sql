@@ -2,6 +2,23 @@
 -- The remote database has divergent migration history and does not include the
 -- tarefa_anexos tables or the is_org_member/is_org_admin helper functions used
 -- by the local migration 20260512120000. This patch targets the live schema.
+--
+-- SUPERSEDED — 2026-07-19. Confirmed against the live database (pg_policies +
+-- pg_proc): every policy/function this patch creates for subtasks,
+-- task_checklist_items, task_comments, task_history, delivery_checklists and
+-- delivery_checklist_items already exists in schema `totum_system` (matching
+-- policyname + cmd), which is the schema the app and its RLS policies
+-- actually run against post-rebaseline. This file still targets `public` —
+-- DO NOT run it against production; it would create orphaned policies in a
+-- schema nothing queries, not fix anything. Kept for history only.
+--
+-- The storage.objects/task-attachments section below is NOT superseded —
+-- it targets a feature that was never provisioned (bucket `task-attachments`
+-- doesn't exist in storage.buckets, confirmed 2026-07-19; zero objects,
+-- zero policies reference it). can_access_task_attachment_path() exists
+-- live in totum_system but is orphaned, unused by any policy. This is a
+-- deferred/unbuilt feature, not a live security gap — see project memory
+-- for the roadmap decision before building bucket + policies from this file.
 
 BEGIN;
 
