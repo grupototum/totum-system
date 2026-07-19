@@ -1,19 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
 import { demoClients } from "@/data/demoData";
 import { getClientDisplayName } from "@/lib/clients";
+import { listClients, createClient, updateClient as updateClientRow, deleteClient as deleteClientRow, type ClientRow } from "@/data/clients.repo";
 
-export type ClientRow = Tables<"clients"> & {
-  company_name?: string | null;
-  contact_name?: string | null;
-  cnpj?: string | null;
-  contracts?: { value: number | null; plan_id: string | null; status: string; plans?: { name: string } | null }[];
-};
+export type { ClientRow };
 
 export function useClients() {
   const { isDemoMode } = useDemo();
@@ -30,18 +24,8 @@ export function useClients() {
 
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setClients([]);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("clients")
-        .select("*, contracts(value, plan_id, status, plans(name))");
-
-      if (error) throw error;
-      const sorted = ((data as ClientRow[]) || []).sort((a, b) =>
+      const data = await listClients();
+      const sorted = data.sort((a, b) =>
         getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR")
       );
       setClients(sorted);
@@ -57,10 +41,10 @@ export function useClients() {
 
   const addClient = async (values: Partial<Tables<"clients">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const payload = attachOrganizationId(values as any, tenant?.organization_id);
-    const { error } = await supabase.from("clients").insert(payload);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await createClient(values, tenant?.organization_id);
+    } catch (error) {
+      toast({ title: "Erro", description: (error as Error).message, variant: "destructive" });
       return false;
     }
     await fetch();
@@ -70,9 +54,10 @@ export function useClients() {
 
   const updateClient = async (id: string, values: Partial<Tables<"clients">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const { error } = await supabase.from("clients").update(values).eq("id", id);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateClientRow(id, values);
+    } catch (error) {
+      toast({ title: "Erro", description: (error as Error).message, variant: "destructive" });
       return false;
     }
     await fetch();
@@ -81,9 +66,10 @@ export function useClients() {
 
   const deleteClient = async (id: string) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const { error } = await supabase.from("clients").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await deleteClientRow(id);
+    } catch (error) {
+      toast({ title: "Erro", description: (error as Error).message, variant: "destructive" });
       return false;
     }
     await fetch();
