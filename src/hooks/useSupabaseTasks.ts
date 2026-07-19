@@ -1,12 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import type { Tables, Enums } from "@/integrations/supabase/types";
+import type { Enums, Tables } from "@/integrations/supabase/types";
 import { Task, TaskStatus, RecurrenceType, RecurrenceConfig } from "@/components/tasks/taskData";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
 import { demoTasks } from "@/data/demoData";
+import {
+  listTasksWithDetails,
+  updateTaskStatus as updateTaskStatusRow,
+  updateTask as updateTaskRow,
+  createTasks,
+  deleteTaskChildren,
+  deleteTaskRow,
+} from "@/data/tasks.repo";
+import { listActiveClientsForDropdown } from "@/data/clients.repo";
+import { listActiveProfilesForDropdown, listProfilesWithAvatarByOrg } from "@/data/profiles.repo";
 
 type TaskRow = Tables<"tasks">;
 
@@ -44,36 +52,11 @@ export function useSupabaseTasks() {
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setTasks([]);
-        return;
-      }
-
-      const { data: taskRows, error } = await supabase
-        .from("tasks")
-        .select(`
-          *,
-          clients(name, responsible_id),
-          plans(name),
-          subtasks(*),
-          task_checklist_items(*),
-          task_comments(*),
-          task_history(*)
-        `)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const taskRows = await listTasksWithDetails();
 
       // Fetch profiles scoped to current tenant for name resolution
       // Explicit org filter is belt-and-suspenders over RLS (master user bypasses RLS)
-      let profileQuery = supabase
-        .from("profiles")
-        .select("user_id, full_name, avatar_url");
-      if (tenant?.organization_id) {
-        profileQuery = profileQuery.eq("organization_id", tenant.organization_id);
-      }
-      const { data: profileRows } = await profileQuery;
+      const profileRows = await listProfilesWithAvatarByOrg(tenant?.organization_id);
 
       const profileMap = new Map<string, { name: string; avatar: string | null }>();
       (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
@@ -143,8 +126,11 @@ export function useSupabaseTasks() {
 
   const fetchClients = useCallback(async () => {
     if (isDemoMode) return;
-    const { data } = await supabase.from("clients").select("id, name").eq("status", "ativo").order("name");
-    setClients(data || []);
+    try {
+      setClients(await listActiveClientsForDropdown());
+    } catch {
+      setClients([]);
+    }
   }, [isDemoMode]);
 
   const fetchProfiles = useCallback(async () => {
@@ -153,18 +139,11 @@ export function useSupabaseTasks() {
     // Normal users are filtered by RLS; master users bypass RLS so we need
     // explicit org filter. Include masters that belong to the current org
     // (e.g. the sys-admin who also works as a team member in their own org).
-    let q = supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .eq("status", "ativo")
-      .order("full_name");
-    if (tenant?.organization_id) {
-      q = q.eq("organization_id", tenant.organization_id);
-    } else {
-      q = q.eq("is_master", false);
+    try {
+      setProfiles(await listActiveProfilesForDropdown(tenant?.organization_id));
+    } catch {
+      setProfiles([]);
     }
-    const { data } = await q;
-    setProfiles(data || []);
   }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => {
@@ -179,24 +158,11 @@ export function useSupabaseTasks() {
       toast({ title: "Modo Demo", description: `Status alterado para ${newStatus}` });
       return;
     }
-    const { error } = await supabase
-      .from("tasks")
-      .update({ status: newStatus as Enums<"task_status"> })
-      .eq("id", taskId);
-
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateTaskStatusRow(taskId, newStatus as Enums<"task_status">);
+    } catch (error) {
+      toast({ title: "Erro", description: (error as Error).message, variant: "destructive" });
       return;
-    }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from("task_history").insert({
-        task_id: taskId,
-        action: "Status alterado",
-        detail: `Status → ${newStatus}`,
-        user_id: user.id,
-      });
     }
 
     await fetchTasks();
@@ -207,13 +173,10 @@ export function useSupabaseTasks() {
       toast({ title: "Modo Demo", description: "Ação simulada com sucesso." });
       return true;
     }
-    const { error } = await supabase
-      .from("tasks")
-      .update(updates)
-      .eq("id", taskId);
-
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateTaskRow(taskId, updates);
+    } catch (error) {
+      toast({ title: "Erro", description: (error as Error).message, variant: "destructive" });
       return false;
     }
 
@@ -239,11 +202,10 @@ export function useSupabaseTasks() {
       toast({ title: "Modo Demo", description: `${newTasks.length} tarefas simuladas com sucesso.` });
       return true;
     }
-    const payload = newTasks.map((task) => attachOrganizationId(task, tenant?.organization_id));
-    const { error } = await supabase.from("tasks").insert(payload);
-
-    if (error) {
-      toast({ title: "Erro ao gerar tarefas", description: error.message, variant: "destructive" });
+    try {
+      await createTasks(newTasks, tenant?.organization_id);
+    } catch (error) {
+      toast({ title: "Erro ao gerar tarefas", description: (error as Error).message, variant: "destructive" });
       return false;
     }
 
@@ -259,24 +221,17 @@ export function useSupabaseTasks() {
       return true;
     }
 
-    // Delete related records in parallel before deleting the task
-    const cascadeResults = await Promise.all([
-      supabase.from("task_checklist_items").delete().eq("task_id", taskId),
-      supabase.from("task_comments").delete().eq("task_id", taskId),
-      supabase.from("task_history").delete().eq("task_id", taskId),
-      supabase.from("subtasks").delete().eq("task_id", taskId),
-    ]);
-
-    const cascadeError = cascadeResults.find(r => r.error);
-    if (cascadeError?.error) {
-      toast({ title: "Erro ao excluir registros relacionados", description: cascadeError.error.message, variant: "destructive" });
+    try {
+      await deleteTaskChildren(taskId);
+    } catch (error) {
+      toast({ title: "Erro ao excluir registros relacionados", description: (error as Error).message, variant: "destructive" });
       return false;
     }
 
-    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-
-    if (error) {
-      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+    try {
+      await deleteTaskRow(taskId);
+    } catch (error) {
+      toast({ title: "Erro ao excluir", description: (error as Error).message, variant: "destructive" });
       return false;
     }
 
