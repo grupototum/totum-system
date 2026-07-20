@@ -56,8 +56,8 @@ export async function listActiveClientsForDropdown() {
 }
 
 // Status aceita "ativo" ou "active" (dado legado inconsistente) — mesma
-// checagem tolerante que o formulário financeiro já fazia.
-export async function listActiveClientsForFinancialDropdown(): Promise<ClientRow[]> {
+// checagem tolerante que os formulários de lançamento e projeto já faziam.
+export async function listActiveClientsLenient(): Promise<ClientRow[]> {
   const { data, error } = await supabase.from("clients").select("*");
   if (error) throw error;
   return ((data as ClientRow[]) || []).filter((client) =>

@@ -20,7 +20,7 @@ import {
   listActiveExpenseTypes,
   createFinancialEntries,
 } from "@/data/financial.repo";
-import { listActiveClientsForFinancialDropdown } from "@/data/clients.repo";
+import { listActiveClientsLenient } from "@/data/clients.repo";
 
 interface Props {
   open: boolean;
@@ -55,7 +55,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
       listActiveFinancialCategories().then(setCategories).catch(() => {});
       listActiveCostCenters().then(setCostCenters).catch(() => {});
       listActiveExpenseTypes().then(setExpenseTypes).catch(() => {});
-      listActiveClientsForFinancialDropdown()
+      listActiveClientsLenient()
         .then((data) => {
           const sorted = [...data].sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
           setClients(sorted);

@@ -16,6 +16,8 @@
 | B-009 | ✅ RESOLVIDO | `src/stark-api/node_modules/` | 2187 arquivos binários (~65MB) trackeados no git | `948c250c` |
 | B-010 | ✅ RESOLVIDO | 23 arquivos `* 2.*` | Duplicatas byte-identical causavam 695+ erros de lint e risco de import errado | `bd676aeb` |
 | B-024 | ✅ RESOLVIDO | Supabase RLS | Policies de filhos de tarefas/checklists e storage `task-attachments` tinham inserts amplos para `authenticated` | Hotfix remoto `20260513_remote_task_child_rls_hotfix.sql` |
+| B-026 | ✅ RESOLVIDO | `src/hooks/useExecutiveDashboard.ts` | 15+ `as any` mascaravam schema real; achado o bug raiz do gráfico de custos sempre zerado (query de histórico não selecionava `entry_class`) | `d2917424` |
+| B-027 | ✅ RESOLVIDO | `src/services/checklistService.ts` | 3 queries Supabase ignoravam `error` no destructure → falha silenciosa (client não lança exceção, então nunca caía no catch) | `c120832b` |
 
 ## 🟡 ALTOS (esta sprint)
 
@@ -39,7 +41,7 @@
 | B-020 | 🟡 ABERTO | `src/pages/DataImport.tsx` | Heights fixas (`h-[400px]`) quebram mobile |
 | B-021 | 🟡 ABERTO | `src/hooks/useDashboardData.ts:93-123` | 11× `as unknown as Type[]` — casting duplo inseguro |
 | B-022 | 🟡 ABERTO | `tailwind.config.ts:114` | `require()` style import — 1 erro de lint |
-| B-023 | 🟡 ABERTO | `src/services/embeddingService.ts:17` | TODO antigo de OpenAI Embedding API não implementado |
+| B-023 | ✅ RESOLVIDO | `src/services/embeddingService.ts:17` | TODO antigo de OpenAI Embedding API não implementado — arquivo removido em `8dbfe1ca` (Lote 1, código morto) |
 
 ## 📌 COMO REGISTRAR NOVOS BUGS
 

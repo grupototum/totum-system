@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
 import { demoProjects } from "@/data/demoData";
+import {
+  listProjectsWithRelations,
+  createProjectWithTasks,
+  updateProject as updateProjectRepo,
+  type ProjectRow,
+} from "@/data/projects.repo";
 
-export type ProjectRow = Tables<"projects"> & {
-  clients?: { name: string } | null;
-  project_types?: { name: string } | null;
-};
+export type { ProjectRow };
 
 interface TaskDef {
   title: string;
@@ -31,12 +32,7 @@ export function useProjects() {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("*, clients(name), project_types(name)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      setProjects((data as ProjectRow[]) || []);
+      setProjects(await listProjectsWithRelations());
     } catch (err) {
       console.error("Error fetching projects:", err);
     } finally {
@@ -49,40 +45,12 @@ export function useProjects() {
   const addProject = async (values: Partial<Tables<"projects">>, tasks: TaskDef[] = []) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
 
-    // Create project
-    const payload = attachOrganizationId(values as any, tenant?.organization_id);
-    const { data: project, error } = await supabase.from("projects").insert(payload).select("id").single();
-    if (error || !project) {
-      toast({ title: "Erro", description: error?.message, variant: "destructive" });
+    try {
+      await createProjectWithTasks(values, tasks, tenant?.organization_id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
-    }
-
-    // Create tasks + subtasks
-    if (tasks.length > 0) {
-      for (const taskDef of tasks) {
-        const taskPayload = attachOrganizationId({
-          title: taskDef.title,
-          client_id: values.client_id!,
-          project_id: project.id,
-          status: "pendente" as any,
-          priority: "media" as any,
-          task_type: "outro" as any,
-        }, tenant?.organization_id);
-        const { data: task, error: taskErr } = await supabase.from("tasks").insert(taskPayload).select("id").single();
-
-        if (taskErr || !task) continue;
-
-        if (taskDef.subtasks.length > 0) {
-          await supabase.from("subtasks").insert(
-            taskDef.subtasks.map((sub, idx) => ({
-              task_id: task.id,
-              title: sub.title,
-              sort_order: idx,
-              status: "pendente" as any,
-            }))
-          );
-        }
-      }
     }
 
     await fetch();
@@ -92,9 +60,11 @@ export function useProjects() {
 
   const updateProject = async (id: string, values: Partial<Tables<"projects">>, _tasks?: TaskDef[]) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const { error } = await supabase.from("projects").update(values).eq("id", id);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateProjectRepo(id, values);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
     await fetch();

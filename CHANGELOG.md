@@ -7,6 +7,10 @@
 
 ### fix
 - Aplicar hotfix RLS em produção para filhos de tarefas, checklists de entrega e objetos `task-attachments`, removendo policies permissivas de insert para usuários autenticados — `supabase/patches/20260513_remote_task_child_rls_hotfix.sql`
+- Resolver 3 dos 7 críticos não-Auth do issue #1 (auditoria 19/06) — `d2917424`, `c120832b`
+  - `useExecutiveDashboard.ts`: remove 15+ `as any`; achado e corrigido o bug raiz do gráfico de custos sempre zerado (query de histórico faltava `entry_class` no select)
+  - `checklistService.ts`: 3 queries Supabase passam a verificar `error` (antes falhavam silenciosamente); troca `as any[]` por `TablesInsert<>`
+  - Os outros 4 críticos do issue (`useTaskAttachments.ts`, `useReveal.ts`, `useAgentExecution.ts`, `embeddingService.ts`) já não existem — removidos em `8dbfe1ca` (Lote 1). `useSupabaseTasks.ts` (cascade delete) já estava corrigido pelo repo pattern (`fc021a6b`). `useAuth.tsx` fica de fora — No-Fly Zone, requer aprovação explícita.
 
 ### chore
 - Untrack `src/stark-api/node_modules/` e `dist/` do git (2215 arquivos, ~65MB) — `948c250c`

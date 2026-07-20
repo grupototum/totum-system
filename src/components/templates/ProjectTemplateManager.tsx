@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import type { Json } from "@/integrations/supabase/types";
+import {
+  listProjectTemplatesWithTasks,
+  createProjectTemplate,
+  replaceProjectTemplateTasks,
+  deleteProjectTemplate as deleteProjectTemplateRepo,
+} from "@/data/projects.repo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,22 +55,11 @@ export function ProjectTemplateManager() {
         setTemplates([]);
         return;
       }
-      const { data, error } = await supabase
-        .from("project_templates")
-        .select("*, project_template_tasks(*)")
-        .order("name");
-      if (error) throw error;
-      const mapped = (data || []).map((t: any) => ({
-        ...t,
-        project_template_tasks: (t.project_template_tasks || []).map((task: any) => ({
-          ...task,
-          subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
-        })),
-      }));
-      setTemplates(mapped);
-    } catch (err: any) {
+      setTemplates(await listProjectTemplatesWithTasks());
+    } catch (err) {
       console.error("Erro ao carregar templates:", err);
-      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao carregar templates", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -93,43 +87,30 @@ export function ProjectTemplateManager() {
 
   const duplicate = async (t: ProjectTemplate) => {
     try {
-      const { data: newTpl, error } = await supabase
-        .from("project_templates")
-        .insert({ name: `${t.name} (cópia)`, description: t.description })
-        .select("id")
-        .single();
-      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
       const sortedTasks = (t.project_template_tasks || []).sort((a, b) => a.sort_order - b.sort_order);
-      if (sortedTasks.length > 0) {
-        await supabase.from("project_template_tasks").insert(
-          sortedTasks.map((task, idx) => ({
-            template_id: newTpl.id,
-            title: task.title,
-            description: task.description || null,
-            sort_order: idx,
-            subtasks: (task.subtasks || []) as unknown as Json,
-          }))
-        );
-      }
+      await createProjectTemplate(`${t.name} (cópia)`, t.description, sortedTasks.map((task) => ({
+        title: task.title,
+        description: task.description,
+        subtasks: task.subtasks || [],
+      })));
       toast({ title: "Template duplicado" });
       fetchTemplates();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Erro ao duplicar template:", err);
-      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao duplicar", description: message, variant: "destructive" });
     }
   };
 
   const deleteTemplate = async (id: string) => {
     try {
-      const { error: tasksErr } = await supabase.from("project_template_tasks").delete().eq("template_id", id);
-      if (tasksErr) throw tasksErr;
-      const { error } = await supabase.from("project_templates").delete().eq("id", id);
-      if (error) throw error;
+      await deleteProjectTemplateRepo(id);
       toast({ title: "Template removido" });
       fetchTemplates();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Erro ao remover template:", err);
-      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao remover", description: message, variant: "destructive" });
     }
   };
 
@@ -162,42 +143,17 @@ export function ProjectTemplateManager() {
     setSaving(true);
     try {
       if (editing) {
-        await supabase.from("project_templates").update({ name: name.trim(), description: description || null }).eq("id", editing.id);
-        await supabase.from("project_template_tasks").delete().eq("template_id", editing.id);
-        if (tasks.length > 0) {
-          await supabase.from("project_template_tasks").insert(
-            tasks.map((t, idx) => ({
-              template_id: editing.id,
-              title: t.title,
-              description: t.description || null,
-              sort_order: idx,
-              subtasks: t.subtasks as unknown as Json,
-            }))
-          );
-        }
+        await replaceProjectTemplateTasks(editing.id, name.trim(), description || null, tasks);
         toast({ title: "Template atualizado" });
       } else {
-        const { data: newTpl, error } = await supabase
-          .from("project_templates")
-          .insert({ name: name.trim(), description: description || null })
-          .select("id")
-          .single();
-        if (error || !newTpl) throw error;
-        await supabase.from("project_template_tasks").insert(
-          tasks.map((t, idx) => ({
-            template_id: newTpl.id,
-            title: t.title,
-            description: t.description || null,
-            sort_order: idx,
-            subtasks: t.subtasks as unknown as Json,
-          }))
-        );
+        await createProjectTemplate(name.trim(), description || null, tasks);
         toast({ title: "Template criado" });
       }
       setDialogOpen(false);
       fetchTemplates();
-    } catch (err: any) {
-      toast({ title: "Erro", description: err?.message, variant: "destructive" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }

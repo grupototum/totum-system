@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
 import { useTenant } from "@/contexts/TenantContext";
 import { toast } from "@/hooks/use-toast";
+import { listActiveClientsLenient } from "@/data/clients.repo";
+import { listActiveContractsForDropdown } from "@/data/contracts.repo";
+import { listActiveProjectTypes, listProjectTemplatesWithTasks } from "@/data/projects.repo";
+import { listActiveProfilesForDropdown } from "@/data/profiles.repo";
 
 interface TaskDef {
   title: string;
@@ -47,28 +50,19 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
       // Scope profiles to current tenant org (belt-and-suspenders over RLS).
       // Include masters that belong to this org so sys-admins who also work
       // in their own tenant appear as assignable team members.
-      let profilesQuery = supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name");
-      if (tenant?.organization_id) {
-        profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
-      } else {
-        profilesQuery = profilesQuery.eq("is_master", false);
-      }
-
       Promise.all([
-        supabase.from("clients").select("*"),
-        supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
-        supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
-        profilesQuery,
-        supabase.from("project_templates").select("*, project_template_tasks(*)").order("name"),
+        listActiveClientsLenient(),
+        listActiveContractsForDropdown(),
+        listActiveProjectTypes(),
+        listActiveProfilesForDropdown(tenant?.organization_id),
+        listProjectTemplatesWithTasks(),
       ]).then(([c, ct, pt, p, tpl]) => {
-        const activeClients = ((c.data as any[]) || [])
-          .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
-          .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+        const activeClients = [...c].sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
         setClients(activeClients);
-        setContracts((ct.data as any) || []);
-        setProjectTypes(pt.data || []);
-        setProfiles((p.data as any) || []);
-        setProjectTemplates(tpl.data || []);
+        setContracts(ct);
+        setProjectTypes(pt);
+        setProfiles(p);
+        setProjectTemplates(tpl);
       }).catch((err) => {
         console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
         toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
