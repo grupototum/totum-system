@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoNotifications } from "@/data/demoData";
+import { listRecentNotifications, markNotificationRead, markAllNotificationsRead } from "@/data/notifications.repo";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -22,13 +23,7 @@ export function NotificationCenter() {
       return;
     }
     if (!user) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    const items = data || [];
+    const items = await listRecentNotifications(user.id, 20).catch(() => []);
     setNotifications(items);
     setUnreadCount(items.filter((n: any) => !n.is_read).length);
   }, [user, isDemoMode]);
@@ -51,7 +46,7 @@ export function NotificationCenter() {
       setUnreadCount(prev => Math.max(0, prev - 1));
       return;
     }
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    await markNotificationRead(id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
@@ -63,7 +58,7 @@ export function NotificationCenter() {
       return;
     }
     if (!user) return;
-    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
+    await markAllNotificationsRead(user.id);
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     setUnreadCount(0);
   };
