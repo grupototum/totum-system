@@ -29,6 +29,12 @@ export async function listClients(): Promise<ClientRow[]> {
   return (data as ClientRow[]) || [];
 }
 
+export async function getClientById(id: string): Promise<ClientRow | null> {
+  const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
+  if (error) throw error;
+  return data as ClientRow;
+}
+
 export async function createClient(values: Partial<Tables<"clients">>, organizationId?: string) {
   const payload = attachOrganizationId(values as any, organizationId);
   const { error } = await supabase.from("clients").insert(payload);
