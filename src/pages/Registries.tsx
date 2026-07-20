@@ -9,7 +9,7 @@ import { RegistryTable, RegistryItem } from "@/components/registries/RegistryTab
 import { RegistryFormDialog, FormField } from "@/components/registries/RegistryFormDialog";
 import { registryGroups, RegistryConfig } from "@/components/registries/registryData";
 import { useRegistryData, registryTableMap } from "@/hooks/useRegistryData";
-import { supabase } from "@/integrations/supabase/client";
+import { listActiveIdNameOptions } from "@/data/registry.repo";
 import { toast } from "@/hooks/use-toast";
 
 const groupIcons: Record<string, typeof DollarSign> = {
@@ -45,12 +45,10 @@ export default function Registries() {
       const names: Record<string, Record<string, string>> = {};
       await Promise.all(
         sourceTables.map(async ({ key, table }) => {
-          const { data } = await supabase.from(table as any).select("id, name").eq("is_active", true).order("name");
-          if (data) {
-            opts[key] = data.map((r: any) => ({ label: r.name, value: r.id }));
-            names[key] = {};
-            data.forEach((r: any) => { names[key][r.id] = r.name; });
-          }
+          const data = await listActiveIdNameOptions(table).catch(() => []);
+          opts[key] = data.map((r) => ({ label: r.name, value: r.id }));
+          names[key] = {};
+          data.forEach((r) => { names[key][r.id] = r.name; });
         })
       );
       setDynamicOptions(opts);

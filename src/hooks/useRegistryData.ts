@@ -3,6 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoRegistryData } from "@/data/demoData";
+import {
+  listRegistryRows,
+  createRegistryRow,
+  updateRegistryRow,
+  deleteRegistryRow,
+  setRegistryRowActive,
+} from "@/data/registry.repo";
 
 // Maps frontend registry keys to Supabase table names and column mappings
 export interface RegistryTableConfig {
@@ -122,15 +129,12 @@ export function useRegistryData(registryKey: string) {
         return;
       }
 
-      const { data: rows, error } = await (supabase.from(config.table as any) as any)
-        .select("*")
-        .order("name");
-
-      if (error) throw error;
-      setData((rows || []).map((r: any) => dbToFrontend(r, config)));
-    } catch (error: any) {
+      const rows = await listRegistryRows(config.table);
+      setData(rows.map((r: any) => dbToFrontend(r, config)));
+    } catch (error) {
       console.error(`Error fetching ${config.table}:`, error);
-      toast({ title: "Erro ao carregar dados", description: error.message || "Falha ao carregar", variant: "destructive" });
+      const message = error instanceof Error ? error.message : "Falha ao carregar";
+      toast({ title: "Erro ao carregar dados", description: message, variant: "destructive" });
       setData([]);
     } finally {
       setLoading(false);
@@ -155,18 +159,19 @@ export function useRegistryData(registryKey: string) {
       dbValues.module = "geral";
     }
     
-    const { error } = await (supabase.from(config.table as any) as any)
-      .insert(dbValues as any);
-      
-    if (error) {
-      if (error.code === "23505") {
+    try {
+      await createRegistryRow(config.table, dbValues);
+    } catch (error) {
+      const code = (error as { code?: string } | null)?.code;
+      const message = error instanceof Error ? error.message : String(error);
+      if (code === "23505") {
         toast({ title: "Duplicidade detectada", description: `Já existe um registro com esse nome.`, variant: "destructive" });
       } else {
-        toast({ title: "Erro ao criar", description: error.message, variant: "destructive" });
+        toast({ title: "Erro ao criar", description: message, variant: "destructive" });
       }
       return false;
     }
-    
+
     await fetchData();
     toast({ title: "Registro criado", description: `"${values.name}" adicionado com sucesso.` });
     return true;
@@ -177,54 +182,51 @@ export function useRegistryData(registryKey: string) {
     if (!config) return false;
     
     const dbValues = frontendToDb(values, config);
-    
-    const { error } = await (supabase.from(config.table as any) as any)
-      .update(dbValues)
-      .eq("id", id);
-      
-    if (error) {
-      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+
+    try {
+      await updateRegistryRow(config.table, id, dbValues);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao atualizar", description: message, variant: "destructive" });
       return false;
     }
-    
+
     await fetchData();
     toast({ title: "Registro atualizado", description: `"${values.name}" salvo com sucesso.` });
     return true;
   };
-  
+
   const deleteItem = async (id: string, name: string): Promise<boolean> => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
-    
-    const { error } = await (supabase.from(config.table as any) as any)
-      .delete()
-      .eq("id", id);
-      
-    if (error) {
-      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+
+    try {
+      await deleteRegistryRow(config.table, id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao excluir", description: message, variant: "destructive" });
       return false;
     }
-    
+
     await fetchData();
     toast({ title: "Registro excluído", description: `"${name}" foi removido.` });
     return true;
   };
-  
+
   const toggleStatus = async (id: string, currentStatus: string, name: string): Promise<boolean> => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
-    
+
     const newActive = currentStatus !== "ativo";
-    
-    const { error } = await (supabase.from(config.table as any) as any)
-      .update({ is_active: newActive } as any)
-      .eq("id", id);
-      
-    if (error) {
-      toast({ title: "Erro ao alterar status", description: error.message, variant: "destructive" });
+
+    try {
+      await setRegistryRowActive(config.table, id, newActive);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao alterar status", description: message, variant: "destructive" });
       return false;
     }
-    
+
     await fetchData();
     toast({
       title: newActive ? "Ativado" : "Desativado",
