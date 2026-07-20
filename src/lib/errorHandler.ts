@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { createErrorLog } from "@/data/error-logs.repo";
 
 type ErrorCategory = "validation" | "permission" | "system" | "integration" | "network" | "unknown";
 
@@ -80,7 +80,7 @@ export async function logError(
   const friendly = getFriendlyError(error);
 
   try {
-    await supabase.from("error_logs").insert({
+    await createErrorLog({
       user_id: userId || null,
       error_type: friendly.category,
       message: friendly.description,

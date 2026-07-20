@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { listRoles } from "@/data/roles.repo";
+import { updateProfileAdmin } from "@/data/profiles.repo";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
@@ -38,8 +40,7 @@ function ProfileTab() {
     }
     
     const fetchRoles = async () => {
-      const { data } = await supabase.from("roles").select("id, name").order("name");
-      setRoles(data || []);
+      setRoles(await listRoles().catch(() => []));
     };
     fetchRoles();
   }, [profile]);
@@ -47,23 +48,22 @@ function ProfileTab() {
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ full_name: fullName, phone, role_id: roleId })
-      .eq("id", profile.id);
-
-    if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-    } else {
-      await supabase.rpc("log_audit", {
-        _user_id: user!.id,
-        _action: "update",
-        _entity_type: "profile",
-        _entity_id: profile.id,
-        _detail: "Perfil atualizado via configurações",
-      });
-      toast({ title: "Perfil atualizado", description: "Suas informações foram salvas." });
+    try {
+      await updateProfileAdmin(profile.id, { full_name: fullName, phone, role_id: roleId });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao salvar", description: message, variant: "destructive" });
+      setSaving(false);
+      return;
     }
+    await supabase.rpc("log_audit", {
+      _user_id: user!.id,
+      _action: "update",
+      _entity_type: "profile",
+      _entity_id: profile.id,
+      _detail: "Perfil atualizado via configurações",
+    });
+    toast({ title: "Perfil atualizado", description: "Suas informações foram salvas." });
     setSaving(false);
   };
 

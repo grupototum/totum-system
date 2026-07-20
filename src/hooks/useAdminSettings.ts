@@ -1,11 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { handleApiError } from "@/lib/errorHandler";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoCompanySettings, demoSystemSettings, demoAuditLogsList } from "@/data/demoData";
+import {
+  getOrganizationSettings,
+  upsertOrganizationSettings,
+  getCompanySettings,
+  updateCompanySettings,
+  getSystemSettings,
+  updateSystemSettings,
+} from "@/data/settings.repo";
+import { listAuditLogsFiltered } from "@/data/audit-logs.repo";
+import { listErrorLogs } from "@/data/error-logs.repo";
 
 const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
 
@@ -19,25 +28,11 @@ export function useCompanySettings() {
       if (isDemoMode) return demoCompanySettings;
 
       if (tenant?.organization_id && !tenant.fallback) {
-        const { data, error } = await supabase
-          .from("organization_settings" as any)
-          .select("*")
-          .eq("organization_id", tenant.organization_id)
-          .maybeSingle();
-
-        if (error) throw error;
-
+        const data = await getOrganizationSettings(tenant.organization_id);
         if (data) return data;
       }
 
-      const { data, error } = await supabase
-        .from("company_settings")
-        .select("*")
-        .maybeSingle();
-
-      if (error) throw error;
-
-      return data;
+      return getCompanySettings();
     },
   });
 }
@@ -53,27 +48,11 @@ export function useUpdateCompanySettings() {
       if (isDemoMode) { toast(DEMO_TOAST); return; }
 
       if (tenant?.organization_id && !tenant.fallback) {
-        const payload = {
-          organization_id: tenant.organization_id,
-          name: updates.name || "",
-          email: updates.email || null,
-          phone: updates.phone || null,
-          address: updates.address || null,
-        };
-
-        const { error } = await supabase
-          .from("organization_settings" as any)
-          .upsert(payload, { onConflict: "organization_id" });
-
-        if (error) throw error;
-
+        await upsertOrganizationSettings(tenant.organization_id, updates);
         return;
       }
 
-      const { data: existing } = await supabase.from("company_settings").select("id").limit(1).maybeSingle();
-      if (!existing) throw new Error("Configurações não encontradas");
-      const { error } = await supabase.from("company_settings").update(updates as any).eq("id", existing.id);
-      if (error) throw error;
+      await updateCompanySettings(updates);
     },
     onSuccess: () => {
       if (!isDemoMode) {
@@ -95,12 +74,7 @@ export function useSystemSettings() {
     queryKey: ["system_settings", isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return demoSystemSettings;
-      const { data, error } = await (supabase as any)
-        .from("system_settings")
-        .select("*")
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      return getSystemSettings();
     },
   });
 }
@@ -112,10 +86,7 @@ export function useUpdateSystemSettings() {
   return useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (isDemoMode) { toast(DEMO_TOAST); return; }
-      const { data: existing } = await (supabase as any).from("system_settings").select("id").limit(1).maybeSingle();
-      if (!existing) throw new Error("Configurações não encontradas");
-      const { error } = await (supabase as any).from("system_settings").update(updates as any).eq("id", existing.id);
-      if (error) throw error;
+      await updateSystemSettings(updates);
     },
     onSuccess: () => {
       if (!isDemoMode) {
@@ -137,17 +108,7 @@ export function useAuditLogs(filters?: { entityType?: string; limit?: number }) 
     queryKey: ["audit_logs", filters, isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return demoAuditLogsList;
-      let query = supabase
-        .from("audit_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(filters?.limit || 100);
-      if (filters?.entityType) {
-        query = query.eq("entity_type", filters.entityType);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      return listAuditLogsFiltered(filters);
     },
   });
 }
@@ -158,13 +119,7 @@ export function useErrorLogs() {
     queryKey: ["error_logs", isDemoMode],
     queryFn: async () => {
       if (isDemoMode) return [];
-      const { data, error } = await supabase
-        .from("error_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data;
+      return listErrorLogs(200);
     },
   });
 }

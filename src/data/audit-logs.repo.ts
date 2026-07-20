@@ -29,3 +29,17 @@ export async function createAuditLog(entry: TablesInsert<"audit_logs">) {
   const { error } = await supabase.from("audit_logs").insert(entry);
   if (error) throw error;
 }
+
+export async function listAuditLogsFiltered(filters?: { entityType?: string; limit?: number }): Promise<AuditLogRow[]> {
+  let query = supabase
+    .from("audit_logs")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(filters?.limit || 100);
+  if (filters?.entityType) {
+    query = query.eq("entity_type", filters.entityType);
+  }
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
