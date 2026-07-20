@@ -129,3 +129,109 @@ export async function createTaskFull(
 
   return taskData.id as string;
 }
+
+// Fluxo de conclusão de tarefa (Tasks.tsx handleComplete): "próxima ação"
+// cria subtask + task filha + histórico; "encerrada" cria comentário
+// opcional + histórico. Duas escritas fisicamente distintas, uma função
+// só porque o caller decide com um único payload.
+export async function recordTaskCompletion(params: {
+  taskId: string;
+  decision: "closed" | "next_action";
+  comment?: string;
+  userId?: string;
+  organizationId?: string;
+  task?: { clientId: string; type: string; contractId?: string | null; projectId?: string | null };
+  nextAction?: {
+    title: string;
+    description: string;
+    responsible_id: string;
+    due_date: string;
+    priority: string;
+  };
+}) {
+  const { taskId, decision, comment, userId, organizationId, task, nextAction } = params;
+
+  if (decision === "next_action" && nextAction && task) {
+    const { error: subErr } = await supabase.from("subtasks").insert({
+      task_id: taskId,
+      title: nextAction.title,
+      status: "pendente",
+      responsible_id: nextAction.responsible_id || null,
+      due_date: nextAction.due_date || null,
+    });
+    if (subErr) throw subErr;
+
+    const { error: taskErr } = await supabase.from("tasks").insert(attachOrganizationId({
+      title: nextAction.title,
+      description: nextAction.description || null,
+      client_id: task.clientId,
+      parent_task_id: taskId,
+      responsible_id: nextAction.responsible_id || null,
+      due_date: nextAction.due_date || null,
+      priority: nextAction.priority as any,
+      status: "pendente",
+      task_type: task.type as any,
+      contract_id: task.contractId || null,
+      project_id: task.projectId || null,
+    }, organizationId));
+    if (taskErr) throw taskErr;
+
+    if (userId) {
+      await supabase.from("task_history").insert({
+        task_id: taskId,
+        action: "Concluída com próxima ação",
+        detail: `Próxima ação criada: "${nextAction.title}"`,
+        user_id: userId,
+      });
+    }
+  } else if (decision === "closed") {
+    if (comment && userId) {
+      await supabase.from("task_comments").insert({
+        task_id: taskId,
+        content: `[Conclusão] ${comment}`,
+        user_id: userId,
+      });
+    }
+    if (userId) {
+      await supabase.from("task_history").insert({
+        task_id: taskId,
+        action: "Concluída e encerrada",
+        detail: comment ? `Comentário: ${comment}` : "Tarefa encerrada sem ações adicionais",
+        user_id: userId,
+      });
+    }
+  }
+}
+
+// Gera a próxima instância de uma task recorrente e marca a original.
+export async function generateRecurringTaskInstance(
+  task: {
+    id: string; title: string; description?: string | null; clientId: string;
+    responsibleId?: string | null; priority: string; type: string;
+    contractId?: string | null; projectId?: string | null;
+  },
+  nextDueDate: string,
+  organizationId?: string,
+) {
+  const { error: insertErr } = await supabase.from("tasks").insert(attachOrganizationId({
+    title: task.title,
+    description: task.description,
+    client_id: task.clientId,
+    responsible_id: task.responsibleId || null,
+    priority: task.priority as any,
+    status: "pendente",
+    task_type: task.type as any,
+    start_date: null,
+    due_date: nextDueDate,
+    is_recurring: false,
+    parent_task_id: task.id,
+    contract_id: task.contractId || null,
+    project_id: task.projectId || null,
+  }, organizationId));
+  if (insertErr) throw insertErr;
+
+  const { error: updateErr } = await supabase.from("tasks").update({
+    last_generated_at: new Date().toISOString(),
+  }).eq("id", task.id);
+  if (updateErr) throw updateErr;
+}

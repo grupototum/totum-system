@@ -24,7 +24,7 @@ import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
+import { recordTaskCompletion, generateRecurringTaskInstance } from "@/data/tasks.repo";
 
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
@@ -171,59 +171,16 @@ export default function Tasks() {
     const userId = user?.id;
     const task = tasks.find((t) => t.id === data.taskId);
 
-    if (data.decision === "next_action" && data.nextAction && task) {
-      // Create subtask linked to original task
-      await supabase.from("subtasks").insert({
-        task_id: data.taskId,
-        title: data.nextAction.title,
-        status: "pendente",
-        responsible_id: data.nextAction.responsible_id || null,
-        due_date: data.nextAction.due_date || null,
+    if ((data.decision === "next_action" && data.nextAction && task) || data.decision === "closed") {
+      await recordTaskCompletion({
+        taskId: data.taskId,
+        decision: data.decision,
+        comment: data.comment,
+        userId,
+        organizationId: tenant?.organization_id,
+        task: task ? { clientId: task.clientId, type: task.type, contractId: task.contractId, projectId: task.projectId } : undefined,
+        nextAction: data.nextAction,
       });
-
-      // Also create a new standalone task linked as child
-      await supabase.from("tasks").insert(attachOrganizationId({
-        title: data.nextAction.title,
-        description: data.nextAction.description || null,
-        client_id: task.clientId,
-        parent_task_id: data.taskId,
-        responsible_id: data.nextAction.responsible_id || null,
-        due_date: data.nextAction.due_date || null,
-        priority: data.nextAction.priority as any,
-        status: "pendente",
-        task_type: task.type as any,
-        contract_id: task.contractId || null,
-        project_id: task.projectId || null,
-      }, tenant?.organization_id));
-
-      // Log history
-      if (userId) {
-        await supabase.from("task_history").insert({
-          task_id: data.taskId,
-          action: "Concluída com próxima ação",
-          detail: `Próxima ação criada: "${data.nextAction.title}"`,
-          user_id: userId,
-        });
-      }
-    } else if (data.decision === "closed") {
-      // Add optional comment
-      if (data.comment && userId) {
-        await supabase.from("task_comments").insert({
-          task_id: data.taskId,
-          content: `[Conclusão] ${data.comment}`,
-          user_id: userId,
-        });
-      }
-
-      // Log history
-      if (userId) {
-        await supabase.from("task_history").insert({
-          task_id: data.taskId,
-          action: "Concluída e encerrada",
-          detail: data.comment ? `Comentário: ${data.comment}` : "Tarefa encerrada sem ações adicionais",
-          user_id: userId,
-        });
-      }
     }
 
     // --- Recurrence Logic ---
@@ -237,25 +194,15 @@ export default function Tasks() {
       const isEnded = task.recurrenceEndDate && new Date(nextDueDate) > new Date(task.recurrenceEndDate);
 
       if (!isEnded) {
-        await supabase.from("tasks").insert(attachOrganizationId({
-          title: task.title,
-          description: task.description,
-          client_id: task.clientId,
-          responsible_id: task.responsibleId || null,
-          priority: task.priority as any,
-          status: "pendente",
-          task_type: task.type as any,
-          start_date: null,
-          due_date: nextDueDate,
-          is_recurring: false,
-          parent_task_id: task.id,
-          contract_id: task.contractId || null,
-          project_id: task.projectId || null,
-        }, tenant?.organization_id));
-        
-        await supabase.from("tasks").update({
-          last_generated_at: new Date().toISOString()
-        }).eq("id", task.id);
+        await generateRecurringTaskInstance(
+          {
+            id: task.id, title: task.title, description: task.description, clientId: task.clientId,
+            responsibleId: task.responsibleId, priority: task.priority, type: task.type,
+            contractId: task.contractId, projectId: task.projectId,
+          },
+          nextDueDate,
+          tenant?.organization_id,
+        );
       }
     }
 
