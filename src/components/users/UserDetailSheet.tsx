@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { ProfileRow, RoleRow } from "@/hooks/useProfiles";
+import { updateProfileAdmin } from "@/data/profiles.repo";
+import { listAuditLogsForEntity, createAuditLog } from "@/data/audit-logs.repo";
 import { PermissionMatrix } from "./PermissionMatrix";
 import { PermissionsMap, buildEmptyAccess } from "./permissionsData";
 import {
@@ -81,17 +83,10 @@ export function UserDetailSheet({
   useEffect(() => {
     if (tab === "historico" && profile) {
       setLogsLoading(true);
-      supabase
-        .from("audit_logs")
-        .select("*")
-        .eq("entity_type", "profile")
-        .eq("entity_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(50)
-        .then(({ data }) => {
-          setAuditLogs(data || []);
-          setLogsLoading(false);
-        });
+      listAuditLogsForEntity("profile", profile.id, 50)
+        .then((data) => setAuditLogs(data))
+        .catch(() => setAuditLogs([]))
+        .finally(() => setLogsLoading(false));
     }
   }, [tab, profile]);
 
@@ -117,10 +112,11 @@ export function UserDetailSheet({
       commission_type: form.commission_type || "percentual",
     };
 
-    const { error } = await supabase.from("profiles").update(updates as any).eq("id", profile.id);
-
-    if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+    try {
+      await updateProfileAdmin(profile.id, updates as any);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao salvar", description: message, variant: "destructive" });
       setSaving(false);
       return;
     }
@@ -128,7 +124,7 @@ export function UserDetailSheet({
     // Log audit
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await supabase.from("audit_logs").insert({
+      await createAuditLog({
         user_id: user.id,
         action: "Perfil atualizado",
         entity_type: "profile",
@@ -297,7 +293,7 @@ export function UserDetailSheet({
                     {profile.status === "ativo" ? (
                       <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
                         onClick={async () => {
-                          await supabase.from("profiles").update({ status: "bloqueado" as any }).eq("id", profile.id);
+                          await updateProfileAdmin(profile.id, { status: "bloqueado" as any });
                           toast({ title: "Usuário bloqueado" });
                           onRefresh();
                         }}>
@@ -306,7 +302,7 @@ export function UserDetailSheet({
                     ) : (
                       <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400"
                         onClick={async () => {
-                          await supabase.from("profiles").update({ status: "ativo" as any }).eq("id", profile.id);
+                          await updateProfileAdmin(profile.id, { status: "ativo" as any });
                           toast({ title: "Usuário ativado" });
                           onRefresh();
                         }}>
@@ -325,7 +321,7 @@ export function UserDetailSheet({
                     <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
                       onClick={async () => {
                         if (!confirm("Tem certeza que deseja excluir/desativar este membro?")) return;
-                        await supabase.from("profiles").update({ status: "inativo" as any, role_id: null }).eq("id", profile.id);
+                        await updateProfileAdmin(profile.id, { status: "inativo" as any, role_id: null });
                         toast({ title: "Membro excluído" });
                         onOpenChange(false);
                         onRefresh();

@@ -4,6 +4,7 @@ import { Mail, Briefcase, Loader2, Users, Filter } from "lucide-react";
 import { useProfiles, useRoles, useDepartments } from "@/hooks/useProfiles";
 import { UserDetailSheet } from "@/components/users/UserDetailSheet";
 import { ProfileRow } from "@/hooks/useProfiles";
+import { getProfileWithRelations } from "@/data/profiles.repo";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -152,13 +153,11 @@ export default function Team() {
         onRefresh={() => {
           refetch();
           if (selectedProfile && !isDemoMode) {
-            supabase.from("profiles")
-              .select("*, roles(name, permissions), departments(name)")
-              .eq("id", selectedProfile.id)
-              .single()
-              .then(({ data }) => {
-                if (data) setSelectedProfile(data as ProfileRow);
-              });
+            getProfileWithRelations(selectedProfile.id)
+              .then((data) => {
+                if (data) setSelectedProfile(data);
+              })
+              .catch(() => {});
           }
         }}
         isAdmin={isAdmin}

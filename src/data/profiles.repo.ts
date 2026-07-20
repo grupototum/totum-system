@@ -1,7 +1,47 @@
-// Camada de acesso a dados de `profiles`. Mínimo por enquanto — só o caso de
-// uso que existia (dropdown de responsáveis); expandir por caso de uso real,
+// Camada de acesso a dados de `profiles`. Expandir por caso de uso real,
 // não especular.
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+export type ProfileRow = Tables<"profiles"> & {
+  roles?: { name: string; permissions: any } | null;
+  departments?: { name: string } | null;
+};
+
+export async function listProfilesForAdmin(organizationId?: string): Promise<ProfileRow[]> {
+  let query = supabase
+    .from("profiles")
+    .select("*, roles(name, permissions), departments(name)")
+    .order("full_name");
+
+  // Explicit org filter on top of RLS: master users bypass RLS and would
+  // otherwise see profiles from ALL organizations.
+  if (organizationId) {
+    // Inclui perfis com organization_id NULL (órfãos de signups antigos):
+    // .eq() nunca casa NULL, o que os tornava invisíveis para o admin em
+    // /usuarios — impossibilitando aprová-los ou corrigi-los pela UI.
+    query = query.or(`organization_id.eq.${organizationId},organization_id.is.null`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data as ProfileRow[]) || [];
+}
+
+export async function getProfileWithRelations(id: string): Promise<ProfileRow | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*, roles(name, permissions), departments(name)")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data as ProfileRow;
+}
+
+export async function updateProfileAdmin(id: string, updates: Partial<Tables<"profiles">>) {
+  const { error } = await supabase.from("profiles").update(updates).eq("id", id);
+  if (error) throw error;
+}
 
 export async function listActiveProfilesForDropdown(organizationId?: string) {
   let query = supabase
