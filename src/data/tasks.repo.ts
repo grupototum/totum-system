@@ -33,6 +33,15 @@ export async function listTasksWithDetails(): Promise<any[]> {
   return data || [];
 }
 
+// Usada pelo dashboard executivo (useExecutiveDashboard).
+export async function listTasksForDashboard() {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("id, title, status, priority, due_date, responsible_id, clients(*)");
+  if (error) throw error;
+  return data || [];
+}
+
 export async function updateTaskStatus(taskId: string, newStatus: Enums<"task_status">) {
   const { error } = await supabase.from("tasks").update({ status: newStatus }).eq("id", taskId);
   if (error) throw error;

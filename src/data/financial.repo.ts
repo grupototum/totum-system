@@ -56,3 +56,25 @@ export async function countActiveCostCenters() {
   if (error) throw error;
   return count || 0;
 }
+
+// Usadas pelo dashboard executivo (useExecutiveDashboard).
+export async function listFinancialEntriesForPeriod(periodStart: string, periodEnd: string) {
+  const { data, error } = await supabase
+    .from("financial_entries")
+    .select("*, clients(*), financial_categories(name)")
+    .gte("due_date", periodStart)
+    .lt("due_date", periodEnd);
+  if (error) throw error;
+  return data || [];
+}
+
+export async function listPaidFinancialEntriesForHistory(historyStart: string, periodEnd: string) {
+  const { data, error } = await supabase
+    .from("financial_entries")
+    .select("value, type, due_date, status, entry_class")
+    .gte("due_date", historyStart)
+    .lt("due_date", periodEnd)
+    .eq("status", "pago");
+  if (error) throw error;
+  return data || [];
+}

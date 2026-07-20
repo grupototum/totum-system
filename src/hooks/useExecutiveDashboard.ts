@@ -7,6 +7,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getClientDisplayName } from "@/lib/clients";
 import type { Tables } from "@/integrations/supabase/types";
+import { listFinancialEntriesForPeriod, listPaidFinancialEntriesForHistory } from "@/data/financial.repo";
+import { listActiveContractsWithClients } from "@/data/contracts.repo";
+import { listChecklistFulfillmentSample } from "@/data/deliveries.repo";
+import { listTasksForDashboard } from "@/data/tasks.repo";
+import { listProfilesWithAvatarByOrg } from "@/data/profiles.repo";
 
 // entry_class/nature existem na coluna do banco mas ainda não saíram no types.ts
 // gerado (pendente regeneração contra o schema atual) — tipados aqui manualmente.
@@ -106,43 +111,15 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
       // Histórico: 6 meses atrás — calculado aqui para usar no Promise.all
       const historyStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().split("T")[0];
 
-      // Query de profiles com filtro de org (belt-and-suspenders sobre RLS)
-      // Scope to current tenant org — master user bypasses RLS and would see all orgs
-      let profilesQuery = supabase.from("profiles").select("user_id, full_name, avatar_url");
-      if (tenant?.organization_id) profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
-
       // --- Todas as queries em paralelo ---
-      const [
-        { data: entries },
-        { data: contracts },
-        { data: checklists },
-        { data: tasks },
-        { data: profileRows },
-        { data: historyEntries },
-      ] = await Promise.all([
-        supabase
-          .from("financial_entries")
-          .select("*, clients(*), financial_categories(name)")
-          .gte("due_date", periodStart)
-          .lt("due_date", periodEnd),
-        supabase
-          .from("contracts")
-          .select("value, client_id, clients(*), status")
-          .eq("status", "ativo"),
-        supabase
-          .from("delivery_checklists")
-          .select("fulfillment_pct, clients(*)")
-          .limit(100),
-        supabase
-          .from("tasks")
-          .select("id, title, status, priority, due_date, responsible_id, clients(*)"),
-        profilesQuery,
-        supabase
-          .from("financial_entries")
-          .select("value, type, due_date, status, entry_class")
-          .gte("due_date", historyStart)
-          .lt("due_date", periodEnd)
-          .eq("status", "pago"),
+      const [entries, contracts, checklists, tasks, profileRows, historyEntries] = await Promise.all([
+        listFinancialEntriesForPeriod(periodStart, periodEnd),
+        listActiveContractsWithClients(),
+        listChecklistFulfillmentSample(100),
+        listTasksForDashboard(),
+        // Scope to current tenant org — master user bypasses RLS and would see all orgs
+        listProfilesWithAvatarByOrg(tenant?.organization_id),
+        listPaidFinancialEntriesForHistory(historyStart, periodEnd),
       ]);
 
       // --- Métricas financeiras ---

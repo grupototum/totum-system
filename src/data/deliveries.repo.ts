@@ -14,6 +14,16 @@ export async function listChecklistsForClient(clientId: string) {
   return data || [];
 }
 
+// Amostra usada pelo dashboard executivo (useExecutiveDashboard) pra calcular fulfillment médio por cliente.
+export async function listChecklistFulfillmentSample(limit = 100) {
+  const { data, error } = await supabase
+    .from("delivery_checklists")
+    .select("fulfillment_pct, clients(*)")
+    .limit(limit);
+  if (error) throw error;
+  return data || [];
+}
+
 export async function updateChecklistItemStatus(itemId: string, updates: Partial<Tables<"delivery_checklist_items">>) {
   const { error } = await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
   if (error) throw error;

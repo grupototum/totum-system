@@ -18,6 +18,16 @@ export async function listActiveContractsForDropdown() {
   return data || [];
 }
 
+// Usada pelo dashboard executivo (useExecutiveDashboard) — só contratos ativos com o cliente.
+export async function listActiveContractsWithClients() {
+  const { data, error } = await supabase
+    .from("contracts")
+    .select("value, client_id, clients(*), status")
+    .eq("status", "ativo");
+  if (error) throw error;
+  return data || [];
+}
+
 export async function listActiveContractTypes() {
   const { data, error } = await supabase.from("contract_types").select("id, name").eq("is_active", true).order("name");
   if (error) throw error;
