@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
 import { demoContracts } from "@/data/demoData";
+import {
+  listContractsWithRelations,
+  createContract,
+  updateContract as updateContractRepo,
+  generateDeliveriesForActivatedContract,
+  type ContractRow,
+} from "@/data/contracts.repo";
 
-export type ContractRow = Tables<"contracts"> & {
-  clients?: { name: string } | null;
-  plans?: { name: string } | null;
-  contract_types?: { name: string } | null;
-};
+export type { ContractRow };
 
 export function useContracts() {
   const { isDemoMode } = useDemo();
@@ -27,12 +28,7 @@ export function useContracts() {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("contracts")
-        .select("*, clients(name), plans(name), contract_types(name)")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      setContracts((data as ContractRow[]) || []);
+      setContracts(await listContractsWithRelations());
     } catch (err) {
       console.error("Error fetching contracts:", err);
     } finally {
@@ -44,10 +40,11 @@ export function useContracts() {
 
   const addContract = async (values: Partial<Tables<"contracts">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    const payload = attachOrganizationId(values as any, tenant?.organization_id);
-    const { error } = await supabase.from("contracts").insert(payload);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await createContract(values, tenant?.organization_id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
     await fetch();
@@ -57,13 +54,15 @@ export function useContracts() {
 
   const updateContract = async (id: string, values: Partial<Tables<"contracts">>) => {
     if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
-    
+
     const prevContract = contracts.find(c => c.id === id);
     const isActivating = values.status === 'ativo' && prevContract?.status !== 'ativo';
 
-    const { error } = await supabase.from("contracts").update(values).eq("id", id);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateContractRepo(id, values);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
 
@@ -71,34 +70,15 @@ export function useContracts() {
     const planId = values.plan_id || prevContract?.plan_id;
     if (isActivating && planId) {
       try {
-        const { data: modelItems } = await supabase
-          .from("delivery_model_items")
-          .select("*")
-          .eq("plan_id", planId);
-        
-        if (modelItems && modelItems.length > 0) {
-          const { data: checklist } = await supabase.from("delivery_checklists").insert({
-            client_id: prevContract?.client_id as string,
-            contract_id: id,
-            plan_id: planId,
-            period: new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date()),
-            frequency: prevContract?.billing_frequency || 'mensal',
-            fulfillment_pct: 0,
-            organization_id: tenant?.organization_id ?? null,
-          }).select().single();
-
-          if (checklist) {
-            const itemsToInsert = modelItems.map((it, idx) => ({
-              checklist_id: checklist.id,
-              name: it.name,
-              delivery_model_item_id: it.id,
-              // status: null is valid — "pendente" is not in the enum
-              sort_order: (it as any).sort_order ?? idx,
-              responsible_id: (it as any).suggested_responsible_id ?? null,
-            }));
-            await supabase.from("delivery_checklist_items").insert(itemsToInsert);
-            toast({ title: "🚀 Entregas geradas", description: `${modelItems.length} itens adicionados ao checklist.` });
-          }
+        const count = await generateDeliveriesForActivatedContract({
+          contractId: id,
+          clientId: prevContract?.client_id as string,
+          planId,
+          billingFrequency: prevContract?.billing_frequency,
+          organizationId: tenant?.organization_id,
+        });
+        if (count > 0) {
+          toast({ title: "🚀 Entregas geradas", description: `${count} itens adicionados ao checklist.` });
         }
       } catch (err) {
         console.error("Erro na automação de entregas:", err);

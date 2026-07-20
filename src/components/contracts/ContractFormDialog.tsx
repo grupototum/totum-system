@@ -6,10 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, AlertCircle, Package, Plus } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
+import { listActiveClientsLenient } from "@/data/clients.repo";
+import { listActiveContractTypes } from "@/data/contracts.repo";
+import { listActivePlans, listActivePlansAsPackageOptions } from "@/data/plans.repo";
+import { listActiveProductsWithType } from "@/data/products.repo";
 
 interface Props {
   open: boolean;
@@ -55,20 +58,18 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
   useEffect(() => {
     if (open) {
       Promise.all([
-        supabase.from("clients").select("*"),
-        supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
-        supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
-        supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name").then(r => ({ ...r, data: (r.data || []).map((p: any) => ({ id: p.id, name: p.name, total_sale: p.value })) })),
-        supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
+        listActiveClientsLenient(),
+        listActivePlans(),
+        listActiveContractTypes(),
+        listActivePlansAsPackageOptions(),
+        listActiveProductsWithType(),
       ]).then(([c, p, ct, pkg, pr]) => {
-        const activeClients = ((c.data as any[]) || [])
-          .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
-          .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+        const activeClients = [...c].sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
         setClients(activeClients);
-        setPlans((p.data as any) || []);
-        setContractTypes(ct.data || []);
-        setPackages((pkg as any).data || []);
-        setProducts((pr.data as any) || []);
+        setPlans(p);
+        setContractTypes(ct);
+        setPackages(pkg);
+        setProducts(pr as any);
       });
 
       if (editData) {
