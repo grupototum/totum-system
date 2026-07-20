@@ -4,6 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoProjects } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import {
   listProjectsWithRelations,
   createProjectWithTasks,
@@ -34,7 +35,7 @@ export function useProjects() {
     try {
       setProjects(await listProjectsWithRelations());
     } catch (err) {
-      console.error("Error fetching projects:", err);
+      reportError("Error fetching projects:", err, "projects_list");
     } finally {
       setLoading(false);
     }

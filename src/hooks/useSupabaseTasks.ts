@@ -5,6 +5,7 @@ import { Task, TaskStatus, RecurrenceType, RecurrenceConfig } from "@/components
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoTasks } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import {
   listTasksWithDetails,
   updateTaskStatus as updateTaskStatusRow,
@@ -117,7 +118,7 @@ export function useSupabaseTasks() {
 
       setTasks(mapped);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      reportError("Error fetching tasks:", error, "tasks_list");
       setTasks([]);
     } finally {
       setLoading(false);

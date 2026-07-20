@@ -6,6 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 import { attachOrganizationId } from "@/lib/tenant";
+import { reportError } from "@/lib/errorHandler";
 
 type TaskRow = Tables<"tasks">;
 
@@ -133,7 +134,7 @@ export async function createTaskFull(
       status: "pendente" as any,
     }));
     const { error: subErr } = await supabase.from("subtasks").insert(subs);
-    if (subErr) console.error("Erro ao criar subtarefas:", subErr);
+    if (subErr) reportError("Erro ao criar subtarefas:", subErr, "task_create_subtasks");
   }
 
   return taskData.id as string;

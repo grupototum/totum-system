@@ -5,6 +5,7 @@ import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoClients } from "@/data/demoData";
 import { getClientDisplayName } from "@/lib/clients";
+import { reportError } from "@/lib/errorHandler";
 import { listClients, createClient, updateClient as updateClientRow, deleteClient as deleteClientRow, type ClientRow } from "@/data/clients.repo";
 
 export type { ClientRow };
@@ -30,7 +31,7 @@ export function useClients() {
       );
       setClients(sorted);
     } catch (error) {
-      console.error("Error fetching clients:", error);
+      reportError("Error fetching clients:", error, "clients_list");
       setClients([]);
     } finally {
       setLoading(false);

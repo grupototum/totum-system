@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { reportError } from "@/lib/errorHandler";
+import {
+  listPopsWithDetailsRecent,
+  createPop,
+  updatePop,
+  replacePopSteps,
+  replacePopChecklistItems,
+  deletePop as deletePopRepo,
+} from "@/data/pops.repo";
 
 export interface PopStep {
   id: string;
@@ -28,6 +36,10 @@ export interface Pop {
   updated_at: string;
 }
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function usePops() {
   const [pops, setPops] = useState<Pop[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,14 +47,9 @@ export function usePops() {
   const fetchPops = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await (supabase as any)
-        .from("pops")
-        .select("*, pop_steps(*), pop_checklist_items(*)")
-        .order("created_at", { ascending: false });
+      const data = await listPopsWithDetailsRecent();
 
-      if (error) throw error;
-
-      const mapped: Pop[] = (data || []).map((p: any) => ({
+      const mapped: Pop[] = data.map((p: any) => ({
         id: p.id,
         title: p.title,
         category: p.category || "geral",
@@ -56,9 +63,9 @@ export function usePops() {
       }));
 
       setPops(mapped);
-    } catch (err: any) {
-      console.error("Error fetching POPs:", err);
-      toast({ title: "Erro ao carregar POPs", description: err.message, variant: "destructive" });
+    } catch (err) {
+      reportError("Error fetching POPs:", err, "pops_list");
+      toast({ title: "Erro ao carregar POPs", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -79,72 +86,37 @@ export function usePops() {
     checklist: { text: string }[];
   }) => {
     try {
-      let popId = pop.id;
+      const popInput = {
+        title: pop.title,
+        category: pop.category,
+        description: pop.description,
+        expected_outcome: pop.expected_outcome,
+        linked_task_type: pop.linked_task_type || null,
+      };
 
-      if (popId) {
-        const { error } = await (supabase as any).from("pops").update({
-          title: pop.title,
-          category: pop.category,
-          description: pop.description,
-          expected_outcome: pop.expected_outcome,
-          linked_task_type: pop.linked_task_type || null,
-        }).eq("id", popId);
-        if (error) throw error;
+      const popId = pop.id ? pop.id : await createPop(popInput);
+      if (pop.id) await updatePop(pop.id, popInput);
 
-        // Delete old steps and checklist, then re-insert
-        await (supabase as any).from("pop_steps").delete().eq("pop_id", popId);
-        await (supabase as any).from("pop_checklist_items").delete().eq("pop_id", popId);
-      } else {
-        const { data, error } = await (supabase as any).from("pops").insert({
-          title: pop.title,
-          category: pop.category,
-          description: pop.description,
-          expected_outcome: pop.expected_outcome,
-          linked_task_type: pop.linked_task_type || null,
-        }).select("id").single();
-        if (error) throw error;
-        popId = data.id;
-      }
-
-      // Insert steps
-      if (pop.steps.length > 0) {
-        const steps = pop.steps.map((s, i) => ({
-          pop_id: popId,
-          title: s.title,
-          description: s.description || "",
-          sort_order: i,
-        }));
-        await (supabase as any).from("pop_steps").insert(steps);
-      }
-
-      // Insert checklist
-      if (pop.checklist.length > 0) {
-        const items = pop.checklist.map((c, i) => ({
-          pop_id: popId,
-          text: c.text,
-          sort_order: i,
-        }));
-        await (supabase as any).from("pop_checklist_items").insert(items);
-      }
+      await replacePopSteps(popId, pop.steps);
+      await replacePopChecklistItems(popId, pop.checklist);
 
       toast({ title: pop.id ? "POP atualizado" : "POP criado", description: `"${pop.title}" salvo com sucesso.` });
       await fetchPops();
       return true;
-    } catch (err: any) {
-      toast({ title: "Erro ao salvar POP", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erro ao salvar POP", description: errorMessage(err), variant: "destructive" });
       return false;
     }
   };
 
   const deletePop = async (id: string) => {
     try {
-      const { error } = await (supabase as any).from("pops").delete().eq("id", id);
-      if (error) throw error;
+      await deletePopRepo(id);
       toast({ title: "POP excluído" });
       await fetchPops();
       return true;
-    } catch (err: any) {
-      toast({ title: "Erro ao excluir", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erro ao excluir", description: errorMessage(err), variant: "destructive" });
       return false;
     }
   };

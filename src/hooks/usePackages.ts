@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
+import { reportError } from "@/lib/errorHandler";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   listActivePackagesWithItems,
@@ -43,7 +44,7 @@ export function usePackages() {
       }));
       setPackages(sorted);
     } catch (err) {
-      console.error("Error fetching packages:", err);
+      reportError("Error fetching packages:", err, "packages_list");
     } finally {
       setLoading(false);
     }

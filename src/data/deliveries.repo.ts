@@ -14,6 +14,19 @@ export async function listChecklistsForClient(clientId: string) {
   return data || [];
 }
 
+// Usada pela tela geral de entregas (useDeliveryChecklists) — não escopada a um cliente.
+export async function listChecklistsForOrg(organizationId?: string, limit = 50) {
+  let query = supabase
+    .from("delivery_checklists")
+    .select("*, clients(name), plans(name), delivery_checklist_items(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (organizationId) query = query.eq("organization_id", organizationId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
 // Amostra usada pelo dashboard executivo (useExecutiveDashboard) pra calcular fulfillment médio por cliente.
 export async function listChecklistFulfillmentSample(limit = 100) {
   const { data, error } = await supabase

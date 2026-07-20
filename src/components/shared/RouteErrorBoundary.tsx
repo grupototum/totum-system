@@ -7,6 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { logError } from "@/lib/errorHandler";
 
 interface Props {
   children: ReactNode;
@@ -40,6 +41,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
         url: typeof window !== "undefined" ? window.location.href : "n/a",
       }
     );
+    logError(error, `route_crash:${this.props.routeName ?? "unknown"}`);
   }
 
   reset = () => {

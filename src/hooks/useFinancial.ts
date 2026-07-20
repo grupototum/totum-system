@@ -4,6 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoFinancialEntries } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 
 export type FinancialEntryRow = Tables<"financial_entries"> & {
   clients?: { name?: string | null; company_name?: string | null } | null;
@@ -60,7 +61,7 @@ export function useFinancialEntries(filters?: { month?: string; startDate?: stri
       const validEntries = ((data as FinancialEntryRow[]) || []).filter(e => Number(e.value) !== 0);
       setEntries(validEntries);
     } catch (err) {
-      console.error("Error fetching financial entries:", err);
+      reportError("Error fetching financial entries:", err, "financial_entries_list");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoDashboardData } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 
 interface DashboardData {
   mrr: number;
@@ -111,7 +112,7 @@ export function useDashboard() {
         pendingChecklists: 0,
       });
     } catch (err) {
-      console.error("[Dashboard] Erro ao carregar dados:", err);
+      reportError("[Dashboard] Erro ao carregar dados:", err, "dashboard_load");
     } finally {
       setLoading(false);
     }

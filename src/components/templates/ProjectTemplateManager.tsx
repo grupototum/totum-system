@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { reportError } from "@/lib/errorHandler";
 import {
   listProjectTemplatesWithTasks,
   createProjectTemplate,
@@ -57,7 +58,7 @@ export function ProjectTemplateManager() {
       }
       setTemplates(await listProjectTemplatesWithTasks());
     } catch (err) {
-      console.error("Erro ao carregar templates:", err);
+      reportError("Erro ao carregar templates:", err, "project_templates_load");
       const message = err instanceof Error ? err.message : String(err);
       toast({ title: "Erro ao carregar templates", description: message, variant: "destructive" });
     } finally {
@@ -96,7 +97,7 @@ export function ProjectTemplateManager() {
       toast({ title: "Template duplicado" });
       fetchTemplates();
     } catch (err) {
-      console.error("Erro ao duplicar template:", err);
+      reportError("Erro ao duplicar template:", err, "project_template_duplicate");
       const message = err instanceof Error ? err.message : String(err);
       toast({ title: "Erro ao duplicar", description: message, variant: "destructive" });
     }
@@ -108,7 +109,7 @@ export function ProjectTemplateManager() {
       toast({ title: "Template removido" });
       fetchTemplates();
     } catch (err) {
-      console.error("Erro ao remover template:", err);
+      reportError("Erro ao remover template:", err, "project_template_delete");
       const message = err instanceof Error ? err.message : String(err);
       toast({ title: "Erro ao remover", description: message, variant: "destructive" });
     }

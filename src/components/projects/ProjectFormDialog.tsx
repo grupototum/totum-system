@@ -10,6 +10,7 @@ import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
 import { useTenant } from "@/contexts/TenantContext";
 import { toast } from "@/hooks/use-toast";
+import { reportError } from "@/lib/errorHandler";
 import { listActiveClientsLenient } from "@/data/clients.repo";
 import { listActiveContractsForDropdown } from "@/data/contracts.repo";
 import { listActiveProjectTypes, listProjectTemplatesWithTasks } from "@/data/projects.repo";
@@ -64,7 +65,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setProfiles(p);
         setProjectTemplates(tpl);
       }).catch((err) => {
-        console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
+        reportError("[ProjectFormDialog] Erro ao carregar dados do formulário:", err, "project_form_load");
         toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
       });
       if (initialData) {

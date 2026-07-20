@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert } from "@/integrations/supabase/types";
+import { reportError } from "@/lib/errorHandler";
 
 /**
  * Gera um checklist de entrega para um cliente baseado no seu plano atual.
@@ -97,7 +98,7 @@ export async function generateChecklistForClient(clientId: string, period: strin
 
     return true;
   } catch (error) {
-    console.error("Erro ao gerar checklist automático:", error);
+    reportError("Erro ao gerar checklist automático:", error, "checklist_auto_generate");
     return false;
   }
 }

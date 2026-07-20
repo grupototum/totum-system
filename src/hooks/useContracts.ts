@@ -4,6 +4,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoContracts } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import {
   listContractsWithRelations,
   createContract,
@@ -30,7 +31,7 @@ export function useContracts() {
     try {
       setContracts(await listContractsWithRelations());
     } catch (err) {
-      console.error("Error fetching contracts:", err);
+      reportError("Error fetching contracts:", err, "contracts_list");
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ export function useContracts() {
           toast({ title: "🚀 Entregas geradas", description: `${count} itens adicionados ao checklist.` });
         }
       } catch (err) {
-        console.error("Erro na automação de entregas:", err);
+        reportError("Erro na automação de entregas:", err, "contract_activation_deliveries");
       }
     }
 

@@ -3,6 +3,7 @@ import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoProfilesList, demoRolesList, demoAuditLogsList, demoDepartmentsList } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   listProfilesForAdmin,
@@ -36,7 +37,7 @@ export function useProfiles() {
       const data = await listProfilesForAdmin(tenant?.organization_id);
       setProfiles(data);
     } catch (error) {
-      console.error("Error fetching profiles:", error);
+      reportError("Error fetching profiles:", error, "profiles_list");
       setProfiles([]);
     } finally {
       setLoading(false);
@@ -98,7 +99,7 @@ export function useRoles() {
     try {
       setRoles(await listRoles());
     } catch (error) {
-      console.error("Error fetching roles:", error);
+      reportError("Error fetching roles:", error, "roles_list");
       setRoles([]);
     } finally {
       setLoading(false);
@@ -197,7 +198,7 @@ export function useAuditLogs() {
     try {
       setLogs(await listAuditLogs(200));
     } catch (error) {
-      console.error("Error fetching audit logs:", error);
+      reportError("Error fetching audit logs:", error, "audit_logs_list");
       setLogs([]);
     } finally {
       setLoading(false);
@@ -224,7 +225,7 @@ export function useDepartments() {
     listDepartments()
       .then(setDepartments)
       .catch((error) => {
-        console.error("Error fetching departments:", error);
+        reportError("Error fetching departments:", error, "departments_list");
         setDepartments([]);
       });
   }, [isDemoMode]);
@@ -249,7 +250,7 @@ export function useUserRoles() {
     try {
       setAdminUserIds(new Set(await listAdminUserIds()));
     } catch (error) {
-      console.error("Error fetching user roles:", error);
+      reportError("Error fetching user roles:", error, "user_roles_list");
       setAdminUserIds(new Set());
     } finally {
       setLoading(false);

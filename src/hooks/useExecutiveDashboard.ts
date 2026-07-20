@@ -12,6 +12,7 @@ import { listActiveContractsWithClients } from "@/data/contracts.repo";
 import { listChecklistFulfillmentSample } from "@/data/deliveries.repo";
 import { listTasksForDashboard } from "@/data/tasks.repo";
 import { listProfilesWithAvatarByOrg } from "@/data/profiles.repo";
+import { reportError } from "@/lib/errorHandler";
 
 // entry_class/nature existem na coluna do banco mas ainda não saíram no types.ts
 // gerado (pendente regeneração contra o schema atual) — tipados aqui manualmente.
@@ -261,7 +262,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         financialHistory,
       });
     } catch (err) {
-      console.error("[ExecutiveDashboard] Erro ao carregar dados:", err);
+      reportError("[ExecutiveDashboard] Erro ao carregar dados:", err, "executive_dashboard_load");
       setData(EMPTY_DATA);
     } finally {
       setLoading(false);

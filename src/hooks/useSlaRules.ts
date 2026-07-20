@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { reportError } from "@/lib/errorHandler";
+import { listAllSlaRules, createSlaRule, updateSlaRule, deleteSlaRule as deleteSlaRuleRepo } from "@/data/sla-rules.repo";
 
 export interface SlaRule {
   id: string;
@@ -14,6 +15,10 @@ export interface SlaRule {
   updated_at: string;
 }
 
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function useSlaRules() {
   const [slaRules, setSlaRules] = useState<SlaRule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,16 +26,10 @@ export function useSlaRules() {
   const fetchSlaRules = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await (supabase as any)
-        .from("sla_rules")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setSlaRules(data || []);
-    } catch (err: any) {
-      console.error("Error fetching SLA rules:", err);
-      toast({ title: "Erro ao carregar SLAs", description: err.message, variant: "destructive" });
+      setSlaRules(await listAllSlaRules() as any);
+    } catch (err) {
+      reportError("Error fetching SLA rules:", err, "sla_rules_list");
+      toast({ title: "Erro ao carregar SLAs", description: errorMessage(err), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -50,46 +49,38 @@ export function useSlaRules() {
     is_active: boolean;
   }) => {
     try {
+      const payload = {
+        name: rule.name,
+        priority: rule.priority,
+        max_response_minutes: rule.max_response_minutes,
+        max_resolution_minutes: rule.max_resolution_minutes,
+        conditions: rule.conditions,
+        is_active: rule.is_active,
+      } as any;
+
       if (rule.id) {
-        const { error } = await (supabase as any).from("sla_rules").update({
-          name: rule.name,
-          priority: rule.priority,
-          max_response_minutes: rule.max_response_minutes,
-          max_resolution_minutes: rule.max_resolution_minutes,
-          conditions: rule.conditions,
-          is_active: rule.is_active,
-        }).eq("id", rule.id);
-        if (error) throw error;
+        await updateSlaRule(rule.id, payload);
       } else {
-        const { error } = await (supabase as any).from("sla_rules").insert({
-          name: rule.name,
-          priority: rule.priority,
-          max_response_minutes: rule.max_response_minutes,
-          max_resolution_minutes: rule.max_resolution_minutes,
-          conditions: rule.conditions,
-          is_active: rule.is_active,
-        });
-        if (error) throw error;
+        await createSlaRule(payload);
       }
 
       toast({ title: rule.id ? "SLA atualizado" : "SLA criado", description: `"${rule.name}" salvo com sucesso.` });
       await fetchSlaRules();
       return true;
-    } catch (err: any) {
-      toast({ title: "Erro ao salvar SLA", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erro ao salvar SLA", description: errorMessage(err), variant: "destructive" });
       return false;
     }
   };
 
   const deleteSlaRule = async (id: string) => {
     try {
-      const { error } = await (supabase as any).from("sla_rules").delete().eq("id", id);
-      if (error) throw error;
+      await deleteSlaRuleRepo(id);
       toast({ title: "SLA excluído" });
       await fetchSlaRules();
       return true;
-    } catch (err: any) {
-      toast({ title: "Erro ao excluir", description: err.message, variant: "destructive" });
+    } catch (err) {
+      toast({ title: "Erro ao excluir", description: errorMessage(err), variant: "destructive" });
       return false;
     }
   };

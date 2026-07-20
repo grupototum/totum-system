@@ -99,3 +99,11 @@ export function handleApiError(error: unknown, context?: string, userId?: string
   logError(error, context, userId);
   return friendly;
 }
+
+// Substituto de `console.error(message, error)` que também persiste em
+// error_logs (logError já lida com userId ausente/erro de persistência).
+// Mesma saída de console de antes — só adiciona o registro em banco.
+export function reportError(message: string, error: unknown, context?: string, userId?: string) {
+  console.error(message, error);
+  logError(error, context, userId);
+}

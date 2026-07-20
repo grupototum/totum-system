@@ -8,6 +8,7 @@ import * as XLSX from "xlsx";
 import { listAllClientsRaw, createClientReturningId } from "@/data/clients.repo";
 import { listFinancialCategoriesForMatching, listBankAccountsForMatching, createFinancialEntries } from "@/data/financial.repo";
 import { createImportBatch, updateImportBatchCounts, getLastCompletedImportBatch, rollbackImportBatch } from "@/data/import-batches.repo";
+import { reportError } from "@/lib/errorHandler";
 
 export interface SystemField {
   key: string;
@@ -292,7 +293,7 @@ export function useImportData() {
           await createFinancialEntries(entries as any);
           financialCount += entries.length;
         } catch (error) {
-          console.error("Insert error:", error);
+          reportError("Insert error:", error, "import_financial_entries_chunk");
         }
         setProgress(Math.round(((i + chunk.length) / validRows.length) * 100));
       }
@@ -308,7 +309,7 @@ export function useImportData() {
       setMapping({});
       setValidatedRows([]);
     } catch (err) {
-      console.error("Import error:", err);
+      reportError("Import error:", err, "import_data_execute");
       const message = err instanceof Error ? err.message : String(err);
       toast({ title: "Erro na importação", description: message, variant: "destructive" });
     } finally {
@@ -330,7 +331,7 @@ export function useImportData() {
 
       toast({ title: "Importação revertida", description: `${batch.total_records} registros removidos.` });
     } catch (err) {
-      console.error("Rollback error:", err);
+      reportError("Rollback error:", err, "import_data_rollback");
       const message = err instanceof Error ? err.message : String(err);
       toast({ title: "Erro ao reverter", description: message, variant: "destructive" });
     }

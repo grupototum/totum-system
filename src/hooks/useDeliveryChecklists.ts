@@ -4,6 +4,13 @@ import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoDeliveryChecklists } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
+import {
+  listChecklistsForOrg,
+  updateChecklistItemStatus,
+  updateChecklistItemJustification,
+  finalizeChecklist as finalizeChecklistRepo,
+} from "@/data/deliveries.repo";
 import type { Tables, Enums } from "@/integrations/supabase/types";
 
 export type ChecklistRow = Tables<"delivery_checklists"> & {
@@ -27,6 +34,15 @@ function useDebouncedCallback<T extends (...args: any[]) => any>(fn: T, delay = 
   );
 }
 
+function sortItems(c: ChecklistRow): ChecklistRow {
+  return {
+    ...c,
+    delivery_checklist_items: (c.delivery_checklist_items || [])
+      .slice()
+      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
+  };
+}
+
 export function useDeliveryChecklists() {
   const { isDemoMode } = useDemo();
   const { tenant } = useTenant();
@@ -46,35 +62,10 @@ export function useDeliveryChecklists() {
       if (!session) { setChecklists([]); return; }
 
       // RLS already scopes to the tenant; org_id filter is belt-and-suspenders
-      let query = supabase
-        .from("delivery_checklists")
-        .select(`
-          *,
-          clients(name),
-          plans(name),
-          delivery_checklist_items(* )
-        `)
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (tenant?.organization_id) {
-        query = query.eq("organization_id", tenant.organization_id);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // Sort items inside each checklist by sort_order
-      const sorted = (data as ChecklistRow[] | null)?.map(c => ({
-        ...c,
-        delivery_checklist_items: (c.delivery_checklist_items || [])
-          .slice()
-          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
-      })) ?? [];
-
-      setChecklists(sorted);
+      const data = await listChecklistsForOrg(tenant?.organization_id, 50);
+      setChecklists((data as ChecklistRow[]).map(sortItems));
     } catch (error) {
-      console.error("Error fetching checklists:", error);
+      reportError("Error fetching checklists:", error, "delivery_checklists_list");
       setChecklists([]);
     } finally {
       setLoading(false);
@@ -90,18 +81,15 @@ export function useDeliveryChecklists() {
   ) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
 
-    const updates: Record<string, unknown> = { status };
+    const updates: Partial<Tables<"delivery_checklist_items">> = { status };
     if (justification !== undefined) updates.justification = justification;
-    if (status === "entregue") updates.completed_at = new Date().toISOString();
-    else updates.completed_at = null;
+    updates.completed_at = status === "entregue" ? new Date().toISOString() : null;
 
-    const { error } = await supabase
-      .from("delivery_checklist_items")
-      .update(updates)
-      .eq("id", itemId);
-
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateChecklistItemStatus(itemId, updates);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
     await fetch();
@@ -111,33 +99,22 @@ export function useDeliveryChecklists() {
   // Debounced: only hits DB after 400ms of silence (prevents per-keystroke calls)
   const _saveJustification = useCallback(async (itemId: string, justification: string) => {
     if (isDemoMode) return true;
-    const { error } = await supabase
-      .from("delivery_checklist_items")
-      .update({ justification })
-      .eq("id", itemId);
-
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await updateChecklistItemJustification(itemId, justification);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
     // Silent refetch (no spinner flicker)
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return true;
-    const { data } = await supabase
-      .from("delivery_checklists")
-      .select("*, clients(name), plans(name), delivery_checklist_items(*)")
-      .order("created_at", { ascending: false })
-      .limit(50);
+    const data = await listChecklistsForOrg(tenant?.organization_id, 50).catch(() => null);
     if (data) {
-      setChecklists((data as ChecklistRow[]).map(c => ({
-        ...c,
-        delivery_checklist_items: (c.delivery_checklist_items || [])
-          .slice()
-          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
-      })));
+      setChecklists((data as ChecklistRow[]).map(sortItems));
     }
     return true;
-  }, [isDemoMode]);
+  }, [isDemoMode, tenant?.organization_id]);
 
   const updateItemJustification = useDebouncedCallback(_saveJustification, 400);
 
@@ -153,17 +130,11 @@ export function useDeliveryChecklists() {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error } = await supabase
-      .from("delivery_checklists")
-      .update({
-        fulfillment_pct: pct,
-        completed_at: new Date().toISOString(),
-        completed_by: user?.id || null,
-      })
-      .eq("id", checklistId);
-
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await finalizeChecklistRepo(checklistId, { fulfillmentPct: pct, completedBy: user?.id || null });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return false;
     }
 

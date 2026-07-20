@@ -10,6 +10,7 @@ import { demoClientObservations, demoProfilesList } from "@/data/demoData";
 import { listClientObservations, createClientObservation } from "@/data/client-observations.repo";
 import { listAuditLogsForEntity } from "@/data/audit-logs.repo";
 import { listProfilesWithAvatarByOrg } from "@/data/profiles.repo";
+import { reportError } from "@/lib/errorHandler";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -84,7 +85,7 @@ export function ClientHubTimeline({ clientId }: Props) {
 
       setEntries(combined);
     } catch (err) {
-      console.error("[ClientHubTimeline] Erro ao carregar timeline:", err);
+      reportError("[ClientHubTimeline] Erro ao carregar timeline:", err, "client_hub_timeline");
       setError("Erro ao carregar o histórico. Tente novamente.");
     } finally {
       setLoading(false);

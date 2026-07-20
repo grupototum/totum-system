@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoProducts, demoProductTypes } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import type { Tables } from "@/integrations/supabase/types";
 import {
   listProductsWithType,
@@ -35,7 +36,7 @@ export function useProducts() {
     try {
       setProducts(await listProductsWithType());
     } catch (err) {
-      console.error("Error fetching products:", err);
+      reportError("Error fetching products:", err, "products_list");
     } finally {
       setLoading(false);
     }
@@ -94,7 +95,7 @@ export function useProductTypes() {
     }
     listActiveProductTypes()
       .then(setTypes)
-      .catch((err) => console.error("Error fetching product types:", err));
+      .catch((err) => reportError("Error fetching product types:", err, "product_types_list"));
   }, [isDemoMode]);
 
   return types;

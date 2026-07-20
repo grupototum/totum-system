@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoRegistryData } from "@/data/demoData";
+import { reportError } from "@/lib/errorHandler";
 import {
   listRegistryRows,
   createRegistryRow,
@@ -132,7 +133,7 @@ export function useRegistryData(registryKey: string) {
       const rows = await listRegistryRows(config.table);
       setData(rows.map((r: any) => dbToFrontend(r, config)));
     } catch (error) {
-      console.error(`Error fetching ${config.table}:`, error);
+      reportError(`Error fetching ${config.table}:`, error, `registry_${config.table}_list`);
       const message = error instanceof Error ? error.message : "Falha ao carregar";
       toast({ title: "Erro ao carregar dados", description: message, variant: "destructive" });
       setData([]);

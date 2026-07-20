@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { reportError } from "@/lib/errorHandler";
 import { listApiKeys, revokeApiKey, deleteApiKey, type ApiKey } from "@/data/api-keys.repo";
 
 export type { ApiKey };
@@ -17,7 +18,7 @@ export function useApiKeys() {
     try {
       setKeys(await listApiKeys());
     } catch (error) {
-      console.error("Erro ao carregar chaves:", error);
+      reportError("Erro ao carregar chaves:", error, "api_keys_list");
       setKeys([]);
     }
     setLoading(false);
@@ -34,14 +35,14 @@ export function useApiKeys() {
       });
 
       if (error) {
-        console.error("Erro ao criar chave:", error);
+        reportError("Erro ao criar chave:", error, "api_key_create");
         return null;
       }
 
       await fetchKeys();
       return data as CreatedApiKey;
     } catch (e) {
-      console.error("Erro ao criar chave:", e);
+      reportError("Erro ao criar chave:", e, "api_key_create");
       return null;
     }
   };
@@ -51,7 +52,7 @@ export function useApiKeys() {
       await revokeApiKey(id);
       await fetchKeys();
     } catch (error) {
-      console.error("Erro ao revogar chave:", error);
+      reportError("Erro ao revogar chave:", error, "api_key_revoke");
     }
   };
 
@@ -60,7 +61,7 @@ export function useApiKeys() {
       await deleteApiKey(id);
       await fetchKeys();
     } catch (error) {
-      console.error("Erro ao excluir chave:", error);
+      reportError("Erro ao excluir chave:", error, "api_key_delete");
     }
   };
 
