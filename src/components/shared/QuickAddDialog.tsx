@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2 } from "lucide-react";
+import { listActiveIdNameOptions, createRegistryRowReturning } from "@/data/registry.repo";
 
 interface QuickAddDialogProps {
   open: boolean;
@@ -46,11 +46,11 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
   useEffect(() => {
     if (open && isProjectType) {
       Promise.all([
-        supabase.from("service_types").select("id, name").eq("is_active", true).order("name"),
-        supabase.from("revenue_types").select("id, name").eq("is_active", true).order("name"),
+        listActiveIdNameOptions("service_types"),
+        listActiveIdNameOptions("revenue_types"),
       ]).then(([st, rt]) => {
-        setServiceTypes((st.data as any[]) || []);
-        setRevenueTypes((rt.data as any[]) || []);
+        setServiceTypes(st);
+        setRevenueTypes(rt);
       });
     }
     if (!open) {
@@ -86,13 +86,7 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
       : payload;
 
     try {
-      const { data, error } = await supabase
-        .from(tableName as any)
-        .insert(scopedPayload)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await createRegistryRowReturning(tableName, scopedPayload);
 
       toast({
         title: "Sucesso",
@@ -100,17 +94,18 @@ export function QuickAddDialog({ open, onOpenChange, registryKey, title, onSucce
       });
 
       if (onSuccess) {
-        onSuccess((data as any).id, (data as any).name || name);
+        onSuccess(data.id, data.name || name);
       }
-      
+
       setName("");
       setServiceTypeId("");
       setRevenueTypeId("");
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       toast({
         title: "Erro",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
     } finally {

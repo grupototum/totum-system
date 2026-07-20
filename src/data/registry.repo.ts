@@ -36,3 +36,10 @@ export async function listActiveIdNameOptions(table: string) {
   if (error) throw error;
   return (data || []) as { id: string; name: string }[];
 }
+
+// Usado pelo QuickAddDialog — insert genérico retornando a linha criada.
+export async function createRegistryRowReturning(table: string, values: Record<string, any>) {
+  const { data, error } = await (supabase.from(table as any) as any).insert(values).select().single();
+  if (error) throw error;
+  return data as { id: string; name?: string };
+}
