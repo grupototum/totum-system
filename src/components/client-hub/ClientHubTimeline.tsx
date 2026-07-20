@@ -7,6 +7,9 @@ import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { demoClientObservations, demoProfilesList } from "@/data/demoData";
+import { listClientObservations, createClientObservation } from "@/data/client-observations.repo";
+import { listAuditLogsForEntity } from "@/data/audit-logs.repo";
+import { listProfilesWithAvatarByOrg } from "@/data/profiles.repo";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -50,29 +53,12 @@ export function ClientHubTimeline({ clientId }: Props) {
     }
 
     try {
-      const [{ data: obs, error: obsError }, { data: audits, error: auditError }] = await Promise.all([
-        supabase
-          .from("client_observations")
-          .select("*")
-          .eq("client_id", clientId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("audit_logs")
-          .select("*")
-          .eq("entity_type", "client")
-          .eq("entity_id", clientId)
-          .order("created_at", { ascending: false })
-          .limit(50),
+      const [obs, audits, profiles] = await Promise.all([
+        listClientObservations(clientId),
+        listAuditLogsForEntity("client", clientId, 50),
+        // Get profiles for user names — scoped to org to prevent cross-tenant leakage
+        listProfilesWithAvatarByOrg(tenant?.organization_id),
       ]);
-
-      if (obsError) throw obsError;
-      if (auditError) throw auditError;
-
-      // Get profiles for user names — scoped to org to prevent cross-tenant leakage
-      let profileQuery = supabase.from("profiles").select("user_id, full_name");
-      if (tenant?.organization_id) profileQuery = profileQuery.eq("organization_id", tenant.organization_id);
-      const { data: profiles, error: profileError } = await profileQuery;
-      if (profileError) throw profileError;
 
       const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
 
@@ -116,16 +102,15 @@ export function ClientHubTimeline({ clientId }: Props) {
     }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("client_observations").insert({
-      client_id: clientId,
-      user_id: user?.id || "",
-      content: newObs.trim(),
-    });
-    setSaving(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    try {
+      await createClientObservation(clientId, user?.id || "", newObs.trim());
+    } catch (error) {
+      setSaving(false);
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro", description: message, variant: "destructive" });
       return;
     }
+    setSaving(false);
     setNewObs("");
     await fetch();
     toast({ title: "Observação adicionada" });

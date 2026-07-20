@@ -7,6 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoDeliveryChecklists } from "@/data/demoData";
+import {
+  listChecklistsForClient,
+  updateChecklistItemStatus,
+  updateChecklistItemJustification,
+  finalizeChecklist as finalizeChecklistRepo,
+} from "@/data/deliveries.repo";
 import type { Enums } from "@/integrations/supabase/types";
 
 type UIStatus = "entregue" | "entregue_parcialmente" | "nao_entregue" | "nao_aplicavel" | "pending";
@@ -50,11 +56,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
-      .from("delivery_checklists")
-      .select("*, plans(name), delivery_checklist_items(*)")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: false });
+    const data = await listChecklistsForClient(clientId).catch(() => []);
 
     // Sort items inside each checklist by sort_order
     const sorted = (data || []).map((c: any) => ({
@@ -86,14 +88,14 @@ export function ClientHubDeliveries({ clientId }: Props) {
     const updates: any = { status };
     if (status === "entregue") updates.completed_at = new Date().toISOString();
     else updates.completed_at = null;
-    await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
+    await updateChecklistItemStatus(itemId, updates);
     await fetch();
   };
 
   // Silent justification save — debounced 400ms, no full refetch spinner
   const _saveJustification = useCallback(async (itemId: string, justification: string) => {
     if (isDemoMode) return;
-    await supabase.from("delivery_checklist_items").update({ justification }).eq("id", itemId);
+    await updateChecklistItemJustification(itemId, justification);
     // Optimistic local update only — no full refetch to avoid flicker while typing
     setChecklists(prev => prev.map(c => ({
       ...c,
@@ -113,9 +115,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
     const actionable = items.filter((i: any) => i.status !== "nao_aplicavel");
     const pct = actionable.length ? Math.round((actionable.filter((i: any) => i.status === "entregue").length / actionable.length) * 100) : 0;
     const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("delivery_checklists").update({
-      fulfillment_pct: pct, completed_at: new Date().toISOString(), completed_by: user?.id || null,
-    }).eq("id", checklistId);
+    await finalizeChecklistRepo(checklistId, { fulfillmentPct: pct, completedBy: user?.id || null });
     await fetch();
     toast({ title: "Checklist finalizado", description: `Cumprimento: ${pct}%` });
   };
