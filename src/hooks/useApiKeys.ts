@@ -1,16 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { listApiKeys, revokeApiKey, deleteApiKey, type ApiKey } from "@/data/api-keys.repo";
 
-export interface ApiKey {
-  id: string;
-  name: string;
-  key_prefix: string;
-  scopes: string[];
-  is_active: boolean;
-  last_used_at: string | null;
-  expires_at: string | null;
-  created_at: string;
-}
+export type { ApiKey };
 
 export interface CreatedApiKey extends ApiKey {
   key: string;
@@ -22,16 +14,11 @@ export function useApiKeys() {
 
   const fetchKeys = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("id, name, key_prefix, scopes, is_active, last_used_at, expires_at, created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) {
+    try {
+      setKeys(await listApiKeys());
+    } catch (error) {
       console.error("Erro ao carregar chaves:", error);
       setKeys([]);
-    } else {
-      setKeys(data || []);
     }
     setLoading(false);
   }, []);
@@ -60,20 +47,20 @@ export function useApiKeys() {
   };
 
   const revokeKey = async (id: string) => {
-    const { error } = await supabase.from("api_keys").update({ is_active: false }).eq("id", id);
-    if (error) {
-      console.error("Erro ao revogar chave:", error);
-    } else {
+    try {
+      await revokeApiKey(id);
       await fetchKeys();
+    } catch (error) {
+      console.error("Erro ao revogar chave:", error);
     }
   };
 
   const deleteKey = async (id: string) => {
-    const { error } = await supabase.from("api_keys").delete().eq("id", id);
-    if (error) {
-      console.error("Erro ao excluir chave:", error);
-    } else {
+    try {
+      await deleteApiKey(id);
       await fetchKeys();
+    } catch (error) {
+      console.error("Erro ao excluir chave:", error);
     }
   };
 
