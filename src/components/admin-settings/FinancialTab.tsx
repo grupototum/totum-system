@@ -1,6 +1,11 @@
 import { Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  countActiveFinancialCategories,
+  countActiveBankAccounts,
+  countActiveExpenseTypes,
+  countActiveCostCenters,
+} from "@/data/financial.repo";
 
 function StatCard({ label, count, loading }: { label: string; count: number; loading: boolean }) {
   return (
@@ -18,34 +23,22 @@ function StatCard({ label, count, loading }: { label: string; count: number; loa
 export function FinancialTab() {
   const { data: categories, isLoading: loadCat } = useQuery({
     queryKey: ["fin_categories_count"],
-    queryFn: async () => {
-      const { count } = await supabase.from("financial_categories").select("*", { count: "exact", head: true }).eq("is_active", true);
-      return count || 0;
-    },
+    queryFn: countActiveFinancialCategories,
   });
 
   const { data: accounts, isLoading: loadAcc } = useQuery({
     queryKey: ["bank_accounts_count"],
-    queryFn: async () => {
-      const { count } = await supabase.from("bank_accounts").select("*", { count: "exact", head: true }).eq("is_active", true);
-      return count || 0;
-    },
+    queryFn: countActiveBankAccounts,
   });
 
   const { data: expenseTypes, isLoading: loadExp } = useQuery({
     queryKey: ["expense_types_count"],
-    queryFn: async () => {
-      const { count } = await supabase.from("expense_types").select("*", { count: "exact", head: true }).eq("is_active", true);
-      return count || 0;
-    },
+    queryFn: countActiveExpenseTypes,
   });
 
   const { data: costCenters, isLoading: loadCC } = useQuery({
     queryKey: ["cost_centers_count"],
-    queryFn: async () => {
-      const { count } = await (supabase.from("cost_centers") as any).select("*", { count: "exact", head: true }).eq("is_active", true);
-      return count || 0;
-    },
+    queryFn: countActiveCostCenters,
   });
 
   return (

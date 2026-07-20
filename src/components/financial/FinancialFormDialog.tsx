@@ -14,6 +14,13 @@ import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2 } from "lucide-react";
 import { addMonths, format, parseISO } from "date-fns";
 import { getClientDisplayName } from "@/lib/clients";
+import {
+  listActiveFinancialCategories,
+  listActiveCostCenters,
+  listActiveExpenseTypes,
+  createFinancialEntries,
+} from "@/data/financial.repo";
+import { listActiveClientsForFinancialDropdown } from "@/data/clients.repo";
 
 interface Props {
   open: boolean;
@@ -45,23 +52,15 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
 
   useEffect(() => {
     if (open) {
-      supabase.from("financial_categories").select("id, name, type").eq("is_active", true).then(({ data }) => {
-        if (data) setCategories(data);
-      });
-      supabase.from("cost_centers").select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setCostCenters(data);
-      });
-      supabase.from("expense_types").select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setExpenseTypes(data);
-      });
-      supabase.from("clients").select("*").then(({ data }) => {
-        if (data) {
-          const activeClients = data
-            .filter((client: any) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
-            .sort((a: any, b: any) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
-          setClients(activeClients);
-        }
-      });
+      listActiveFinancialCategories().then(setCategories).catch(() => {});
+      listActiveCostCenters().then(setCostCenters).catch(() => {});
+      listActiveExpenseTypes().then(setExpenseTypes).catch(() => {});
+      listActiveClientsForFinancialDropdown()
+        .then((data) => {
+          const sorted = [...data].sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
+          setClients(sorted);
+        })
+        .catch(() => {});
     }
   }, [open]);
 
@@ -132,9 +131,7 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
         }, tenant?.organization_id));
       }
 
-      const { error } = await supabase.from("financial_entries").insert(entries);
-
-      if (error) throw error;
+      await createFinancialEntries(entries);
 
       toast({ title: "Lançamento criado", description: numInstallments > 1 ? `${numInstallments} parcelas geradas` : undefined });
       resetForm();
