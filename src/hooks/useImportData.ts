@@ -5,6 +5,9 @@ import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
+import { listAllClientsRaw, createClientReturningId } from "@/data/clients.repo";
+import { listFinancialCategoriesForMatching, listBankAccountsForMatching, createFinancialEntries } from "@/data/financial.repo";
+import { createImportBatch, updateImportBatchCounts, getLastCompletedImportBatch, rollbackImportBatch } from "@/data/import-batches.repo";
 
 export interface SystemField {
   key: string;
@@ -204,11 +207,7 @@ export function useImportData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
 
-      const { data: batch, error: batchErr } = await (supabase.from("import_batches") as any)
-        .insert({ user_id: user.id, entity_types: ["financial_entries", "clients"], total_records: validRows.length, status: "completed" })
-        .select()
-        .single();
-      if (batchErr) throw batchErr;
+      const batch = await createImportBatch(user.id, validRows.length);
 
       // Collect unique clients
       const clientMap = new Map<string, { name: string; email?: string; phone?: string; document?: string }>();
@@ -229,14 +228,14 @@ export function useImportData() {
       let clientCount = 0;
 
       if (clientMap.size > 0) {
-        const { data: existing } = await supabase.from("clients").select("*");
+        const existing = await listAllClientsRaw();
         const existingMap = new Map((existing || []).map((c: any) => [String(c.company_name || c.name || "").toLowerCase(), c.id]));
         for (const [key, client] of clientMap) {
           if (existingMap.has(key)) {
             clientIdMap.set(key, existingMap.get(key)!);
           } else {
-            const { data: created, error } = await (supabase.from("clients") as any)
-              .insert(attachOrganizationId({
+            try {
+              const createdId = await createClientReturningId({
                 company_name: client.name,
                 contact_name: client.name,
                 email: client.email || null,
@@ -244,20 +243,19 @@ export function useImportData() {
                 cnpj: client.document || null,
                 import_batch_id: batch.id,
                 status: "active",
-              }, tenant?.organization_id))
-              .select("id")
-              .single();
-            if (!error && created) {
-              clientIdMap.set(key, created.id);
+              } as any, tenant?.organization_id);
+              clientIdMap.set(key, createdId);
               clientCount++;
+            } catch {
+              // segue sem esse cliente — mesmo comportamento original (erro silencioso)
             }
           }
         }
       }
 
       // Fetch categories and bank accounts for matching
-      const { data: categories } = await supabase.from("financial_categories").select("id, name");
-      const { data: bankAccounts } = await supabase.from("bank_accounts").select("id, name");
+      const categories = await listFinancialCategoriesForMatching();
+      const bankAccounts = await listBankAccountsForMatching();
       const catMap = new Map((categories || []).map(c => [c.name.toLowerCase(), c.id]));
       const bankMap = new Map((bankAccounts || []).map(b => [b.name.toLowerCase(), b.id]));
 
@@ -290,15 +288,16 @@ export function useImportData() {
           }, tenant?.organization_id);
         });
 
-        const { error } = await (supabase.from("financial_entries") as any).insert(entries);
-        if (error) console.error("Insert error:", error);
-        else financialCount += entries.length;
+        try {
+          await createFinancialEntries(entries as any);
+          financialCount += entries.length;
+        } catch (error) {
+          console.error("Insert error:", error);
+        }
         setProgress(Math.round(((i + chunk.length) / validRows.length) * 100));
       }
 
-      await (supabase.from("import_batches") as any)
-        .update({ financial_count: financialCount, client_count: clientCount })
-        .eq("id", batch.id);
+      await updateImportBatchCounts(batch.id, financialCount, clientCount);
 
       toast({ title: "✅ Importação concluída", description: `${financialCount} lançamentos e ${clientCount} novos clientes importados.` });
 
@@ -308,9 +307,10 @@ export function useImportData() {
       setDetectedColumns([]);
       setMapping({});
       setValidatedRows([]);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Import error:", err);
-      toast({ title: "Erro na importação", description: err.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro na importação", description: message, variant: "destructive" });
     } finally {
       setImporting(false);
       setProgress(0);
@@ -319,25 +319,20 @@ export function useImportData() {
 
   const rollbackLastImport = useCallback(async () => {
     try {
-      const { data: batches } = await (supabase.from("import_batches") as any)
-        .select("*")
-        .eq("status", "completed")
-        .order("created_at", { ascending: false })
-        .limit(1);
+      const batch = await getLastCompletedImportBatch();
 
-      if (!batches || batches.length === 0) {
+      if (!batch) {
         toast({ title: "Nenhuma importação para desfazer", variant: "destructive" });
         return;
       }
 
-      const batch = batches[0];
-      const { error } = await (supabase.rpc as any)("rollback_import", { _batch_id: batch.id });
-      if (error) throw error;
+      await rollbackImportBatch(batch.id);
 
       toast({ title: "Importação revertida", description: `${batch.total_records} registros removidos.` });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Rollback error:", err);
-      toast({ title: "Erro ao reverter", description: err.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao reverter", description: message, variant: "destructive" });
     }
   }, []);
 

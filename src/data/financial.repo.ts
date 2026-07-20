@@ -57,6 +57,19 @@ export async function countActiveCostCenters() {
   return count || 0;
 }
 
+// Usadas pela importação de dados (useImportData) para casar categoria/conta pelo nome.
+export async function listFinancialCategoriesForMatching() {
+  const { data, error } = await supabase.from("financial_categories").select("id, name");
+  if (error) throw error;
+  return data || [];
+}
+
+export async function listBankAccountsForMatching() {
+  const { data, error } = await supabase.from("bank_accounts").select("id, name");
+  if (error) throw error;
+  return data || [];
+}
+
 // Usadas pelo dashboard executivo (useExecutiveDashboard).
 export async function listFinancialEntriesForPeriod(periodStart: string, periodEnd: string) {
   const { data, error } = await supabase

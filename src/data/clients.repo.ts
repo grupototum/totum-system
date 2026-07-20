@@ -41,6 +41,14 @@ export async function createClient(values: Partial<Tables<"clients">>, organizat
   if (error) throw error;
 }
 
+// Usada pela importação de dados (useImportData) — precisa do id de volta.
+export async function createClientReturningId(values: Partial<Tables<"clients">>, organizationId?: string) {
+  const payload = attachOrganizationId(values as any, organizationId);
+  const { data, error } = await supabase.from("clients").insert(payload).select("id").single();
+  if (error) throw error;
+  return data.id as string;
+}
+
 export async function updateClient(id: string, values: Partial<Tables<"clients">>) {
   const { error } = await supabase.from("clients").update(values).eq("id", id);
   if (error) throw error;
@@ -59,6 +67,13 @@ export async function listActiveClientsForDropdown() {
     .order("name");
   if (error) throw error;
   return data || [];
+}
+
+// Usada pela importação de dados (useImportData) para casar clientes existentes pelo nome.
+export async function listAllClientsRaw(): Promise<ClientRow[]> {
+  const { data, error } = await supabase.from("clients").select("*");
+  if (error) throw error;
+  return (data as ClientRow[]) || [];
 }
 
 // Status aceita "ativo" ou "active" (dado legado inconsistente) — mesma
