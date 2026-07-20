@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import {
+  listTaskTemplatesWithItems,
+  createTaskTemplate,
+  replaceTaskTemplateItems,
+  deleteTaskTemplate as deleteTaskTemplateRepo,
+} from "@/data/task-templates.repo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,15 +50,11 @@ export function TaskTemplateManager() {
         setTemplates([]);
         return;
       }
-      const { data, error } = await supabase
-        .from("task_templates")
-        .select("*, task_template_items(*)")
-        .order("name");
-      if (error) throw error;
-      setTemplates((data as any) || []);
-    } catch (err: any) {
+      setTemplates(await listTaskTemplatesWithItems());
+    } catch (err) {
       console.error("Erro ao carregar templates:", err);
-      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao carregar templates", description: message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -80,42 +82,29 @@ export function TaskTemplateManager() {
 
   const duplicate = async (t: TaskTemplate) => {
     try {
-      const { data: newTpl, error } = await supabase
-        .from("task_templates")
-        .insert({ name: `${t.name} (cópia)`, description: t.description })
-        .select("id")
-        .single();
-      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
       const sortedItems = (t.task_template_items || []).sort((a, b) => a.sort_order - b.sort_order);
-      if (sortedItems.length > 0) {
-        await supabase.from("task_template_items").insert(
-          sortedItems.map((i, idx) => ({
-            template_id: newTpl.id,
-            title: i.title,
-            description: i.description || null,
-            sort_order: idx,
-          }))
-        );
-      }
+      await createTaskTemplate(`${t.name} (cópia)`, t.description, sortedItems.map((i) => ({
+        title: i.title,
+        description: i.description,
+      })));
       toast({ title: "Template duplicado" });
       fetch();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Erro ao duplicar template:", err);
-      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao duplicar", description: message, variant: "destructive" });
     }
   };
 
   const deleteTemplate = async (id: string) => {
     try {
-      const { error: itemsErr } = await supabase.from("task_template_items").delete().eq("template_id", id);
-      if (itemsErr) throw itemsErr;
-      const { error } = await supabase.from("task_templates").delete().eq("id", id);
-      if (error) throw error;
+      await deleteTaskTemplateRepo(id);
       toast({ title: "Template removido" });
       fetch();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Erro ao remover template:", err);
-      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro ao remover", description: message, variant: "destructive" });
     }
   };
 
@@ -134,42 +123,17 @@ export function TaskTemplateManager() {
     setSaving(true);
     try {
       if (editing) {
-        await supabase.from("task_templates").update({ name: name.trim(), description: description || null }).eq("id", editing.id);
-        await supabase.from("task_template_items").delete().eq("template_id", editing.id);
-        if (items.length > 0) {
-          await supabase.from("task_template_items").insert(
-            items.map((i, idx) => ({
-              template_id: editing.id,
-              title: i.title,
-              description: i.description || null,
-              sort_order: idx,
-            }))
-          );
-        }
+        await replaceTaskTemplateItems(editing.id, name.trim(), description || null, items);
         toast({ title: "Template atualizado" });
       } else {
-        const { data: newTpl, error } = await supabase
-          .from("task_templates")
-          .insert({ name: name.trim(), description: description || null })
-          .select("id")
-          .single();
-        if (error || !newTpl) throw error;
-        if (items.length > 0) {
-          await supabase.from("task_template_items").insert(
-            items.map((i, idx) => ({
-              template_id: newTpl.id,
-              title: i.title,
-              description: i.description || null,
-              sort_order: idx,
-            }))
-          );
-        }
+        await createTaskTemplate(name.trim(), description || null, items);
         toast({ title: "Template criado" });
       }
       setDialogOpen(false);
       fetch();
-    } catch (err: any) {
-      toast({ title: "Erro", description: err?.message, variant: "destructive" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast({ title: "Erro", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }

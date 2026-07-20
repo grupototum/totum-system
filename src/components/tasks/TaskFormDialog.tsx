@@ -18,11 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2, Plus, X, FileText, BookOpen, Shield, RefreshCw } from "lucide-react";
+import { listTaskTemplatesWithItems } from "@/data/task-templates.repo";
+import { listPopsWithDetails } from "@/data/pops.repo";
+import { listActiveSlaRules } from "@/data/sla-rules.repo";
+import { createTaskFull } from "@/data/tasks.repo";
 import { Switch } from "@/components/ui/switch";
 
 interface TaskFormDialogProps {
@@ -83,24 +86,9 @@ export function TaskFormDialog({
   // Fetch templates
   useEffect(() => {
     if (!open) return;
-    supabase
-      .from("task_templates")
-      .select("*, task_template_items(*)")
-      .order("name")
-      .then(({ data }) => setTemplates(data || []));
-    // Fetch POPs
-    (supabase as any)
-      .from("pops")
-      .select("*, pop_steps(*), pop_checklist_items(*)")
-      .order("title")
-      .then(({ data }: any) => setPops(data || []));
-    // Fetch SLA rules
-    (supabase as any)
-      .from("sla_rules")
-      .select("*")
-      .eq("is_active", true)
-      .order("name")
-      .then(({ data }: any) => setSlaRules(data || []));
+    listTaskTemplatesWithItems().then(setTemplates).catch(() => {});
+    listPopsWithDetails().then(setPops).catch(() => {});
+    listActiveSlaRules().then(setSlaRules).catch(() => {});
   }, [open]);
 
   const resetForm = () => {
@@ -214,35 +202,14 @@ export function TaskFormDialog({
     };
 
     const scopedPayload = attachOrganizationId(insertPayload, tenant?.organization_id);
-    const { data: taskData, error } = await (supabase as any).from("tasks").insert(scopedPayload).select("id").single();
 
-    if (error) {
+    try {
+      await createTaskFull(scopedPayload, checklistItems, subtaskItems);
+    } catch (error) {
       setSaving(false);
-      toast({ title: "Erro ao criar tarefa", description: error.message, variant: "destructive" });
+      const message = error instanceof Error ? error.message : String(error);
+      toast({ title: "Erro ao criar tarefa", description: message, variant: "destructive" });
       return;
-    }
-
-    // Insert checklist items
-    if (checklistItems.length > 0 && taskData) {
-      const items = checklistItems.map((text, i) => ({
-        task_id: taskData.id,
-        text,
-        sort_order: i,
-        completed: false,
-      }));
-      await supabase.from("task_checklist_items").insert(items);
-    }
-
-    // Insert real subtasks
-    if (subtaskItems.length > 0 && taskData) {
-      const subs = subtaskItems.map((title, i) => ({
-        task_id: taskData.id,
-        title,
-        sort_order: i,
-        status: "pendente" as any,
-      }));
-      const { error: subErr } = await supabase.from("subtasks").insert(subs);
-      if (subErr) console.error("Erro ao criar subtarefas:", subErr);
     }
 
     setSaving(false);

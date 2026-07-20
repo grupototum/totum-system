@@ -94,3 +94,38 @@ export async function deleteTaskRow(taskId: string) {
   const { error } = await supabase.from("tasks").delete().eq("id", taskId);
   if (error) throw error;
 }
+
+// Fluxo completo de criação usado pelo TaskFormDialog: task com campos ricos
+// (SLA, recorrência etc.) + checklist + subtasks iniciais, numa só chamada.
+export async function createTaskFull(
+  insertPayload: Record<string, any>,
+  checklistTexts: string[],
+  subtaskTitles: string[]
+) {
+  const { data: taskData, error } = await (supabase as any).from("tasks").insert(insertPayload).select("id").single();
+  if (error) throw error;
+
+  if (checklistTexts.length > 0) {
+    const items = checklistTexts.map((text, i) => ({
+      task_id: taskData.id,
+      text,
+      sort_order: i,
+      completed: false,
+    }));
+    const { error: itemsErr } = await supabase.from("task_checklist_items").insert(items);
+    if (itemsErr) throw itemsErr;
+  }
+
+  if (subtaskTitles.length > 0) {
+    const subs = subtaskTitles.map((title, i) => ({
+      task_id: taskData.id,
+      title,
+      sort_order: i,
+      status: "pendente" as any,
+    }));
+    const { error: subErr } = await supabase.from("subtasks").insert(subs);
+    if (subErr) console.error("Erro ao criar subtarefas:", subErr);
+  }
+
+  return taskData.id as string;
+}
