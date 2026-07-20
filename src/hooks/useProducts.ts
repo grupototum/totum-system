@@ -1,15 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoProducts, demoProductTypes } from "@/data/demoData";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  listProductsWithType,
+  createProduct,
+  updateProduct as updateProductRepo,
+  deactivateProduct,
+  listActiveProductTypes,
+  type ProductRow,
+} from "@/data/products.repo";
 
-export type ProductRow = Tables<"products"> & {
-  product_types?: { name: string } | null;
-};
+export type { ProductRow };
 
 const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
 
 export function useProducts() {
   const { isDemoMode } = useDemo();
@@ -24,12 +33,7 @@ export function useProducts() {
       return;
     }
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*, product_types(name)")
-        .order("name");
-      if (error) throw error;
-      setProducts((data as ProductRow[]) || []);
+      setProducts(await listProductsWithType());
     } catch (err) {
       console.error("Error fetching products:", err);
     } finally {
@@ -41,8 +45,12 @@ export function useProducts() {
 
   const addProduct = async (values: Partial<Tables<"products">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-    const { error } = await supabase.from("products").insert(values as any);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await createProduct(values);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     toast({ title: "Produto criado", description: values.name });
     return true;
@@ -50,16 +58,24 @@ export function useProducts() {
 
   const updateProduct = async (id: string, values: Partial<Tables<"products">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-    const { error } = await supabase.from("products").update(values).eq("id", id);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await updateProductRepo(id, values);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     return true;
   };
 
   const deleteProduct = async (id: string) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-    const { error } = await supabase.from("products").update({ is_active: false }).eq("id", id);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await deactivateProduct(id);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     return true;
   };
@@ -76,8 +92,9 @@ export function useProductTypes() {
       setTypes(demoProductTypes as unknown as Tables<"product_types">[]);
       return;
     }
-    supabase.from("product_types").select("*").eq("is_active", true).order("name")
-      .then(({ data }) => setTypes(data || []));
+    listActiveProductTypes()
+      .then(setTypes)
+      .catch((err) => console.error("Error fetching product types:", err));
   }, [isDemoMode]);
 
   return types;

@@ -1,15 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import type { Tables } from "@/integrations/supabase/types";
+import {
+  listActivePackagesWithItems,
+  createPackage,
+  updatePackage as updatePackageRepo,
+  deactivatePackage,
+  createDeliveryModelItem,
+  updateDeliveryModelItem,
+  deleteDeliveryModelItem,
+  reorderDeliveryModelItems,
+  type PackageRow,
+} from "@/data/plans.repo";
 
-// Packages are stored in the "plans" table with label = 'pacote'
-export type PackageRow = Tables<"plans"> & {
-  items?: Tables<"delivery_model_items">[];
-};
+export type { PackageRow };
 
 const DEMO_TOAST = { title: "🎭 Modo Demonstração", description: "Ação simulada — nenhuma alteração foi salva." };
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
 
 export function usePackages() {
   const { isDemoMode } = useDemo();
@@ -24,19 +35,12 @@ export function usePackages() {
       return;
     }
     try {
-      const { data, error } = await supabase
-        .from("plans")
-        .select("*, items:delivery_model_items(*)")
-        .eq("is_active", true)
-        .order("name");
-      if (error) throw error;
-
+      const data = await listActivePackagesWithItems();
       // Sort items inside each package by sort_order
-      const sorted = ((data as PackageRow[]) || []).map(pkg => ({
+      const sorted = data.map(pkg => ({
         ...pkg,
         items: (pkg.items || []).slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
       }));
-
       setPackages(sorted);
     } catch (err) {
       console.error("Error fetching packages:", err);
@@ -49,13 +53,12 @@ export function usePackages() {
 
   const addPackage = async (values: Partial<Tables<"plans">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-
-    const { error } = await supabase
-      .from("plans")
-      .insert({ ...values, name: values.name || "Novo Pacote" } as any);
-
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
-
+    try {
+      await createPackage(values);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     toast({ title: "Pacote criado", description: values.name });
     return true;
@@ -63,18 +66,24 @@ export function usePackages() {
 
   const updatePackage = async (id: string, values: Partial<Tables<"plans">>) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-
-    const { error } = await supabase.from("plans").update(values).eq("id", id);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
-
+    try {
+      await updatePackageRepo(id, values);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     return true;
   };
 
   const deletePackage = async (id: string) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-    const { error } = await supabase.from("plans").update({ is_active: false }).eq("id", id);
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await deactivatePackage(id);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     return true;
   };
@@ -87,19 +96,21 @@ export function usePackages() {
   ) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
 
-    // Determine next sort_order
     const pkg = packages.find(p => p.id === planId);
     const maxOrder = (pkg?.items || []).reduce((m, i) => Math.max(m, i.sort_order ?? 0), -1);
 
-    const { error } = await supabase.from("delivery_model_items").insert({
-      plan_id: planId,
-      name: item.name,
-      task_type: (item.task_type ?? "outro") as any,
-      suggested_priority: (item.suggested_priority ?? "media") as any,
-      sort_order: item.sort_order ?? maxOrder + 1,
-    });
-
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await createDeliveryModelItem({
+        planId,
+        name: item.name,
+        taskType: item.task_type,
+        suggestedPriority: item.suggested_priority,
+        sortOrder: item.sort_order ?? maxOrder + 1,
+      });
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     toast({ title: "Item adicionado", description: item.name });
     return true;
@@ -110,26 +121,24 @@ export function usePackages() {
     values: Partial<Pick<Tables<"delivery_model_items">, "name" | "task_type" | "suggested_priority" | "sort_order" | "suggested_responsible_id">>
   ) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-
-    const { error } = await supabase
-      .from("delivery_model_items")
-      .update(values as any)
-      .eq("id", itemId);
-
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await updateDeliveryModelItem(itemId, values);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     return true;
   };
 
   const deleteDeliveryItem = async (itemId: string) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-
-    const { error } = await supabase
-      .from("delivery_model_items")
-      .delete()
-      .eq("id", itemId);
-
-    if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return false; }
+    try {
+      await deleteDeliveryModelItem(itemId);
+    } catch (error) {
+      toast({ title: "Erro", description: errorMessage(error), variant: "destructive" });
+      return false;
+    }
     await fetch();
     toast({ title: "Item removido" });
     return true;
@@ -138,15 +147,10 @@ export function usePackages() {
   /** Reorder all items in a plan by providing the ordered array of IDs. */
   const reorderDeliveryItems = async (planId: string, orderedIds: string[]) => {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
-
-    const updates = orderedIds.map((id, idx) =>
-      supabase.from("delivery_model_items").update({ sort_order: idx }).eq("id", id).eq("plan_id", planId)
-    );
-
-    const results = await Promise.all(updates);
-    const failed = results.find(r => r.error);
-    if (failed?.error) {
-      toast({ title: "Erro ao reordenar", description: failed.error.message, variant: "destructive" });
+    try {
+      await reorderDeliveryModelItems(planId, orderedIds);
+    } catch (error) {
+      toast({ title: "Erro ao reordenar", description: errorMessage(error), variant: "destructive" });
       return false;
     }
     await fetch();
