@@ -6,6 +6,20 @@ import { demoExecutiveDashboardData } from "@/data/demoData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getClientDisplayName } from "@/lib/clients";
+import type { Tables } from "@/integrations/supabase/types";
+
+// entry_class/nature existem na coluna do banco mas ainda não saíram no types.ts
+// gerado (pendente regeneração contra o schema atual) — tipados aqui manualmente.
+type FinancialEntryRow = Tables<"financial_entries"> & {
+  entry_class?: string | null;
+  nature?: string | null;
+  clients: Tables<"clients"> | null;
+  financial_categories: { name: string } | null;
+};
+type ContractRow = Pick<Tables<"contracts">, "value" | "client_id" | "status"> & { clients: Tables<"clients"> | null };
+type ChecklistRow = Pick<Tables<"delivery_checklists">, "fulfillment_pct"> & { clients: Tables<"clients"> | null };
+type TaskRow = Pick<Tables<"tasks">, "id" | "title" | "status" | "priority" | "due_date" | "responsible_id"> & { clients: Tables<"clients"> | null };
+type ProfileRow = Pick<Tables<"profiles">, "user_id" | "full_name" | "avatar_url">;
 
 interface ExecutiveDashboardData {
   totalRevenue: number;
@@ -125,16 +139,16 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         profilesQuery,
         supabase
           .from("financial_entries")
-          .select("value, type, due_date, status")
+          .select("value, type, due_date, status, entry_class")
           .gte("due_date", historyStart)
           .lt("due_date", periodEnd)
           .eq("status", "pago"),
       ]);
 
       // --- Métricas financeiras ---
-      const allEntries = entries || [];
-      const getEntryClass = (entry: any) => entry.entry_class || (entry.type === "receber" ? "receita" : "despesa");
-      const getEntryNature = (entry: any) => entry.nature || "fixo";
+      const allEntries = (entries || []) as FinancialEntryRow[];
+      const getEntryClass = (entry: FinancialEntryRow) => entry.entry_class || (entry.type === "receber" ? "receita" : "despesa");
+      const getEntryNature = (entry: FinancialEntryRow) => entry.nature || "fixo";
 
       const income = allEntries.filter(e => e.type === "receber" && e.status === "pago");
       const totalRevenue = income.reduce((s, e) => s + Number(e.value), 0);
@@ -148,7 +162,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
       const revClientMap: Record<string, number> = {};
       income.forEach(e => {
-        const name = getClientDisplayName((e as any).clients) || "Sem cliente";
+        const name = getClientDisplayName(e.clients) || "Sem cliente";
         revClientMap[name] = (revClientMap[name] || 0) + Number(e.value);
       });
       const revenueByClient = Object.entries(revClientMap)
@@ -161,7 +175,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         "Despesa Fixa": 0,
         "Despesa Variável": 0,
       };
-      allEntries.filter(e => e.type === "pagar" && e.status === "pago").forEach((e: any) => {
+      allEntries.filter(e => e.type === "pagar" && e.status === "pago").forEach(e => {
         const prefix = getEntryClass(e) === "custo" ? "Custo" : "Despesa";
         const suffix = getEntryNature(e) === "variavel" ? "Variável" : "Fixa";
         const cat = `${prefix} ${suffix}`;
@@ -173,13 +187,14 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         .sort((a, b) => b.value - a.value);
 
       // --- Contratos ---
-      const mrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
-      const activeContracts = (contracts || []).length;
+      const allContracts = (contracts || []) as ContractRow[];
+      const mrr = allContracts.reduce((s, c) => s + (Number(c.value) || 0), 0);
+      const activeContracts = allContracts.length;
       const defaultingContracts = allEntries.filter(e => e.type === "receber" && e.status === "atrasado" && e.contract_id).length;
 
       // --- Fulfillment de checklists ---
       const fulfillmentMap: Record<string, number[]> = {};
-      (checklists || []).forEach((c: any) => {
+      ((checklists || []) as ChecklistRow[]).forEach(c => {
         const name = getClientDisplayName(c.clients) || "—";
         if (!fulfillmentMap[name]) fulfillmentMap[name] = [];
         fulfillmentMap[name].push(Number(c.fulfillment_pct) || 0);
@@ -190,9 +205,9 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
 
       // --- Tarefas ---
       const profileMap = new Map<string, { name: string; avatar?: string }>();
-      (profileRows || []).forEach((p: any) => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
+      ((profileRows || []) as ProfileRow[]).forEach(p => profileMap.set(p.user_id, { name: p.full_name, avatar: p.avatar_url }));
 
-      const allTasks = tasks || [];
+      const allTasks = (tasks || []) as TaskRow[];
       const totalTasks = allTasks.length;
       const completedTasks = allTasks.filter(t => t.status === "concluido").length;
       const pendingTasks = allTasks.filter(t => t.status === "pendente").length;
@@ -218,7 +233,7 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         .map(t => ({
           id: t.id,
           title: t.title,
-          client: getClientDisplayName((t as any).clients) || "—",
+          client: getClientDisplayName(t.clients) || "—",
           dueDate: t.due_date || "",
           responsible: t.responsible_id ? profileMap.get(t.responsible_id)?.name : undefined,
         }));
@@ -244,11 +259,12 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
         const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
         historyMap[m] = { revenue: 0, costs: 0, expenses: 0 };
       }
-      (historyEntries || []).forEach(e => {
+      type HistoryEntryRow = Pick<Tables<"financial_entries">, "value" | "type" | "due_date"> & { entry_class?: string | null };
+      ((historyEntries || []) as HistoryEntryRow[]).forEach(e => {
         const m = e.due_date.substring(0, 7);
         if (historyMap[m]) {
           if (e.type === "receber") historyMap[m].revenue += Number(e.value);
-          else if ((e as any).entry_class === "custo") historyMap[m].costs += Number(e.value);
+          else if (e.entry_class === "custo") historyMap[m].costs += Number(e.value);
           else historyMap[m].expenses += Number(e.value);
         }
       });
