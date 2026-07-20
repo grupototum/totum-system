@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 /**
  * Gera um checklist de entrega para um cliente baseado no seu plano atual.
@@ -22,25 +23,28 @@ export async function generateChecklistForClient(clientId: string, period: strin
     }
 
     // 2. Verificar se já existe um checklist para este período e cliente
-    const { data: existing } = await supabase
+    const { data: existing, error: existingErr } = await supabase
       .from("delivery_checklists")
       .select("id")
       .eq("client_id", clientId)
       .eq("period", period)
       .limit(1)
-      .single();
+      .maybeSingle();
 
+    if (existingErr) throw existingErr;
     if (existing) {
       return true;
     }
 
     // 3. Criar o cabeçalho do checklist
     // Resolve organization_id via clients table (service-role bypasses RLS)
-    const { data: clientRow } = await supabase
+    const { data: clientRow, error: clientErr } = await supabase
       .from("clients")
       .select("organization_id")
       .eq("id", clientId)
       .single();
+
+    if (clientErr) throw clientErr;
 
     const { data: checklist, error: checklistErr } = await supabase
       .from("delivery_checklists")
@@ -61,11 +65,13 @@ export async function generateChecklistForClient(clientId: string, period: strin
     }
 
     // 4. Buscar itens do modelo do pacote
-    const { data: modelItems } = await supabase
+    const { data: modelItems, error: modelItemsErr } = await supabase
       .from("delivery_model_items")
       .select("*")
       .eq("plan_id", contract.plan_id)
       .order("sort_order", { ascending: true });
+
+    if (modelItemsErr) throw modelItemsErr;
 
     if (modelItems && modelItems.length > 0) {
       // 5. Inserir os itens no checklist
@@ -80,7 +86,7 @@ export async function generateChecklistForClient(clientId: string, period: strin
 
       const { error: itemsErr } = await supabase
         .from("delivery_checklist_items")
-        .insert(itemsToInsert as any[]);
+        .insert(itemsToInsert as TablesInsert<"delivery_checklist_items">[]);
 
       if (itemsErr) throw itemsErr;
 
