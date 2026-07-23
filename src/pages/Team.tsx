@@ -22,7 +22,7 @@ export default function Team() {
   const { isDemoMode } = useDemo();
   const { profiles, loading, refetch } = useProfiles();
   const { roles } = useRoles();
-  const deptsList = useDepartments();
+  const { departments: deptsList } = useDepartments();
   const departments = deptsList.map(d => ({ id: d.id, name: d.name }));
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<ProfileRow | null>(null);

@@ -273,7 +273,9 @@ export function useExecutiveDashboard(periodFilter: PeriodFilter) {
     } finally {
       setLoading(false);
     }
-  }, [periodFilter, isDemoMode, tenant?.organization_id]);
+  // Desestrutura primitivos de periodFilter para evitar nova referência de objeto
+  // causando re-fetch infinito quando o pai recria o objeto a cada render.
+  }, [isDemoMode, tenant?.organization_id, periodFilter.type, periodFilter.month ?? "", periodFilter.startDate ?? "", periodFilter.endDate ?? ""]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

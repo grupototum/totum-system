@@ -96,7 +96,7 @@ export default function UsersPermissions() {
   const { profiles, loading: profilesLoading, refetch: refetchProfiles, updateProfile } = useProfiles();
   const { roles: roleRows, loading: rolesLoading, saveRole, deleteRole: deleteRoleDb, duplicateRole: duplicateRoleDb } = useRoles();
   const { logs, loading: auditLoading } = useAuditLogs();
-  const departments = useDepartments();
+  const { departments } = useDepartments();
   const { adminUserIds, toggleAdmin } = useUserRoles();
 
   // Dialogs
