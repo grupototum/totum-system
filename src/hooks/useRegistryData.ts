@@ -4,9 +4,17 @@ import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoRegistryData } from "@/data/demoData";
 
+type ValidTable =
+  | "banks" | "bank_accounts" | "cost_centers" | "financial_categories"
+  | "expense_types" | "client_types" | "contract_types" | "plans"
+  | "project_types" | "service_types" | "product_types" | "general_categories"
+  | "suppliers" | "partners" | "departments" | "tags"
+  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons"
+  | "revenue_types";
+
 // Maps frontend registry keys to Supabase table names and column mappings
 export interface RegistryTableConfig {
-  table: string;
+  table: ValidTable;
   columns: Record<string, string>;
   statusField?: string;
 }
@@ -40,13 +48,6 @@ export const registryTableMap: Record<string, RegistryTableConfig> = {
   motivos_nao_entrega: { table: "delay_reasons", columns: { name: "name", descricao: "description" } },
 };
 
-type ValidTable = 
-  | "banks" | "bank_accounts" | "cost_registrations" | "financial_categories"
-  | "expense_types" | "client_types" | "contract_types" | "plans"
-  | "project_types" | "service_types" | "product_types" | "general_categories"
-  | "suppliers" | "partners" | "departments" | "tags"
-  | "cancellation_reasons" | "delinquency_reasons" | "delay_reasons"
-  | "revenue_types";
 
 export interface RegistryRow {
   id: string;
@@ -122,7 +123,8 @@ export function useRegistryData(registryKey: string) {
         return;
       }
 
-      const { data: rows, error } = await (supabase.from(config.table as any) as any)
+      const { data: rows, error } = await supabase
+        .from(config.table as ValidTable)
         .select("*")
         .order("name");
 
@@ -155,8 +157,9 @@ export function useRegistryData(registryKey: string) {
       dbValues.module = "geral";
     }
     
-    const { error } = await (supabase.from(config.table as any) as any)
-      .insert(dbValues as any);
+    const { error } = await supabase
+      .from(config.table as ValidTable)
+      .insert(dbValues as never);
       
     if (error) {
       if (error.code === "23505") {
@@ -178,8 +181,9 @@ export function useRegistryData(registryKey: string) {
     
     const dbValues = frontendToDb(values, config);
     
-    const { error } = await (supabase.from(config.table as any) as any)
-      .update(dbValues)
+    const { error } = await supabase
+      .from(config.table as ValidTable)
+      .update(dbValues as never)
       .eq("id", id);
       
     if (error) {
@@ -196,7 +200,8 @@ export function useRegistryData(registryKey: string) {
     if (isDemoMode) { toast(DEMO_TOAST); return true; }
     if (!config) return false;
     
-    const { error } = await (supabase.from(config.table as any) as any)
+    const { error } = await supabase
+      .from(config.table as ValidTable)
       .delete()
       .eq("id", id);
       
@@ -216,8 +221,9 @@ export function useRegistryData(registryKey: string) {
     
     const newActive = currentStatus !== "ativo";
     
-    const { error } = await (supabase.from(config.table as any) as any)
-      .update({ is_active: newActive } as any)
+    const { error } = await supabase
+      .from(config.table as ValidTable)
+      .update({ is_active: newActive } as never)
       .eq("id", id);
       
     if (error) {

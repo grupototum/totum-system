@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
@@ -227,6 +227,7 @@ export function useImportData() {
       // Find or create clients
       const clientIdMap = new Map<string, string>();
       let clientCount = 0;
+      const clientErrors: string[] = [];
 
       if (clientMap.size > 0) {
         const { data: existing } = await supabase.from("clients").select("*");
@@ -247,11 +248,21 @@ export function useImportData() {
               }, tenant?.organization_id))
               .select("id")
               .single();
-            if (!error && created) {
+            if (error) {
+              console.error(`Error creating client "${client.name}":`, error);
+              clientErrors.push(client.name);
+            } else if (created) {
               clientIdMap.set(key, created.id);
               clientCount++;
             }
           }
+        }
+        if (clientErrors.length > 0) {
+          toast({
+            title: "Aviso na importação",
+            description: `${clientErrors.length} cliente(s) não puderam ser criados: ${clientErrors.slice(0, 3).join(", ")}${clientErrors.length > 3 ? "..." : ""}`,
+            variant: "destructive",
+          });
         }
       }
 
@@ -291,8 +302,10 @@ export function useImportData() {
         });
 
         const { error } = await (supabase.from("financial_entries") as any).insert(entries);
-        if (error) console.error("Insert error:", error);
-        else financialCount += entries.length;
+        if (error) {
+          throw new Error(`Erro ao inserir lançamentos (lote ${Math.floor(i / CHUNK_SIZE) + 1}): ${error.message}`);
+        }
+        financialCount += entries.length;
         setProgress(Math.round(((i + chunk.length) / validRows.length) * 100));
       }
 
@@ -355,15 +368,17 @@ export function useImportData() {
     URL.revokeObjectURL(url);
   }, []);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: validatedRows.length,
     valid: validatedRows.filter(r => r.isValid).length,
     invalid: validatedRows.filter(r => !r.isValid).length,
-    totalIncome: validatedRows.filter(r => r.isValid && INCOME_KEYWORDS.includes((r.data.type || "").toLowerCase()))
+    totalIncome: validatedRows
+      .filter(r => r.isValid && INCOME_KEYWORDS.includes((r.data.type || "").toLowerCase()))
       .reduce((sum, r) => sum + (parseValue(r.data.value) || 0), 0),
-    totalExpense: validatedRows.filter(r => r.isValid && EXPENSE_KEYWORDS.includes((r.data.type || "").toLowerCase()))
+    totalExpense: validatedRows
+      .filter(r => r.isValid && EXPENSE_KEYWORDS.includes((r.data.type || "").toLowerCase()))
       .reduce((sum, r) => sum + (parseValue(r.data.value) || 0), 0),
-  };
+  }), [validatedRows]);
 
   return {
     step, setStep, file, parseFile, rawData, detectedColumns,

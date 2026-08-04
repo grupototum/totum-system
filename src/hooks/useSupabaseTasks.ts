@@ -91,9 +91,9 @@ export function useSupabaseTasks() {
         responsible: t.responsible_id ? profileMap.get(t.responsible_id)?.name || undefined : undefined,
         responsibleAvatarUrl: t.responsible_id ? profileMap.get(t.responsible_id)?.avatar || undefined : undefined,
         responsibleId: t.responsible_id || undefined,
-        priority: t.priority as any,
+        priority: t.priority as Enums<"task_priority">,
         status: t.status as TaskStatus,
-        type: t.task_type as any,
+        type: t.task_type as Enums<"task_type">,
         startDate: t.start_date || undefined,
         dueDate: t.due_date || undefined,
         estimatedTime: t.estimated_minutes || undefined,
@@ -143,9 +143,21 @@ export function useSupabaseTasks() {
 
   const fetchClients = useCallback(async () => {
     if (isDemoMode) return;
-    const { data } = await supabase.from("clients").select("id, name").eq("status", "ativo").order("name");
-    setClients(data || []);
-  }, [isDemoMode]);
+    try {
+      let q = supabase.from("clients").select("id, name").eq("status", "ativo").order("name");
+      if (tenant?.organization_id) {
+        q = q.eq("organization_id", tenant.organization_id);
+      }
+      const { data, error } = await q;
+      if (error) {
+        console.error("Error fetching clients:", error);
+        return;
+      }
+      setClients(data || []);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  }, [isDemoMode, tenant?.organization_id]);
 
   const fetchProfiles = useCallback(async () => {
     if (isDemoMode) return;
@@ -153,18 +165,26 @@ export function useSupabaseTasks() {
     // Normal users are filtered by RLS; master users bypass RLS so we need
     // explicit org filter. Include masters that belong to the current org
     // (e.g. the sys-admin who also works as a team member in their own org).
-    let q = supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .eq("status", "ativo")
-      .order("full_name");
-    if (tenant?.organization_id) {
-      q = q.eq("organization_id", tenant.organization_id);
-    } else {
-      q = q.eq("is_master", false);
+    try {
+      let q = supabase
+        .from("profiles")
+        .select("user_id, full_name")
+        .eq("status", "ativo")
+        .order("full_name");
+      if (tenant?.organization_id) {
+        q = q.eq("organization_id", tenant.organization_id);
+      } else {
+        q = q.eq("is_master", false);
+      }
+      const { data, error } = await q;
+      if (error) {
+        console.error("Error fetching profiles:", error);
+        return;
+      }
+      setProfiles(data || []);
+    } catch (error) {
+      console.error("Error fetching profiles:", error);
     }
-    const { data } = await q;
-    setProfiles(data || []);
   }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => {
