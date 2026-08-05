@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export interface ApiKey {
   id: string;
@@ -29,6 +30,7 @@ export function useApiKeys() {
 
     if (error) {
       console.error("Erro ao carregar chaves:", error);
+      toast({ title: "Erro ao carregar chaves de API", description: error.message, variant: "destructive" });
       setKeys([]);
     } else {
       setKeys(data || []);
@@ -48,6 +50,7 @@ export function useApiKeys() {
 
       if (error) {
         console.error("Erro ao criar chave:", error);
+        toast({ title: "Erro ao criar chave de API", description: error.message, variant: "destructive" });
         return null;
       }
 
@@ -55,6 +58,7 @@ export function useApiKeys() {
       return data as CreatedApiKey;
     } catch (e) {
       console.error("Erro ao criar chave:", e);
+      toast({ title: "Erro ao criar chave de API", description: "Tente novamente em instantes.", variant: "destructive" });
       return null;
     }
   };
@@ -63,6 +67,7 @@ export function useApiKeys() {
     const { error } = await supabase.from("api_keys").update({ is_active: false }).eq("id", id);
     if (error) {
       console.error("Erro ao revogar chave:", error);
+      toast({ title: "Erro ao revogar chave", description: error.message, variant: "destructive" });
     } else {
       await fetchKeys();
     }
@@ -72,6 +77,7 @@ export function useApiKeys() {
     const { error } = await supabase.from("api_keys").delete().eq("id", id);
     if (error) {
       console.error("Erro ao excluir chave:", error);
+      toast({ title: "Erro ao excluir chave", description: error.message, variant: "destructive" });
     } else {
       await fetchKeys();
     }

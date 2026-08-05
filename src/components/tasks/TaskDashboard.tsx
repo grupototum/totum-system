@@ -11,6 +11,8 @@ interface TaskDashboardProps {
 }
 
 export function TaskDashboard({ tasks }: TaskDashboardProps) {
+  // Recalculado a cada render (não memoizado) de propósito: precisa refletir o
+  // instante atual nos memos de "atrasada" abaixo, não só quando `tasks` muda.
   const now = new Date();
   const [selectedUser, setSelectedUser] = useState("all");
 
@@ -43,7 +45,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return { total, completed, pending, inProgress, overdue, completionRate };
-  }, [filteredTasks]);
+  }, [filteredTasks, now]);
 
   // Tasks by responsible (all tasks, for ranking)
   const byResponsible = useMemo(() => {
@@ -58,7 +60,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
       if (t.dueDate && new Date(t.dueDate) < now && t.status !== "concluido") map[key].overdue++;
     });
     return Object.values(map).sort((a, b) => b.total - a.total);
-  }, [tasks]);
+  }, [tasks, now]);
 
   // Tasks by day (filtered)
   const byDay = useMemo(() => {
@@ -77,7 +79,7 @@ export function TaskDashboard({ tasks }: TaskDashboardProps) {
       });
     }
     return days;
-  }, [filteredTasks]);
+  }, [filteredTasks, now]);
 
   // Critical tasks (filtered)
   const criticalTasks = useMemo(() => {
