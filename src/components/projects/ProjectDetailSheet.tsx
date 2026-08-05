@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { Loader2, Plus, CheckCircle2, Circle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import type { ProjectRow } from "@/hooks/useProjects";
@@ -34,7 +35,16 @@ export function ProjectDetailSheet({ project, open, onOpenChange }: Props) {
       .eq("project_id", project.id)
       .order("created_at")
       .then(({ data, error }) => {
-        if (!error) setTasks(data || []);
+        if (error) {
+          toast({ title: "Erro ao carregar tarefas do projeto", description: error.message, variant: "destructive" });
+        } else {
+          setTasks(data || []);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading project tasks:", err);
+        toast({ title: "Erro ao carregar tarefas do projeto", description: "Tente novamente em instantes.", variant: "destructive" });
         setLoading(false);
       });
   }, [project?.id, open]);

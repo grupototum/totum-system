@@ -55,7 +55,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
       }
 
       Promise.all([
-        supabase.from("clients").select("*"),
+        supabase.from("clients").select("id, name, company_name, status"),
         supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
         supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
         profilesQuery,
