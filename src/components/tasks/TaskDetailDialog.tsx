@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -18,8 +18,11 @@ import {
 import {
   CheckCircle2, Circle, Plus, Trash2, User, Calendar, Clock,
   MessageSquare, History, ChevronDown, Send, RefreshCw, FileText, ListTree,
+  Pencil, Save, Undo2,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { UnsavedChangesDialog } from "@/components/shared";
 
 interface TaskDetailDialogProps {
   task: Task | null;
@@ -28,6 +31,48 @@ interface TaskDetailDialogProps {
   onUpdate: (task: Task) => void;
   onDelete?: (taskId: string) => void;
   profiles?: { user_id: string; full_name: string }[];
+}
+
+// Campos cobertos pelo fluxo Editar/Salvar/Descartar (aba Resumo + descrição).
+// Checklist, subtarefas, comentários e recorrência continuam com salvamento
+// imediato, como já funcionavam antes.
+interface EditableFields {
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  type: TaskType;
+  responsibleId?: string;
+  responsible?: string;
+  startDate?: string;
+  dueDate?: string;
+}
+
+function pickEditable(task: Task): EditableFields {
+  return {
+    title: task.title,
+    description: task.description,
+    status: task.status,
+    priority: task.priority,
+    type: task.type,
+    responsibleId: task.responsibleId,
+    responsible: task.responsible,
+    startDate: task.startDate,
+    dueDate: task.dueDate,
+  };
+}
+
+function validateEditable(d: EditableFields): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!d.title.trim()) errors.title = "Título é obrigatório";
+  if (!d.responsibleId) errors.responsibleId = "Responsável é obrigatório";
+  if (!d.priority) errors.priority = "Prioridade é obrigatória";
+  if (!d.startDate) errors.startDate = "Data de início é obrigatória";
+  if (!d.dueDate) errors.dueDate = "Data de vencimento é obrigatória";
+  if (d.startDate && d.dueDate && d.startDate > d.dueDate) {
+    errors.dueDate = "Data de vencimento não pode ser antes da data de início";
+  }
+  return errors;
 }
 
 export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete, profiles = [] }: TaskDetailDialogProps) {
@@ -49,7 +94,69 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
   const [newSubtask, setNewSubtask] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  if (!task) return null;
+  // Editar / Salvar / Descartar — estado padrão é leitura; título e campos do
+  // Resumo só ficam editáveis (e só persistem) através deste fluxo.
+  const [editMode, setEditMode] = useState(false);
+  const [draft, setDraft] = useState<EditableFields | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const originalRef = useRef<EditableFields | null>(null);
+
+  useEffect(() => {
+    if (task) {
+      const picked = pickEditable(task);
+      setDraft(picked);
+      originalRef.current = picked;
+      setEditMode(false);
+      setFieldErrors({});
+    }
+    // Reseta apenas ao trocar de tarefa ou reabrir o dialog — não a cada
+    // atualização de `task` em background, para não perder edição em curso.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task?.id, open]);
+
+  const isDirty = editMode && draft !== null && originalRef.current !== null &&
+    JSON.stringify(draft) !== JSON.stringify(originalRef.current);
+
+  const { confirmOpen, guardedAction, confirmDiscard, cancelDiscard } = useUnsavedChangesGuard(isDirty);
+
+  if (!task || !draft) return null;
+
+  const updateDraft = (partial: Partial<EditableFields>) => {
+    setDraft((d) => (d ? { ...d, ...partial } : d));
+    setFieldErrors((e) => {
+      const next = { ...e };
+      Object.keys(partial).forEach((k) => { delete next[k]; });
+      return next;
+    });
+  };
+
+  const handleEdit = () => setEditMode(true);
+
+  const handleSaveEdit = () => {
+    const errors = validateEditable(draft);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    onUpdate({ ...task, ...draft });
+    originalRef.current = draft;
+    setEditMode(false);
+    setFieldErrors({});
+  };
+
+  const handleDiscardEdit = () => {
+    if (originalRef.current) setDraft(originalRef.current);
+    setEditMode(false);
+    setFieldErrors({});
+  };
+
+  const handleDialogOpenChange = (next: boolean) => {
+    if (!next) {
+      guardedAction(() => { handleDiscardEdit(); onOpenChange(false); });
+    } else {
+      onOpenChange(next);
+    }
+  };
 
   const update = (partial: Partial<Task>) => onUpdate({ ...task, ...partial });
 
@@ -129,31 +236,65 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
   ] as const;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="bg-card border-border text-foreground max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
-          <DialogTitle className="font-heading text-lg pr-8 flex items-center gap-2">
-            {task.title}
-            {task.isRecurring && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
-                <RefreshCw className="h-3 w-3" />
-                {task.recurrenceType ? recurrenceLabels[task.recurrenceType] : "Recorrente"}
-              </span>
-            )}
-            {task.parentTaskId && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.06] text-muted-foreground">
-                Ocorrência
-              </span>
-            )}
-          </DialogTitle>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-muted-foreground/70">{task.clientName}</span>
-            {task.planName && (
-              <>
-                <span className="text-muted-foreground/40">·</span>
-                <span className="text-xs text-muted-foreground/50">{task.planName}</span>
-              </>
-            )}
+          <div className="flex items-start justify-between gap-3 pr-8">
+            <div className="flex-1 min-w-0">
+              {editMode ? (
+                <div>
+                  <Input
+                    value={draft.title}
+                    onChange={(e) => updateDraft({ title: e.target.value })}
+                    className={`font-heading text-lg h-auto py-1 bg-muted/50 border-border ${fieldErrors.title ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    placeholder="Título da tarefa"
+                  />
+                  {fieldErrors.title && <p className="text-xs text-destructive mt-1">{fieldErrors.title}</p>}
+                </div>
+              ) : (
+                <DialogTitle className="font-heading text-lg flex items-center gap-2 flex-wrap">
+                  {task.title}
+                  {task.isRecurring && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
+                      <RefreshCw className="h-3 w-3" />
+                      {task.recurrenceType ? recurrenceLabels[task.recurrenceType] : "Recorrente"}
+                    </span>
+                  )}
+                  {task.parentTaskId && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.06] text-muted-foreground">
+                      Ocorrência
+                    </span>
+                  )}
+                </DialogTitle>
+              )}
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-xs text-muted-foreground/70">{task.clientName}</span>
+                {task.planName && (
+                  <>
+                    <span className="text-muted-foreground/40">·</span>
+                    <span className="text-xs text-muted-foreground/50">{task.planName}</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Editar / Salvar / Descartar */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {editMode ? (
+                <>
+                  <Button size="sm" variant="ghost" className="h-7 text-xs gap-1" onClick={handleDiscardEdit}>
+                    <Undo2 className="h-3.5 w-3.5" /> Descartar
+                  </Button>
+                  <Button size="sm" className="h-7 text-xs gap-1" disabled={!isDirty} onClick={handleSaveEdit}>
+                    <Save className="h-3.5 w-3.5" /> Salvar
+                  </Button>
+                </>
+              ) : (
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-border bg-white/[0.04] hover:bg-white/[0.08]" onClick={handleEdit}>
+                  <Pencil className="h-3.5 w-3.5" /> Editar
+                </Button>
+              )}
+            </div>
           </div>
         </DialogHeader>
 
@@ -178,78 +319,126 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
         {/* Summary Tab */}
         {activeTab === "summary" && (
           <div className="space-y-5 mt-3">
+            {!editMode && (
+              <p className="text-[10px] text-muted-foreground/50 -mt-1">
+                Clique em <strong>Editar</strong> para alterar os campos abaixo.
+              </p>
+            )}
             {/* Status & Priority Row */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Status</label>
-                <Select value={task.status} onValueChange={(v) => update({ status: v as TaskStatus })}>
-                  <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
-                  <SelectContent className={selectContentClasses}>
-                    {(Object.keys(statusConfig) as TaskStatus[]).map((s) => (
-                      <SelectItem key={s} value={s} className={selectItemClasses}>{statusConfig[s].label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {editMode ? (
+                  <Select value={draft.status} onValueChange={(v) => updateDraft({ status: v as TaskStatus })}>
+                    <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
+                    <SelectContent className={selectContentClasses}>
+                      {(Object.keys(statusConfig) as TaskStatus[]).map((s) => (
+                        <SelectItem key={s} value={s} className={selectItemClasses}>{statusConfig[s].label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{statusConfig[task.status]?.label || task.status}</p>
+                )}
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Prioridade</label>
-                <Select value={task.priority} onValueChange={(v) => update({ priority: v as TaskPriority })}>
-                  <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
-                  <SelectContent className={selectContentClasses}>
-                    {(Object.keys(priorityConfig) as TaskPriority[]).map((p) => (
-                      <SelectItem key={p} value={p} className={selectItemClasses}>{priorityConfig[p].label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Prioridade *</label>
+                {editMode ? (
+                  <>
+                    <Select value={draft.priority} onValueChange={(v) => updateDraft({ priority: v as TaskPriority })}>
+                      <SelectTrigger className={`${selectClasses} ${fieldErrors.priority ? "border-destructive" : ""}`}><SelectValue /></SelectTrigger>
+                      <SelectContent className={selectContentClasses}>
+                        {(Object.keys(priorityConfig) as TaskPriority[]).map((p) => (
+                          <SelectItem key={p} value={p} className={selectItemClasses}>{priorityConfig[p].label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldErrors.priority && <p className="text-[10px] text-destructive mt-1">{fieldErrors.priority}</p>}
+                  </>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{priorityConfig[task.priority]?.label || task.priority}</p>
+                )}
               </div>
             </div>
 
             {/* Responsible & Type */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Responsável</label>
-                <Select value={task.responsible || "none"} onValueChange={(v) => update({ responsible: v === "none" ? undefined : v })}>
-                  <SelectTrigger className={selectClasses}><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                  <SelectContent className={selectContentClasses}>
-                    <SelectItem value="none" className={selectItemClasses}>Sem responsável</SelectItem>
-                    {profiles.map((p) => (
-                      <SelectItem key={p.user_id} value={p.full_name} className={selectItemClasses}>{p.full_name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Responsável *</label>
+                {editMode ? (
+                  <>
+                    <Select
+                      value={draft.responsibleId || "none"}
+                      onValueChange={(v) => {
+                        if (v === "none") { updateDraft({ responsibleId: undefined, responsible: undefined }); return; }
+                        const p = profiles.find((pr) => pr.user_id === v);
+                        updateDraft({ responsibleId: v, responsible: p?.full_name });
+                      }}
+                    >
+                      <SelectTrigger className={`${selectClasses} ${fieldErrors.responsibleId ? "border-destructive" : ""}`}><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                      <SelectContent className={selectContentClasses}>
+                        <SelectItem value="none" className={selectItemClasses}>Sem responsável</SelectItem>
+                        {profiles.map((p) => (
+                          <SelectItem key={p.user_id} value={p.user_id} className={selectItemClasses}>{p.full_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldErrors.responsibleId && <p className="text-[10px] text-destructive mt-1">{fieldErrors.responsibleId}</p>}
+                  </>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{task.responsible || "Sem responsável"}</p>
+                )}
               </div>
               <div>
                 <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Tipo</label>
-                <Select value={task.type} onValueChange={(v) => update({ type: v as TaskType })}>
-                  <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
-                  <SelectContent className={selectContentClasses}>
-                    {(Object.keys(typeLabels) as TaskType[]).map((t) => (
-                      <SelectItem key={t} value={t} className={selectItemClasses}>{typeLabels[t]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {editMode ? (
+                  <Select value={draft.type} onValueChange={(v) => updateDraft({ type: v as TaskType })}>
+                    <SelectTrigger className={selectClasses}><SelectValue /></SelectTrigger>
+                    <SelectContent className={selectContentClasses}>
+                      {(Object.keys(typeLabels) as TaskType[]).map((t) => (
+                        <SelectItem key={t} value={t} className={selectItemClasses}>{typeLabels[t]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{typeLabels[task.type] || task.type}</p>
+                )}
               </div>
             </div>
 
             {/* Dates */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Data de Início</label>
-                <Input
-                  type="date"
-                  value={task.startDate || ""}
-                  onChange={(e) => update({ startDate: e.target.value })}
-                  className="bg-muted/50 border-border rounded-lg h-8 text-xs focus:border-primary/50"
-                />
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Data de Início *</label>
+                {editMode ? (
+                  <>
+                    <Input
+                      type="date"
+                      value={draft.startDate || ""}
+                      onChange={(e) => updateDraft({ startDate: e.target.value })}
+                      className={`bg-muted/50 border-border rounded-lg h-8 text-xs focus:border-primary/50 ${fieldErrors.startDate ? "border-destructive" : ""}`}
+                    />
+                    {fieldErrors.startDate && <p className="text-[10px] text-destructive mt-1">{fieldErrors.startDate}</p>}
+                  </>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{task.startDate ? new Date(task.startDate).toLocaleDateString("pt-BR") : "—"}</p>
+                )}
               </div>
               <div>
-                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Data de Entrega</label>
-                <Input
-                  type="date"
-                  value={task.dueDate || ""}
-                  onChange={(e) => update({ dueDate: e.target.value })}
-                  className="bg-muted/50 border-border rounded-lg h-8 text-xs focus:border-primary/50"
-                />
+                <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Data de Entrega *</label>
+                {editMode ? (
+                  <>
+                    <Input
+                      type="date"
+                      value={draft.dueDate || ""}
+                      onChange={(e) => updateDraft({ dueDate: e.target.value })}
+                      className={`bg-muted/50 border-border rounded-lg h-8 text-xs focus:border-primary/50 ${fieldErrors.dueDate ? "border-destructive" : ""}`}
+                    />
+                    {fieldErrors.dueDate && <p className="text-[10px] text-destructive mt-1">{fieldErrors.dueDate}</p>}
+                  </>
+                ) : (
+                  <p className="text-xs h-8 flex items-center">{task.dueDate ? new Date(task.dueDate).toLocaleDateString("pt-BR") : "—"}</p>
+                )}
               </div>
             </div>
           </div>
@@ -261,11 +450,15 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
             {/* Description (5x larger) */}
             <div>
               <label className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mb-1 block">Descrição</label>
-              <Textarea
-                value={task.description}
-                onChange={(e) => update({ description: e.target.value })}
-                className="bg-muted/50 border-border rounded-lg text-xs min-h-[300px] resize-y focus:border-primary/50"
-              />
+              {editMode ? (
+                <Textarea
+                  value={draft.description}
+                  onChange={(e) => updateDraft({ description: e.target.value })}
+                  className="bg-muted/50 border-border rounded-lg text-xs min-h-[300px] resize-y focus:border-primary/50"
+                />
+              ) : (
+                <p className="text-xs text-foreground/80 whitespace-pre-wrap min-h-[80px]">{task.description || "Sem descrição."}</p>
+              )}
             </div>
 
             {/* Checklist */}
@@ -590,6 +783,7 @@ export function TaskDetailDialog({ task, open, onOpenChange, onUpdate, onDelete,
           </div>
         )}
       </DialogContent>
+      <UnsavedChangesDialog open={confirmOpen} onConfirmDiscard={confirmDiscard} onCancel={cancelDiscard} />
     </Dialog>
   );
 }

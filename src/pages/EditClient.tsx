@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,9 +17,15 @@ import {
 } from "@/components/ui/select";
 import {
   Building2, Briefcase, Target, Palette, Settings2,
-  ChevronLeft, ChevronRight, Check, Loader2, User, ArrowLeft,
+  ChevronLeft, ChevronRight, Check, Loader2, User, ArrowLeft, Ban, RotateCcw,
 } from "lucide-react";
 import { validateClientBasicInfo, isValidEmail, isValidPhone, isValidURL, sanitizeURL, type ValidationErrors } from "@/lib/validation";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { UnsavedChangesDialog } from "@/components/shared";
 
 /* ─── types ─── */
 interface FormData {
@@ -79,8 +85,12 @@ export default function EditClient() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<ValidationErrors>({});
+  const [clientStatus, setClientStatus] = useState<string>("ativo");
+  const [togglingStatus, setTogglingStatus] = useState(false);
+  const [confirmDeactivate, setConfirmDeactivate] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const originalFormRef = useRef<FormData | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -88,7 +98,8 @@ export default function EditClient() {
       const { data: raw } = await supabase.from("clients").select("*").eq("id", clientId).single();
       const data = raw as any;
       if (data) {
-        setForm({
+        setClientStatus(data.status ?? "ativo");
+        const loaded: FormData = {
           company_name: data.company_name ?? "",
           cnpj: data.cnpj ?? "",
           contact_name: data.contact_name ?? "",
@@ -123,12 +134,17 @@ export default function EditClient() {
           working_days: (data.working_days as string[]) ?? [],
           additional_info: data.additional_info ?? "",
           terms_accepted: data.terms_accepted ?? false,
-        });
+        };
+        setForm(loaded);
+        originalFormRef.current = loaded;
       }
       setLoading(false);
     }
     load();
   }, [clientId]);
+
+  const isDirty = !!form && !!originalFormRef.current && JSON.stringify(form) !== JSON.stringify(originalFormRef.current);
+  const { confirmOpen, guardedAction, confirmDiscard, cancelDiscard } = useUnsavedChangesGuard(isDirty);
 
   if (loading) {
     return <LoadingState variant="page" className="max-w-7xl mx-auto" />;
@@ -150,6 +166,29 @@ export default function EditClient() {
       </div>
     );
   }
+
+  const isInactive = clientStatus.toLowerCase() === "inativo" || clientStatus.toLowerCase() === "inactive";
+
+  const deactivateClient = async () => {
+    if (!clientId) return;
+    setTogglingStatus(true);
+    const { error } = await supabase.from("clients").update({ status: "inativo", updated_at: new Date().toISOString() } as any).eq("id", clientId);
+    setTogglingStatus(false);
+    setConfirmDeactivate(false);
+    if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
+    setClientStatus("inativo");
+    toast({ title: "Cliente desativado", description: "O cliente foi ocultado das listagens." });
+  };
+
+  const reactivateClient = async () => {
+    if (!clientId) return;
+    setTogglingStatus(true);
+    const { error } = await supabase.from("clients").update({ status: "ativo", updated_at: new Date().toISOString() } as any).eq("id", clientId);
+    setTogglingStatus(false);
+    if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
+    setClientStatus("ativo");
+    toast({ title: "Cliente reativado", description: "O cliente voltou a aparecer nas listagens." });
+  };
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((f) => f ? { ...f, [key]: value } : f);
@@ -230,6 +269,7 @@ export default function EditClient() {
     } as any).eq("id", clientId);
     setSaving(false);
     if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
+    originalFormRef.current = form;
     toast({ title: "✅ Cliente atualizado!", description: `${form.company_name} salvo com sucesso` });
     navigate("/clientes");
   };
@@ -247,7 +287,7 @@ export default function EditClient() {
     <div className="p-6 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground mb-3" onClick={() => navigate("/clientes")}>
+          <Button variant="ghost" size="sm" className="text-xs text-muted-foreground mb-3" onClick={() => guardedAction(() => navigate("/clientes"))}>
             <ArrowLeft className="w-3 h-3 mr-1" /> Voltar à Central
           </Button>
           <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">EDITAR CLIENTE</h1>
@@ -464,6 +504,32 @@ export default function EditClient() {
                     </Button>
                   )}
                 </div>
+
+                {/* Desativar / Reativar cliente (soft delete) */}
+                <div className="flex justify-center mt-4 pt-4 border-t border-border/30">
+                  {isInactive ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={togglingStatus}
+                      onClick={reactivateClient}
+                      className="text-xs gap-1.5 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10"
+                    >
+                      {togglingStatus ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                      Reativar Cliente
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={togglingStatus}
+                      onClick={() => setConfirmDeactivate(true)}
+                      className="text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                    >
+                      <Ban className="w-3.5 h-3.5" /> Desativar Cliente
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -516,6 +582,25 @@ export default function EditClient() {
             </div>
           </div>
         </div>
+
+        <AlertDialog open={confirmDeactivate} onOpenChange={setConfirmDeactivate}>
+          <AlertDialogContent className="bg-card border-border text-foreground">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Desativar cliente?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza? O cliente será ocultado de todas as listas. Os dados são preservados e a reativação pode ser feita a qualquer momento neste cadastro.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={deactivateClient} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Desativar Cliente
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <UnsavedChangesDialog open={confirmOpen} onConfirmDiscard={confirmDiscard} onCancel={cancelDiscard} />
       </div>
   );
 }

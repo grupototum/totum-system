@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,8 @@ import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2, Plus, X, FileText, BookOpen, Shield, RefreshCw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import { UnsavedChangesDialog } from "@/components/shared";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -80,6 +82,38 @@ export function TaskFormDialog({
   const [slaRules, setSlaRules] = useState<any[]>([]);
   const [selectedSlaId, setSelectedSlaId] = useState("");
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const baselineRef = useRef<string>("");
+
+  // Ao abrir, sugere a data atual para "Data Início" quando ainda vazia, e
+  // captura a linha de base para detectar alterações não salvas (a data
+  // sugerida não conta como "alteração" do usuário).
+  useEffect(() => {
+    if (!open) return;
+    const initialStart = startDate || new Date().toISOString().split("T")[0];
+    if (!startDate) setStartDate(initialStart);
+    baselineRef.current = JSON.stringify({
+      title, description, clientId, responsibleId, priority, taskType,
+      startDate: initialStart, dueDate, checklistItems, subtaskItems, isRecurring,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const isDirty = open && baselineRef.current !== "" && baselineRef.current !== JSON.stringify({
+    title, description, clientId, responsibleId, priority, taskType,
+    startDate, dueDate, checklistItems, subtaskItems, isRecurring,
+  });
+
+  const { confirmOpen, guardedAction, confirmDiscard, cancelDiscard } = useUnsavedChangesGuard(isDirty);
+
+  const handleDialogOpenChange = (next: boolean) => {
+    if (!next) {
+      guardedAction(() => onOpenChange(false));
+    } else {
+      onOpenChange(next);
+    }
+  };
+
   // Fetch templates
   useEffect(() => {
     if (!open) return;
@@ -121,6 +155,7 @@ export function TaskFormDialog({
     setShowTemplates(false);
     setSelectedPopId("");
     setSelectedSlaId("");
+    setErrors({});
   };
 
   const addCheckItem = () => {
@@ -165,11 +200,26 @@ export function TaskFormDialog({
     toast({ title: "POP aplicado", description: `${checkItems.length} itens de checklist e ${stepItems.length} etapas carregados.` });
   };
 
+  const validate = (): boolean => {
+    const nextErrors: Record<string, string> = {};
+    if (!title.trim()) nextErrors.title = "Título é obrigatório";
+    if (!clientId) nextErrors.clientId = "Cliente é obrigatório";
+    if (!responsibleId) nextErrors.responsibleId = "Responsável é obrigatório";
+    if (!priority) nextErrors.priority = "Prioridade é obrigatória";
+    if (!startDate) nextErrors.startDate = "Data de início é obrigatória";
+    if (!dueDate) nextErrors.dueDate = "Data de entrega é obrigatória";
+    if (startDate && dueDate && startDate > dueDate) {
+      nextErrors.dueDate = "Data de entrega não pode ser antes da data de início";
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
   const handleSave = async () => {
-    if (!title.trim() || !clientId) {
+    if (!validate()) {
       toast({
         title: "Campos obrigatórios",
-        description: "Preencha o título e selecione um cliente.",
+        description: "Preencha título, cliente, responsável, prioridade e as datas antes de salvar.",
         variant: "destructive",
       });
       return;
@@ -253,7 +303,7 @@ export function TaskFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent className="max-w-lg bg-card border-border text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nova Tarefa</DialogTitle>
@@ -266,7 +316,13 @@ export function TaskFormDialog({
           {/* Title */}
           <div className="space-y-2">
             <Label>Título *</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Criar post para Instagram" className="bg-white/[0.04] border-border" />
+            <Input
+              value={title}
+              onChange={(e) => { setTitle(e.target.value); setErrors((er) => ({ ...er, title: "" })); }}
+              placeholder="Ex: Criar post para Instagram"
+              className={`bg-white/[0.04] border-border ${errors.title ? "border-destructive focus-visible:ring-destructive" : ""}`}
+            />
+            {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
           </div>
 
           {/* Description */}
@@ -279,28 +335,30 @@ export function TaskFormDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Cliente *</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Select value={clientId} onValueChange={(v) => { setClientId(v); setErrors((er) => ({ ...er, clientId: "" })); }}>
+                <SelectTrigger className={`bg-white/[0.04] border-border ${errors.clientId ? "border-destructive" : ""}`}><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {errors.clientId && <p className="text-xs text-destructive">{errors.clientId}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Responsável</Label>
-              <Select value={responsibleId} onValueChange={setResponsibleId}>
-                <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <Label>Responsável *</Label>
+              <Select value={responsibleId} onValueChange={(v) => { setResponsibleId(v); setErrors((er) => ({ ...er, responsibleId: "" })); }}>
+                <SelectTrigger className={`bg-white/[0.04] border-border ${errors.responsibleId ? "border-destructive" : ""}`}><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   {profiles.map((p) => <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {errors.responsibleId && <p className="text-xs text-destructive">{errors.responsibleId}</p>}
             </div>
           </div>
 
           {/* Priority + Type */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Prioridade</Label>
+              <Label>Prioridade *</Label>
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -322,12 +380,24 @@ export function TaskFormDialog({
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Data Início</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="bg-white/[0.04] border-border" />
+              <Label>Data Início *</Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => { setStartDate(e.target.value); setErrors((er) => ({ ...er, startDate: "" })); }}
+                className={`bg-white/[0.04] border-border ${errors.startDate ? "border-destructive" : ""}`}
+              />
+              {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
             </div>
             <div className="space-y-2">
-              <Label>Data Entrega</Label>
-              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-white/[0.04] border-border" />
+              <Label>Data Entrega *</Label>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => { setDueDate(e.target.value); setErrors((er) => ({ ...er, dueDate: "" })); }}
+                className={`bg-white/[0.04] border-border ${errors.dueDate ? "border-destructive" : ""}`}
+              />
+              {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate}</p>}
             </div>
           </div>
 
@@ -442,7 +512,7 @@ export function TaskFormDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="border-border bg-white/[0.04] hover:bg-white/[0.08]">
+          <Button variant="outline" onClick={() => guardedAction(() => onOpenChange(false))} className="border-border bg-white/[0.04] hover:bg-white/[0.08]">
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={saving}>
@@ -451,6 +521,7 @@ export function TaskFormDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+      <UnsavedChangesDialog open={confirmOpen} onConfirmDiscard={confirmDiscard} onCancel={cancelDiscard} />
     </Dialog>
   );
 }

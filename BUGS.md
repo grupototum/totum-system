@@ -16,6 +16,8 @@
 | B-009 | ✅ RESOLVIDO | `src/stark-api/node_modules/` | 2187 arquivos binários (~65MB) trackeados no git | `948c250c` |
 | B-010 | ✅ RESOLVIDO | 23 arquivos `* 2.*` | Duplicatas byte-identical causavam 695+ erros de lint e risco de import errado | `bd676aeb` |
 | B-024 | ✅ RESOLVIDO | Supabase RLS | Policies de filhos de tarefas/checklists e storage `task-attachments` tinham inserts amplos para `authenticated` | Hotfix remoto `20260513_remote_task_child_rls_hotfix.sql` |
+| B-026 | ✅ RESOLVIDO | `src/pages/NewClient.tsx`, `src/pages/EditClient.tsx` | Cadastro/edição de cliente quebrava com `Could not find the 'additional_info' column of 'clients' in the schema cache` — coluna nunca existiu no banco | `supabase/patches/20260804_add_clients_additional_info.sql` |
+| B-027 | ✅ RESOLVIDO | `src/pages/Tasks.tsx` | `handleTaskUpdate` não incluía `title`/`responsible_id` no payload de `updateTask` — editar título ou responsável na `TaskDetailDialog` não persistia no Supabase | Ver CHANGELOG [Unreleased] |
 
 ## 🟡 ALTOS (esta sprint)
 

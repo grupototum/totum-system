@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Search, Plus, MoreHorizontal, ArrowUpDown, Pencil, Trash2,
-  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck,
+  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck, EyeOff, Eye,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,15 +29,24 @@ export default function Clients() {
   const { profiles } = useProfiles();
   const [search, setSearch] = useState("");
   const [managerFilter, setManagerFilter] = useState<string>("all");
+  const [showInactive, setShowInactive] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "card">(() => {
     return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
   });
 
+  const isInactiveStatus = (status?: string | null) => {
+    const normalized = (status || "").toLowerCase();
+    return normalized === "inativo" || normalized === "inactive";
+  };
+
   const filtered = clients.filter((c: any) => {
     const matchesSearch = getClientDisplayName(c).toLowerCase().includes(search.toLowerCase());
     const matchesManager = managerFilter === "all" || c.responsible_id === managerFilter;
-    return matchesSearch && matchesManager;
+    const matchesActiveState = showInactive ? isInactiveStatus(c.status) : !isInactiveStatus(c.status);
+    return matchesSearch && matchesManager && matchesActiveState;
   });
+
+  const inactiveCount = clients.filter((c) => isInactiveStatus(c.status)).length;
 
   const getActivePlan = (c: ClientRow) => {
     const active = (c.contracts || []).find((ct) => ct.status === "ativo");
@@ -98,6 +107,17 @@ export default function Clients() {
             </SelectContent>
           </Select>
         </div>
+
+        <Button
+          onClick={() => setShowInactive(!showInactive)}
+          variant="outline"
+          className={`gap-2 rounded-xl h-10 px-4 text-sm border-border shrink-0 ${
+            showInactive ? "bg-primary/10 text-primary border-primary/20" : "bg-white/[0.05] text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {showInactive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {showInactive ? "Ver Ativos" : `Mostrar Inativos${inactiveCount > 0 ? ` (${inactiveCount})` : ""}`}
+        </Button>
 
         <div className="flex items-center gap-1 bg-white/[0.04] border border-border rounded-lg p-0.5">
           <button
