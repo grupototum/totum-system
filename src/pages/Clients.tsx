@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useClients, ClientRow } from "@/hooks/useClients";
 import { useProfiles } from "@/hooks/useProfiles";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
 import { PageHeader, EmptyState, LoadingState } from "@/components/shared";
@@ -32,6 +33,7 @@ export default function Clients() {
   const navigate = useNavigate();
   const { clients, loading, deleteClient } = useClients();
   const { profiles } = useProfiles();
+  const { maskDocument } = usePermissions();
   const [search, setSearch] = useState("");
   const [managerFilter, setManagerFilter] = useState<string>("all");
   const [showInactive, setShowInactive] = useState(false);
@@ -187,7 +189,7 @@ export default function Clients() {
                       onClick={() => navigate(`/clientes/${client.id}`)}
                     >
                       <td className="p-4 font-medium text-primary cursor-pointer">{displayName}</td>
-                      <td className="p-4 text-muted-foreground text-xs">{client.cnpj || client.document || "—"}</td>
+                      <td className="p-4 text-muted-foreground text-xs">{maskDocument(client.cnpj || client.document) || "—"}</td>
                       <td className="p-4">{getActivePlan(client)}</td>
                       <td className="p-4 font-heading">
                         {mrr > 0 ? `R$ ${mrr.toLocaleString("pt-BR")}` : "—"}
@@ -287,7 +289,7 @@ export default function Clients() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">{displayName}</h3>
-                    <p className="text-[11px] text-muted-foreground truncate">{client.cnpj || client.document || "Sem documento"}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{maskDocument(client.cnpj || client.document) || "Sem documento"}</p>
                   </div>
                 </div>
 
