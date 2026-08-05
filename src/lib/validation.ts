@@ -138,40 +138,6 @@ export interface ValidationErrors {
 }
 
 /**
- * Valida formulário de recuperação de senha
- */
-export const validateForgotPasswordForm = (email: string): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (!isRequired(email)) {
-    errors.email = "E-mail é obrigatório";
-  } else if (!isValidEmail(email)) {
-    errors.email = "E-mail inválido";
-  }
-  
-  return errors;
-};
-
-/**
- * Valida formulário de redefinição de senha
- */
-export const validateResetPasswordForm = (password: string, confirmPassword: string): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (!isRequired(password)) {
-    errors.password = "Senha é obrigatória";
-  } else if (!isValidPassword(password)) {
-    errors.password = "Senha deve ter pelo menos 6 caracteres";
-  }
-  
-  if (password !== confirmPassword) {
-    errors.confirmPassword = "As senhas não coincidem";
-  }
-  
-  return errors;
-};
-
-/**
  * Valida dados do cliente (etapa 0 - informações básicas)
  */
 export const validateClientBasicInfo = (
