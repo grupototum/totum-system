@@ -27,7 +27,6 @@
 - [ ] **B-020** Responsividade em `DataImport.tsx` (`h-[400px]` → `h-[300px] md:h-[400px]`)
 - [ ] **B-021** Substituir 11× `as unknown as Type[]` em `useDashboardData.ts` por Zod ou types gerados
 - [ ] **B-022** Converter `require()` em `tailwind.config.ts` para ES import
-- [ ] **B-023** Resolver TODO antigo em `embeddingService.ts:17`
 - [ ] Quebrar `SettingsPage.tsx` (19 useState) → subcomponentes por aba
 - [ ] Extrair strings Tailwind duplicadas para `src/lib/styles.ts`
 - [ ] Adicionar `try/catch` de rede em hooks que só tratam erros Supabase
