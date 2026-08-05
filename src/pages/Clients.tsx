@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -23,6 +23,11 @@ const statusConfig: Record<string, string> = {
   pending: "status-paused",
 };
 
+function isInactiveStatus(status?: string | null) {
+  const normalized = (status || "").toLowerCase();
+  return normalized === "inativo" || normalized === "inactive";
+}
+
 export default function Clients() {
   const navigate = useNavigate();
   const { clients, loading, deleteClient } = useClients();
@@ -34,19 +39,14 @@ export default function Clients() {
     return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
   });
 
-  const isInactiveStatus = (status?: string | null) => {
-    const normalized = (status || "").toLowerCase();
-    return normalized === "inativo" || normalized === "inactive";
-  };
-
-  const filtered = clients.filter((c: any) => {
+  const filtered = useMemo(() => clients.filter((c: any) => {
     const matchesSearch = getClientDisplayName(c).toLowerCase().includes(search.toLowerCase());
     const matchesManager = managerFilter === "all" || c.responsible_id === managerFilter;
     const matchesActiveState = showInactive ? isInactiveStatus(c.status) : !isInactiveStatus(c.status);
     return matchesSearch && matchesManager && matchesActiveState;
-  });
+  }), [clients, search, managerFilter, showInactive]);
 
-  const inactiveCount = clients.filter((c) => isInactiveStatus(c.status)).length;
+  const inactiveCount = useMemo(() => clients.filter((c) => isInactiveStatus(c.status)).length, [clients]);
 
   const getActivePlan = (c: ClientRow) => {
     const active = (c.contracts || []).find((ct) => ct.status === "ativo");
