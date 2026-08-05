@@ -86,7 +86,11 @@ export function ClientHubDeliveries({ clientId }: Props) {
     const updates: any = { status };
     if (status === "entregue") updates.completed_at = new Date().toISOString();
     else updates.completed_at = null;
-    await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
+    const { error } = await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
+    if (error) {
+      toast({ title: "Erro ao atualizar item", description: error.message, variant: "destructive" });
+      return;
+    }
     await fetch();
   };
 

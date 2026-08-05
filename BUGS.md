@@ -41,7 +41,7 @@
 | B-020 | 🟡 ABERTO | `src/pages/DataImport.tsx` | Heights fixas (`h-[400px]`) quebram mobile |
 | B-021 | 🟡 ABERTO | `src/hooks/useDashboardData.ts:93-123` | 11× `as unknown as Type[]` — casting duplo inseguro |
 | B-022 | 🟡 ABERTO | `tailwind.config.ts:114` | `require()` style import — 1 erro de lint |
-| B-023 | 🟡 ABERTO | `src/services/embeddingService.ts:17` | TODO antigo de OpenAI Embedding API não implementado |
+| B-023 | ✅ RESOLVIDO | ~~`src/services/embeddingService.ts:17`~~ | TODO antigo de OpenAI Embedding API não implementado — arquivo não existe mais no repositório (removido em limpeza anterior de código morto) |
 
 ## 📌 COMO REGISTRAR NOVOS BUGS
 

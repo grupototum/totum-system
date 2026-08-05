@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, Package, Plus } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
@@ -55,20 +56,23 @@ export function ContractFormDialog({ open, onOpenChange, onSubmit, editData, def
   useEffect(() => {
     if (open) {
       Promise.all([
-        supabase.from("clients").select("*"),
+        supabase.from("clients").select("id, name, company_name, status"),
         supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name"),
         supabase.from("contract_types").select("id, name").eq("is_active", true).order("name"),
-        supabase.from("plans").select("id, name, value, frequency").eq("is_active", true).order("name").then(r => ({ ...r, data: (r.data || []).map((p: any) => ({ id: p.id, name: p.name, total_sale: p.value })) })),
         supabase.from("products").select("id, name, price, product_types(name)").eq("is_active", true).order("name"),
-      ]).then(([c, p, ct, pkg, pr]) => {
+      ]).then(([c, p, ct, pr]) => {
         const activeClients = ((c.data as any[]) || [])
           .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
           .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
         setClients(activeClients);
         setPlans((p.data as any) || []);
         setContractTypes(ct.data || []);
-        setPackages((pkg as any).data || []);
+        // "Pacotes" reaproveita a mesma consulta de planos (antes era uma 2ª query idêntica)
+        setPackages((p.data || []).map((pl: any) => ({ id: pl.id, name: pl.name, total_sale: pl.value })));
         setProducts((pr.data as any) || []);
+      }).catch((err) => {
+        console.error("Error loading contract form options:", err);
+        toast({ title: "Erro ao carregar opções do formulário", description: "Tente novamente em instantes.", variant: "destructive" });
       });
 
       if (editData) {

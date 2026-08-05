@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getClientDisplayName } from "@/lib/clients";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoReportsData } from "@/data/demoData";
+import { toast } from "@/hooks/use-toast";
 
 export interface MrrHistoryItem {
   month: string;
@@ -89,34 +90,35 @@ export function useReports(filters?: ReportsFilters) {
       return;
     }
 
+    try {
     const now = new Date();
     const rangeStart = filters?.startDate || new Date(now.getFullYear(), now.getMonth() - 5, 1);
     const rangeEnd = filters?.endDate || new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const months = getMonthsBetween(rangeStart, rangeEnd);
 
-    // ── 1. MRR History ──
-    const mrrHistory: MrrHistoryItem[] = [];
-    for (const d of months) {
-      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-      const endStr = toDateStr(endOfMonth);
-
-      const { data: contracts } = await supabase
-        .from("contracts")
-        .select("value, client_id, start_date, end_date, status")
-        .or(`end_date.is.null,end_date.gte.${toDateStr(d)}`)
-        .lte("start_date", endStr)
-        .in("status", ["ativo", "pausado"]);
-
-      const monthMrr = (contracts || []).reduce((s, c) => s + (Number(c.value) || 0), 0);
-      const uniqueClients = new Set((contracts || []).map(c => c.client_id));
-      const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
-      mrrHistory.push({ month: monthLabel, mrr: monthMrr, clients: uniqueClients.size });
-    }
-
-    // ── 2. Churn ──
+    // Uma única busca de contratos, reutilizada pelo histórico de MRR e pelo churn
+    // (antes eram N queries, uma por mês, no histórico de MRR)
     const { data: allContracts } = await supabase
       .from("contracts")
       .select("status, client_id, start_date, end_date, value");
+
+    // ── 1. MRR History ──
+    const mrrHistory: MrrHistoryItem[] = months.map((d) => {
+      const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+      const endStr = toDateStr(endOfMonth);
+      const startStr = toDateStr(d);
+      const monthContracts = (allContracts || []).filter((c) =>
+        ["ativo", "pausado"].includes(c.status) &&
+        c.start_date <= endStr &&
+        (!c.end_date || c.end_date >= startStr)
+      );
+      const monthMrr = monthContracts.reduce((s, c) => s + (Number(c.value) || 0), 0);
+      const uniqueClients = new Set(monthContracts.map(c => c.client_id));
+      const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
+      return { month: monthLabel, mrr: monthMrr, clients: uniqueClients.size };
+    });
+
+    // ── 2. Churn ──
 
     const activeContracts = (allContracts || []).filter(c => c.status === "ativo").length;
     const cancelledContracts = (allContracts || []).filter(c => c.status === "cancelado" || c.status === "encerrado").length;
@@ -206,24 +208,26 @@ export function useReports(filters?: ReportsFilters) {
       })
       .sort((a, b) => b.profit - a.profit);
 
-    // ── 5. Revenue by Month ──
-    const revenueByMonth: RevenueByMonth[] = [];
-    for (const d of months) {
+    // ── 5. Revenue by Month ── (uma única query pro range inteiro, agrupada em JS)
+    const lastMonth = months[months.length - 1] || rangeStart;
+    const rangeEndExclusive = new Date(lastMonth.getFullYear(), lastMonth.getMonth() + 1, 1);
+    const { data: rangeEntries } = await supabase
+      .from("financial_entries")
+      .select("type, value, due_date")
+      .gte("due_date", toDateStr(months[0] || rangeStart))
+      .lt("due_date", toDateStr(rangeEndExclusive));
+
+    const revenueByMonth: RevenueByMonth[] = months.map((d) => {
       const monthStart = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
       const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
       const monthEnd = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-01`;
+      const entries = (rangeEntries || []).filter(e => e.due_date >= monthStart && e.due_date < monthEnd);
 
-      const { data: entries } = await supabase
-        .from("financial_entries")
-        .select("type, value")
-        .gte("due_date", monthStart)
-        .lt("due_date", monthEnd);
-
-      const receita = (entries || []).filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
-      const despesa = (entries || []).filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
+      const receita = entries.filter(e => e.type === "receber").reduce((s, e) => s + Number(e.value), 0);
+      const despesa = entries.filter(e => e.type === "pagar").reduce((s, e) => s + Number(e.value), 0);
       const monthLabel = d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
-      revenueByMonth.push({ month: monthLabel, receita, despesa, lucro: receita - despesa });
-    }
+      return { month: monthLabel, receita, despesa, lucro: receita - despesa };
+    });
 
     const currentMrr = mrrHistory[mrrHistory.length - 1]?.mrr || 0;
 
@@ -242,8 +246,12 @@ export function useReports(filters?: ReportsFilters) {
       currentMrr,
       forecastNext3: currentMrr * 3,
     });
-
-    setLoading(false);
+    } catch (err) {
+      console.error("Error fetching reports:", err);
+      toast({ title: "Erro ao carregar relatórios", description: "Tente novamente em instantes.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startKey, endKey, isDemoMode]);
 
