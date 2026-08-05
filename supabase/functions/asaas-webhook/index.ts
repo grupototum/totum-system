@@ -18,7 +18,9 @@ serve(async (req) => {
       { db: { schema: "totum_system" } }
     );
 
-    // Verificar token do webhook (opcional, mas recomendado)
+    // Verifica o token do webhook. Falha fechado: sem webhook_token configurado
+    // em asaas_config, nenhuma requisição passa (antes, sem token configurado,
+    // qualquer request era aceita sem checagem nenhuma).
     const webhookToken = req.headers.get("asaas-access-token");
     const { data: config } = await supabase
       .from("asaas_config")
@@ -26,7 +28,7 @@ serve(async (req) => {
       .eq("is_active", true)
       .single();
 
-    if (config?.webhook_token && webhookToken !== config.webhook_token) {
+    if (!config?.webhook_token || webhookToken !== config.webhook_token) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
