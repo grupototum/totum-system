@@ -137,18 +137,23 @@ export function useImportData() {
         });
       });
     } else {
-      const buffer = await f.arrayBuffer();
-      const wb = XLSX.read(buffer, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
-      const cols = data.length > 0 ? Object.keys(data[0]) : [];
-      setRawData(data.map(row => {
-        const cleaned: Record<string, string> = {};
-        for (const [k, v] of Object.entries(row)) cleaned[k] = String(v ?? "");
-        return cleaned;
-      }));
-      setDetectedColumns(cols);
-      autoMap(cols);
+      try {
+        const buffer = await f.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
+        const cols = data.length > 0 ? Object.keys(data[0]) : [];
+        setRawData(data.map(row => {
+          const cleaned: Record<string, string> = {};
+          for (const [k, v] of Object.entries(row)) cleaned[k] = String(v ?? "");
+          return cleaned;
+        }));
+        setDetectedColumns(cols);
+        autoMap(cols);
+      } catch (err) {
+        console.error("Error parsing spreadsheet:", err);
+        toast({ title: "Arquivo inválido", description: "Não foi possível ler essa planilha. Verifique o formato e tente novamente.", variant: "destructive" });
+      }
     }
   }, [autoMap]);
 
