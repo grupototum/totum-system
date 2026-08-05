@@ -10,10 +10,7 @@ import {
   createAsaasPayment,
   syncPaymentsFromAsaas,
   createAsaasSubscription,
-  deleteAsaasPayment,
-  refundAsaasPayment,
   deleteAsaasSubscription,
-  getAsaasPixQrCode,
   formatAsaasStatus,
   formatBillingType,
   formatCycle,
@@ -140,43 +137,6 @@ export function useCreateAsaasPayment() {
     onError: (e: any) => {
       toast({ title: "Erro ao criar cobrança", description: e.message, variant: "destructive" });
     },
-  });
-}
-
-export function useDeleteAsaasPayment() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ paymentId, apiKey }: { paymentId: string; apiKey: string }) =>
-      deleteAsaasPayment(paymentId, apiKey),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["asaas_payments"] });
-      toast({ title: "Cobrança excluída" });
-    },
-    onError: (e: any) => {
-      toast({ title: "Erro ao excluir", description: e.message, variant: "destructive" });
-    },
-  });
-}
-
-export function useRefundAsaasPayment() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ paymentId, apiKey, value }: { paymentId: string; apiKey: string; value?: number }) =>
-      refundAsaasPayment(paymentId, apiKey, value),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["asaas_payments"] });
-      toast({ title: "Estorno solicitado" });
-    },
-    onError: (e: any) => {
-      toast({ title: "Erro no estorno", description: e.message, variant: "destructive" });
-    },
-  });
-}
-
-export function useGetPixQrCode() {
-  return useMutation({
-    mutationFn: async ({ paymentId, apiKey }: { paymentId: string; apiKey: string }) =>
-      getAsaasPixQrCode(paymentId, apiKey),
   });
 }
 
