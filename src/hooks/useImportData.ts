@@ -230,30 +230,57 @@ export function useImportData() {
       const clientErrors: string[] = [];
 
       if (clientMap.size > 0) {
-        const { data: existing } = await supabase.from("clients").select("*");
+        const { data: existing } = await supabase.from("clients").select("id, company_name, name");
         const existingMap = new Map((existing || []).map((c: any) => [String(c.company_name || c.name || "").toLowerCase(), c.id]));
+
+        const toCreate = Array.from(clientMap.entries()).filter(([key]) => !existingMap.has(key));
         for (const [key, client] of clientMap) {
-          if (existingMap.has(key)) {
-            clientIdMap.set(key, existingMap.get(key)!);
+          if (existingMap.has(key)) clientIdMap.set(key, existingMap.get(key)!);
+        }
+
+        if (toCreate.length > 0) {
+          const payloads = toCreate.map(([, client]) => attachOrganizationId({
+            company_name: client.name,
+            contact_name: client.name,
+            email: client.email || null,
+            phone: client.phone || null,
+            cnpj: client.document || null,
+            import_batch_id: batch.id,
+            status: "active",
+          }, tenant?.organization_id));
+
+          // Tenta em lote primeiro; se falhar (ex: violação de constraint em uma
+          // linha), cai para o insert individual original para isolar o erro por cliente.
+          const { data: created, error: bulkErr } = await (supabase.from("clients") as any)
+            .insert(payloads)
+            .select("id");
+
+          if (!bulkErr && created) {
+            toCreate.forEach(([key], i) => {
+              const id = created[i]?.id;
+              if (id) { clientIdMap.set(key, id); clientCount++; }
+            });
           } else {
-            const { data: created, error } = await (supabase.from("clients") as any)
-              .insert(attachOrganizationId({
-                company_name: client.name,
-                contact_name: client.name,
-                email: client.email || null,
-                phone: client.phone || null,
-                cnpj: client.document || null,
-                import_batch_id: batch.id,
-                status: "active",
-              }, tenant?.organization_id))
-              .select("id")
-              .single();
-            if (error) {
-              console.error(`Error creating client "${client.name}":`, error);
-              clientErrors.push(client.name);
-            } else if (created) {
-              clientIdMap.set(key, created.id);
-              clientCount++;
+            for (const [key, client] of toCreate) {
+              const { data: single, error } = await (supabase.from("clients") as any)
+                .insert(attachOrganizationId({
+                  company_name: client.name,
+                  contact_name: client.name,
+                  email: client.email || null,
+                  phone: client.phone || null,
+                  cnpj: client.document || null,
+                  import_batch_id: batch.id,
+                  status: "active",
+                }, tenant?.organization_id))
+                .select("id")
+                .single();
+              if (error) {
+                console.error(`Error creating client "${client.name}":`, error);
+                clientErrors.push(client.name);
+              } else if (single) {
+                clientIdMap.set(key, single.id);
+                clientCount++;
+              }
             }
           }
         }
