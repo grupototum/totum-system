@@ -138,59 +138,6 @@ export interface ValidationErrors {
 }
 
 /**
- * Valida formulário de login
- */
-export const validateLoginForm = (email: string, password: string): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (!isRequired(email)) {
-    errors.email = "E-mail é obrigatório";
-  } else if (!isValidEmail(email)) {
-    errors.email = "E-mail inválido";
-  }
-  
-  if (!isRequired(password)) {
-    errors.password = "Senha é obrigatória";
-  }
-  
-  return errors;
-};
-
-/**
- * Valida formulário de registro
- */
-export const validateSignUpForm = (
-  email: string,
-  password: string,
-  confirmPassword: string,
-  name?: string
-): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (name !== undefined && !isRequired(name)) {
-    errors.name = "Nome é obrigatório";
-  }
-  
-  if (!isRequired(email)) {
-    errors.email = "E-mail é obrigatório";
-  } else if (!isValidEmail(email)) {
-    errors.email = "E-mail inválido";
-  }
-  
-  if (!isRequired(password)) {
-    errors.password = "Senha é obrigatória";
-  } else if (!isValidPassword(password)) {
-    errors.password = "Senha deve ter pelo menos 6 caracteres";
-  }
-  
-  if (password !== confirmPassword) {
-    errors.confirmPassword = "As senhas não coincidem";
-  }
-  
-  return errors;
-};
-
-/**
  * Valida formulário de recuperação de senha
  */
 export const validateForgotPasswordForm = (email: string): ValidationErrors => {
@@ -268,28 +215,3 @@ export const validateClientBasicInfo = (
   return errors;
 };
 
-/**
- * Valida tarefa
- */
-export const validateTask = (title: string): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (!isRequired(title)) {
-    errors.title = "Título é obrigatório";
-  }
-  
-  return errors;
-};
-
-/**
- * Valida conteúdo do pipeline
- */
-export const validateContentCard = (title: string): ValidationErrors => {
-  const errors: ValidationErrors = {};
-  
-  if (!isRequired(title)) {
-    errors.title = "Título é obrigatório";
-  }
-  
-  return errors;
-};
