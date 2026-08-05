@@ -22,6 +22,8 @@
 
 ## 🟢 PRÓXIMAS SEMANAS
 
+- [ ] Co-responsável e Observador em tarefas (multi-select de usuários, avatares no card) — exige nova migration (`tasks.co_responsible_ids`/`tasks.observer_ids` ou tabela de junção) e ajuste de RLS; adiado desta entrega por ser item **SHOULD** e tocar em No-Fly Zone de banco
+
 - [ ] **B-020** Responsividade em `DataImport.tsx` (`h-[400px]` → `h-[300px] md:h-[400px]`)
 - [ ] **B-021** Substituir 11× `as unknown as Type[]` em `useDashboardData.ts` por Zod ou types gerados
 - [ ] **B-022** Converter `require()` em `tailwind.config.ts` para ES import
