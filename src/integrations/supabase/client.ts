@@ -4,9 +4,13 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-// Schema do PostgREST. Default 'public'; configurável por env para deploys
-// cujo banco exponha as tabelas do app em outro schema.
-const SUPABASE_SCHEMA = import.meta.env.VITE_SUPABASE_SCHEMA || 'public';
+// Schema do PostgREST. Default 'totum_system': é o schema onde o baseline
+// (supabase/migrations/00000000000000_baseline_totum_system.sql) cria as tabelas
+// do app, e é o que todas as edge functions cravam em `db.schema`. Com default
+// 'public' o front lia um schema sem as tabelas quando a env faltava, e o app
+// subia vazio enquanto as edge functions seguiam funcionando.
+// Configurável por env para deploys cujo banco exponha as tabelas em outro schema.
+const SUPABASE_SCHEMA = import.meta.env.VITE_SUPABASE_SCHEMA || 'totum_system';
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
