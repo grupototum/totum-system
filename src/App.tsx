@@ -17,6 +17,7 @@ import { RouteErrorBoundary } from "@/components/shared/RouteErrorBoundary";
 // Lazy-loaded pages — each becomes its own chunk (~40–120 KB each)
 const AuthPage            = lazy(() => import("./pages/AuthPage"));
 const ResetPasswordPage   = lazy(() => import("./pages/ResetPasswordPage"));
+const AuthCallback        = lazy(() => import("./pages/AuthCallback"));
 const SetupPage           = lazy(() => import("./pages/SetupPage"));
 const Index               = lazy(() => import("./pages/Index"));
 const Clients             = lazy(() => import("./pages/Clients"));
@@ -174,6 +175,7 @@ function PublicRoutes() {
           <Route path="/" element={<PixelSystemsLanding />} />
           <Route path="/nova-agencia" element={<NovaAgenciaPage />} />
           <Route path="/login" element={<AuthRoutes />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/setup" element={<SetupRoute />} />
           <Route path="/*" element={<PixelSystemsLanding />} />
@@ -191,6 +193,7 @@ function PublicRoutes() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/nova-agencia" element={<NovaAgenciaPage />} />
           <Route path="/login" element={<AuthRoutes />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/*" element={<ProtectedRoutes />} />
         </Routes>
@@ -203,6 +206,7 @@ function PublicRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login" element={<AuthRoutes />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/setup" element={<SetupRoute />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/*" element={<ProtectedRoutes />} />

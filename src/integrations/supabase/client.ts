@@ -23,5 +23,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    // PKCE é o fluxo exigido pelo GoTrue self-hosted para OAuth: o provedor
+    // devolve `?code=` em vez de devolver o token no fragmento da URL.
+    flowType: 'pkce',
   }
 });
