@@ -21,7 +21,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.body.classList.remove("light");
     try {
       localStorage.setItem("totum-theme", "dark");
-    } catch {}
+    } catch {
+      // localStorage pode estar indisponível (modo privado / storage cheio)
+    }
   }, []);
 
   const noop = () => {};

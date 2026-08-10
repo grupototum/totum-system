@@ -71,7 +71,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
   useEffect(() => { fetch(); }, [fetch]);
 
   const toggleExpand = (id: string) => {
-    setExpanded(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setExpanded(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
   };
 
   const getPct = (c: any) => {

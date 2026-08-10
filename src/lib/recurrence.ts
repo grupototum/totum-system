@@ -11,7 +11,7 @@ export function calculateNextDueDate(currentDateStr: string, type: RecurrenceTyp
       next.setDate(current.getDate() + 1);
       break;
     
-    case "semanal":
+    case "semanal": {
       const days = config?.week_days || [];
       if (days.length === 0) {
         next.setDate(current.getDate() + 7);
@@ -30,8 +30,9 @@ export function calculateNextDueDate(currentDateStr: string, type: RecurrenceTyp
         if (!found) next.setDate(current.getDate() + 7);
       }
       break;
+    }
 
-    case "mensal":
+    case "mensal": {
       const targetDay = config?.month_day || current.getDate();
       next.setMonth(current.getMonth() + 1);
       next.setDate(targetDay);
@@ -40,11 +41,13 @@ export function calculateNextDueDate(currentDateStr: string, type: RecurrenceTyp
         next.setDate(0); // Last day of previous month
       }
       break;
+    }
 
-    case "personalizada":
+    case "personalizada": {
       const interval = config?.interval_days || 7;
       next.setDate(current.getDate() + interval);
       break;
+    }
 
     default:
       next.setDate(current.getDate() + 7);
