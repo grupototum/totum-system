@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### fix
+- Restaura os `GRANT`s do schema `totum_system` para `anon`/`authenticated`/`service_role` após migração do banco entre VPS — corrige `42501 permission denied for schema totum_system` (dashboard zerado). `supabase/patches/20260810_restore_totum_system_grants.sql` (aplicado manualmente por Israel no Studio; RLS confirmado ativo antes de conceder)
 - Header `Strict-Transport-Security` (HSTS, 2 anos + includeSubDomains) adicionado no `vercel.json` — Revisão Totum 2026-08-10
 - Patch de segurança `js-yaml` 4.3.0 → 4.3.1 (vulnerabilidade HIGH, fix semver-compatível no lockfile) — Revisão Totum 2026-08-10
 - Corrigir erro `Could not find the 'additional_info' column of 'clients' in the schema cache` no cadastro/edição de cliente — coluna criada via `supabase/patches/20260804_add_clients_additional_info.sql` (o campo já era usado no formulário, mas nunca existiu no banco)
