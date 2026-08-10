@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### fix
+- Patch de segurança `js-yaml` 4.3.0 → 4.3.1 (vulnerabilidade HIGH, fix semver-compatível no lockfile) — Revisão Totum 2026-08-10
 - Corrigir erro `Could not find the 'additional_info' column of 'clients' in the schema cache` no cadastro/edição de cliente — coluna criada via `supabase/patches/20260804_add_clients_additional_info.sql` (o campo já era usado no formulário, mas nunca existiu no banco)
 - `TaskDetailDialog`: título e responsável da tarefa deixavam de ser persistidos ao salvar (payload de `updateTask` não incluía `title`/`responsible_id`) — corrigido em `src/pages/Tasks.tsx`
 - Aplicar hotfix RLS em produção para filhos de tarefas, checklists de entrega e objetos `task-attachments`, removendo policies permissivas de insert para usuários autenticados — `supabase/patches/20260513_remote_task_child_rls_hotfix.sql`
@@ -19,6 +20,7 @@
 - Aviso de alterações não salvas: novo hook `useUnsavedChangesGuard` + `UnsavedChangesDialog` reutilizados em `NewClient`, `EditClient`, `TaskFormDialog` e `TaskDetailDialog` — bloqueia fechamento acidental (Dialog/Sheet) e refresh/fechamento de aba (`beforeunload`) quando há dados não salvos
 
 ### chore
+- Revisão Totum 2026-08-10: 10 erros mecânicos de lint corrigidos sem mudança de comportamento (case blocks, ternário-statement, interfaces vazias, `require()` → import) — lint cai de 443 para 433 problemas
 - Untrack `src/stark-api/node_modules/` e `dist/` do git (2215 arquivos, ~65MB) — `948c250c`
 - Remover 23 arquivos duplicados `* 2.*` byte-identical (artefatos do Finder macOS) — `bd676aeb`
 
