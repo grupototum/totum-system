@@ -15,7 +15,8 @@
 - [ ] **B-016** Fix `useEffect` deps em `FinancialFormDialog.tsx:46` (adicionar `[open]`)
 - [ ] **B-017** Adicionar `try/catch` + toast em `ClientFormDialog.tsx:75`
 - [ ] **B-018** Implementar validação HMAC do webhook Asaas — **⚠️ No-Fly Zone, aprovação obrigatória**
-- [ ] **B-019** Avaliar substituição do `xlsx@0.18.5` por `exceljs` (Prototype Pollution)
+- [ ] **B-019** Corrigir `xlsx@0.18.5` vulnerável (Prototype Pollution + ReDoS; `useImportData.ts` parseia upload de usuário) — caminho preferido: instalar `xlsx@0.20.3` do CDN oficial SheetJS (`npm i https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`, mesma API, zero mudança de código); alternativa: migrar para `exceljs`
+- [ ] **B-026** Migrar `react-router-dom` v6 → v7.18+ (2 advisories MODERATE sem fix na linha 6.x) — **⚠️ No-Fly Zone #5 (roteamento multi-tenant), branch dedicada + teste manual dos fluxos de subdomínio, aprovação obrigatória**
 - [ ] **B-025** Reconciliar histórico de migrations Supabase local/remoto sem `repair` às cegas
 - [ ] Regenerar types Supabase via MCP e remover `as any` em `TenantContext.tsx:52`
 - [ ] Ativar `noImplicitAny: true` e corrigir erros emergentes em pequenos grupos

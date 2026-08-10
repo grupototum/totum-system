@@ -38,7 +38,7 @@ src/
 ├── lib/              # Utilitários (errorHandler, tenant, utils)
 ├── data/             # Dados mock para modo demo
 └── assets/           # Imagens e fontes
-stark-api/            # Servidor Express separado (NÃO faz parte do bundle Vite)
+api/                  # Serverless functions Vercel (ex: /api/tarefas, CRUD por API key)
 supabase/             # Edge Functions e migrations
 docs/                 # Documentação do projeto
 ```
@@ -59,8 +59,8 @@ Toda alteração nestas áreas exige aprovação ANTES de qualquer commit:
 |---|---|---|
 | Build (`npm run build`) | ✅ | ~10s. Code splitting por rota ativo |
 | TypeScript (`tsc --noEmit`) | ✅ | Passa (strict: false) |
-| Lint (`npm run lint`) | ⚠️ | ~2035 problemas — maioria `no-explicit-any` |
-| npm audit | ⚠️ | 1 HIGH: `xlsx` Prototype Pollution (sem fix upstream) |
+| Lint (`npm run lint`) | ⚠️ | ~433 problemas — 404 são `no-explicit-any` (revisão 2026-08-10) |
+| npm audit | ⚠️ | `xlsx` HIGH (fix só via CDN oficial SheetJS) · `react-router` 2× MODERATE (fix só no major v7) |
 | .env no .gitignore | ✅ | Protegido |
 | Secrets hardcoded | ✅ | Limpo (tokens revogados em commit anterior) |
 

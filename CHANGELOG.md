@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### fix
+- Header `Strict-Transport-Security` (HSTS, 2 anos + includeSubDomains) adicionado no `vercel.json` — Revisão Totum 2026-08-10
 - Patch de segurança `js-yaml` 4.3.0 → 4.3.1 (vulnerabilidade HIGH, fix semver-compatível no lockfile) — Revisão Totum 2026-08-10
 - Corrigir erro `Could not find the 'additional_info' column of 'clients' in the schema cache` no cadastro/edição de cliente — coluna criada via `supabase/patches/20260804_add_clients_additional_info.sql` (o campo já era usado no formulário, mas nunca existiu no banco)
 - `TaskDetailDialog`: título e responsável da tarefa deixavam de ser persistidos ao salvar (payload de `updateTask` não incluía `title`/`responsible_id`) — corrigido em `src/pages/Tasks.tsx`
@@ -21,6 +22,8 @@
 
 ### chore
 - Revisão Totum 2026-08-10: 10 erros mecânicos de lint corrigidos sem mudança de comportamento (case blocks, ternário-statement, interfaces vazias, `require()` → import) — lint cai de 443 para 433 problemas
+- Remove `bun.lock`/`bun.lockb` (npm/`package-lock.json` é o gerenciador canônico) — Revisão Totum 2026-08-10
+- CLAUDE.md atualizado (lint real ~433, `api/` no lugar de `stark-api/`, npm audit atual); TODO.md ganha B-026 (migração react-router v7) e B-019 revisado com caminho via CDN oficial SheetJS — Revisão Totum 2026-08-10
 - Untrack `src/stark-api/node_modules/` e `dist/` do git (2215 arquivos, ~65MB) — `948c250c`
 - Remover 23 arquivos duplicados `* 2.*` byte-identical (artefatos do Finder macOS) — `bd676aeb`
 
