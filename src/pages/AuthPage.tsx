@@ -37,11 +37,12 @@ export default function AuthPage() {
   // Signup público removido: usuários são criados por admin (provision-subdomain /
   // admin-update-user). O fecho autoritativo é GOTRUE_DISABLE_SIGNUP=true no self-host;
   // isto só remove a affordance da UI. Ver split-brain de schema / org default fixa.
-  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "forgot" | "magic">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
   const [showPendingMessage, setShowPendingMessage] = useState(isPending);
 
   // isPending pode chegar de forma assíncrona (ex.: retorno do OAuth Google),
@@ -104,6 +105,21 @@ export default function AuthPage() {
     }
   };
 
+  const handleMagicLink = async () => {
+    if (!email) return;
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/dashboard` },
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      setMagicSent(true);
+    }
+  };
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -134,7 +150,7 @@ export default function AuthPage() {
             height={48}
           />
           <p className={`text-sm ${hasTenantBg ? "text-white/60" : "text-muted-foreground"}`}>
-            {mode === "login" ? "Acesse sua conta" : "Recuperar senha"}
+            {mode === "login" ? "Acesse sua conta" : mode === "magic" ? "Login sem senha" : "Recuperar senha"}
           </p>
         </div>
 
@@ -158,15 +174,34 @@ export default function AuthPage() {
           </div>
         )}
 
-        {!showPendingMessage && (
+        {!showPendingMessage && magicSent && (
+          <div className="glass-card rounded-2xl p-6 text-center space-y-3 border border-primary/20 bg-primary/[0.04]">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <Mail className="h-6 w-6 text-primary" />
+            </div>
+            <h3 className="font-heading font-semibold text-foreground">Verifique seu email</h3>
+            <p className="text-sm text-muted-foreground">
+              Enviamos um link de acesso para <strong>{email}</strong>. Clique no link para entrar.
+            </p>
+            <Button
+              variant="ghost"
+              onClick={() => { setMagicSent(false); setMode("login"); }}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Voltar ao login
+            </Button>
+          </div>
+        )}
+
+        {!showPendingMessage && !magicSent && (
           <>
             <div className={`glass-card rounded-2xl p-6 space-y-4 ${cardClass}`} style={cardStyle}>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" aria-hidden="true" />
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Endereço de e-mail" autoComplete="email" className={inputCls} />
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" aria-label="Endereço de e-mail" autoComplete="email" className={inputCls} onKeyDown={(e) => e.key === "Enter" && mode === "magic" && handleMagicLink()} />
               </div>
 
-              {mode !== "forgot" && (
+              {mode !== "forgot" && mode !== "magic" && (
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" aria-hidden="true" />
                   <Input
@@ -197,21 +232,31 @@ export default function AuthPage() {
               )}
 
               <Button
-                onClick={mode === "login" ? handleLogin : handleForgotPassword}
+                onClick={mode === "login" ? handleLogin : mode === "magic" ? handleMagicLink : handleForgotPassword}
                 disabled={loading}
                 className="w-full gradient-primary border-0 text-white font-semibold rounded-xl h-11"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {mode === "login" ? "Entrar" : "Enviar Link"}
+                {mode === "login" ? "Entrar" : mode === "magic" ? "Enviar Magic Link" : "Enviar Link"}
               </Button>
 
-              {mode !== "forgot" && (
+              {mode === "login" && (
                 <>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-border" />
                     <span className="text-[10px] text-muted-foreground uppercase">ou</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
+                  <Button
+                    onClick={() => setMode("magic")}
+                    variant="outline"
+                    disabled={loading}
+                    className={`w-full rounded-xl h-11 ${hasTenantBg ? "text-white border-white/20 hover:border-white/40" : "border-border bg-secondary hover:bg-accent text-foreground"}`}
+                    style={hasTenantBg ? { backgroundColor: tenant?.bg_color ?? undefined } : undefined}
+                  >
+                    <Mail className="h-4 w-4 mr-2" aria-hidden="true" />
+                    Entrar sem senha (Magic Link)
+                  </Button>
                   <Button
                     onClick={handleGoogleLogin}
                     variant="outline"
