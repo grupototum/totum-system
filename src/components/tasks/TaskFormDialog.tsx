@@ -206,10 +206,12 @@ export function TaskFormDialog({
     if (!clientId) nextErrors.clientId = "Cliente é obrigatório";
     if (!responsibleId) nextErrors.responsibleId = "Responsável é obrigatório";
     if (!priority) nextErrors.priority = "Prioridade é obrigatória";
-    if (!startDate) nextErrors.startDate = "Data de início é obrigatória";
-    if (!dueDate) nextErrors.dueDate = "Data de entrega é obrigatória";
-    if (startDate && dueDate && startDate > dueDate) {
-      nextErrors.dueDate = "Data de entrega não pode ser antes da data de início";
+    if (!isRecurring) {
+      if (!startDate) nextErrors.startDate = "Data de início é obrigatória";
+      if (!dueDate) nextErrors.dueDate = "Data de entrega é obrigatória";
+      if (startDate && dueDate && startDate > dueDate) {
+        nextErrors.dueDate = "Data de entrega não pode ser antes da data de início";
+      }
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -244,6 +246,10 @@ export function TaskFormDialog({
       }
     }
 
+    const today = new Date().toISOString().split("T")[0];
+    const effectiveStartDate = isRecurring ? today : startDate;
+    const effectiveDueDate = isRecurring ? today : dueDate;
+
     const insertPayload: any = {
       title: title.trim(),
       description: description.trim() || null,
@@ -252,8 +258,8 @@ export function TaskFormDialog({
       priority: priority,
       task_type: taskType,
       status: "pendente",
-      start_date: startDate || null,
-      due_date: dueDate || null,
+      start_date: effectiveStartDate || null,
+      due_date: effectiveDueDate || null,
       pop_id: selectedPopId || null,
       sla_id: selectedSlaId || null,
       sla_response_deadline: slaResponseDeadline,
@@ -378,28 +384,30 @@ export function TaskFormDialog({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Data Início *</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => { setStartDate(e.target.value); setErrors((er) => ({ ...er, startDate: "" })); }}
-                className={`bg-white/[0.04] border-border ${errors.startDate ? "border-destructive" : ""}`}
-              />
-              {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
+          {!isRecurring && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Data Início *</Label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => { setStartDate(e.target.value); setErrors((er) => ({ ...er, startDate: "" })); }}
+                  className={`bg-white/[0.04] border-border ${errors.startDate ? "border-destructive" : ""}`}
+                />
+                {errors.startDate && <p className="text-xs text-destructive">{errors.startDate}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label>Data Entrega *</Label>
+                <Input
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => { setDueDate(e.target.value); setErrors((er) => ({ ...er, dueDate: "" })); }}
+                  className={`bg-white/[0.04] border-border ${errors.dueDate ? "border-destructive" : ""}`}
+                />
+                {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate}</p>}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Data Entrega *</Label>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => { setDueDate(e.target.value); setErrors((er) => ({ ...er, dueDate: "" })); }}
-                className={`bg-white/[0.04] border-border ${errors.dueDate ? "border-destructive" : ""}`}
-              />
-              {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate}</p>}
-            </div>
-          </div>
+          )}
 
           {/* Recurrence */}
           <div className="space-y-4 border border-border rounded-lg p-4">
@@ -408,23 +416,28 @@ export function TaskFormDialog({
               <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
             </div>
             {isRecurring && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-xs">Frequência</Label>
-                  <Select value={recurrenceType} onValueChange={setRecurrenceType}>
-                    <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="diaria">Diária</SelectItem>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="mensal">Mensal</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Frequência</Label>
+                    <Select value={recurrenceType} onValueChange={setRecurrenceType}>
+                      <SelectTrigger className="bg-white/[0.04] border-border"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="diaria">Diária</SelectItem>
+                        <SelectItem value="semanal">Semanal</SelectItem>
+                        <SelectItem value="mensal">Mensal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">Data Fim (opcional)</Label>
+                    <Input type="date" value={recurrenceEndDate} onChange={(e) => setRecurrenceEndDate(e.target.value)} className="bg-white/[0.04] border-border" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Data Fim (opcional)</Label>
-                  <Input type="date" value={recurrenceEndDate} onChange={(e) => setRecurrenceEndDate(e.target.value)} className="bg-white/[0.04] border-border" />
-                </div>
-              </div>
+                <p className="text-xs text-muted-foreground">
+                  A data de entrega é definida automaticamente no dia da geração.
+                </p>
+              </>
             )}
           </div>
           {/* POP + SLA Selection */}

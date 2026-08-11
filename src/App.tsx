@@ -46,6 +46,7 @@ const SlaRules            = lazy(() => import("./pages/SlaRules"));
 const DataImport          = lazy(() => import("./pages/DataImport"));
 const NotFound            = lazy(() => import("./pages/NotFound"));
 const NovaAgenciaPage     = lazy(() => import("./pages/NovaAgenciaPage"));
+const Novidades           = lazy(() => import("./pages/Novidades"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +139,7 @@ function ProtectedRoutes() {
           <Route path="/pops" element={<PopLibrary />} />
           <Route path="/sla" element={<SlaRules />} />
           <Route path="/importar" element={<DataImport />} />
+          <Route path="/novidades" element={<Novidades />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

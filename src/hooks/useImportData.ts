@@ -4,7 +4,7 @@ import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export interface SystemField {
   key: string;
@@ -73,6 +73,17 @@ export function parseValue(raw: string): number | null {
   return isNaN(num) ? null : num;
 }
 
+function cellToString(value: ExcelJS.CellValue): string {
+  if (value == null) return "";
+  if (value instanceof Date) return value.toISOString().split("T")[0];
+  if (typeof value === "object") {
+    if ("result" in value) return String(value.result ?? "");
+    if ("text" in value) return String(value.text ?? "");
+    if ("richText" in value) return value.richText.map(r => r.text).join("");
+  }
+  return String(value);
+}
+
 function parseDate(raw: string): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
@@ -139,15 +150,28 @@ export function useImportData() {
     } else {
       try {
         const buffer = await f.arrayBuffer();
-        const wb = XLSX.read(buffer, { type: "array" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
-        const cols = data.length > 0 ? Object.keys(data[0]) : [];
-        setRawData(data.map(row => {
-          const cleaned: Record<string, string> = {};
-          for (const [k, v] of Object.entries(row)) cleaned[k] = String(v ?? "");
-          return cleaned;
-        }));
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.worksheets[0];
+
+        const headers: string[] = [];
+        worksheet.getRow(1).eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          headers[colNumber - 1] = String(cell.value ?? "").trim();
+        });
+
+        const data: Record<string, string>[] = [];
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+          const rowData: Record<string, string> = {};
+          headers.forEach((header, idx) => {
+            if (!header) return;
+            rowData[header] = cellToString(row.getCell(idx + 1).value);
+          });
+          data.push(rowData);
+        });
+
+        const cols = headers.filter(Boolean);
+        setRawData(data);
         setDetectedColumns(cols);
         autoMap(cols);
       } catch (err) {

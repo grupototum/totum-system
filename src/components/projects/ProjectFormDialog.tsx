@@ -22,9 +22,10 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: any, tasks: TaskDef[]) => Promise<boolean>;
   initialData?: any;
+  initialTemplateId?: string;
 }
 
-export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
+export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, initialTemplateId }: Props) {
   const { tenant } = useTenant();
   const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
@@ -37,6 +38,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
     responsible_id: "", description: "", start_date: "", due_date: "",
   });
   const [tasks, setTasks] = useState<TaskDef[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
   const [quickAddClientOpen, setQuickAddClientOpen] = useState(false);
@@ -69,6 +71,18 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
         setProjectTemplates(tpl.data || []);
+
+        if (!initialData && initialTemplateId) {
+          const preselected = (tpl.data || []).find((t: any) => t.id === initialTemplateId);
+          if (preselected) {
+            const tplTasks = (preselected.project_template_tasks || [])
+              .sort((a: any, b: any) => a.sort_order - b.sort_order)
+              .map((t: any) => ({ title: t.title, subtasks: Array.isArray(t.subtasks) ? t.subtasks : [] }));
+            setForm((prev) => ({ ...prev, name: prev.name || preselected.name }));
+            setTasks(tplTasks);
+            setSelectedTemplateId(preselected.id);
+          }
+        }
       }).catch((err) => {
         console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
         toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
@@ -85,11 +99,14 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           due_date: initialData.due_date || "",
         });
         setTasks([]); // For editing, tasks are managed separately
+        setSelectedTemplateId("");
       } else {
         setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
         setTasks([]);
+        setSelectedTemplateId("");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tenant?.organization_id]);
 
   const filteredContracts = form.client_id
@@ -107,6 +124,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
       }));
     setTasks(tplTasks);
+    setSelectedTemplateId(templateId);
   };
 
   const addTask = () => {
@@ -165,7 +183,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           {isNewProject && projectTemplates.length > 0 && (
             <div>
               <Label>Usar Template</Label>
-              <Select onValueChange={applyTemplate}>
+              <Select value={selectedTemplateId} onValueChange={applyTemplate}>
                 <SelectTrigger><SelectValue placeholder="Selecionar template (opcional)" /></SelectTrigger>
                 <SelectContent>
                   {projectTemplates.map((t: any) => (

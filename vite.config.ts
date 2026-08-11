@@ -52,7 +52,7 @@ export default defineConfig(() => {
               // recharts/d3 têm deps circulares — deixar o Rollup resolver naturalmente evita TDZ
               // if (id.includes("recharts") || ...) — removido intencionalmente
               if (id.includes("lucide")) return "vendor-icons";
-              if (id.includes("xlsx") || id.includes("exceljs")) return "vendor-xlsx";
+              if (id.includes("exceljs")) return "vendor-exceljs";
               if (id.includes("date-fns") || id.includes("react-day-picker")) return "vendor-date";
             }
           },

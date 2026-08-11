@@ -24,6 +24,7 @@ import {
   Upload,
   ChevronRight,
   Gauge,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
@@ -112,6 +113,7 @@ const navGroups = [
       { title: "Permissões", url: "/usuarios", icon: Shield, permKey: "usr_permissoes.editar" },
       { title: "Configurações", url: "/configuracoes", icon: Settings, permKey: null },
       { title: "Importação", url: "/importar", icon: Upload, permKey: null },
+      { title: "Novidades", url: "/novidades", icon: Sparkles, permKey: null },
       { title: "Admin", url: "/admin", icon: ShieldCheck, permKey: null, adminOnly: true },
     ]
   }

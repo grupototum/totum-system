@@ -10,6 +10,7 @@ import { demoProjects } from "@/data/demoData";
 export type ProjectRow = Tables<"projects"> & {
   clients?: { name: string } | null;
   project_types?: { name: string } | null;
+  tasks?: { status: string }[] | null;
 };
 
 interface TaskDef {
@@ -33,7 +34,7 @@ export function useProjects() {
     try {
       const { data, error } = await supabase
         .from("projects")
-        .select("*, clients(name), project_types(name)")
+        .select("*, clients(name), project_types(name), tasks(status)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setProjects((data as ProjectRow[]) || []);
