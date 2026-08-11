@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, Clock, User, Loader2, Pencil, Search, LayoutTemplate, FilePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjects, ProjectRow } from "@/hooks/useProjects";
+import { useProjectTemplates } from "@/hooks/useProjectTemplates";
 import { ProjectFormDialog } from "@/components/projects/ProjectFormDialog";
 import { ProjectDetailSheet } from "@/components/projects/ProjectDetailSheet";
-import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 const statusColors: Record<string, string> = {
@@ -31,12 +31,6 @@ const STATUS_FILTERS = [
   { value: "concluido", label: "Concluídos" },
 ];
 
-interface ProjectTemplateOption {
-  id: string;
-  name: string;
-  project_template_tasks?: { id: string }[];
-}
-
 function projectProgress(project: ProjectRow) {
   const tasks = project.tasks || [];
   const completed = tasks.filter((t) => t.status === "concluido").length;
@@ -52,15 +46,7 @@ export default function Projects() {
   const [formTemplateId, setFormTemplateId] = useState<string | undefined>(undefined);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [detailProject, setDetailProject] = useState<ProjectRow | null>(null);
-  const [templates, setTemplates] = useState<ProjectTemplateOption[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from("project_templates")
-      .select("id, name, project_template_tasks(id)")
-      .order("name")
-      .then(({ data }) => setTemplates(data || []));
-  }, []);
+  const { data: templates = [] } = useProjectTemplates();
 
   const inProgressCount = projects.filter((p) => p.status === "em_andamento").length;
 

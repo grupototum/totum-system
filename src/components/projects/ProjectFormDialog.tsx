@@ -11,6 +11,7 @@ import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
 import { useTenant } from "@/contexts/TenantContext";
 import { toast } from "@/hooks/use-toast";
+import { useProjectTemplates } from "@/hooks/useProjectTemplates";
 
 interface TaskDef {
   title: string;
@@ -31,7 +32,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, i
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
   const [profiles, setProfiles] = useState<{ user_id: string; full_name: string }[]>([]);
-  const [projectTemplates, setProjectTemplates] = useState<any[]>([]);
+  const { data: projectTemplates = [] } = useProjectTemplates();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "", client_id: "", contract_id: "", project_type_id: "",
@@ -61,8 +62,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, i
         supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
         supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
         profilesQuery,
-        supabase.from("project_templates").select("*, project_template_tasks(*)").order("name"),
-      ]).then(([c, ct, pt, p, tpl]) => {
+      ]).then(([c, ct, pt, p]) => {
         const activeClients = ((c.data as any[]) || [])
           .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
           .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
@@ -70,19 +70,6 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, i
         setContracts((ct.data as any) || []);
         setProjectTypes(pt.data || []);
         setProfiles((p.data as any) || []);
-        setProjectTemplates(tpl.data || []);
-
-        if (!initialData && initialTemplateId) {
-          const preselected = (tpl.data || []).find((t: any) => t.id === initialTemplateId);
-          if (preselected) {
-            const tplTasks = (preselected.project_template_tasks || [])
-              .sort((a: any, b: any) => a.sort_order - b.sort_order)
-              .map((t: any) => ({ title: t.title, subtasks: Array.isArray(t.subtasks) ? t.subtasks : [] }));
-            setForm((prev) => ({ ...prev, name: prev.name || preselected.name }));
-            setTasks(tplTasks);
-            setSelectedTemplateId(preselected.id);
-          }
-        }
       }).catch((err) => {
         console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
         toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
@@ -108,6 +95,23 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, i
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, tenant?.organization_id]);
+
+  // Aplica o template pré-selecionado (vindo do painel "Criar Projeto" em
+  // Projects.tsx) assim que a lista de templates estiver disponível. Guardado
+  // por !selectedTemplateId para não reaplicar depois que o usuário já
+  // escolheu algo (manualmente ou por esta própria auto-aplicação).
+  useEffect(() => {
+    if (!open || initialData || !initialTemplateId || selectedTemplateId) return;
+    const preselected = projectTemplates.find((t) => t.id === initialTemplateId);
+    if (!preselected) return;
+    const tplTasks = (preselected.project_template_tasks || [])
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((t) => ({ title: t.title, subtasks: Array.isArray(t.subtasks) ? t.subtasks : [] }));
+    setForm((prev) => ({ ...prev, name: prev.name || preselected.name }));
+    setTasks(tplTasks);
+    setSelectedTemplateId(preselected.id);
+  }, [open, initialData, initialTemplateId, projectTemplates, selectedTemplateId]);
 
   const filteredContracts = form.client_id
     ? contracts.filter((c) => c.client_id === form.client_id)
