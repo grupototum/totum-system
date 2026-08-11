@@ -25,7 +25,7 @@
 |---|---|---|---|---|
 | B-028 | 🔴 ABERTO | `src/App.tsx` (`ProtectedRoutes`) | Nenhuma rota é protegida por permissão — só por sessão. Qualquer usuário autenticado acessa `/admin`, `/usuarios`, `/dashboard-executivo` etc. digitando a URL direta, independente de role/permissão. O filtro de menu (`AppSidebar`) é só cosmético/de descoberta | Crítica |
 | B-029 | 🔴 ABERTO | RLS de `tasks`, `clients`, `financial_entries`, `projects`, `contracts` | Policies de INSERT usam `WITH CHECK (true)` — não valida que o `organization_id` inserido bate com a org do usuário. Em tese permite inserir registros com `organization_id` de outra organização | Alta |
-| B-030 | 🔴 ABERTO | `src/hooks/usePermissions.ts:14-18` | `isAdmin` é determinado por substring no nome da role (`roleName.includes("admin")`), não pelo enum `app_role`/RPC `is_admin()`. Uma role chamada "Administrativo Financeiro" tornaria o usuário admin no client | Alta |
+| B-030 | ✅ RESOLVIDO | `src/hooks/usePermissions.ts` | `isAdmin` passa a usar a RPC `is_admin()` (mesma fonte das RLS policies) + `profile.is_master` síncrono; string match vira só fallback até a RPC responder | `3ae655ca` |
 | B-031 | 🟡 ABERTO | RLS de `user_roles` | Qualquer membro autenticado da mesma org pode ler/editar `user_roles` de qualquer outro membro (policy "Tenant isolation" não restringe por role, só por org) | Alta |
 | B-032 | 🟡 ABERTO | RLS de `profiles` (UPDATE) | Policy `Users update own profile` permite ao próprio usuário editar seu profile sem restringir colunas — em tese permite alterar `role_id`/`is_master` | Alta |
 | B-033 | 🟢 ABERTO | Tabela `roles` (RLS) | Sem `organization_id` — todas as organizações compartilham o mesmo espaço de leitura de `roles` (`SELECT USING (true)`) | Média |
