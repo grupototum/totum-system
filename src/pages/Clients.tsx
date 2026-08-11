@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,7 +13,7 @@ import { useProfiles } from "@/hooks/useProfiles";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
-import { PageHeader, EmptyState, LoadingState } from "@/components/shared";
+import { PageHeader, EmptyState, LoadingState, PaginationControls } from "@/components/shared";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
@@ -28,6 +28,8 @@ function isInactiveStatus(status?: string | null) {
   const normalized = (status || "").toLowerCase();
   return normalized === "inativo" || normalized === "inactive";
 }
+
+const PAGE_SIZE = 25;
 
 export default function Clients() {
   const navigate = useNavigate();
@@ -49,6 +51,10 @@ export default function Clients() {
   }), [clients, search, managerFilter, showInactive]);
 
   const inactiveCount = useMemo(() => clients.filter((c) => isInactiveStatus(c.status)).length, [clients]);
+
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [search, managerFilter, showInactive, viewMode]);
+  const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
 
   const getActivePlan = (c: ClientRow) => {
     const active = (c.contracts || []).find((ct) => ct.status === "ativo");
@@ -178,7 +184,7 @@ export default function Clients() {
                       className="m-4"
                     />
                   </td></tr>
-                ) : filtered.map((client) => {
+                ) : paged.map((client) => {
                   const mrr = getMrr(client);
                   const displayName = getClientDisplayName(client);
                   const statusLabel = getClientStatusLabel(client.status);
@@ -226,8 +232,10 @@ export default function Clients() {
               </tbody>
             </table>
           </div>
+          <PaginationControls page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
         </motion.div>
       ) : (
+        <>
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -247,7 +255,7 @@ export default function Clients() {
                 }
               />
             </div>
-          ) : filtered.map((client, i) => {
+          ) : paged.map((client, i) => {
             const mrr = getMrr(client);
             const displayName = getClientDisplayName(client);
             const statusLabel = getClientStatusLabel(client.status);
@@ -328,6 +336,8 @@ export default function Clients() {
             );
           })}
         </motion.div>
+        <PaginationControls page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
+        </>
       )}
     </div>
   );
