@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,7 +16,7 @@ export function TaskSearch() {
   const { results, search } = useTaskSearch();
   const navigate = useNavigate();
 
-  useState(() => {
+  useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -25,7 +25,7 @@ export function TaskSearch() {
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
-  });
+  }, []);
 
   return (
     <>
