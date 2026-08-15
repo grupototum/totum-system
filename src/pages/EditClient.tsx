@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useClientById } from "@/hooks/useClients";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,65 +84,58 @@ export default function EditClient() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData | null>(null);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [clientStatus, setClientStatus] = useState<string>("ativo");
   const [togglingStatus, setTogglingStatus] = useState(false);
   const [confirmDeactivate, setConfirmDeactivate] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { client: rawClient, loading, updateClient } = useClientById(clientId);
   const originalFormRef = useRef<FormData | null>(null);
 
   useEffect(() => {
-    async function load() {
-      if (!clientId) { setLoading(false); return; }
-      const { data: raw } = await supabase.from("clients").select("*").eq("id", clientId).single();
-      const data = raw as any;
-      if (data) {
-        setClientStatus(data.status ?? "ativo");
-        const loaded: FormData = {
-          company_name: data.company_name ?? "",
-          cnpj: data.cnpj ?? "",
-          contact_name: data.contact_name ?? "",
-          email: data.email ?? "",
-          phone: data.phone ?? "",
-          website: data.website ?? "",
-          industry: data.industry ?? "",
-          business_description: data.business_description ?? "",
-          products_services: data.products_services ?? "",
-          time_in_market: data.time_in_market ?? "",
-          company_size: data.company_size ?? "",
-          monthly_revenue: data.monthly_revenue ?? "",
-          main_niche: data.main_niche ?? "",
-          main_pains: data.main_pains ?? "",
-          desires: data.desires ?? "",
-          age_min: data.age_min ?? 18,
-          age_max: data.age_max ?? 65,
-          gender: data.gender ?? "both",
-          location: data.location ?? "",
-          social_class: data.social_class ?? "",
-          brand_tone: data.brand_tone ?? "",
-          primary_color: data.primary_color ?? "#f76926",
-          secondary_color: data.secondary_color ?? "#1a1a2e",
-          fonts: data.fonts ?? "",
-          visual_elements: data.visual_elements ?? "",
-          visual_personality: data.visual_personality ?? "",
-          support_channels: (data.support_channels as string[]) ?? [],
-          crm_used: data.crm_used ?? "",
-          sla_response: data.sla_response ?? "",
-          business_hours_start: data.business_hours_start ?? "08:00",
-          business_hours_end: data.business_hours_end ?? "18:00",
-          working_days: (data.working_days as string[]) ?? [],
-          additional_info: data.additional_info ?? "",
-          terms_accepted: data.terms_accepted ?? false,
-        };
-        setForm(loaded);
-        originalFormRef.current = loaded;
-      }
-      setLoading(false);
-    }
-    load();
-  }, [clientId]);
+    if (!rawClient) return;
+    const data = rawClient as any;
+    setClientStatus(data.status ?? "ativo");
+    const loaded: FormData = {
+      company_name: data.company_name ?? "",
+      cnpj: data.cnpj ?? "",
+      contact_name: data.contact_name ?? "",
+      email: data.email ?? "",
+      phone: data.phone ?? "",
+      website: data.website ?? "",
+      industry: data.industry ?? "",
+      business_description: data.business_description ?? "",
+      products_services: data.products_services ?? "",
+      time_in_market: data.time_in_market ?? "",
+      company_size: data.company_size ?? "",
+      monthly_revenue: data.monthly_revenue ?? "",
+      main_niche: data.main_niche ?? "",
+      main_pains: data.main_pains ?? "",
+      desires: data.desires ?? "",
+      age_min: data.age_min ?? 18,
+      age_max: data.age_max ?? 65,
+      gender: data.gender ?? "both",
+      location: data.location ?? "",
+      social_class: data.social_class ?? "",
+      brand_tone: data.brand_tone ?? "",
+      primary_color: data.primary_color ?? "#f76926",
+      secondary_color: data.secondary_color ?? "#1a1a2e",
+      fonts: data.fonts ?? "",
+      visual_elements: data.visual_elements ?? "",
+      visual_personality: data.visual_personality ?? "",
+      support_channels: (data.support_channels as string[]) ?? [],
+      crm_used: data.crm_used ?? "",
+      sla_response: data.sla_response ?? "",
+      business_hours_start: data.business_hours_start ?? "08:00",
+      business_hours_end: data.business_hours_end ?? "18:00",
+      working_days: (data.working_days as string[]) ?? [],
+      additional_info: data.additional_info ?? "",
+      terms_accepted: data.terms_accepted ?? false,
+    };
+    setForm(loaded);
+    originalFormRef.current = loaded;
+  }, [rawClient]);
 
   const isDirty = !!form && !!originalFormRef.current && JSON.stringify(form) !== JSON.stringify(originalFormRef.current);
   const { confirmOpen, guardedAction, confirmDiscard, cancelDiscard } = useUnsavedChangesGuard(isDirty);
@@ -259,16 +253,16 @@ export default function EditClient() {
     const sanitizedWebsite = form.website ? sanitizeURL(form.website) : null;
     
     setSaving(true);
-    const { error } = await supabase.from("clients").update({
+    const ok = await updateClient({
       company_name: form.company_name, cnpj: form.cnpj, contact_name: form.contact_name, email: form.email, phone: form.phone, website: sanitizedWebsite,
       industry: form.industry || null, business_description: form.business_description || null, products_services: form.products_services || null, time_in_market: form.time_in_market || null, company_size: form.company_size || null, monthly_revenue: form.monthly_revenue || null,
-      main_niche: form.main_niche || null, main_pains: form.main_pains || null, desires: form.desires || null, age_min: form.age_min, age_max: form.age_max, gender: form.gender, location: form.location || null, social_class: form.social_class || null, brand_tone: form.brand_tone || null,
+      main_niche: form.main_niche || null, main_pains: form.main_pains || null, desires: form.desires || null, age_min: form.age_min, age_max: form.age_max, gender: form.gender as any, location: form.location || null, social_class: form.social_class || null, brand_tone: form.brand_tone || null,
       primary_color: form.primary_color, secondary_color: form.secondary_color, fonts: form.fonts || null, visual_elements: form.visual_elements || null, visual_personality: form.visual_personality || null,
-      support_channels: form.support_channels, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days, additional_info: form.additional_info || null, terms_accepted: form.terms_accepted,
+      support_channels: form.support_channels as any, crm_used: form.crm_used || null, sla_response: form.sla_response || null, business_hours_start: form.business_hours_start, business_hours_end: form.business_hours_end, working_days: form.working_days as any, additional_info: form.additional_info || null, terms_accepted: form.terms_accepted,
       updated_at: new Date().toISOString(),
-    } as any).eq("id", clientId);
+    } as any);
     setSaving(false);
-    if (error) { toast({ title: "❌ Erro", description: error.message, variant: "destructive" }); return; }
+    if (!ok) return;
     originalFormRef.current = form;
     toast({ title: "✅ Cliente atualizado!", description: `${form.company_name} salvo com sucesso` });
     navigate("/clientes");

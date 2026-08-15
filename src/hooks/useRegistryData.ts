@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useDemo } from "@/contexts/DemoContext";
 import { demoRegistryData } from "@/data/demoData";
+import { useTenant } from "@/contexts/TenantContext";
+import { attachOrganizationId } from "@/lib/tenant";
 
 type ValidTable =
   | "banks" | "bank_accounts" | "cost_centers" | "financial_categories"
@@ -240,4 +242,76 @@ export function useRegistryData(registryKey: string) {
   };
   
   return { data, loading, hasTable, addItem, updateItem, deleteItem, toggleStatus, refetch: fetchData };
+}
+
+export function useRegistryFKOptions(
+  sourceTables: { key: string; table: string }[]
+) {
+  const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string; value: string }[]>>({});
+  const [fkNames, setFkNames] = useState<Record<string, Record<string, string>>>({});
+  const [loading, setLoading] = useState(false);
+
+  const registryKey = sourceTables.map((s) => `${s.key}:${s.table}`).join(",");
+
+  useEffect(() => {
+    if (sourceTables.length === 0) return;
+    setLoading(true);
+
+    const loadOptions = async () => {
+      const opts: Record<string, { label: string; value: string }[]> = {};
+      const names: Record<string, Record<string, string>> = {};
+      await Promise.all(
+        sourceTables.map(async ({ key, table }) => {
+          const { data } = await (supabase.from(table as any) as any).select("id, name").eq("is_active", true).order("name");
+          if (data) {
+            opts[key] = data.map((r: any) => ({ label: r.name, value: r.id }));
+            names[key] = {};
+            data.forEach((r: any) => { names[key][r.id] = r.name; });
+          }
+        })
+      );
+      setDynamicOptions(opts);
+      setFkNames(names);
+      setLoading(false);
+    };
+    loadOptions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registryKey]);
+
+  return { dynamicOptions, fkNames, loading };
+}
+
+export function useProjectTypeLookups(open: boolean) {
+  const [serviceTypes, setServiceTypes] = useState<{ id: string; name: string }[]>([]);
+  const [revenueTypes, setRevenueTypes] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    Promise.all([
+      supabase.from("service_types").select("id, name").eq("is_active", true).order("name"),
+      supabase.from("revenue_types").select("id, name").eq("is_active", true).order("name"),
+    ]).then(([st, rt]) => {
+      setServiceTypes((st.data as any[]) || []);
+      setRevenueTypes((rt.data as any[]) || []);
+    });
+  }, [open]);
+
+  return { serviceTypes, revenueTypes };
+}
+
+export function useQuickAdd() {
+  const { tenant } = useTenant();
+
+  const quickAdd = async (
+    tableName: string,
+    payload: any,
+    scopeOrg = false
+  ): Promise<{ id: string; name: string }> => {
+    const finalPayload = scopeOrg ? attachOrganizationId(payload, tenant?.organization_id) : payload;
+    const { data, error } = await (supabase.from(tableName as any) as any).insert(finalPayload).select().single();
+    if (error) throw error;
+    return data as { id: string; name: string };
+  };
+
+  return { quickAdd };
 }

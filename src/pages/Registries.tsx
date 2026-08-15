@@ -8,8 +8,7 @@ import {
 import { RegistryTable, RegistryItem } from "@/components/registries/RegistryTable";
 import { RegistryFormDialog, FormField } from "@/components/registries/RegistryFormDialog";
 import { registryGroups, RegistryConfig } from "@/components/registries/registryData";
-import { useRegistryData, registryTableMap } from "@/hooks/useRegistryData";
-import { supabase } from "@/integrations/supabase/client";
+import { useRegistryData, useRegistryFKOptions, registryTableMap } from "@/hooks/useRegistryData";
 import { toast } from "@/hooks/use-toast";
 
 const groupIcons: Record<string, typeof DollarSign> = {
@@ -30,34 +29,10 @@ export default function Registries() {
   const { data: supabaseData, loading, hasTable, addItem, updateItem, deleteItem, toggleStatus } = useRegistryData(activeRegistry.key);
 
   // Load dynamic options for fields with sourceTable
-  const [dynamicOptions, setDynamicOptions] = useState<Record<string, { label: string; value: string }[]>>({});
-  const [fkNames, setFkNames] = useState<Record<string, Record<string, string>>>({});
-
-  useEffect(() => {
-    const sourceTables = activeRegistry.formFields
-      .filter((f) => f.sourceTable)
-      .map((f) => ({ key: f.key, table: f.sourceTable! }));
-
-    if (sourceTables.length === 0) return;
-
-    const loadOptions = async () => {
-      const opts: Record<string, { label: string; value: string }[]> = {};
-      const names: Record<string, Record<string, string>> = {};
-      await Promise.all(
-        sourceTables.map(async ({ key, table }) => {
-          const { data } = await supabase.from(table as any).select("id, name").eq("is_active", true).order("name");
-          if (data) {
-            opts[key] = data.map((r: any) => ({ label: r.name, value: r.id }));
-            names[key] = {};
-            data.forEach((r: any) => { names[key][r.id] = r.name; });
-          }
-        })
-      );
-      setDynamicOptions(opts);
-      setFkNames(names);
-    };
-    loadOptions();
-  }, [activeRegistry.key]);
+  const fkSourceTables = activeRegistry.formFields
+    .filter((f) => f.sourceTable)
+    .map((f) => ({ key: f.key, table: f.sourceTable! }));
+  const { dynamicOptions, fkNames } = useRegistryFKOptions(fkSourceTables);
 
   // Enrich data with resolved FK names
   const enrichedData = useMemo(() => (

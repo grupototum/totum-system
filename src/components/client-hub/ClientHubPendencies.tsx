@@ -1,60 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
 import { Loader2, AlertTriangle, Clock, Package } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useDemo } from "@/contexts/DemoContext";
-import { demoTasks, demoDeliveryChecklists } from "@/data/demoData";
 import { format } from "date-fns";
+import { useClientPendencies } from "@/hooks/useClientPendencies";
 
 interface Props { clientId: string; }
 
 export function ClientHubPendencies({ clientId }: Props) {
-  const { isDemoMode } = useDemo();
-  const [lateTasks, setLateTasks] = useState<any[]>([]);
-  const [incompleteDeliveries, setIncompleteDeliveries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    const today = new Date().toISOString().split("T")[0];
-
-    if (isDemoMode) {
-      const late = demoTasks
-        .filter(t => t.clientId === clientId && t.status !== "concluido" && t.dueDate && t.dueDate < today)
-        .map(t => ({ id: t.id, title: t.title, due_date: t.dueDate, priority: t.priority, status: t.status }));
-
-      const incomplete = demoDeliveryChecklists
-        .filter(c => c.client_id === clientId && !c.completed_at)
-        .map(c => ({ id: c.id, period: c.period, frequency: c.frequency, fulfillment_pct: c.fulfillment_pct, plans: c.plans }));
-
-      setLateTasks(late);
-      setIncompleteDeliveries(incomplete);
-      setLoading(false);
-      return;
-    }
-
-    // Late tasks
-    const { data: tasks } = await supabase
-      .from("tasks")
-      .select("id, title, due_date, priority, status")
-      .eq("client_id", clientId)
-      .neq("status", "concluido")
-      .lt("due_date", today)
-      .order("due_date");
-
-    // Incomplete deliveries (not finalized)
-    const { data: checklists } = await supabase
-      .from("delivery_checklists")
-      .select("id, period, frequency, fulfillment_pct, plans(name)")
-      .eq("client_id", clientId)
-      .is("completed_at", null)
-      .order("created_at", { ascending: false });
-
-    setLateTasks(tasks || []);
-    setIncompleteDeliveries(checklists || []);
-    setLoading(false);
-  }, [clientId, isDemoMode]);
-
-  useEffect(() => { fetch(); }, [fetch]);
+  const { lateTasks, incompleteDeliveries, loading } = useClientPendencies(clientId);
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
 

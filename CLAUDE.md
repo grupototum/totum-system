@@ -77,11 +77,8 @@ Toda alteração nestas áreas exige aprovação ANTES de qualquer commit:
 ## 🔑 CREDENCIAIS DE ACESSO
 
 - **Admin:** `dev@grupototum.com` / `Totum@ADM2026`
-- **Supabase Project:** ⚠️ **PENDENTE DE ATUALIZAÇÃO** — o ref antigo
-  `fgosozxvhbdhqigwzqih` está **desativado (NXDOMAIN)** desde o commit `11ba014`.
-  O ref atual não está registrado em lugar nenhum do repo; a fonte de verdade
-  hoje é a env `VITE_SUPABASE_URL` no painel da Vercel.
-- **Schema do banco:** `totum_system` (não `public`)
+- **Supabase:** Self-hosted — `supa.grupototum.com` / `supa-core.grupototum.cloud`, schema `totum_system` (não `public`)
+- **⚠️ Cloud fgosozxvhbdhqigwzqih — APOSENTADO/NXDOMAIN.** Não usar. Fonte de verdade: `VITE_SUPABASE_URL` no painel da Vercel.
 - **Deploy:** push em `main` → Vercel deploy automático
 
 ## 🛡 MULTI-TENANT
@@ -108,6 +105,6 @@ Toda alteração nestas áreas exige aprovação ANTES de qualquer commit:
 ## 🔗 LINKS
 
 - App: https://totum.pixelsystem.online
-- Supabase: ⚠️ link removido — apontava para o projeto desativado `fgosozxvhbdhqigwzqih`
+- Supabase (self-hosted): `https://supa.grupototum.com` — ~~Cloud fgosozxvhbdhqigwzqih aposentado~~
 - GitHub: https://github.com/grupototum/totum-system
 - Vercel: https://vercel.com (deploy automático via push em main)

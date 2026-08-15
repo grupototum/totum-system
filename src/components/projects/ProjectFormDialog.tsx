@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { useProjectFormData } from "@/hooks/useProjectFormData";
 import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
@@ -28,11 +28,26 @@ interface Props {
 
 export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, initialTemplateId }: Props) {
   const { tenant } = useTenant();
+  const {
+    clients: loadedClients,
+    contracts: loadedContracts,
+    projectTypes: loadedProjectTypes,
+    profiles: loadedProfiles,
+  } = useProjectFormData(open, tenant?.organization_id);
+
+  // Writable copies — QuickAddDialog onSuccess can append items optimistically
   const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
   const [profiles, setProfiles] = useState<{ user_id: string; full_name: string }[]>([]);
   const { data: projectTemplates = [] } = useProjectTemplates();
+
+  useEffect(() => {
+    setClients(loadedClients);
+    setContracts(loadedContracts);
+    setProjectTypes(loadedProjectTypes);
+    setProfiles(loadedProfiles);
+  }, [loadedClients, loadedContracts, loadedProjectTypes, loadedProfiles]);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "", client_id: "", contract_id: "", project_type_id: "",
@@ -47,33 +62,6 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, i
 
   useEffect(() => {
     if (open) {
-      // Scope profiles to current tenant org (belt-and-suspenders over RLS).
-      // Include masters that belong to this org so sys-admins who also work
-      // in their own tenant appear as assignable team members.
-      let profilesQuery = supabase.from("profiles").select("user_id, full_name").eq("status", "ativo").order("full_name");
-      if (tenant?.organization_id) {
-        profilesQuery = profilesQuery.eq("organization_id", tenant.organization_id);
-      } else {
-        profilesQuery = profilesQuery.eq("is_master", false);
-      }
-
-      Promise.all([
-        supabase.from("clients").select("id, name, company_name, status"),
-        supabase.from("contracts").select("id, title, client_id").eq("status", "ativo").order("title"),
-        supabase.from("project_types").select("id, name").eq("is_active", true).order("name"),
-        profilesQuery,
-      ]).then(([c, ct, pt, p]) => {
-        const activeClients = ((c.data as any[]) || [])
-          .filter((client) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
-          .sort((a, b) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
-        setClients(activeClients);
-        setContracts((ct.data as any) || []);
-        setProjectTypes(pt.data || []);
-        setProfiles((p.data as any) || []);
-      }).catch((err) => {
-        console.error("[ProjectFormDialog] Erro ao carregar dados do formulário:", err);
-        toast({ title: "Erro ao carregar dados do formulário", description: "Recarregue e tente novamente.", variant: "destructive" });
-      });
       if (initialData) {
         setForm({
           name: initialData.name || "",

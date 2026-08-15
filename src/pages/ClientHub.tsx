@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Package, FileText, Clock, BarChart3, AlertTriangle, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useDemo } from "@/contexts/DemoContext";
-import { demoClients } from "@/data/demoData";
 import { ClientHubDeliveries } from "@/components/client-hub/ClientHubDeliveries";
 import { ClientHubContracts } from "@/components/client-hub/ClientHubContracts";
 import { ClientHubTimeline } from "@/components/client-hub/ClientHubTimeline";
@@ -13,6 +10,7 @@ import { ClientHubPendencies } from "@/components/client-hub/ClientHubPendencies
 import { ClientHubAsaas } from "@/components/client-hub/ClientHubAsaas";
 import { cn } from "@/lib/utils";
 import { getClientDisplayName, getClientStatusLabel } from "@/lib/clients";
+import { useClientById } from "@/hooks/useClients";
 
 const tabs = [
   { value: "deliveries", label: "Entregas", icon: Package },
@@ -28,30 +26,8 @@ type TabValue = (typeof tabs)[number]["value"];
 export default function ClientHub() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isDemoMode } = useDemo();
-  const [client, setClient] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { client, loading } = useClientById(id);
   const [activeTab, setActiveTab] = useState<TabValue>("deliveries");
-
-  const fetchClient = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    if (isDemoMode) {
-      const found = demoClients.find(c => c.id === id);
-      setClient(found ? { ...found, client_types: null } : null);
-      setLoading(false);
-      return;
-    }
-    const { data } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("id", id)
-      .single();
-    setClient(data);
-    setLoading(false);
-  }, [id, isDemoMode]);
-
-  useEffect(() => { fetchClient(); }, [fetchClient]);
 
   if (loading) {
     return (

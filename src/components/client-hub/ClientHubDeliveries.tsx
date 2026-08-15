@@ -1,12 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, AlertCircle, MinusCircle, Ban, ChevronDown, ChevronRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { useDemo } from "@/contexts/DemoContext";
-import { demoDeliveryChecklists } from "@/data/demoData";
+import { useClientDeliveries } from "@/hooks/useClientDeliveries";
 import type { Enums } from "@/integrations/supabase/types";
 
 type UIStatus = "entregue" | "entregue_parcialmente" | "nao_entregue" | "nao_aplicavel" | "pending";
@@ -21,54 +18,12 @@ const statusIcons: Record<UIStatus, { icon: typeof CheckCircle2; color: string; 
 
 const statusOptions: Enums<"delivery_item_status">[] = ["entregue", "entregue_parcialmente", "nao_entregue", "nao_aplicavel"];
 
-/** Debounce — fires fn only after `delay` ms of silence. */
-function useDebouncedCallback<T extends (...args: any[]) => any>(fn: T, delay = 400) {
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  return useCallback(
-    (...args: Parameters<T>) => {
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => fn(...args), delay);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fn, delay]
-  );
-}
-
 interface Props { clientId: string; }
 
 export function ClientHubDeliveries({ clientId }: Props) {
-  const { isDemoMode } = useDemo();
-  const [checklists, setChecklists] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { checklists, loading, updateItemStatus, updateJustification, finalizeChecklist } = useClientDeliveries(clientId);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
-
-  const fetch = useCallback(async () => {
-    if (isDemoMode) {
-      setChecklists(demoDeliveryChecklists.filter(c => c.client_id === clientId));
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const { data } = await supabase
-      .from("delivery_checklists")
-      .select("*, plans(name), delivery_checklist_items(*)")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: false });
-
-    // Sort items inside each checklist by sort_order
-    const sorted = (data || []).map((c: any) => ({
-      ...c,
-      delivery_checklist_items: (c.delivery_checklist_items || [])
-        .slice()
-        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
-    }));
-
-    setChecklists(sorted);
-    setLoading(false);
-  }, [clientId, isDemoMode]);
-
-  useEffect(() => { fetch(); }, [fetch]);
 
   const toggleExpand = (id: string) => {
     setExpanded(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -81,48 +36,6 @@ export function ClientHubDeliveries({ clientId }: Props) {
     return Math.round((actionable.filter((i: any) => i.status === "entregue").length / actionable.length) * 100);
   };
 
-  const updateItemStatus = async (itemId: string, status: Enums<"delivery_item_status">) => {
-    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
-    const updates: any = { status };
-    if (status === "entregue") updates.completed_at = new Date().toISOString();
-    else updates.completed_at = null;
-    const { error } = await supabase.from("delivery_checklist_items").update(updates).eq("id", itemId);
-    if (error) {
-      toast({ title: "Erro ao atualizar item", description: error.message, variant: "destructive" });
-      return;
-    }
-    await fetch();
-  };
-
-  // Silent justification save — debounced 400ms, no full refetch spinner
-  const _saveJustification = useCallback(async (itemId: string, justification: string) => {
-    if (isDemoMode) return;
-    await supabase.from("delivery_checklist_items").update({ justification }).eq("id", itemId);
-    // Optimistic local update only — no full refetch to avoid flicker while typing
-    setChecklists(prev => prev.map(c => ({
-      ...c,
-      delivery_checklist_items: (c.delivery_checklist_items || []).map((i: any) =>
-        i.id === itemId ? { ...i, justification } : i
-      ),
-    })));
-  }, [isDemoMode]);
-
-  const updateJustification = useDebouncedCallback(_saveJustification, 400);
-
-  const finalizeChecklist = async (checklistId: string) => {
-    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return; }
-    const c = checklists.find(x => x.id === checklistId);
-    if (!c) return;
-    const items = c.delivery_checklist_items || [];
-    const actionable = items.filter((i: any) => i.status !== "nao_aplicavel");
-    const pct = actionable.length ? Math.round((actionable.filter((i: any) => i.status === "entregue").length / actionable.length) * 100) : 0;
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("delivery_checklists").update({
-      fulfillment_pct: pct, completed_at: new Date().toISOString(), completed_by: user?.id || null,
-    }).eq("id", checklistId);
-    await fetch();
-    toast({ title: "Checklist finalizado", description: `Cumprimento: ${pct}%` });
-  };
 
   const canFinalize = (c: any) => {
     const items = c.delivery_checklist_items || [];

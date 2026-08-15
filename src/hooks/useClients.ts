@@ -92,3 +92,39 @@ export function useClients() {
 
   return { clients, loading, refetch: fetch, addClient, updateClient, deleteClient };
 }
+
+export function useClientById(clientId: string | undefined) {
+  const { isDemoMode } = useDemo();
+  const [client, setClient] = useState<ClientRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = useCallback(async () => {
+    if (!clientId) { setLoading(false); return; }
+    if (isDemoMode) {
+      const found = (demoClients as ClientRow[]).find((c) => c.id === clientId) || null;
+      setClient(found);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const { data } = await supabase.from("clients").select("*").eq("id", clientId).single();
+    setClient((data as ClientRow) || null);
+    setLoading(false);
+  }, [clientId, isDemoMode]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  const updateClient = async (values: Partial<Tables<"clients">>) => {
+    if (!clientId) return false;
+    if (isDemoMode) { toast({ title: "Modo Demo", description: "Ação simulada com sucesso." }); return true; }
+    const { error } = await supabase.from("clients").update(values).eq("id", clientId);
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return false;
+    }
+    await fetch();
+    return true;
+  };
+
+  return { client, loading, refetch: fetch, updateClient };
+}

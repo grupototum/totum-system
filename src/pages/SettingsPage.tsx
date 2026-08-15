@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { User, Shield, Puzzle, Camera, Loader2, CheckCircle2, AlertCircle, Clock, LogOut, KeyRound } from "lucide-react";
 import { ApiKeysTab } from "@/components/admin-settings/ApiKeysTab";
 import { AvatarUpload } from "@/components/shared/AvatarUpload";
@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRoles } from "@/hooks/useProfiles";
+import { useAuditLogsByUser } from "@/hooks/useProfiles";
 
 // ── Profile Tab ──
 function ProfileTab() {
@@ -22,7 +24,7 @@ function ProfileTab() {
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [roleId, setRoleId] = useState("");
-  const [roles, setRoles] = useState<any[]>([]);
+  const { roles } = useRoles();
   const [canChangeRole, setCanChangeRole] = useState(false);
 
   useEffect(() => {
@@ -31,17 +33,11 @@ function ProfileTab() {
       setPhone(profile.phone || "");
       setAvatarUrl(profile.avatar_url || null);
       setRoleId(profile.role_id || "");
-      
+
       // Check if user is admin or has specific permission
       const isAdmin = profile.roles?.name?.toLowerCase().includes("admin") || profile.role_id === "admin";
       setCanChangeRole(isAdmin);
     }
-    
-    const fetchRoles = async () => {
-      const { data } = await supabase.from("roles").select("id, name").order("name");
-      setRoles(data || []);
-    };
-    fetchRoles();
   }, [profile]);
 
   const handleSave = async () => {
@@ -135,24 +131,7 @@ function SecurityTab() {
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [saving, setSaving] = useState(false);
-  const [loginHistory, setLoginHistory] = useState<{ created_at: string; detail: string | null }[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from("audit_logs")
-      .select("created_at, detail")
-      .eq("action", "login")
-      .eq("entity_type", "auth")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(10)
-      .then(({ data }) => {
-        setLoginHistory(data || []);
-        setLoadingHistory(false);
-      });
-  }, [user]);
+  const { logs: loginHistory, loading: loadingHistory } = useAuditLogsByUser(user?.id, { action: "login", entityType: "auth" });
 
   const handleChangePassword = async () => {
     if (newPw.length < 6) {

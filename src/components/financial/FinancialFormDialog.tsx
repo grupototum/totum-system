@@ -8,9 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useFinancialFormLookups, useClientContractsByClientId, useCreateFinancialEntry } from "@/hooks/useFinancialFormLookups";
 import { toast } from "@/hooks/use-toast";
-import { useTenant } from "@/contexts/TenantContext";
-import { attachOrganizationId } from "@/lib/tenant";
 import { Loader2 } from "lucide-react";
 import { addMonths, format, parseISO } from "date-fns";
 import { getClientDisplayName } from "@/lib/clients";
@@ -22,68 +21,30 @@ interface Props {
 }
 
 export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
-  const { tenant } = useTenant();
+  const { categories, costCenters, expenseTypes, clients } = useFinancialFormLookups(open);
+  const { createEntries } = useCreateFinancialEntry();
   const [saving, setSaving] = useState(false);
   const [description, setDescription] = useState("");
   const [entryClass, setEntryClass] = useState("receita");
   const [nature, setNature] = useState("fixo");
   const [categoryId, setCategoryId] = useState("");
-  const [categories, setCategories] = useState<{ id: string; name: string; type: string }[]>([]);
   const [value, setValue] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [installments, setInstallments] = useState("1");
   const [costCenterId, setCostCenterId] = useState("");
-  const [costCenters, setCostCenters] = useState<{ id: string; name: string }[]>([]);
   const [expenseTypeId, setExpenseTypeId] = useState("");
-  const [expenseTypes, setExpenseTypes] = useState<{ id: string; name: string }[]>([]);
   const [clientId, setClientId] = useState("");
-  const [clients, setClients] = useState<{ id: string; name?: string | null; company_name?: string | null; status?: string | null }[]>([]);
   const [contractId, setContractId] = useState("");
-  const [contracts, setContracts] = useState<{ id: string; status: string; plans?: { name?: string | null } | null; value?: number | null }[]>([]);
+  const contracts = useClientContractsByClientId(clientId || null);
   const [interval, setIntervalValue] = useState("1");
   const [notes, setNotes] = useState("");
-
-  useEffect(() => {
-    if (open) {
-      supabase.from("financial_categories").select("id, name, type").eq("is_active", true).then(({ data }) => {
-        if (data) setCategories(data);
-      });
-      supabase.from("cost_centers").select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setCostCenters(data);
-      });
-      supabase.from("expense_types").select("id, name").eq("is_active", true).then(({ data }) => {
-        if (data) setExpenseTypes(data);
-      });
-      supabase.from("clients").select("*").then(({ data }) => {
-        if (data) {
-          const activeClients = data
-            .filter((client: any) => ["ativo", "active"].includes((client.status || "").toLowerCase()))
-            .sort((a: any, b: any) => getClientDisplayName(a).localeCompare(getClientDisplayName(b), "pt-BR"));
-          setClients(activeClients);
-        }
-      });
-    }
-  }, [open]);
 
   useEffect(() => {
     setCategoryId("");
   }, [entryClass]);
 
   useEffect(() => {
-    if (!clientId || clientId === "none") {
-      setContractId("");
-      setContracts([]);
-      return;
-    }
-
-    supabase
-      .from("contracts")
-      .select("id, status, value, plans(name)")
-      .eq("client_id", clientId)
-      .order("start_date", { ascending: false })
-      .then(({ data }) => {
-        setContracts((data as any) || []);
-      });
+    if (!clientId || clientId === "none") setContractId("");
   }, [clientId]);
 
   const resetForm = () => {
@@ -103,16 +64,15 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
     const totalValue = parseFloat(value);
     const installmentValue = Math.round((totalValue / numInstallments) * 100) / 100;
 
-    const { data: { user } } = await supabase.auth.getUser();
-
     try {
       const dbType = entryClass === "receita" ? "receber" : "pagar";
       const intervalMonths = Math.max(1, parseInt(interval) || 1);
+      const { data: { user } } = await supabase.auth.getUser();
       const entries = [];
-      
+
       for (let i = 0; i < numInstallments; i++) {
         const date = addMonths(parseISO(dueDate), i * intervalMonths);
-        entries.push(attachOrganizationId({
+        entries.push({
           description: numInstallments > 1 ? `${description.trim()} (${i + 1}/${numInstallments})` : description.trim(),
           type: dbType,
           entry_class: entryClass,
@@ -129,12 +89,11 @@ export function FinancialFormDialog({ open, onOpenChange, onCreated }: Props) {
           total_installments: numInstallments > 1 ? numInstallments : null,
           notes: notes.trim() || null,
           created_by: user?.id || null,
-        }, tenant?.organization_id));
+        });
       }
 
-      const { error } = await supabase.from("financial_entries").insert(entries);
-
-      if (error) throw error;
+      const errMsg = await createEntries(entries);
+      if (errMsg) throw new Error(errMsg);
 
       toast({ title: "Lançamento criado", description: numInstallments > 1 ? `${numInstallments} parcelas geradas` : undefined });
       resetForm();

@@ -1,134 +1,30 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Loader2, MessageSquare, Send, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useDemo } from "@/contexts/DemoContext";
-import { useTenant } from "@/contexts/TenantContext";
-import { demoClientObservations, demoProfilesList } from "@/data/demoData";
+import { useAuth } from "@/hooks/useAuth";
+import { useClientTimeline } from "@/hooks/useClientTimeline";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface Props { clientId: string; }
 
-interface TimelineEntry {
-  id: string;
-  type: "observation" | "audit";
-  content: string;
-  userName: string;
-  createdAt: string;
-}
-
 export function ClientHubTimeline({ clientId }: Props) {
-  const { isDemoMode } = useDemo();
-  const { tenant } = useTenant();
-  const [entries, setEntries] = useState<TimelineEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { entries, loading, error, addObservation, refetch } = useClientTimeline(clientId);
   const [newObs, setNewObs] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    if (isDemoMode) {
-      const profileMap = new Map(demoProfilesList.map(p => [p.user_id, p.full_name]));
-      const obs = demoClientObservations
-        .filter(o => o.client_id === clientId)
-        .map(o => ({
-          id: o.id,
-          type: "observation" as const,
-          content: o.content,
-          userName: profileMap.get(o.user_id) || "Usuário",
-          createdAt: o.created_at,
-        }));
-      setEntries(obs);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const [{ data: obs, error: obsError }, { data: audits, error: auditError }] = await Promise.all([
-        supabase
-          .from("client_observations")
-          .select("*")
-          .eq("client_id", clientId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("audit_logs")
-          .select("*")
-          .eq("entity_type", "client")
-          .eq("entity_id", clientId)
-          .order("created_at", { ascending: false })
-          .limit(50),
-      ]);
-
-      if (obsError) throw obsError;
-      if (auditError) throw auditError;
-
-      // Get profiles for user names — scoped to org to prevent cross-tenant leakage
-      let profileQuery = supabase.from("profiles").select("user_id, full_name");
-      if (tenant?.organization_id) profileQuery = profileQuery.eq("organization_id", tenant.organization_id);
-      const { data: profiles, error: profileError } = await profileQuery;
-      if (profileError) throw profileError;
-
-      const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
-
-      const obsEntries: TimelineEntry[] = (obs || []).map((o: any) => ({
-        id: o.id,
-        type: "observation" as const,
-        content: o.content,
-        userName: profileMap.get(o.user_id) || "Usuário",
-        createdAt: o.created_at,
-      }));
-
-      const auditEntries: TimelineEntry[] = (audits || []).map((a: any) => ({
-        id: a.id,
-        type: "audit" as const,
-        content: `${a.action}${a.detail ? `: ${a.detail}` : ""}`,
-        userName: profileMap.get(a.user_id) || "Sistema",
-        createdAt: a.created_at,
-      }));
-
-      const combined = [...obsEntries, ...auditEntries].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      setEntries(combined);
-    } catch (err) {
-      console.error("[ClientHubTimeline] Erro ao carregar timeline:", err);
-      setError("Erro ao carregar o histórico. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, isDemoMode, tenant?.organization_id]);
-
-  useEffect(() => { fetch(); }, [fetch]);
-
   const handleAddObs = async () => {
     if (!newObs.trim()) return;
-    if (isDemoMode) {
-      toast({ title: "🎭 Modo Demonstração", description: "Observação simulada — nenhuma alteração foi salva." });
-      setNewObs("");
-      return;
-    }
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    const { error } = await supabase.from("client_observations").insert({
-      client_id: clientId,
-      user_id: user?.id || "",
-      content: newObs.trim(),
-    });
+    const ok = await addObservation(newObs.trim(), user?.id || "");
     setSaving(false);
-    if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
-      return;
+    if (ok) {
+      setNewObs("");
+      toast({ title: "Observação adicionada" });
     }
-    setNewObs("");
-    await fetch();
-    toast({ title: "Observação adicionada" });
   };
 
   if (loading) return <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
@@ -137,7 +33,7 @@ export function ClientHubTimeline({ clientId }: Props) {
     <div className="flex flex-col items-center gap-3 py-12 text-sm text-destructive">
       <AlertCircle className="h-5 w-5" />
       <span>{error}</span>
-      <Button variant="ghost" size="sm" onClick={fetch} className="gap-2">
+      <Button variant="ghost" size="sm" onClick={refetch} className="gap-2">
         <RefreshCw className="h-3.5 w-3.5" /> Tentar novamente
       </Button>
     </div>
