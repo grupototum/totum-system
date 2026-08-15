@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useMemo, useCallback } from "react";
+import { useTaskGoals, type TaskGoal } from "@/hooks/useTaskGoals";
 import { toast } from "@/hooks/use-toast";
 import { Task } from "./taskData";
 import { Button } from "@/components/ui/button";
@@ -10,21 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Target, Plus, Trash2, Trophy, TrendingUp, CheckCircle2, Clock, Loader2, Pencil } from "lucide-react";
 import { motion } from "framer-motion";
-
-interface TaskGoal {
-  id: string;
-  title: string;
-  description: string | null;
-  target_count: number;
-  current_count: number;
-  goal_type: string;
-  period: string;
-  start_date: string;
-  end_date: string | null;
-  status: string;
-  responsible_id: string | null;
-  client_id: string | null;
-}
 
 interface TaskGoalsProps {
   tasks: Task[];
@@ -47,8 +32,7 @@ const PERIODS = [
 ];
 
 export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
-  const [goals, setGoals] = useState<TaskGoal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { goals, loading, createGoal, updateGoal, deleteGoal } = useTaskGoals();
   const [formOpen, setFormOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<TaskGoal | null>(null);
   const [saving, setSaving] = useState(false);
@@ -64,25 +48,8 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
   const [responsibleId, setResponsibleId] = useState("");
   const [clientId, setClientId] = useState("");
 
-  const fetchGoals = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await (supabase as any)
-      .from("task_goals")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data) setGoals(data);
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { fetchGoals(); }, [fetchGoals]);
-
-  // Compute current_count for each goal based on real tasks
   const goalsWithProgress = useMemo(() => {
     return goals.map((goal) => {
-      const start = new Date(goal.start_date);
-      const end = goal.end_date ? new Date(goal.end_date) : getPeriodEnd(goal.start_date, goal.period);
-
       const relevantTasks = tasks.filter((t) => {
         if (goal.responsible_id && t.responsibleId !== goal.responsible_id) return false;
         if (goal.client_id && t.clientId !== goal.client_id) return false;
@@ -107,7 +74,7 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
     });
   }, [goals, tasks]);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
     setTargetCount(10);
@@ -118,7 +85,7 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
     setResponsibleId("");
     setClientId("");
     setEditingGoal(null);
-  };
+  }, []);
 
   const openEdit = (goal: TaskGoal) => {
     setEditingGoal(goal);
@@ -153,42 +120,26 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
       client_id: clientId || null,
     };
 
-    if (editingGoal) {
-      const { error } = await (supabase as any)
-        .from("task_goals")
-        .update(payload)
-        .eq("id", editingGoal.id);
-      if (error) {
-        toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Meta atualizada" });
-      }
+    const error = editingGoal
+      ? await updateGoal(editingGoal.id, payload)
+      : await createGoal(payload as any);
+
+    if (error) {
+      toast({ title: editingGoal ? "Erro ao atualizar" : "Erro ao criar meta", description: error.message, variant: "destructive" });
     } else {
-      const { error } = await (supabase as any)
-        .from("task_goals")
-        .insert(payload);
-      if (error) {
-        toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" });
-      } else {
-        toast({ title: "Meta criada com sucesso" });
-      }
+      toast({ title: editingGoal ? "Meta atualizada" : "Meta criada com sucesso" });
     }
 
     setSaving(false);
     setFormOpen(false);
     resetForm();
-    fetchGoals();
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await (supabase as any).from("task_goals").delete().eq("id", id);
-    if (!error) {
-      toast({ title: "Meta removida" });
-      fetchGoals();
-    }
+    const error = await deleteGoal(id);
+    if (!error) toast({ title: "Meta removida" });
   };
 
-  // Stats
   const activeGoals = goalsWithProgress.filter((g) => g.status === "active");
   const completedGoals = goalsWithProgress.filter((g) => g.isCompleted);
   const avgProgress = activeGoals.length > 0
@@ -406,16 +357,4 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
       </Dialog>
     </div>
   );
-}
-
-function getPeriodEnd(startDate: string, period: string): Date {
-  const d = new Date(startDate);
-  switch (period) {
-    case "weekly": d.setDate(d.getDate() + 7); break;
-    case "monthly": d.setMonth(d.getMonth() + 1); break;
-    case "quarterly": d.setMonth(d.getMonth() + 3); break;
-    case "yearly": d.setFullYear(d.getFullYear() + 1); break;
-    default: d.setMonth(d.getMonth() + 1);
-  }
-  return d;
 }
