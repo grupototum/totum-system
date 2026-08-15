@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUserIsMaster } from "@/hooks/useProfiles";
 import { useProvisionSubdomain } from "@/hooks/useProvisionSubdomain";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,8 +42,7 @@ export default function NovaAgenciaPage() {
   const isDark = resolvedTheme === "dark";
   const logo = isDark ? logoWhite : logoRed;
 
-  const [isMaster, setIsMaster] = useState<boolean | null>(null);
-  const [checkingMaster, setCheckingMaster] = useState(true);
+  const { isMaster, loading: checkingMaster } = useCurrentUserIsMaster(session?.user?.id);
 
   // Form fields
   const [responsavel, setResponsavel] = useState("");
@@ -55,25 +55,6 @@ export default function NovaAgenciaPage() {
   const [doneHostname, setDoneHostname] = useState("");
 
   const { provision, loading: provisioning } = useProvisionSubdomain();
-
-  // Verify master status after session is available
-  useEffect(() => {
-    if (authLoading) return;
-    if (!session) {
-      setCheckingMaster(false);
-      return;
-    }
-
-    supabase
-      .from("profiles")
-      .select("is_master")
-      .eq("user_id", session.user.id)
-      .single()
-      .then(({ data }) => {
-        setIsMaster(data?.is_master ?? false);
-        setCheckingMaster(false);
-      });
-  }, [session, authLoading]);
 
   // Auto-fill subdomain from empresa name
   const handleEmpresaChange = (val: string) => {

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useTaskTemplates, TaskTemplate } from "@/hooks/useTaskTemplates";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Copy, Trash2, X, Loader2, FileText, GripVertical, LayoutGrid, List } from "lucide-react";
+import { Plus, Pencil, Copy, Trash2, X, Loader2, FileText, LayoutGrid, List } from "lucide-react";
 
 interface TemplateItem {
   id?: string;
@@ -15,50 +15,19 @@ interface TemplateItem {
   sort_order: number;
 }
 
-interface TaskTemplate {
-  id: string;
-  name: string;
-  description: string | null;
-  task_template_items: TemplateItem[];
-}
-
 export function TaskTemplateManager() {
-  const [templates, setTemplates] = useState<TaskTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { templates, loading, fetchTemplates, saveTemplate, duplicateTemplate, deleteTemplate } = useTaskTemplates();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<TaskTemplate | null>(null);
   const [saving, setSaving] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Form state
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<TemplateItem[]>([]);
   const [newItem, setNewItem] = useState("");
 
-  const fetch = async () => {
-    setLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setTemplates([]);
-        return;
-      }
-      const { data, error } = await supabase
-        .from("task_templates")
-        .select("*, task_template_items(*)")
-        .order("name");
-      if (error) throw error;
-      setTemplates((data as any) || []);
-    } catch (err: any) {
-      console.error("Erro ao carregar templates:", err);
-      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
 
   const openNew = () => {
     setEditing(null);
@@ -78,47 +47,6 @@ export function TaskTemplateManager() {
     setDialogOpen(true);
   };
 
-  const duplicate = async (t: TaskTemplate) => {
-    try {
-      const { data: newTpl, error } = await supabase
-        .from("task_templates")
-        .insert({ name: `${t.name} (cópia)`, description: t.description })
-        .select("id")
-        .single();
-      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
-      const sortedItems = (t.task_template_items || []).sort((a, b) => a.sort_order - b.sort_order);
-      if (sortedItems.length > 0) {
-        await supabase.from("task_template_items").insert(
-          sortedItems.map((i, idx) => ({
-            template_id: newTpl.id,
-            title: i.title,
-            description: i.description || null,
-            sort_order: idx,
-          }))
-        );
-      }
-      toast({ title: "Template duplicado" });
-      fetch();
-    } catch (err: any) {
-      console.error("Erro ao duplicar template:", err);
-      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
-    }
-  };
-
-  const deleteTemplate = async (id: string) => {
-    try {
-      const { error: itemsErr } = await supabase.from("task_template_items").delete().eq("template_id", id);
-      if (itemsErr) throw itemsErr;
-      const { error } = await supabase.from("task_templates").delete().eq("id", id);
-      if (error) throw error;
-      toast({ title: "Template removido" });
-      fetch();
-    } catch (err: any) {
-      console.error("Erro ao remover template:", err);
-      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
-    }
-  };
-
   const addItem = () => {
     if (!newItem.trim()) return;
     setItems(prev => [...prev, { title: newItem.trim(), sort_order: prev.length }]);
@@ -132,47 +60,22 @@ export function TaskTemplateManager() {
   const handleSave = async () => {
     if (!name.trim()) return;
     setSaving(true);
-    try {
-      if (editing) {
-        await supabase.from("task_templates").update({ name: name.trim(), description: description || null }).eq("id", editing.id);
-        await supabase.from("task_template_items").delete().eq("template_id", editing.id);
-        if (items.length > 0) {
-          await supabase.from("task_template_items").insert(
-            items.map((i, idx) => ({
-              template_id: editing.id,
-              title: i.title,
-              description: i.description || null,
-              sort_order: idx,
-            }))
-          );
-        }
-        toast({ title: "Template atualizado" });
-      } else {
-        const { data: newTpl, error } = await supabase
-          .from("task_templates")
-          .insert({ name: name.trim(), description: description || null })
-          .select("id")
-          .single();
-        if (error || !newTpl) throw error;
-        if (items.length > 0) {
-          await supabase.from("task_template_items").insert(
-            items.map((i, idx) => ({
-              template_id: newTpl.id,
-              title: i.title,
-              description: i.description || null,
-              sort_order: idx,
-            }))
-          );
-        }
-        toast({ title: "Template criado" });
-      }
-      setDialogOpen(false);
-      fetch();
-    } catch (err: any) {
-      toast({ title: "Erro", description: err?.message, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
+    const ok = await saveTemplate({
+      id: editing?.id,
+      name: name.trim(),
+      description: description || null,
+      items: items.map(i => ({ title: i.title, description: i.description })),
+    });
+    setSaving(false);
+    if (ok) setDialogOpen(false);
+  };
+
+  const handleDuplicate = async (t: TaskTemplate) => {
+    await duplicateTemplate(t);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteTemplate(id);
   };
 
   return (
@@ -242,10 +145,10 @@ export function TaskTemplateManager() {
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(t)}>
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => duplicate(t)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDuplicate(t)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteTemplate(t.id)}>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(t.id)}>
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>

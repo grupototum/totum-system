@@ -356,3 +356,111 @@ export function useUserRoles() {
 
   return { adminUserIds, loading, refetch: fetch, toggleAdmin };
 }
+
+export function useAuditLogsByUser(userId: string | undefined, options?: { action?: string; entityType?: string }) {
+  const { isDemoMode } = useDemo();
+  const [logs, setLogs] = useState<AuditRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    if (!userId) { setLoading(false); return; }
+    if (isDemoMode) {
+      setLogs(demoAuditLogsList as unknown as AuditRow[]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      let query = supabase
+        .from("audit_logs")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (options?.action) query = query.eq("action", options.action);
+      if (options?.entityType) query = query.eq("entity_type", options.entityType);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      setLogs(data || []);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      setLogs([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, isDemoMode, options?.action, options?.entityType]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { logs, loading, refetch: fetch };
+}
+
+export function useProfileAuditLogs(profileId: string | undefined) {
+  const { isDemoMode } = useDemo();
+  const [logs, setLogs] = useState<AuditRow[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    if (!profileId) return;
+    setLoading(true);
+    if (isDemoMode) {
+      setLogs([]);
+      setLoading(false);
+      return;
+    }
+    const { data } = await supabase
+      .from("audit_logs")
+      .select("*")
+      .eq("entity_type", "profile")
+      .eq("entity_id", profileId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setLogs(data || []);
+    setLoading(false);
+  }, [profileId, isDemoMode]);
+
+  return { logs, loading, fetch };
+}
+
+export function useProfileMutations() {
+  const insertAuditLog = async (entry: Partial<Tables<"audit_logs">>) => {
+    await supabase.from("audit_logs").insert(entry as any);
+  };
+
+  const updateProfileById = async (id: string, updates: Partial<Tables<"profiles">>) => {
+    const { error } = await supabase.from("profiles").update(updates as any).eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      return false;
+    }
+    return true;
+  };
+
+  return { updateProfileById, insertAuditLog };
+}
+
+export function useCurrentUserIsMaster(userId: string | undefined) {
+  const [isMaster, setIsMaster] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("is_master")
+      .eq("user_id", userId)
+      .single()
+      .then(({ data }) => {
+        setIsMaster(data?.is_master ?? false);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  return { isMaster, loading };
+}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useProjectTemplates, ProjectTemplate } from "@/hooks/useProjectTemplates";
 import { toast } from "@/hooks/use-toast";
-import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,16 +18,8 @@ interface TemplateTask {
   subtasks: SubtaskDef[];
 }
 
-interface ProjectTemplate {
-  id: string;
-  name: string;
-  description: string | null;
-  project_template_tasks: TemplateTask[];
-}
-
 export function ProjectTemplateManager() {
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { templates, loading, fetchTemplates, saveTemplate, duplicateTemplate, deleteTemplate } = useProjectTemplates();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<ProjectTemplate | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,40 +29,9 @@ export function ProjectTemplateManager() {
   const [description, setDescription] = useState("");
   const [tasks, setTasks] = useState<TemplateTask[]>([]);
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
-
-  // New task form
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
-  const fetchTemplates = async () => {
-    setLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setTemplates([]);
-        return;
-      }
-      const { data, error } = await supabase
-        .from("project_templates")
-        .select("*, project_template_tasks(*)")
-        .order("name");
-      if (error) throw error;
-      const mapped = (data || []).map((t: any) => ({
-        ...t,
-        project_template_tasks: (t.project_template_tasks || []).map((task: any) => ({
-          ...task,
-          subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
-        })),
-      }));
-      setTemplates(mapped);
-    } catch (err: any) {
-      console.error("Erro ao carregar templates:", err);
-      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchTemplates(); }, []);
+  useEffect(() => { fetchTemplates(); }, [fetchTemplates]);
 
   const openNew = () => {
     setEditing(null);
@@ -89,48 +49,6 @@ export function ProjectTemplateManager() {
         .map((task, idx) => ({ ...task, sort_order: idx }))
     );
     setDialogOpen(true);
-  };
-
-  const duplicate = async (t: ProjectTemplate) => {
-    try {
-      const { data: newTpl, error } = await supabase
-        .from("project_templates")
-        .insert({ name: `${t.name} (cópia)`, description: t.description })
-        .select("id")
-        .single();
-      if (error || !newTpl) throw error || new Error("Falha ao duplicar");
-      const sortedTasks = (t.project_template_tasks || []).sort((a, b) => a.sort_order - b.sort_order);
-      if (sortedTasks.length > 0) {
-        await supabase.from("project_template_tasks").insert(
-          sortedTasks.map((task, idx) => ({
-            template_id: newTpl.id,
-            title: task.title,
-            description: task.description || null,
-            sort_order: idx,
-            subtasks: (task.subtasks || []) as unknown as Json,
-          }))
-        );
-      }
-      toast({ title: "Template duplicado" });
-      fetchTemplates();
-    } catch (err: any) {
-      console.error("Erro ao duplicar template:", err);
-      toast({ title: "Erro ao duplicar", description: err?.message, variant: "destructive" });
-    }
-  };
-
-  const deleteTemplate = async (id: string) => {
-    try {
-      const { error: tasksErr } = await supabase.from("project_template_tasks").delete().eq("template_id", id);
-      if (tasksErr) throw tasksErr;
-      const { error } = await supabase.from("project_templates").delete().eq("id", id);
-      if (error) throw error;
-      toast({ title: "Template removido" });
-      fetchTemplates();
-    } catch (err: any) {
-      console.error("Erro ao remover template:", err);
-      toast({ title: "Erro ao remover", description: err?.message, variant: "destructive" });
-    }
   };
 
   const addTask = () => {
@@ -160,47 +78,14 @@ export function ProjectTemplateManager() {
       return;
     }
     setSaving(true);
-    try {
-      if (editing) {
-        await supabase.from("project_templates").update({ name: name.trim(), description: description || null }).eq("id", editing.id);
-        await supabase.from("project_template_tasks").delete().eq("template_id", editing.id);
-        if (tasks.length > 0) {
-          await supabase.from("project_template_tasks").insert(
-            tasks.map((t, idx) => ({
-              template_id: editing.id,
-              title: t.title,
-              description: t.description || null,
-              sort_order: idx,
-              subtasks: t.subtasks as unknown as Json,
-            }))
-          );
-        }
-        toast({ title: "Template atualizado" });
-      } else {
-        const { data: newTpl, error } = await supabase
-          .from("project_templates")
-          .insert({ name: name.trim(), description: description || null })
-          .select("id")
-          .single();
-        if (error || !newTpl) throw error;
-        await supabase.from("project_template_tasks").insert(
-          tasks.map((t, idx) => ({
-            template_id: newTpl.id,
-            title: t.title,
-            description: t.description || null,
-            sort_order: idx,
-            subtasks: t.subtasks as unknown as Json,
-          }))
-        );
-        toast({ title: "Template criado" });
-      }
-      setDialogOpen(false);
-      fetchTemplates();
-    } catch (err: any) {
-      toast({ title: "Erro", description: err?.message, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
+    const ok = await saveTemplate({
+      id: editing?.id,
+      name: name.trim(),
+      description: description || null,
+      tasks: tasks.map(t => ({ title: t.title, description: t.description, subtasks: t.subtasks })),
+    });
+    setSaving(false);
+    if (ok) setDialogOpen(false);
   };
 
   return (
@@ -256,7 +141,7 @@ export function ProjectTemplateManager() {
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(t)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => duplicate(t)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => duplicateTemplate(t)}>
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteTemplate(t.id)}>

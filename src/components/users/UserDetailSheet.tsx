@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { ProfileRow, RoleRow } from "@/hooks/useProfiles";
+import { ProfileRow, RoleRow, useProfileAuditLogs, useProfileMutations } from "@/hooks/useProfiles";
 import { PermissionMatrix } from "./PermissionMatrix";
 import { PermissionsMap, buildEmptyAccess } from "./permissionsData";
 import {
@@ -44,13 +44,13 @@ const selectItemCls = "text-xs focus:bg-white/[0.06] focus:text-foreground";
 export function UserDetailSheet({
   profile, open, onOpenChange, roles, departments, onRefresh, isAdmin,
 }: UserDetailSheetProps) {
+  const { updateProfileById, insertAuditLog } = useProfileMutations();
+  const { logs: auditLogs, loading: logsLoading, fetch: fetchAuditLogs } = useProfileAuditLogs(profile?.id);
   const [tab, setTab] = useState<Tab>("resumo");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<Record<string, any>>({});
   const [permissions, setPermissions] = useState<PermissionsMap>(buildEmptyAccess());
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
-  const [logsLoading, setLogsLoading] = useState(false);
 
   useEffect(() => {
     if (profile && open) {
@@ -77,23 +77,9 @@ export function UserDetailSheet({
     }
   }, [profile, open, roles]);
 
-  // Load audit logs when tab changes
   useEffect(() => {
-    if (tab === "historico" && profile) {
-      setLogsLoading(true);
-      supabase
-        .from("audit_logs")
-        .select("*")
-        .eq("entity_type", "profile")
-        .eq("entity_id", profile.id)
-        .order("created_at", { ascending: false })
-        .limit(50)
-        .then(({ data }) => {
-          setAuditLogs(data || []);
-          setLogsLoading(false);
-        });
-    }
-  }, [tab, profile]);
+    if (tab === "historico" && profile) fetchAuditLogs();
+  }, [tab, profile, fetchAuditLogs]);
 
   if (!profile) return null;
 
@@ -117,30 +103,19 @@ export function UserDetailSheet({
       commission_type: form.commission_type || "percentual",
     };
 
-    const { error } = await supabase.from("profiles").update(updates as any).eq("id", profile.id);
+    const ok = await updateProfileById(profile.id, updates);
+    if (!ok) { setSaving(false); return; }
 
-    if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
-      setSaving(false);
-      return;
-    }
-
-    // Log audit
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await supabase.from("audit_logs").insert({
+      await insertAuditLog({
         user_id: user.id,
         action: "Perfil atualizado",
         entity_type: "profile",
         entity_id: profile.id,
         detail: `Usuário ${form.full_name} atualizado`,
-        old_data: {
-          full_name: profile.full_name,
-          status: profile.status,
-          role_id: profile.role_id,
-          department_id: profile.department_id,
-        },
-        new_data: updates,
+        old_data: { full_name: profile.full_name, status: profile.status, role_id: profile.role_id, department_id: profile.department_id } as any,
+        new_data: updates as any,
       });
     }
 
@@ -297,7 +272,7 @@ export function UserDetailSheet({
                     {profile.status === "ativo" ? (
                       <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400"
                         onClick={async () => {
-                          await supabase.from("profiles").update({ status: "bloqueado" as any }).eq("id", profile.id);
+                          await updateProfileById(profile.id, { status: "bloqueado" as any });
                           toast({ title: "Usuário bloqueado" });
                           onRefresh();
                         }}>
@@ -306,7 +281,7 @@ export function UserDetailSheet({
                     ) : (
                       <Button size="sm" variant="outline" className="text-xs border-border bg-white/[0.03] hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400"
                         onClick={async () => {
-                          await supabase.from("profiles").update({ status: "ativo" as any }).eq("id", profile.id);
+                          await updateProfileById(profile.id, { status: "ativo" as any });
                           toast({ title: "Usuário ativado" });
                           onRefresh();
                         }}>

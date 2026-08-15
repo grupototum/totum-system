@@ -7,6 +7,7 @@ import { useDemo } from "@/contexts/DemoContext";
 import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import { demoTasks } from "@/data/demoData";
+import { calculateNextDueDate } from "@/lib/recurrence";
 
 type TaskRow = Tables<"tasks">;
 
@@ -285,6 +286,107 @@ export function useSupabaseTasks() {
     return true;
   };
 
+  const completeTask = async (data: {
+    taskId: string;
+    decision: "closed" | "next_action";
+    comment?: string;
+    nextAction?: {
+      title: string;
+      description: string;
+      responsible_id: string;
+      due_date: string;
+      priority: string;
+    };
+  }) => {
+    if (isDemoMode) {
+      toast({ title: "Modo Demo", description: "Tarefa concluída (simulado)." });
+      return true;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
+    const task = tasks.find((t) => t.id === data.taskId);
+
+    if (data.decision === "next_action" && data.nextAction && task) {
+      await supabase.from("subtasks").insert({
+        task_id: data.taskId,
+        title: data.nextAction.title,
+        status: "pendente",
+        responsible_id: data.nextAction.responsible_id || null,
+        due_date: data.nextAction.due_date || null,
+      });
+
+      await supabase.from("tasks").insert(attachOrganizationId({
+        title: data.nextAction.title,
+        description: data.nextAction.description || null,
+        client_id: task.clientId,
+        parent_task_id: data.taskId,
+        responsible_id: data.nextAction.responsible_id || null,
+        due_date: data.nextAction.due_date || null,
+        priority: data.nextAction.priority as any,
+        status: "pendente",
+        task_type: task.type as any,
+        contract_id: task.contractId || null,
+        project_id: task.projectId || null,
+      }, tenant?.organization_id));
+
+      if (userId) {
+        await supabase.from("task_history").insert({
+          task_id: data.taskId,
+          action: "Concluída com próxima ação",
+          detail: `Próxima ação criada: "${data.nextAction.title}"`,
+          user_id: userId,
+        });
+      }
+    } else if (data.decision === "closed") {
+      if (data.comment && userId) {
+        await supabase.from("task_comments").insert({
+          task_id: data.taskId,
+          content: `[Conclusão] ${data.comment}`,
+          user_id: userId,
+        });
+      }
+      if (userId) {
+        await supabase.from("task_history").insert({
+          task_id: data.taskId,
+          action: "Concluída e encerrada",
+          detail: data.comment ? `Comentário: ${data.comment}` : "Tarefa encerrada sem ações adicionais",
+          user_id: userId,
+        });
+      }
+    }
+
+    if (task && task.isRecurring && !task.parentTaskId) {
+      const nextDueDate = calculateNextDueDate(
+        task.dueDate || new Date().toISOString(),
+        task.recurrenceType || "mensal",
+        task.recurrenceConfig
+      );
+      const isEnded = task.recurrenceEndDate && new Date(nextDueDate) > new Date(task.recurrenceEndDate);
+      if (!isEnded) {
+        await supabase.from("tasks").insert(attachOrganizationId({
+          title: task.title,
+          description: task.description,
+          client_id: task.clientId,
+          responsible_id: task.responsibleId || null,
+          priority: task.priority as any,
+          status: "pendente",
+          task_type: task.type as any,
+          start_date: null,
+          due_date: nextDueDate,
+          is_recurring: false,
+          parent_task_id: task.id,
+          contract_id: task.contractId || null,
+          project_id: task.projectId || null,
+        }, tenant?.organization_id));
+        await supabase.from("tasks").update({ last_generated_at: new Date().toISOString() }).eq("id", task.id);
+      }
+    }
+
+    await updateTaskStatus(data.taskId, "concluido");
+    return true;
+  };
+
   return {
     tasks,
     loading,
@@ -294,6 +396,7 @@ export function useSupabaseTasks() {
     updateTask,
     addTasks,
     deleteTask,
+    completeTask,
     refetch: fetchTasks,
   };
 }

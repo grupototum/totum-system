@@ -77,7 +77,8 @@ Toda alteração nestas áreas exige aprovação ANTES de qualquer commit:
 ## 🔑 CREDENCIAIS DE ACESSO
 
 - **Admin:** `dev@grupototum.com` / `Totum@ADM2026`
-- **Supabase Project:** `fgosozxvhbdhqigwzqih`
+- **Supabase:** Self-hosted — `supa.grupototum.com` / `supa-core.grupototum.cloud`, schema `totum_system`
+- **⚠️ Cloud fgoso (`fgosozxvhbdhqigwzqih`) — APOSENTADO.** Não usar como alvo de config, deploy ou `db push`.
 - **Deploy:** push em `main` → Vercel deploy automático
 
 ## 🛡 MULTI-TENANT
@@ -104,6 +105,6 @@ Toda alteração nestas áreas exige aprovação ANTES de qualquer commit:
 ## 🔗 LINKS
 
 - App: https://totum.pixelsystem.online
-- Supabase: https://supabase.com/dashboard/project/fgosozxvhbdhqigwzqih
+- Supabase (self-hosted): `https://supa.grupototum.com` — ~~Cloud fgoso aposentado~~
 - GitHub: https://github.com/grupototum/totum-system
 - Vercel: https://vercel.com (deploy automático via push em main)

@@ -1,72 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { Bell } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useDemo } from "@/contexts/DemoContext";
-import { demoNotifications } from "@/data/demoData";
+import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export function NotificationCenter() {
   const { user } = useAuth();
-  const { isDemoMode } = useDemo();
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const fetch = useCallback(async () => {
-    if (isDemoMode) {
-      setNotifications(demoNotifications);
-      setUnreadCount(demoNotifications.filter(n => !n.is_read).length);
-      return;
-    }
-    if (!user) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    const items = data || [];
-    setNotifications(items);
-    setUnreadCount(items.filter((n: any) => !n.is_read).length);
-  }, [user, isDemoMode]);
-
-  useEffect(() => { fetch(); }, [fetch]);
+  const { notifications, unreadCount, markAsRead, markAllRead, refetch } = useNotifications(user?.id);
 
   // Realtime subscription
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("notifications-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => fetch())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => refetch())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, fetch]);
-
-  const markAsRead = async (id: string) => {
-    if (isDemoMode) {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-      return;
-    }
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-    setUnreadCount(prev => Math.max(0, prev - 1));
-  };
-
-  const markAllRead = async () => {
-    if (isDemoMode) {
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-      setUnreadCount(0);
-      return;
-    }
-    if (!user) return;
-    await supabase.from("notifications").update({ is_read: true }).eq("user_id", user.id).eq("is_read", false);
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    setUnreadCount(0);
-  };
+  }, [user, refetch]);
 
   const typeColors: Record<string, string> = {
     warning: "bg-amber-500",
