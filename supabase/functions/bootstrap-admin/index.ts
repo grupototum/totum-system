@@ -26,6 +26,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Bootstrap-only gate: this endpoint has no caller auth by design (there's
+    // no admin yet to authenticate as during first-run setup), so it must
+    // refuse to run once an admin already exists — otherwise anyone who knows
+    // an existing user's email could call it to get promoted to admin at any
+    // time, not just during initial setup.
+    const { data: adminExists, error: hasAdminError } = await supabaseAdmin.rpc("has_any_admin");
+    if (hasAdminError) {
+      return new Response(JSON.stringify({ error: hasAdminError.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (adminExists) {
+      return new Response(JSON.stringify({ error: "Setup already completed" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Check if user already exists
     const { data: existingProfiles } = await supabaseAdmin
       .from("profiles")

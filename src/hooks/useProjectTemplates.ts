@@ -1,51 +1,39 @@
-import { useState, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Json } from "@/integrations/supabase/types";
 
-export interface TemplateTask {
-  id?: string;
+export interface ProjectTemplateTask {
+  id: string;
   title: string;
   description?: string;
   sort_order: number;
-  subtasks: { title: string }[];
+  subtasks: { title: string }[] | null;
 }
 
 export interface ProjectTemplate {
   id: string;
   name: string;
   description: string | null;
-  project_template_tasks: TemplateTask[];
+  project_template_tasks: ProjectTemplateTask[];
+}
+
+async function fetchTemplatesFromDB(): Promise<ProjectTemplate[]> {
+  const { data, error } = await supabase
+    .from("project_templates")
+    .select("*, project_template_tasks(*)")
+    .order("name");
+  if (error) throw error;
+  return (data ?? []) as unknown as ProjectTemplate[];
 }
 
 export function useProjectTemplates() {
-  const [templates, setTemplates] = useState<ProjectTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchTemplates = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setTemplates([]); return; }
-      const { data, error } = await supabase
-        .from("project_templates")
-        .select("*, project_template_tasks(*)")
-        .order("name");
-      if (error) throw error;
-      const mapped = (data || []).map((t: any) => ({
-        ...t,
-        project_template_tasks: (t.project_template_tasks || []).map((task: any) => ({
-          ...task,
-          subtasks: Array.isArray(task.subtasks) ? task.subtasks : [],
-        })),
-      }));
-      setTemplates(mapped);
-    } catch (err: any) {
-      toast({ title: "Erro ao carregar templates", description: err?.message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const query = useQuery({
+    queryKey: ["project_templates"],
+    queryFn: fetchTemplatesFromDB,
+  });
 
   const saveTemplate = async (tpl: {
     id?: string;
@@ -78,7 +66,7 @@ export function useProjectTemplates() {
       }
 
       toast({ title: tpl.id ? "Template atualizado" : "Template criado" });
-      await fetchTemplates();
+      queryClient.invalidateQueries({ queryKey: ["project_templates"] });
       return true;
     } catch (err: any) {
       toast({ title: "Erro ao salvar", description: err.message, variant: "destructive" });
@@ -103,7 +91,7 @@ export function useProjectTemplates() {
         );
       }
       toast({ title: "Template duplicado" });
-      await fetchTemplates();
+      queryClient.invalidateQueries({ queryKey: ["project_templates"] });
       return true;
     } catch (err: any) {
       toast({ title: "Erro ao duplicar", description: err.message, variant: "destructive" });
@@ -117,7 +105,7 @@ export function useProjectTemplates() {
       const { error } = await supabase.from("project_templates").delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Template excluído" });
-      await fetchTemplates();
+      queryClient.invalidateQueries({ queryKey: ["project_templates"] });
       return true;
     } catch (err: any) {
       toast({ title: "Erro ao excluir", description: err.message, variant: "destructive" });
@@ -125,5 +113,5 @@ export function useProjectTemplates() {
     }
   };
 
-  return { templates, loading, fetchTemplates, saveTemplate, duplicateTemplate, deleteTemplate };
+  return { ...query, saveTemplate, duplicateTemplate, deleteTemplate };
 }

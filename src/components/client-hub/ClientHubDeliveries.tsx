@@ -36,6 +36,7 @@ export function ClientHubDeliveries({ clientId }: Props) {
     return Math.round((actionable.filter((i: any) => i.status === "entregue").length / actionable.length) * 100);
   };
 
+
   const canFinalize = (c: any) => {
     const items = c.delivery_checklist_items || [];
     return !items.some((i: any) => !i.status) &&

@@ -1,9 +1,11 @@
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useDemo } from "@/contexts/DemoContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export function usePermissions() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { isDemoMode } = useDemo();
 
   const permissions = useMemo(() => {
@@ -11,11 +13,36 @@ export function usePermissions() {
     return (profile?.roles?.permissions as Record<string, boolean>) ?? {};
   }, [profile, isDemoMode]);
 
-  const isAdmin = useMemo(() => {
-    if (isDemoMode) return true;
+  // Heurística legada (nome da role contém "admin"): fica só como fallback
+  // síncrono enquanto a RPC oficial não responde, pra não "piscar" a UI de
+  // admins de verdade. Ela pode dar falso positivo (ex: role "Administrativo
+  // Financeiro") — por isso não é mais a fonte de verdade, só usada até a
+  // RPC abaixo confirmar o valor real (B-030).
+  const roleNameGuess = useMemo(() => {
     const roleName = profile?.roles?.name?.toLowerCase() || "";
     return roleName.includes("admin") || roleName.includes("administrador") || roleName.includes("master");
-  }, [profile, isDemoMode]);
+  }, [profile]);
+
+  // Fonte de verdade: user_roles.role = 'admin' via RPC is_admin() (a mesma
+  // função usada pelas RLS policies no banco). Se a RPC falhar, cai de volta
+  // pra heurística acima em vez de bloquear o usuário por uma falha de rede.
+  const { data: isAdminConfirmed } = useQuery({
+    queryKey: ["is_admin", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("is_admin", { _user_id: user!.id });
+      if (error) throw error;
+      return data === true;
+    },
+    enabled: !isDemoMode && !!user?.id,
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  const isAdmin = useMemo(() => {
+    if (isDemoMode) return true;
+    if (profile?.is_master) return true;
+    return isAdminConfirmed ?? roleNameGuess;
+  }, [isDemoMode, profile?.is_master, isAdminConfirmed, roleNameGuess]);
 
   /** Check a single permission key like "fin_geral.visualizar" */
   const hasPermission = (key: string): boolean => {

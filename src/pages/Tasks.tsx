@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target, Search, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { TaskDetailDialog } from "@/components/tasks/TaskDetailDialog";
 import { GenerateTasksDialog } from "@/components/tasks/GenerateTasksDialog";
 import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { calculateNextDueDate } from "@/lib/recurrence";
 import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
 import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
@@ -24,6 +25,11 @@ import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { toast } from "@/hooks/use-toast";
 
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
+
+// Ordem de prioridade para ordenação automática: Urgente > Alta > Média > Baixa
+const priorityRank: Record<string, number> = { urgente: 0, alta: 1, media: 2, baixa: 3 };
+
+const LIST_PAGE_SIZE = 25;
 
 export default function Tasks() {
   const { tasks: supabaseTasks, loading, updateTaskStatus, updateTask, deleteTask, completeTask, refetch, profiles, clients } = useSupabaseTasks();
@@ -51,6 +57,7 @@ export default function Tasks() {
   const [typeFilter, setTypeFilter] = useState<string[]>([]);
   const [managerFilter, setManagerFilter] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"dueDate" | "clientName" | "status" | "type" | "responsible">("dueDate");
+  const [listPage, setListPage] = useState(1);
 
   const filteredTasks = useMemo(() => {
     const result = tasks.filter((t) => {
@@ -90,7 +97,10 @@ export default function Tasks() {
           return collator.compare(a.responsible || "", b.responsible || "");
         case "dueDate":
         default: {
-          // Sem prazo vai para o fim
+          // Ordenação automática: prioridade (Urgente > Alta > Média > Baixa) primeiro,
+          // depois prazo mais próximo. Tarefa sem prazo vai para o fim.
+          const rank = priorityRank[a.priority] - priorityRank[b.priority];
+          if (rank !== 0) return rank;
           const da = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
           const db = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
           return da - db;
@@ -101,6 +111,16 @@ export default function Tasks() {
   }, [tasks, search, clientFilter, responsibleFilter, priorityFilter, typeFilter, managerFilter, showArchived, sortBy]);
 
   const archivedCount = useMemo(() => tasks.filter(t => t.status === "arquivado").length, [tasks]);
+
+  // A visão "Lista" (e a lista de arquivadas) é paginada em memória sobre o
+  // conjunto já filtrado — Kanban/Calendário/Dashboard/Metas continuam vendo
+  // o conjunto completo, que é o que essas visões precisam para fazer sentido.
+  useEffect(() => { setListPage(1); }, [search, clientFilter, responsibleFilter, priorityFilter, typeFilter, managerFilter, showArchived, sortBy, view]);
+
+  const pagedListTasks = useMemo(
+    () => filteredTasks.slice((listPage - 1) * LIST_PAGE_SIZE, listPage * LIST_PAGE_SIZE),
+    [filteredTasks, listPage]
+  );
 
   const handleUnarchive = async (taskId: string) => {
     await updateTaskStatus(taskId, "concluido");
@@ -137,6 +157,8 @@ export default function Tasks() {
 
     setSelectedTask(updatedTask);
     await updateTask(updatedTask.id, {
+      title: updatedTask.title,
+      responsible_id: updatedTask.responsibleId || null,
       status: updatedTask.status as any,
       priority: updatedTask.priority as any,
       task_type: updatedTask.type as any,
@@ -304,7 +326,7 @@ export default function Tasks() {
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dueDate">Por data</SelectItem>
+                  <SelectItem value="dueDate">Prioridade + data</SelectItem>
                   <SelectItem value="clientName">Por cliente</SelectItem>
                   <SelectItem value="status">Por status</SelectItem>
                   <SelectItem value="type">Por tipo</SelectItem>
@@ -350,12 +372,15 @@ export default function Tasks() {
             />
           )}
           {(view === "list" || showArchived) && (
-            <TaskListView 
-              tasks={filteredTasks} 
-              onTaskClick={handleTaskClick}
-              showUnarchive={showArchived}
-              onUnarchive={handleUnarchive}
-            />
+            <>
+              <TaskListView
+                tasks={pagedListTasks}
+                onTaskClick={handleTaskClick}
+                showUnarchive={showArchived}
+                onUnarchive={handleUnarchive}
+              />
+              <PaginationControls page={listPage} pageSize={LIST_PAGE_SIZE} totalCount={filteredTasks.length} onPageChange={setListPage} />
+            </>
           )}
           {view === "calendar" && !showArchived && (
             <TaskCalendar

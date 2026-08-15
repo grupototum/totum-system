@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useClients } from "@/hooks/useClients";
@@ -16,9 +16,14 @@ import {
 } from "@/components/ui/select";
 import {
   Building2, Briefcase, Target, Palette, Settings2,
-  ChevronLeft, ChevronRight, Check, Loader2, User,
+  ChevronLeft, ChevronRight, Check, Loader2, User, FileClock,
 } from "lucide-react";
 import { validateClientBasicInfo, isValidEmail, isValidPhone, isValidURL, sanitizeURL, type ValidationErrors } from "@/lib/validation";
+import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /* ─── types ─── */
 interface FormData {
@@ -89,6 +94,56 @@ export default function NewClient() {
   const { user } = useAuth();
   const { addClient } = useClients();
   const navigate = useNavigate();
+
+  const draftKey = user ? `draft_client_${user.id}` : null;
+  const [draftReady, setDraftReady] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const pendingDraftRef = useRef<FormData | null>(null);
+
+  // Ao abrir o cadastro, verifica se existe um rascunho salvo para este usuário
+  useEffect(() => {
+    if (!draftKey) return;
+    const raw = localStorage.getItem(draftKey);
+    if (raw) {
+      try {
+        pendingDraftRef.current = JSON.parse(raw);
+        setShowDraftPrompt(true);
+      } catch {
+        localStorage.removeItem(draftKey);
+        setDraftReady(true);
+      }
+    } else {
+      setDraftReady(true);
+    }
+  }, [draftKey]);
+
+  const continueDraft = () => {
+    if (pendingDraftRef.current) setForm(pendingDraftRef.current);
+    pendingDraftRef.current = null;
+    setShowDraftPrompt(false);
+    setDraftReady(true);
+  };
+
+  const discardDraft = () => {
+    if (draftKey) localStorage.removeItem(draftKey);
+    pendingDraftRef.current = null;
+    setShowDraftPrompt(false);
+    setDraftReady(true);
+  };
+
+  // Salva rascunho no localStorage a cada alteração (debounce 500ms) — nunca vai para o Supabase
+  useEffect(() => {
+    if (!draftReady || !draftKey) return;
+    const timer = setTimeout(() => {
+      localStorage.setItem(draftKey, JSON.stringify(form));
+      setDraftSavedAt(new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [form, draftReady, draftKey]);
+
+  const isDirty = draftReady && JSON.stringify(form) !== JSON.stringify(INITIAL);
+  useUnsavedChangesGuard(isDirty);
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -171,6 +226,7 @@ export default function NewClient() {
     } as any);
     setSaving(false);
     if (!ok) return;
+    if (draftKey) localStorage.removeItem(draftKey);
     toast({ title: "✅ Cliente cadastrado!", description: `${form.company_name} adicionado com sucesso` });
     navigate("/clientes");
   };
@@ -403,6 +459,11 @@ export default function NewClient() {
                     </Button>
                   )}
                 </div>
+                {draftSavedAt && (
+                  <p className="flex items-center gap-1.5 justify-center text-[10px] text-muted-foreground/60 mt-3">
+                    <FileClock className="w-3 h-3" /> Rascunho salvo às {draftSavedAt}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -467,6 +528,21 @@ export default function NewClient() {
             </div>
           </div>
         </div>
+
+        <AlertDialog open={showDraftPrompt} onOpenChange={(o) => { if (!o) discardDraft(); }}>
+          <AlertDialogContent className="bg-card border-border text-foreground">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Rascunho encontrado</AlertDialogTitle>
+              <AlertDialogDescription>
+                Encontramos um rascunho. Deseja continuar de onde parou?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={discardDraft}>Descartar rascunho</AlertDialogCancel>
+              <AlertDialogAction onClick={continueDraft}>Continuar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
   );
 }

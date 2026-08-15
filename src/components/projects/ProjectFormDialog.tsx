@@ -10,6 +10,8 @@ import { Loader2, Plus, X, ChevronDown, ChevronRight } from "lucide-react";
 import { QuickAddDialog } from "@/components/shared/QuickAddDialog";
 import { getClientDisplayName } from "@/lib/clients";
 import { useTenant } from "@/contexts/TenantContext";
+import { toast } from "@/hooks/use-toast";
+import { useProjectTemplates } from "@/hooks/useProjectTemplates";
 
 interface TaskDef {
   title: string;
@@ -21,16 +23,16 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: any, tasks: TaskDef[]) => Promise<boolean>;
   initialData?: any;
+  initialTemplateId?: string;
 }
 
-export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }: Props) {
+export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData, initialTemplateId }: Props) {
   const { tenant } = useTenant();
   const {
     clients: loadedClients,
     contracts: loadedContracts,
     projectTypes: loadedProjectTypes,
     profiles: loadedProfiles,
-    projectTemplates: loadedTemplates,
   } = useProjectFormData(open, tenant?.organization_id);
 
   // Writable copies — QuickAddDialog onSuccess can append items optimistically
@@ -38,21 +40,21 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
   const [contracts, setContracts] = useState<{ id: string; title: string; client_id: string }[]>([]);
   const [projectTypes, setProjectTypes] = useState<{ id: string; name: string }[]>([]);
   const [profiles, setProfiles] = useState<{ user_id: string; full_name: string }[]>([]);
-  const [projectTemplates, setProjectTemplates] = useState<any[]>([]);
+  const { data: projectTemplates = [] } = useProjectTemplates();
 
   useEffect(() => {
     setClients(loadedClients);
     setContracts(loadedContracts);
     setProjectTypes(loadedProjectTypes);
     setProfiles(loadedProfiles);
-    setProjectTemplates(loadedTemplates);
-  }, [loadedClients, loadedContracts, loadedProjectTypes, loadedProfiles, loadedTemplates]);
+  }, [loadedClients, loadedContracts, loadedProjectTypes, loadedProfiles]);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     name: "", client_id: "", contract_id: "", project_type_id: "",
     responsible_id: "", description: "", start_date: "", due_date: "",
   });
   const [tasks, setTasks] = useState<TaskDef[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [expandedTask, setExpandedTask] = useState<number | null>(null);
   const [quickAddClientOpen, setQuickAddClientOpen] = useState(false);
@@ -72,12 +74,32 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           due_date: initialData.due_date || "",
         });
         setTasks([]); // For editing, tasks are managed separately
+        setSelectedTemplateId("");
       } else {
         setForm({ name: "", client_id: "", contract_id: "", project_type_id: "", responsible_id: "", description: "", start_date: "", due_date: "" });
         setTasks([]);
+        setSelectedTemplateId("");
       }
     }
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tenant?.organization_id]);
+
+  // Aplica o template pré-selecionado (vindo do painel "Criar Projeto" em
+  // Projects.tsx) assim que a lista de templates estiver disponível. Guardado
+  // por !selectedTemplateId para não reaplicar depois que o usuário já
+  // escolheu algo (manualmente ou por esta própria auto-aplicação).
+  useEffect(() => {
+    if (!open || initialData || !initialTemplateId || selectedTemplateId) return;
+    const preselected = projectTemplates.find((t) => t.id === initialTemplateId);
+    if (!preselected) return;
+    const tplTasks = (preselected.project_template_tasks || [])
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((t) => ({ title: t.title, subtasks: Array.isArray(t.subtasks) ? t.subtasks : [] }));
+    setForm((prev) => ({ ...prev, name: prev.name || preselected.name }));
+    setTasks(tplTasks);
+    setSelectedTemplateId(preselected.id);
+  }, [open, initialData, initialTemplateId, projectTemplates, selectedTemplateId]);
 
   const filteredContracts = form.client_id
     ? contracts.filter((c) => c.client_id === form.client_id)
@@ -94,6 +116,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
         subtasks: Array.isArray(t.subtasks) ? t.subtasks : [],
       }));
     setTasks(tplTasks);
+    setSelectedTemplateId(templateId);
   };
 
   const addTask = () => {
@@ -152,7 +175,7 @@ export function ProjectFormDialog({ open, onOpenChange, onSubmit, initialData }:
           {isNewProject && projectTemplates.length > 0 && (
             <div>
               <Label>Usar Template</Label>
-              <Select onValueChange={applyTemplate}>
+              <Select value={selectedTemplateId} onValueChange={applyTemplate}>
                 <SelectTrigger><SelectValue placeholder="Selecionar template (opcional)" /></SelectTrigger>
                 <SelectContent>
                   {projectTemplates.map((t: any) => (

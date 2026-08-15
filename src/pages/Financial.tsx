@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, TrendingDown, ArrowDownLeft, ArrowUpRight, Loader2, Plus, CreditCard, List, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { FinancialFormDialog } from "@/components/financial/FinancialFormDialog"
 import { AsaasFinancialPanel } from "@/components/financial/AsaasFinancialPanel";
 import { usePermissions } from "@/hooks/usePermissions";
 import { AccessDenied } from "@/components/shared/AccessDenied";
+import { PaginationControls } from "@/components/shared/PaginationControls";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
@@ -54,12 +55,16 @@ export default function Financial() {
   const [kanbanGroup, setKanbanGroup] = useState<KanbanGroup>("status");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
 
-  const { entries, loading, summary, refetch } = useFinancialEntries({ 
+  const { entries, pagedEntries, totalCount, pageSize, loading, summary, refetch } = useFinancialEntries({
     month: startDate || endDate ? undefined : currentMonth,
     startDate,
-    endDate 
-  });
+    endDate
+  }, page);
+
+  // Volta para a primeira página sempre que o filtro de período muda.
+  useEffect(() => { setPage(1); }, [startDate, endDate]);
 
   const monthLabel = format(now, "MMMM yyyy").replace(/^\w/, (c) => c.toUpperCase());
 
@@ -280,9 +285,9 @@ export default function Financial() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(entries || []).length === 0 ? (
+                    {(pagedEntries || []).length === 0 ? (
                       <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum lançamento neste mês</td></tr>
-                    ) : (entries || []).map((tx) => {
+                    ) : (pagedEntries || []).map((tx) => {
                       const isIncome = tx.type === "receber";
                       const entryClass = getEntryClass(tx);
                       return (
@@ -322,6 +327,7 @@ export default function Financial() {
                   </tbody>
                 </table>
               </div>
+              <PaginationControls page={page} pageSize={pageSize} totalCount={totalCount} onPageChange={setPage} />
             </motion.div>
           ) : (
             /* Kanban View */

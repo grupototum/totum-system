@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Task } from "./taskData";
@@ -64,7 +64,7 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
   const [responsibleId, setResponsibleId] = useState("");
   const [clientId, setClientId] = useState("");
 
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from("task_goals")
@@ -73,9 +73,9 @@ export function TaskGoals({ tasks, profiles, clients }: TaskGoalsProps) {
 
     if (!error && data) setGoals(data);
     setLoading(false);
-  };
+  }, []);
 
-  useEffect(() => { fetchGoals(); }, []);
+  useEffect(() => { fetchGoals(); }, [fetchGoals]);
 
   // Compute current_count for each goal based on real tasks
   const goalsWithProgress = useMemo(() => {

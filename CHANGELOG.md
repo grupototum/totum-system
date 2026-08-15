@@ -6,7 +6,17 @@
 ## [Unreleased]
 
 ### fix
+- Corrigir erro `Could not find the 'additional_info' column of 'clients' in the schema cache` no cadastro/edição de cliente — coluna criada via `supabase/patches/20260804_add_clients_additional_info.sql` (o campo já era usado no formulário, mas nunca existiu no banco)
+- `TaskDetailDialog`: título e responsável da tarefa deixavam de ser persistidos ao salvar (payload de `updateTask` não incluía `title`/`responsible_id`) — corrigido em `src/pages/Tasks.tsx`
 - Aplicar hotfix RLS em produção para filhos de tarefas, checklists de entrega e objetos `task-attachments`, removendo policies permissivas de insert para usuários autenticados — `supabase/patches/20260513_remote_task_child_rls_hotfix.sql`
+
+### feat
+- Cadastro de cliente: rascunho automático em `localStorage` (`draft_client_{userId}`, debounce 500ms) com prompt de retomada e indicador "Rascunho salvo" — `src/pages/NewClient.tsx`
+- Tarefas: ordenação automática por prioridade (Urgente > Alta > Média > Baixa) e depois prazo, aplicada por padrão na listagem — `src/pages/Tasks.tsx`
+- `TaskDetailDialog`: fluxo Editar / Salvar / Descartar — leitura por padrão, título e campos de resumo só ficam editáveis e só persistem através deste fluxo, com reversão total ao descartar
+- Tarefas: responsável, prioridade, data de início e data de vencimento passam a ser obrigatórios na criação (`TaskFormDialog`) e edição (`TaskDetailDialog`), com validação inline e sugestão automática da data de início; data de vencimento não pode anteceder a data de início
+- Cliente: botão "Desativar Cliente" (soft delete, `status = inativo`) e "Reativar Cliente" em `EditClient.tsx`; listagem de clientes ganha filtro "Mostrar Inativos" (oculto por padrão)
+- Aviso de alterações não salvas: novo hook `useUnsavedChangesGuard` + `UnsavedChangesDialog` reutilizados em `NewClient`, `EditClient`, `TaskFormDialog` e `TaskDetailDialog` — bloqueia fechamento acidental (Dialog/Sheet) e refresh/fechamento de aba (`beforeunload`) quando há dados não salvos
 
 ### chore
 - Untrack `src/stark-api/node_modules/` e `dist/` do git (2215 arquivos, ~65MB) — `948c250c`

@@ -10,6 +10,7 @@ import { demoProjects } from "@/data/demoData";
 export type ProjectRow = Tables<"projects"> & {
   clients?: { name: string } | null;
   project_types?: { name: string } | null;
+  tasks?: { status: string }[] | null;
 };
 
 interface TaskDef {
@@ -33,7 +34,7 @@ export function useProjects() {
     try {
       const { data, error } = await supabase
         .from("projects")
-        .select("*, clients(name), project_types(name)")
+        .select("*, clients(name), project_types(name), tasks(status)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       setProjects((data as ProjectRow[]) || []);
@@ -57,30 +58,33 @@ export function useProjects() {
       return false;
     }
 
-    // Create tasks + subtasks
+    // Create tasks + subtasks (bulk, em vez de 1 insert por tarefa/subtarefa em loop)
     if (tasks.length > 0) {
-      for (const taskDef of tasks) {
-        const taskPayload = attachOrganizationId({
-          title: taskDef.title,
-          client_id: values.client_id!,
-          project_id: project.id,
-          status: "pendente" as any,
-          priority: "media" as any,
-          task_type: "outro" as any,
-        }, tenant?.organization_id);
-        const { data: task, error: taskErr } = await supabase.from("tasks").insert(taskPayload).select("id").single();
+      const taskPayloads = tasks.map((taskDef) => attachOrganizationId({
+        title: taskDef.title,
+        client_id: values.client_id!,
+        project_id: project.id,
+        status: "pendente" as any,
+        priority: "media" as any,
+        task_type: "outro" as any,
+      }, tenant?.organization_id));
 
-        if (taskErr || !task) continue;
+      const { data: insertedTasks, error: tasksErr } = await supabase.from("tasks").insert(taskPayloads).select("id");
 
-        if (taskDef.subtasks.length > 0) {
-          await supabase.from("subtasks").insert(
-            taskDef.subtasks.map((sub, idx) => ({
-              task_id: task.id,
-              title: sub.title,
-              sort_order: idx,
-              status: "pendente" as any,
-            }))
-          );
+      // A ordem de retorno do insert em lote acompanha a ordem de inserção (Postgres/PostgREST).
+      if (!tasksErr && insertedTasks) {
+        const subtaskPayloads = tasks.flatMap((taskDef, i) => {
+          const taskId = insertedTasks[i]?.id;
+          if (!taskId || taskDef.subtasks.length === 0) return [];
+          return taskDef.subtasks.map((sub, idx) => ({
+            task_id: taskId,
+            title: sub.title,
+            sort_order: idx,
+            status: "pendente" as any,
+          }));
+        });
+        if (subtaskPayloads.length > 0) {
+          await supabase.from("subtasks").insert(subtaskPayloads);
         }
       }
     }

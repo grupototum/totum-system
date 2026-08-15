@@ -5,3 +5,5 @@ export { ErrorState } from "./ErrorState";
 export { RouteErrorBoundary } from "./RouteErrorBoundary";
 export { AccessDenied } from "./AccessDenied";
 export { Icon, type IconProps, type IconSize } from "./Icon";
+export { UnsavedChangesDialog } from "./UnsavedChangesDialog";
+export { PaginationControls } from "./PaginationControls";

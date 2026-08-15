@@ -1,5 +1,5 @@
 # BUGS.md — Totum System
-> Vibe Coding Totum v3.0 · Atualizado: 2026-05-07
+> Vibe Coding Totum v3.0 · Atualizado: 2026-08-10
 
 ## 🔴 CRÍTICOS (resolver antes de qualquer release)
 
@@ -16,6 +16,28 @@
 | B-009 | ✅ RESOLVIDO | `src/stark-api/node_modules/` | 2187 arquivos binários (~65MB) trackeados no git | `948c250c` |
 | B-010 | ✅ RESOLVIDO | 23 arquivos `* 2.*` | Duplicatas byte-identical causavam 695+ erros de lint e risco de import errado | `bd676aeb` |
 | B-024 | ✅ RESOLVIDO | Supabase RLS | Policies de filhos de tarefas/checklists e storage `task-attachments` tinham inserts amplos para `authenticated` | Hotfix remoto `20260513_remote_task_child_rls_hotfix.sql` |
+| B-026 | ✅ RESOLVIDO | `src/pages/NewClient.tsx`, `src/pages/EditClient.tsx` | Cadastro/edição de cliente quebrava com `Could not find the 'additional_info' column of 'clients' in the schema cache` — coluna nunca existiu no banco | `supabase/patches/20260804_add_clients_additional_info.sql` |
+| B-027 | ✅ RESOLVIDO | `src/pages/Tasks.tsx` | `handleTaskUpdate` não incluía `title`/`responsible_id` no payload de `updateTask` — editar título ou responsável na `TaskDetailDialog` não persistia no Supabase | Ver CHANGELOG [Unreleased] |
+
+## 🔴 CRÍTICOS — achados da auditoria de permissões (2026-08-10, ver `docs/PERMISSION_MATRIX.md`)
+
+| # | Status | Arquivo | Problema | Prioridade |
+|---|---|---|---|---|
+| B-028 | 🔴 ABERTO | `src/App.tsx` (`ProtectedRoutes`) | Nenhuma rota é protegida por permissão — só por sessão. Qualquer usuário autenticado acessa `/admin`, `/usuarios`, `/dashboard-executivo` etc. digitando a URL direta, independente de role/permissão. O filtro de menu (`AppSidebar`) é só cosmético/de descoberta | Crítica |
+| B-029 | 🔴 ABERTO | RLS de `tasks`, `clients`, `financial_entries`, `projects`, `contracts` | Policies de INSERT usam `WITH CHECK (true)` — não valida que o `organization_id` inserido bate com a org do usuário. Em tese permite inserir registros com `organization_id` de outra organização | Alta |
+| B-030 | ✅ RESOLVIDO | `src/hooks/usePermissions.ts` | `isAdmin` passa a usar a RPC `is_admin()` (mesma fonte das RLS policies) + `profile.is_master` síncrono; string match vira só fallback até a RPC responder | `3ae655ca` |
+| B-031 | 🟡 ABERTO | RLS de `user_roles` | Qualquer membro autenticado da mesma org pode ler/editar `user_roles` de qualquer outro membro (policy "Tenant isolation" não restringe por role, só por org) | Alta |
+| B-032 | 🟡 ABERTO | RLS de `profiles` (UPDATE) | Policy `Users update own profile` permite ao próprio usuário editar seu profile sem restringir colunas — em tese permite alterar `role_id`/`is_master` | Alta |
+| B-033 | 🟢 ABERTO | Tabela `roles` (RLS) | Sem `organization_id` — todas as organizações compartilham o mesmo espaço de leitura de `roles` (`SELECT USING (true)`) | Média |
+| B-034 | 🟢 ABERTO | Funções SQL `has_permission()`/`get_user_permissions()` | Existem no schema mas não são referenciadas por nenhuma `CREATE POLICY` — o sistema de permissões granulares (`roles.permissions`) não é enforced no banco, só no client (`usePermissions.ts`), que pode ser contornado por chamadas diretas à API | Média |
+
+## 🟡 ALTOS — achados da auditoria api-v1/agentes (2026-08-10, ver `docs/AGENTS_API_AUDIT.md`)
+
+| # | Status | Arquivo | Problema | Prioridade |
+|---|---|---|---|---|
+| B-035 | 🟡 ABERTO | `supabase/functions/api-v1/`, `api/tarefas/index.js` | Dois endpoints paralelos para o mesmo propósito (agentes externos), com contratos de resposta diferentes (RFC 7807 vs envelope custom), superfícies diferentes (projects+tasks vs só tasks) e nenhum consumidor real identificado no repo. `api-v1` não tem documentação em `docs/` | Média |
+| B-036 | 🟡 ABERTO | `supabase/functions/api-v1/index.ts` (catch global) | Erro 500 expõe `String(e)` no campo `detail` da resposta RFC 7807 — pode vazar detalhes internos de erro | Média |
+| B-037 | 🟢 ABERTO | `api-v1` e `api/tarefas` | Nenhum rate limiting em nenhum dos dois endpoints autenticados por API key | Baixa |
 
 ## 🟡 ALTOS (esta sprint)
 
@@ -25,12 +47,12 @@
 | B-012 | 🔴 ABERTO | `src/pages/AgenteDetail.tsx` | God Component 756 LOC: UI + gráficos + state + Supabase | Alta |
 | B-013 | 🔴 ABERTO | `src/components/ui/sidebar.tsx` | 637 LOC monolítico | Alta |
 | B-014 | 🔴 ABERTO | `src/services/asaasService.ts` | 615 LOC — **No-Fly Zone** | Alta |
-| B-015 | 🟡 ABERTO | `src/components/tasks/TaskGoals.tsx:78` | `useEffect` com deps incompletas (`fetchGoals` fora do array) | Média |
-| B-016 | 🟡 ABERTO | `src/components/financial/FinancialFormDialog.tsx:46` | `useEffect` sem `[open]` nas deps | Média |
-| B-017 | 🟡 ABERTO | `src/components/clients/ClientFormDialog.tsx:75` | Chamada Supabase sem `.catch()` | Média |
-| B-018 | 🟡 ABERTO | `supabase/functions/asaas-webhook/` | Sem validação HMAC da assinatura do Asaas | Média |
-| B-019 | 🟡 ABERTO | `package.json` — `xlsx@0.18.5` | Prototype Pollution + ReDoS (sem fix upstream) | Média |
-| B-025 | 🔴 ABERTO | `supabase/migrations/` | Histórico local/remoto divergente bloqueia `supabase db push`; reconciliar com dump/pull antes de novos pushes | Alta |
+| B-015 | ✅ RESOLVIDO | `src/components/tasks/TaskGoals.tsx:67` | `useEffect` com deps incompletas (`fetchGoals` fora do array) | `fetchGoals` movido para `useCallback`, incluído nas deps do `useEffect` — Rodada 1 |
+| B-016 | ✅ RESOLVIDO (achado obsoleto) | `src/components/financial/FinancialFormDialog.tsx:46` | Já tinha `[open]` nas deps — descrição do bug não correspondia ao código auditado em 2026-08-10 | — |
+| B-017 | ✅ RESOLVIDO (achado obsoleto) | — | `src/components/clients/ClientFormDialog.tsx` não existe no repositório; equivalente funcional (`src/pages/NewClient.tsx:229`) já trata erro do Supabase | — |
+| B-018 | ✅ RESOLVIDO (achado obsoleto) | `supabase/functions/asaas-webhook/index.ts:21` | Já valida `asaas-access-token` fail-closed contra `asaas_config.webhook_token`. Asaas não oferece HMAC — o controle correto pro provedor já está implementado | — |
+| B-019 | ✅ RESOLVIDO | `package.json` | `xlsx@0.18.5` (Prototype Pollution, sem fix upstream) substituído por `exceljs@4.4.0` em `src/hooks/useImportData.ts` — único consumidor no repo | Rodada 1 |
+| B-025 | ✅ RESOLVIDO (achado obsoleto) | `supabase/migrations/` | Migrations já consolidadas em baseline único (`00000000000000_baseline_totum_system.sql`, commit `03eeddd5`). Bloqueador real era outro — ver B-028 | — |
 
 ## 🟢 MÉDIOS (próximas semanas)
 
@@ -39,7 +61,7 @@
 | B-020 | 🟡 ABERTO | `src/pages/DataImport.tsx` | Heights fixas (`h-[400px]`) quebram mobile |
 | B-021 | 🟡 ABERTO | `src/hooks/useDashboardData.ts:93-123` | 11× `as unknown as Type[]` — casting duplo inseguro |
 | B-022 | 🟡 ABERTO | `tailwind.config.ts:114` | `require()` style import — 1 erro de lint |
-| B-023 | 🟡 ABERTO | `src/services/embeddingService.ts:17` | TODO antigo de OpenAI Embedding API não implementado |
+| B-023 | ✅ RESOLVIDO | ~~`src/services/embeddingService.ts:17`~~ | TODO antigo de OpenAI Embedding API não implementado — arquivo não existe mais no repositório (removido em limpeza anterior de código morto) |
 
 ## 📌 COMO REGISTRAR NOVOS BUGS
 

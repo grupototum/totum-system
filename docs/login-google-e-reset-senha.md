@@ -37,7 +37,10 @@
 
 ### Google Cloud Console → Credentials (OAuth client Web)
 - **Authorized JavaScript origins**: `https://totum.pixelsystem.online` (+ subdomínios de tenant).
-- **Authorized redirect URI**: `https://fgosozxvhbdhqigwzqih.supabase.co/auth/v1/callback`.
+- **Authorized redirect URI**: `https://<PROJECT_REF>.supabase.co/auth/v1/callback`, onde
+  `<PROJECT_REF>` é o ref do projeto Supabase ativo (o mesmo host de `VITE_SUPABASE_URL`).
+  ⚠️ O ref antigo `fgosozxvhbdhqigwzqih` está desativado — se ele ainda constar no Google
+  Cloud Console, o callback do login Google aponta para um host inexistente.
 
 > **Hands-off:** me envie o **Client ID + Secret** do Google que eu valido a config / passo o checklist
 > exato. Não consigo abrir esses painéis a partir do código.

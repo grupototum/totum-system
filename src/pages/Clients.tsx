@@ -1,18 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Search, Plus, MoreHorizontal, ArrowUpDown, Pencil, Trash2,
-  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck,
+  LayoutGrid, List, Mail, Phone, Building2, Users, UserCheck, EyeOff, Eye,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useClients, ClientRow } from "@/hooks/useClients";
 import { useProfiles } from "@/hooks/useProfiles";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getClientDisplayName, getClientSecondaryInfo, getClientStatusLabel } from "@/lib/clients";
-import { PageHeader, EmptyState, LoadingState } from "@/components/shared";
+import { PageHeader, EmptyState, LoadingState, PaginationControls } from "@/components/shared";
 
 const statusConfig: Record<string, string> = {
   ativo: "status-active",
@@ -23,21 +24,37 @@ const statusConfig: Record<string, string> = {
   pending: "status-paused",
 };
 
+function isInactiveStatus(status?: string | null) {
+  const normalized = (status || "").toLowerCase();
+  return normalized === "inativo" || normalized === "inactive";
+}
+
+const PAGE_SIZE = 25;
+
 export default function Clients() {
   const navigate = useNavigate();
   const { clients, loading, deleteClient } = useClients();
   const { profiles } = useProfiles();
+  const { maskDocument } = usePermissions();
   const [search, setSearch] = useState("");
   const [managerFilter, setManagerFilter] = useState<string>("all");
+  const [showInactive, setShowInactive] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "card">(() => {
     return (localStorage.getItem("clients_view_mode") as "list" | "card") || "list";
   });
 
-  const filtered = clients.filter((c: any) => {
+  const filtered = useMemo(() => clients.filter((c: any) => {
     const matchesSearch = getClientDisplayName(c).toLowerCase().includes(search.toLowerCase());
     const matchesManager = managerFilter === "all" || c.responsible_id === managerFilter;
-    return matchesSearch && matchesManager;
-  });
+    const matchesActiveState = showInactive ? isInactiveStatus(c.status) : !isInactiveStatus(c.status);
+    return matchesSearch && matchesManager && matchesActiveState;
+  }), [clients, search, managerFilter, showInactive]);
+
+  const inactiveCount = useMemo(() => clients.filter((c) => isInactiveStatus(c.status)).length, [clients]);
+
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [search, managerFilter, showInactive, viewMode]);
+  const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
 
   const getActivePlan = (c: ClientRow) => {
     const active = (c.contracts || []).find((ct) => ct.status === "ativo");
@@ -99,6 +116,17 @@ export default function Clients() {
           </Select>
         </div>
 
+        <Button
+          onClick={() => setShowInactive(!showInactive)}
+          variant="outline"
+          className={`gap-2 rounded-xl h-10 px-4 text-sm border-border shrink-0 ${
+            showInactive ? "bg-primary/10 text-primary border-primary/20" : "bg-white/[0.05] text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {showInactive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {showInactive ? "Ver Ativos" : `Mostrar Inativos${inactiveCount > 0 ? ` (${inactiveCount})` : ""}`}
+        </Button>
+
         <div className="flex items-center gap-1 bg-white/[0.04] border border-border rounded-lg p-0.5">
           <button
             onClick={() => { setViewMode("list"); localStorage.setItem("clients_view_mode", "list"); }}
@@ -156,7 +184,7 @@ export default function Clients() {
                       className="m-4"
                     />
                   </td></tr>
-                ) : filtered.map((client) => {
+                ) : paged.map((client) => {
                   const mrr = getMrr(client);
                   const displayName = getClientDisplayName(client);
                   const statusLabel = getClientStatusLabel(client.status);
@@ -167,7 +195,7 @@ export default function Clients() {
                       onClick={() => navigate(`/clientes/${client.id}`)}
                     >
                       <td className="p-4 font-medium text-primary cursor-pointer">{displayName}</td>
-                      <td className="p-4 text-muted-foreground text-xs">{client.cnpj || client.document || "—"}</td>
+                      <td className="p-4 text-muted-foreground text-xs">{maskDocument(client.cnpj || client.document) || "—"}</td>
                       <td className="p-4">{getActivePlan(client)}</td>
                       <td className="p-4 font-heading">
                         {mrr > 0 ? `R$ ${mrr.toLocaleString("pt-BR")}` : "—"}
@@ -204,8 +232,10 @@ export default function Clients() {
               </tbody>
             </table>
           </div>
+          <PaginationControls page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
         </motion.div>
       ) : (
+        <>
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -225,7 +255,7 @@ export default function Clients() {
                 }
               />
             </div>
-          ) : filtered.map((client, i) => {
+          ) : paged.map((client, i) => {
             const mrr = getMrr(client);
             const displayName = getClientDisplayName(client);
             const statusLabel = getClientStatusLabel(client.status);
@@ -267,7 +297,7 @@ export default function Clients() {
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold text-sm truncate text-foreground group-hover:text-primary transition-colors">{displayName}</h3>
-                    <p className="text-[11px] text-muted-foreground truncate">{client.cnpj || client.document || "Sem documento"}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{maskDocument(client.cnpj || client.document) || "Sem documento"}</p>
                   </div>
                 </div>
 
@@ -306,6 +336,8 @@ export default function Clients() {
             );
           })}
         </motion.div>
+        <PaginationControls page={page} pageSize={PAGE_SIZE} totalCount={filtered.length} onPageChange={setPage} />
+        </>
       )}
     </div>
   );

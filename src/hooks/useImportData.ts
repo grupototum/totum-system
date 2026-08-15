@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/contexts/TenantContext";
 import { attachOrganizationId } from "@/lib/tenant";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 export interface SystemField {
   key: string;
@@ -73,6 +73,17 @@ export function parseValue(raw: string): number | null {
   return isNaN(num) ? null : num;
 }
 
+function cellToString(value: ExcelJS.CellValue): string {
+  if (value == null) return "";
+  if (value instanceof Date) return value.toISOString().split("T")[0];
+  if (typeof value === "object") {
+    if ("result" in value) return String(value.result ?? "");
+    if ("text" in value) return String(value.text ?? "");
+    if ("richText" in value) return value.richText.map(r => r.text).join("");
+  }
+  return String(value);
+}
+
 function parseDate(raw: string): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
@@ -137,18 +148,36 @@ export function useImportData() {
         });
       });
     } else {
-      const buffer = await f.arrayBuffer();
-      const wb = XLSX.read(buffer, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
-      const cols = data.length > 0 ? Object.keys(data[0]) : [];
-      setRawData(data.map(row => {
-        const cleaned: Record<string, string> = {};
-        for (const [k, v] of Object.entries(row)) cleaned[k] = String(v ?? "");
-        return cleaned;
-      }));
-      setDetectedColumns(cols);
-      autoMap(cols);
+      try {
+        const buffer = await f.arrayBuffer();
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.worksheets[0];
+
+        const headers: string[] = [];
+        worksheet.getRow(1).eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          headers[colNumber - 1] = String(cell.value ?? "").trim();
+        });
+
+        const data: Record<string, string>[] = [];
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+          const rowData: Record<string, string> = {};
+          headers.forEach((header, idx) => {
+            if (!header) return;
+            rowData[header] = cellToString(row.getCell(idx + 1).value);
+          });
+          data.push(rowData);
+        });
+
+        const cols = headers.filter(Boolean);
+        setRawData(data);
+        setDetectedColumns(cols);
+        autoMap(cols);
+      } catch (err) {
+        console.error("Error parsing spreadsheet:", err);
+        toast({ title: "Arquivo inválido", description: "Não foi possível ler essa planilha. Verifique o formato e tente novamente.", variant: "destructive" });
+      }
     }
   }, [autoMap]);
 
@@ -227,31 +256,69 @@ export function useImportData() {
       // Find or create clients
       const clientIdMap = new Map<string, string>();
       let clientCount = 0;
+      const clientErrors: string[] = [];
 
       if (clientMap.size > 0) {
-        const { data: existing } = await supabase.from("clients").select("*");
+        const { data: existing } = await supabase.from("clients").select("id, company_name, name");
         const existingMap = new Map((existing || []).map((c: any) => [String(c.company_name || c.name || "").toLowerCase(), c.id]));
+
+        const toCreate = Array.from(clientMap.entries()).filter(([key]) => !existingMap.has(key));
         for (const [key, client] of clientMap) {
-          if (existingMap.has(key)) {
-            clientIdMap.set(key, existingMap.get(key)!);
+          if (existingMap.has(key)) clientIdMap.set(key, existingMap.get(key)!);
+        }
+
+        if (toCreate.length > 0) {
+          const payloads = toCreate.map(([, client]) => attachOrganizationId({
+            company_name: client.name,
+            contact_name: client.name,
+            email: client.email || null,
+            phone: client.phone || null,
+            cnpj: client.document || null,
+            import_batch_id: batch.id,
+            status: "active",
+          }, tenant?.organization_id));
+
+          // Tenta em lote primeiro; se falhar (ex: violação de constraint em uma
+          // linha), cai para o insert individual original para isolar o erro por cliente.
+          const { data: created, error: bulkErr } = await (supabase.from("clients") as any)
+            .insert(payloads)
+            .select("id");
+
+          if (!bulkErr && created) {
+            toCreate.forEach(([key], i) => {
+              const id = created[i]?.id;
+              if (id) { clientIdMap.set(key, id); clientCount++; }
+            });
           } else {
-            const { data: created, error } = await (supabase.from("clients") as any)
-              .insert(attachOrganizationId({
-                company_name: client.name,
-                contact_name: client.name,
-                email: client.email || null,
-                phone: client.phone || null,
-                cnpj: client.document || null,
-                import_batch_id: batch.id,
-                status: "active",
-              }, tenant?.organization_id))
-              .select("id")
-              .single();
-            if (!error && created) {
-              clientIdMap.set(key, created.id);
-              clientCount++;
+            for (const [key, client] of toCreate) {
+              const { data: single, error } = await (supabase.from("clients") as any)
+                .insert(attachOrganizationId({
+                  company_name: client.name,
+                  contact_name: client.name,
+                  email: client.email || null,
+                  phone: client.phone || null,
+                  cnpj: client.document || null,
+                  import_batch_id: batch.id,
+                  status: "active",
+                }, tenant?.organization_id))
+                .select("id")
+                .single();
+              if (error) {
+                console.error(`Error creating client "${client.name}":`, error);
+                clientErrors.push(client.name);
+              } else if (single) {
+                clientIdMap.set(key, single.id);
+                clientCount++;
+              }
             }
           }
+        }
+        if (clientErrors.length > 0) {
+          toast({
+            title: "Aviso na importação",
+            description: `${clientErrors.length} cliente(s) não puderam ser criados: ${clientErrors.slice(0, 3).join(", ")}${clientErrors.length > 3 ? "..." : ""}`,
+            variant: "destructive",
+          });
         }
       }
 
@@ -291,8 +358,10 @@ export function useImportData() {
         });
 
         const { error } = await (supabase.from("financial_entries") as any).insert(entries);
-        if (error) console.error("Insert error:", error);
-        else financialCount += entries.length;
+        if (error) {
+          throw new Error(`Erro ao inserir lançamentos (lote ${Math.floor(i / CHUNK_SIZE) + 1}): ${error.message}`);
+        }
+        financialCount += entries.length;
         setProgress(Math.round(((i + chunk.length) / validRows.length) * 100));
       }
 
@@ -355,15 +424,17 @@ export function useImportData() {
     URL.revokeObjectURL(url);
   }, []);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: validatedRows.length,
     valid: validatedRows.filter(r => r.isValid).length,
     invalid: validatedRows.filter(r => !r.isValid).length,
-    totalIncome: validatedRows.filter(r => r.isValid && INCOME_KEYWORDS.includes((r.data.type || "").toLowerCase()))
+    totalIncome: validatedRows
+      .filter(r => r.isValid && INCOME_KEYWORDS.includes((r.data.type || "").toLowerCase()))
       .reduce((sum, r) => sum + (parseValue(r.data.value) || 0), 0),
-    totalExpense: validatedRows.filter(r => r.isValid && EXPENSE_KEYWORDS.includes((r.data.type || "").toLowerCase()))
+    totalExpense: validatedRows
+      .filter(r => r.isValid && EXPENSE_KEYWORDS.includes((r.data.type || "").toLowerCase()))
       .reduce((sum, r) => sum + (parseValue(r.data.value) || 0), 0),
-  };
+  }), [validatedRows]);
 
   return {
     step, setStep, file, parseFile, rawData, detectedColumns,

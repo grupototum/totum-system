@@ -252,37 +252,42 @@ export function useAuditLogs() {
 export function useDepartments() {
   const { isDemoMode } = useDemo();
   const [departments, setDepartments] = useState<Tables<"departments">[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadDepartments = useCallback(async () => {
+    setLoading(true);
     if (isDemoMode) {
       setDepartments(demoDepartmentsList as unknown as Tables<"departments">[]);
+      setLoading(false);
       return;
     }
 
-    const loadDepartments = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("departments")
-          .select("*")
-          .order("name");
+    try {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("*")
+        .order("name");
 
-        if (error) {
-          console.error("Error fetching departments:", error);
-          setDepartments([]);
-          return;
-        }
-
-        setDepartments(data || []);
-      } catch (error) {
+      if (error) {
         console.error("Error fetching departments:", error);
         setDepartments([]);
+        return;
       }
-    };
 
-    loadDepartments();
+      setDepartments(data || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      setDepartments([]);
+    } finally {
+      setLoading(false);
+    }
   }, [isDemoMode]);
 
-  return departments;
+  useEffect(() => {
+    loadDepartments();
+  }, [loadDepartments]);
+
+  return { departments, loading, refetch: loadDepartments };
 }
 
 export function useUserRoles() {

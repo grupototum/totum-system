@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -35,17 +35,19 @@ export default function Registries() {
   const { dynamicOptions, fkNames } = useRegistryFKOptions(fkSourceTables);
 
   // Enrich data with resolved FK names
-  const enrichedData = hasTable
-    ? supabaseData.map((row) => {
-        const enriched = { ...row };
-        activeRegistry.formFields.forEach((f) => {
-          if (f.sourceTable && fkNames[f.key] && row[f.key]) {
-            enriched[`${f.key}_nome`] = fkNames[f.key][row[f.key]] || "";
-          }
-        });
-        return enriched;
-      })
-    : undefined;
+  const enrichedData = useMemo(() => (
+    hasTable
+      ? supabaseData.map((row) => {
+          const enriched = { ...row };
+          activeRegistry.formFields.forEach((f) => {
+            if (f.sourceTable && fkNames[f.key] && row[f.key]) {
+              enriched[`${f.key}_nome`] = fkNames[f.key][row[f.key]] || "";
+            }
+          });
+          return enriched;
+        })
+      : undefined
+  ), [hasTable, supabaseData, activeRegistry.formFields, fkNames]);
 
   // Merge dynamic options into form fields
   const resolvedFields: FormField[] = activeRegistry.formFields.map((f) => {

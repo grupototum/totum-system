@@ -7,7 +7,7 @@ import { PwaInstallPrompt } from "./PwaInstallPrompt";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex flex-col w-full">
         <DemoBanner />
         <div className="flex flex-1 min-h-0">

@@ -73,21 +73,6 @@ export interface Task {
   history: TaskHistoryEntry[];
 }
 
-export interface DeliveryModelItem {
-  id: string;
-  name: string;
-  description: string;
-  type: TaskType;
-  suggestedPriority: TaskPriority;
-  suggestedResponsible?: string;
-}
-
-export interface DeliveryModel {
-  planId: string;
-  packageName: string;
-  items: DeliveryModelItem[];
-}
-
 // Status config
 export const statusConfig: Record<TaskStatus, { label: string; color: string; bgColor: string }> = {
   pendente: { label: "Pendente", color: "text-muted-foreground", bgColor: "bg-white/[0.06]" },
@@ -124,58 +109,6 @@ export const recurrenceLabels: Record<RecurrenceType, string> = {
 export const weekDayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 export const statusColumns: TaskStatus[] = ["pendente", "em_andamento", "pausado", "concluido"];
-
-// Delivery Models
-export const deliveryModels: DeliveryModel[] = [
-  {
-    planId: "premium",
-    packageName: "Premium",
-    items: [
-      { id: "dm1", name: "Criar 8 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
-      { id: "dm2", name: "Criar 4 stories animados", description: "Stories semanais", type: "conteudo", suggestedPriority: "media" },
-      { id: "dm3", name: "Produzir 1 vídeo curto", description: "Reels/Shorts", type: "conteudo", suggestedPriority: "alta" },
-      { id: "dm4", name: "Gestão de tráfego (Google Ads)", description: "Otimização e monitoramento", type: "trafego", suggestedPriority: "alta", suggestedResponsible: "Juliana Costa" },
-      { id: "dm5", name: "Gestão de tráfego (Meta Ads)", description: "Otimização e monitoramento", type: "trafego", suggestedPriority: "alta", suggestedResponsible: "Juliana Costa" },
-      { id: "dm6", name: "Otimização de campanhas", description: "Revisão e otimização semanal", type: "trafego", suggestedPriority: "media" },
-      { id: "dm7", name: "Relatório mensal de performance", description: "Métricas e insights", type: "relatorio", suggestedPriority: "alta" },
-      { id: "dm8", name: "Reunião de alinhamento", description: "Call mensal com cliente", type: "reuniao", suggestedPriority: "media" },
-    ],
-  },
-  {
-    planId: "pro",
-    packageName: "Pro",
-    items: [
-      { id: "dm9", name: "Criar 6 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
-      { id: "dm10", name: "Criar 3 stories", description: "Stories semanais", type: "conteudo", suggestedPriority: "media" },
-      { id: "dm11", name: "Gestão de tráfego (Meta Ads)", description: "Otimização", type: "trafego", suggestedPriority: "alta", suggestedResponsible: "Juliana Costa" },
-      { id: "dm12", name: "Relatório mensal", description: "Métricas", type: "relatorio", suggestedPriority: "media" },
-      { id: "dm13", name: "Reunião de alinhamento", description: "Call mensal", type: "reuniao", suggestedPriority: "media" },
-    ],
-  },
-  {
-    planId: "essencial",
-    packageName: "Essencial",
-    items: [
-      { id: "dm14", name: "Criar 3 artes para Instagram", description: "Feed posts", type: "conteudo", suggestedPriority: "alta" },
-      { id: "dm15", name: "Gestão de tráfego (Meta Ads)", description: "Monitoramento básico", type: "trafego", suggestedPriority: "alta" },
-      { id: "dm16", name: "Relatório quinzenal", description: "Métricas básicas", type: "relatorio", suggestedPriority: "media" },
-    ],
-  },
-];
-
-// Mock clients with plans
-export const clientPlans = [
-  { clientId: "1", clientName: "TechVentures S.A.", planId: "premium", packageName: "Premium" },
-  { clientId: "2", clientName: "Nova Digital", planId: "essencial", packageName: "Essencial" },
-  { clientId: "3", clientName: "Startup Labs", planId: "premium", packageName: "Premium" },
-  { clientId: "4", clientName: "Innova Corp", planId: "pro", packageName: "Pro" },
-  { clientId: "5", clientName: "DigitalPlus", planId: "essencial", packageName: "Essencial" },
-  { clientId: "6", clientName: "Agro Connect", planId: "pro", packageName: "Pro" },
-];
-
-export const teamMembers = [
-  "Ana Silva", "Carlos Mendes", "Juliana Costa", "Rafael Lima", "Marina Souza",
-];
 
 // Initial mock tasks
 export const initialTasks: Task[] = [
