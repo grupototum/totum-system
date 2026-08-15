@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, CheckCircle2, Circle, Clock } from "lucide-react";
+import { useProjectTasks } from "@/hooks/useProjectTasks";
+import { Loader2, CheckCircle2, Circle, Clock } from "lucide-react";
 import { format } from "date-fns";
 import type { ProjectRow } from "@/hooks/useProjects";
 
@@ -23,31 +20,7 @@ const statusLabels: Record<string, string> = {
 };
 
 export function ProjectDetailSheet({ project, open, onOpenChange }: Props) {
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!project || !open) return;
-    setLoading(true);
-    supabase
-      .from("tasks")
-      .select("id, title, status, priority, due_date, responsible_id, subtasks(*)")
-      .eq("project_id", project.id)
-      .order("created_at")
-      .then(({ data, error }) => {
-        if (error) {
-          toast({ title: "Erro ao carregar tarefas do projeto", description: error.message, variant: "destructive" });
-        } else {
-          setTasks(data || []);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading project tasks:", err);
-        toast({ title: "Erro ao carregar tarefas do projeto", description: "Tente novamente em instantes.", variant: "destructive" });
-        setLoading(false);
-      });
-  }, [project?.id, open]);
+  const { tasks, loading } = useProjectTasks(project?.id, open);
 
   if (!project) return null;
 

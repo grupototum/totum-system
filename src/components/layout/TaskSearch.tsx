@@ -9,14 +9,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { supabase } from "@/integrations/supabase/client";
+import { useTaskSearch } from "@/hooks/useTaskSearch";
 
 export function TaskSearch() {
   const [open, setOpen] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const { results, search } = useTaskSearch();
   const navigate = useNavigate();
 
-  // Ctrl+K shortcut
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -27,16 +26,6 @@ export function TaskSearch() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-
-  const handleSearch = async (term: string) => {
-    if (term.length < 2) { setResults([]); return; }
-    const { data } = await supabase
-      .from("tasks")
-      .select("id, title, status, clients(name), projects(name)")
-      .ilike("title", `%${term}%`)
-      .limit(20);
-    setResults(data || []);
-  };
 
   return (
     <>
@@ -52,7 +41,7 @@ export function TaskSearch() {
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Buscar tarefas..." onValueChange={handleSearch} />
+        <CommandInput placeholder="Buscar tarefas..." onValueChange={search} />
         <CommandList>
           <CommandEmpty>Nenhuma tarefa encontrada.</CommandEmpty>
           <CommandGroup heading="Tarefas">

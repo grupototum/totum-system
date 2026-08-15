@@ -1,6 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
 
 export interface TaskGoal {
   id: string;
@@ -31,35 +30,28 @@ export function useTaskGoals() {
     setLoading(false);
   }, []);
 
-  const saveGoal = async (payload: Omit<TaskGoal, "id" | "current_count" | "status"> & { id?: string }) => {
-    if (payload.id) {
-      const { error } = await (supabase as any).from("task_goals").update(payload).eq("id", payload.id);
-      if (error) {
-        toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
-        return false;
-      }
-      toast({ title: "Meta atualizada" });
-    } else {
-      const { error } = await (supabase as any).from("task_goals").insert(payload);
-      if (error) {
-        toast({ title: "Erro ao criar meta", description: error.message, variant: "destructive" });
-        return false;
-      }
-      toast({ title: "Meta criada com sucesso" });
-    }
+  useEffect(() => { fetchGoals(); }, [fetchGoals]);
+
+  const createGoal = async (payload: Omit<TaskGoal, "id" | "current_count" | "status">) => {
+    const { error } = await (supabase as any).from("task_goals").insert(payload);
+    if (error) return error;
     await fetchGoals();
-    return true;
+    return null;
+  };
+
+  const updateGoal = async (id: string, payload: Partial<TaskGoal>) => {
+    const { error } = await (supabase as any).from("task_goals").update(payload).eq("id", id);
+    if (error) return error;
+    await fetchGoals();
+    return null;
   };
 
   const deleteGoal = async (id: string) => {
     const { error } = await (supabase as any).from("task_goals").delete().eq("id", id);
-    if (!error) {
-      toast({ title: "Meta removida" });
-      await fetchGoals();
-      return true;
-    }
-    return false;
+    if (error) return error;
+    await fetchGoals();
+    return null;
   };
 
-  return { goals, loading, fetchGoals, saveGoal, deleteGoal };
+  return { goals, loading, refetch: fetchGoals, createGoal, updateGoal, deleteGoal };
 }
