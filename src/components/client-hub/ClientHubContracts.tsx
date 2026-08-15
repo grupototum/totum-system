@@ -1,12 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Loader2, FileText, Pencil, Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useDemo } from "@/contexts/DemoContext";
-import { demoContracts } from "@/data/demoData";
 import { format } from "date-fns";
 import { ContractFormDialog } from "@/components/contracts/ContractFormDialog";
-import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useClientContracts } from "@/hooks/useClientContracts";
 
 interface Props { clientId: string; }
 
@@ -18,67 +15,13 @@ const statusCls: Record<string, string> = {
 };
 
 export function ClientHubContracts({ clientId }: Props) {
-  const { isDemoMode } = useDemo();
-  const [contracts, setContracts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { contracts, loading, createContract, updateContract } = useClientContracts(clientId);
   const [editingContract, setEditingContract] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    if (isDemoMode) {
-      setContracts(demoContracts.filter(c => c.client_id === clientId));
-      setLoading(false);
-      return;
-    }
-    const { data } = await supabase
-      .from("contracts")
-      .select("*, plans(name), contract_types(name)")
-      .eq("client_id", clientId)
-      .order("created_at", { ascending: false });
-    setContracts(data || []);
-    setLoading(false);
-  }, [clientId, isDemoMode]);
+  const handleCreate = (values: any) => createContract(values);
 
-  useEffect(() => { fetch(); }, [fetch]);
-
-  const handleCreate = async (values: any) => {
-    if (isDemoMode) {
-      toast({ title: "Sucesso", description: "Contrato criado (Modo Demo)." });
-      return true;
-    }
-    const { error } = await supabase
-      .from("contracts")
-      .insert({ ...values, client_id: clientId });
-
-    if (error) {
-      toast({ title: "Erro ao criar contrato", description: error.message, variant: "destructive" });
-      return false;
-    }
-    toast({ title: "Sucesso", description: "Contrato criado com sucesso." });
-    fetch();
-    return true;
-  };
-
-  const handleUpdate = async (values: any) => {
-    if (isDemoMode) {
-      setContracts(prev => prev.map(c => c.id === editingContract.id ? { ...c, ...values } : c));
-      toast({ title: "Sucesso", description: "Contrato atualizado (Modo Demo)." });
-      return true;
-    }
-    const { error } = await supabase
-      .from("contracts")
-      .update(values)
-      .eq("id", editingContract.id);
-
-    if (error) {
-      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
-      return false;
-    }
-    toast({ title: "Sucesso", description: "Contrato atualizado com sucesso." });
-    fetch();
-    return true;
-  };
+  const handleUpdate = (values: any) => updateContract(editingContract.id, values);
 
   const handleOpenNew = () => {
     setEditingContract(null);
@@ -99,7 +42,6 @@ export function ClientHubContracts({ clientId }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Header com botão de novo contrato */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {contracts.length} contrato{contracts.length !== 1 ? "s" : ""} vinculado{contracts.length !== 1 ? "s" : ""}
