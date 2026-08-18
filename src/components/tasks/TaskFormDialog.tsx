@@ -26,6 +26,8 @@ import { Loader2, Plus, X, FileText, BookOpen, Shield, RefreshCw } from "lucide-
 import { Switch } from "@/components/ui/switch";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 import { UnsavedChangesDialog } from "@/components/shared";
+import { TenantScopeErrorDialog, type TenantScopeDiagnostics } from "@/components/shared/TenantScopeErrorDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 interface TaskFormDialogProps {
   open: boolean;
@@ -59,8 +61,10 @@ export function TaskFormDialog({
   profiles,
   onCreated,
 }: TaskFormDialogProps) {
-  const { tenant } = useTenant();
+  const { tenant, host, refresh: refreshTenant } = useTenant();
+  const { user, profile } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [scopeError, setScopeError] = useState<TenantScopeDiagnostics | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [clientId, setClientId] = useState("");
@@ -269,11 +273,39 @@ export function TaskFormDialog({
       recurrence_end_date: isRecurring && recurrenceEndDate ? recurrenceEndDate : null,
     };
 
-    const scopedPayload = attachOrganizationId(insertPayload, tenant?.organization_id);
+    const buildDiagnostics = (dbError?: { message?: string; code?: string }): TenantScopeDiagnostics => ({
+      host,
+      matchType: tenant?.match_type,
+      tenantOrganizationId: tenant?.organization_id ?? null,
+      profileOrganizationId: (profile as any)?.organization_id ?? null,
+      userEmail: user?.email ?? null,
+      isMaster: (profile as any)?.is_master ?? null,
+      dbMessage: dbError?.message ?? null,
+      dbCode: dbError?.code ?? null,
+    });
+
+    // Sem organização resolvida o payload sai sem organization_id e o banco aplica
+    // o DEFAULT gen_random_uuid() da coluna — a linha nasceria órfã (ou seria
+    // recusada pela RLS). Barra antes de gravar e explica o procedimento.
+    if (!tenant?.organization_id) {
+      setSaving(false);
+      setScopeError(buildDiagnostics());
+      return;
+    }
+
+    const scopedPayload = attachOrganizationId(insertPayload, tenant.organization_id);
     const { data: taskData, error } = await (supabase as any).from("tasks").insert(scopedPayload).select("id").single();
 
     if (error) {
       setSaving(false);
+      // 42501 / "row-level security" = bloqueio de escopo multi-tenant. A mensagem
+      // crua do Postgres não diz ao usuário o que fazer; a janela abaixo diz.
+      const isRlsBlock =
+        error.code === "42501" || /row-level security/i.test(error.message || "");
+      if (isRlsBlock) {
+        setScopeError(buildDiagnostics(error));
+        return;
+      }
       toast({ title: "Erro ao criar tarefa", description: error.message, variant: "destructive" });
       return;
     }
@@ -535,6 +567,14 @@ export function TaskFormDialog({
         </DialogFooter>
       </DialogContent>
       <UnsavedChangesDialog open={confirmOpen} onConfirmDiscard={confirmDiscard} onCancel={cancelDiscard} />
+
+      <TenantScopeErrorDialog
+        open={scopeError !== null}
+        onOpenChange={(next) => { if (!next) setScopeError(null); }}
+        entityLabel="tarefa"
+        diagnostics={scopeError ?? { host }}
+        onRetry={refreshTenant}
+      />
     </Dialog>
   );
 }

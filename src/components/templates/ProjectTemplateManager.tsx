@@ -46,7 +46,7 @@ export function ProjectTemplateManager() {
     setTasks(
       (t.project_template_tasks || [])
         .sort((a, b) => a.sort_order - b.sort_order)
-        .map((task, idx) => ({ ...task, sort_order: idx }))
+        .map((task, idx) => ({ ...task, sort_order: idx, subtasks: task.subtasks ?? [] }))
     );
     setDialogOpen(true);
   };
@@ -63,12 +63,12 @@ export function ProjectTemplateManager() {
   };
 
   const addSubtask = (taskIdx: number, title: string) => {
-    setTasks(prev => prev.map((t, i) => i === taskIdx ? { ...t, subtasks: [...t.subtasks, { title }] } : t));
+    setTasks(prev => prev.map((t, i) => i === taskIdx ? { ...t, subtasks: [...(t.subtasks ?? []), { title }] } : t));
   };
 
   const removeSubtask = (taskIdx: number, subIdx: number) => {
     setTasks(prev => prev.map((t, i) =>
-      i === taskIdx ? { ...t, subtasks: t.subtasks.filter((_, si) => si !== subIdx) } : t
+      i === taskIdx ? { ...t, subtasks: (t.subtasks ?? []).filter((_, si) => si !== subIdx) } : t
     ));
   };
 
@@ -118,11 +118,11 @@ export function ProjectTemplateManager() {
 
       {loading ? (
         <div className="flex justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
-      ) : templates.length === 0 ? (
+      ) : (templates?.length ?? 0) === 0 ? (
         <div className="text-center py-10 text-muted-foreground text-sm">Nenhum template de projeto cadastrado</div>
       ) : (
         <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" : "flex flex-col gap-3"}>
-          {templates.map(t => {
+          {(templates ?? []).map(t => {
             const totalTasks = (t.project_template_tasks || []).length;
             const totalSubtasks = (t.project_template_tasks || []).reduce((s, tk) => s + (tk.subtasks?.length || 0), 0);
             return (
@@ -177,14 +177,14 @@ export function ProjectTemplateManager() {
                       {expandedTask === idx ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                     </button>
                     <span className="flex-1 text-sm font-medium">{task.title}</span>
-                    <span className="text-xs text-muted-foreground">{task.subtasks.length} sub</span>
+                    <span className="text-xs text-muted-foreground">{(task.subtasks ?? []).length} sub</span>
                     <button onClick={() => removeTask(idx)} className="p-1 hover:bg-white/[0.06] rounded">
                       <X className="h-3 w-3 text-muted-foreground" />
                     </button>
                   </div>
                   {expandedTask === idx && (
                     <SubtaskEditor
-                      subtasks={task.subtasks}
+                      subtasks={task.subtasks ?? []}
                       onAdd={(title) => addSubtask(idx, title)}
                       onRemove={(subIdx) => removeSubtask(idx, subIdx)}
                     />

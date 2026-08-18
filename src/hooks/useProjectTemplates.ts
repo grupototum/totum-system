@@ -113,5 +113,16 @@ export function useProjectTemplates() {
     }
   };
 
-  return { ...query, saveTemplate, duplicateTemplate, deleteTemplate };
+  return {
+    ...query,
+    // Aliases retrocompatíveis: ProjectTemplateManager consome templates/loading/
+    // fetchTemplates. Sem eles, `templates` chega undefined e a aba Templates
+    // quebra em `templates.length`.
+    templates: query.data ?? [],
+    loading: query.isLoading,
+    fetchTemplates: query.refetch,
+    saveTemplate,
+    duplicateTemplate,
+    deleteTemplate,
+  };
 }

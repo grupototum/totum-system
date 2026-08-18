@@ -8,16 +8,34 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const REALTIME_ENABLED = import.meta.env.VITE_ENABLE_REALTIME === "true";
+const REALTIME_SCHEMA = import.meta.env.VITE_SUPABASE_SCHEMA || "totum_system";
+const POLL_INTERVAL_MS = 60_000;
+
 export function NotificationCenter() {
   const { user } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllRead, refetch } = useNotifications(user?.id);
 
-  // Realtime subscription
+  // Atualização de notificações.
+  //
+  // Realtime fica DESLIGADO por padrão: o Supabase self-hosted
+  // (supa.grupototum.com) não expõe /realtime/v1/websocket pelo proxy, e o
+  // client entrava em loop infinito de reconexão poluindo o console com
+  // "WebSocket connection ... failed". Enquanto o serviço não for exposto,
+  // usamos polling. Para religar, defina VITE_ENABLE_REALTIME=true.
   useEffect(() => {
     if (!user) return;
+
+    if (!REALTIME_ENABLED) {
+      const timer = setInterval(() => { void refetch(); }, POLL_INTERVAL_MS);
+      return () => clearInterval(timer);
+    }
+
     const channel = supabase
       .channel("notifications-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => refetch())
+      // O schema precisa ser o mesmo do PostgREST (totum_system), senão o
+      // filtro nunca casa — antes estava cravado em "public".
+      .on("postgres_changes", { event: "INSERT", schema: REALTIME_SCHEMA, table: "notifications", filter: `user_id=eq.${user.id}` }, () => refetch())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, refetch]);
@@ -32,7 +50,12 @@ export function NotificationCenter() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={unreadCount > 0 ? `Notificações (${unreadCount} não lidas)` : "Notificações"}
+          className="relative text-muted-foreground hover:text-foreground"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-[10px] font-bold text-white flex items-center justify-center">

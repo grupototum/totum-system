@@ -13,7 +13,7 @@ type TaskRow = Tables<"tasks">;
 
 export function useSupabaseTasks() {
   const { isDemoMode } = useDemo();
-  const { tenant } = useTenant();
+  const { tenant, loading: tenantLoading } = useTenant();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
@@ -189,10 +189,14 @@ export function useSupabaseTasks() {
   }, [isDemoMode, tenant?.organization_id]);
 
   useEffect(() => {
+    // Espera a resolução do tenant antes de buscar. Sem essa trava as três
+    // consultas rodavam duas vezes (uma com tenant nulo, outra já resolvido) —
+    // no Lighthouse isso aparecia como 2× 449 KB só no fetch de tasks.
+    if (tenantLoading) return;
     fetchTasks();
     fetchClients();
     fetchProfiles();
-  }, [fetchTasks, fetchClients, fetchProfiles]);
+  }, [tenantLoading, fetchTasks, fetchClients, fetchProfiles]);
 
   const updateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
     if (isDemoMode) {
