@@ -31,6 +31,7 @@ export function TaskSearch() {
     <>
       <button
         onClick={() => setOpen(true)}
+        aria-label="Buscar tarefas"
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors text-sm"
       >
         <Search className="h-3.5 w-3.5" />

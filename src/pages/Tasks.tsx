@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target, Search, ArrowUpDown } from "lucide-react";
+import { LayoutGrid, List, CalendarDays, Sparkles, BarChart3, Loader2, Plus, Archive, RotateCcw, LayoutTemplate, Target, Search, ArrowUpDown, X, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,7 +15,7 @@ import { TaskCompletionDialog } from "@/components/tasks/TaskCompletionDialog";
 import { TaskFormDialog } from "@/components/tasks/TaskFormDialog";
 import { PaginationControls } from "@/components/shared/PaginationControls";
 import { calculateNextDueDate } from "@/lib/recurrence";
-import { Task, TaskStatus, initialTasks } from "@/components/tasks/taskData";
+import { Task, TaskStatus, initialTasks, statusConfig, statusColumns } from "@/components/tasks/taskData";
 import { TaskTemplateManager } from "@/components/templates/TaskTemplateManager";
 import { TaskGoals } from "@/components/tasks/TaskGoals";
 import { ProjectTemplateManager } from "@/components/templates/ProjectTemplateManager";
@@ -23,6 +23,16 @@ import { Confetti } from "@/components/tasks/Confetti";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseTasks } from "@/hooks/useSupabaseTasks";
 import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type ViewMode = "dashboard" | "kanban" | "list" | "calendar" | "goals" | "templates";
 
@@ -43,6 +53,11 @@ export default function Tasks() {
   const [createOpen, setCreateOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [showArchived, setShowArchived] = useState(false);
+
+  // Seleção em massa no Kanban
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkRunning, setBulkRunning] = useState(false);
 
   // Completion dialog state
   const [completionTask, setCompletionTask] = useState<Task | null>(null);
@@ -117,10 +132,70 @@ export default function Tasks() {
   // o conjunto completo, que é o que essas visões precisam para fazer sentido.
   useEffect(() => { setListPage(1); }, [search, clientFilter, responsibleFilter, priorityFilter, typeFilter, managerFilter, showArchived, sortBy, view]);
 
+  // A seleção só faz sentido dentro do Kanban visível: trocar de visão ou de
+  // filtro deixaria ids selecionados fora da tela, e a ação em massa agiria
+  // sobre tarefas que o usuário não está mais vendo.
+  useEffect(() => { setSelectedTaskIds([]); }, [view, showArchived, search, clientFilter, responsibleFilter, priorityFilter, typeFilter, managerFilter]);
+
   const pagedListTasks = useMemo(
     () => filteredTasks.slice((listPage - 1) * LIST_PAGE_SIZE, listPage * LIST_PAGE_SIZE),
     [filteredTasks, listPage]
   );
+
+  const toggleTaskSelection = (taskId: string) => {
+    setSelectedTaskIds((prev) =>
+      prev.includes(taskId) ? prev.filter((id) => id !== taskId) : [...prev, taskId]
+    );
+  };
+
+  const toggleColumnSelection = (taskIds: string[], select: boolean) => {
+    setSelectedTaskIds((prev) =>
+      select
+        ? Array.from(new Set([...prev, ...taskIds]))
+        : prev.filter((id) => !taskIds.includes(id))
+    );
+  };
+
+  const handleBulkStatusChange = async (newStatus: TaskStatus) => {
+    const ids = [...selectedTaskIds];
+    if (ids.length === 0) return;
+    setBulkRunning(true);
+    try {
+      // Sequencial de propósito: updateTaskStatus refaz o fetch a cada chamada,
+      // e disparar tudo em paralelo geraria N refetches concorrentes.
+      for (const id of ids) {
+        await updateTaskStatus(id, newStatus);
+      }
+      setSelectedTaskIds([]);
+      toast({
+        title: "Tarefas atualizadas",
+        description: `${ids.length} ${ids.length === 1 ? "tarefa movida" : "tarefas movidas"} para ${statusConfig[newStatus].label}.`,
+      });
+    } finally {
+      setBulkRunning(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selectedTaskIds];
+    if (ids.length === 0) return;
+    setBulkRunning(true);
+    try {
+      let deleted = 0;
+      for (const id of ids) {
+        const ok = await deleteTask(id);
+        if (ok) deleted += 1;
+      }
+      setSelectedTaskIds([]);
+      setBulkDeleteOpen(false);
+      toast({
+        title: "Exclusão concluída",
+        description: `${deleted} de ${ids.length} ${ids.length === 1 ? "tarefa excluída" : "tarefas excluídas"}.`,
+      });
+    } finally {
+      setBulkRunning(false);
+    }
+  };
 
   const handleUnarchive = async (taskId: string) => {
     await updateTaskStatus(taskId, "concluido");
@@ -262,7 +337,7 @@ export default function Tasks() {
             variant="outline"
             className={`gap-2 rounded-full px-4 text-sm border-border ${
               showArchived 
-                ? "bg-primary/10 text-primary border-primary/20" 
+                ? "bg-primary/20 text-primary-bright border-primary/40" 
                 : "bg-muted/40 hover:bg-muted/80 text-foreground"
             }`}
           >
@@ -300,7 +375,7 @@ export default function Tasks() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all shrink-0 ${
                   view === v.key
                     ? "bg-primary/15 text-primary border border-primary/20 shadow-sm"
-                    : "text-muted-foreground/70 hover:text-muted-foreground hover:bg-white/[0.04] border border-transparent"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04] border border-transparent"
                 }`}
               >
                 <v.icon className="h-3.5 w-3.5" />
@@ -321,7 +396,7 @@ export default function Tasks() {
                 />
               </div>
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
-                <SelectTrigger className="h-9 w-[160px] bg-white/[0.05] border-border rounded-lg text-xs">
+                <SelectTrigger className="h-9 w-[160px] bg-white/[0.05] border-border rounded-lg text-xs" aria-label="Ordenar tarefas por">
                   <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground/50" />
                   <SelectValue placeholder="Ordenar" />
                 </SelectTrigger>
@@ -365,11 +440,61 @@ export default function Tasks() {
         >
           {view === "dashboard" && !showArchived && <TaskDashboard tasks={activeTasks} />}
           {view === "kanban" && !showArchived && (
-            <TaskKanban
-              tasks={filteredTasks}
-              onStatusChange={handleStatusChange}
-              onTaskClick={handleTaskClick}
-            />
+            <>
+              {selectedTaskIds.length > 0 && (
+                <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/80 px-4 py-2.5 backdrop-blur">
+                  <span className="text-sm font-medium text-foreground">
+                    {selectedTaskIds.length} {selectedTaskIds.length === 1 ? "tarefa selecionada" : "tarefas selecionadas"}
+                  </span>
+                  <div className="ml-auto flex flex-wrap items-center gap-2">
+                    <Select
+                      value=""
+                      onValueChange={(value) => handleBulkStatusChange(value as TaskStatus)}
+                      disabled={bulkRunning}
+                    >
+                      <SelectTrigger className="h-8 w-[190px] text-xs" aria-label="Mover tarefas selecionadas para outro status">
+                        <SelectValue placeholder="Mover para..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusColumns.map((status) => (
+                          <SelectItem key={status} value={status} className="text-xs">
+                            {statusConfig[status].label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-xs text-destructive hover:text-destructive"
+                      disabled={bulkRunning}
+                      onClick={() => setBulkDeleteOpen(true)}
+                    >
+                      {bulkRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                      Excluir
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1.5 text-xs"
+                      disabled={bulkRunning}
+                      onClick={() => setSelectedTaskIds([])}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Limpar
+                    </Button>
+                  </div>
+                </div>
+              )}
+              <TaskKanban
+                tasks={filteredTasks}
+                onStatusChange={handleStatusChange}
+                onTaskClick={handleTaskClick}
+                selectedIds={selectedTaskIds}
+                onToggleTask={toggleTaskSelection}
+                onToggleColumn={toggleColumnSelection}
+              />
+            </>
           )}
           {(view === "list" || showArchived) && (
             <>
@@ -411,6 +536,30 @@ export default function Tasks() {
           )}
         </motion.div>
       )}
+
+      <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Excluir {selectedTaskIds.length} {selectedTaskIds.length === 1 ? "tarefa" : "tarefas"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Subtarefas, checklists, comentários e
+              histórico das tarefas selecionadas também serão excluídos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkRunning}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void handleBulkDelete(); }}
+              disabled={bulkRunning}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkRunning ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <TaskDetailDialog
         task={selectedTask}

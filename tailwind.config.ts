@@ -34,6 +34,8 @@ export default {
           foreground: "hsl(var(--primary-foreground))",
           deep: "hsl(var(--primary-deep))",
           hover: "hsl(var(--primary-hover))",
+          // Vermelho claro da marca — usado onde o #da2128 não atinge 4.5:1
+          bright: "hsl(var(--primary-bright))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

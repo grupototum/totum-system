@@ -4,14 +4,29 @@ import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea
 import { Task, TaskStatus, statusConfig, statusColumns, priorityConfig, recurrenceLabels } from "./taskData";
 import { Clock, RefreshCw } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TaskKanbanProps {
   tasks: Task[];
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onTaskClick: (task: Task) => void;
+  /** Ids das tarefas selecionadas. A seleção em massa só aparece com onToggleTask definido. */
+  selectedIds?: string[];
+  onToggleTask?: (taskId: string) => void;
+  /** Seleciona/limpa uma coluna inteira. */
+  onToggleColumn?: (taskIds: string[], select: boolean) => void;
 }
 
-function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanProps) {
+function TaskKanbanComponent({
+  tasks,
+  onStatusChange,
+  onTaskClick,
+  selectedIds,
+  onToggleTask,
+  onToggleColumn,
+}: TaskKanbanProps) {
+  const selectable = Boolean(onToggleTask);
+  const selectedSet = new Set(selectedIds || []);
   const columns = statusColumns.map((status) => ({
     status,
     ...statusConfig[status],
@@ -33,7 +48,20 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
             <div className="flex items-center gap-2 mb-3 px-1">
               <div className={`h-2 w-2 rounded-full ${col.status === "pendente" ? "bg-white/30" : col.status === "em_andamento" ? "bg-blue-500" : col.status === "pausado" ? "bg-amber-500" : "bg-emerald-500"}`} />
               <span className={`text-xs font-semibold uppercase tracking-wider ${col.color}`}>{col.label}</span>
-              <span className="text-[10px] text-muted-foreground/40 font-heading">{col.tasks.length}</span>
+              <span className="text-[10px] text-muted-foreground/80 font-heading">{col.tasks.length}</span>
+              {selectable && col.tasks.length > 0 && (() => {
+                const columnIds = col.tasks.map((t) => t.id);
+                const allSelected = columnIds.every((id) => selectedSet.has(id));
+                return (
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={() => onToggleColumn?.(columnIds, !allSelected)}
+                    aria-label={`Selecionar todas as tarefas de ${col.label}`}
+                    title={allSelected ? "Limpar seleção da coluna" : "Selecionar coluna inteira"}
+                    className="ml-auto h-3.5 w-3.5 border-white/30"
+                  />
+                );
+              })()}
             </div>
 
             <Droppable droppableId={col.status}>
@@ -59,7 +87,9 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                             onClick={() => onTaskClick(task)}
                             className={`glass-card rounded-xl p-3 cursor-pointer hover:bg-white/[0.06] transition-all relative overflow-hidden group border-l-4 ${priorityColor.replace('text-', 'border-')} ${
                               snapshot.isDragging ? "opacity-70 shadow-2xl shadow-black/50 rotate-2 scale-105 z-50 border-white/20" : ""
-                            } ${isOverdue ? "pulse-red" : ""}`}
+                            } ${isOverdue ? "pulse-red" : ""} ${
+                              selectedSet.has(task.id) ? "ring-2 ring-primary bg-white/[0.06]" : ""
+                            }`}
                             style={{
                               ...provided.draggableProps.style,
                             }}
@@ -68,8 +98,25 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                             <div className={`absolute top-0 left-0 bottom-0 w-1 ${priorityColor.replace('text-', 'bg-')}`} />
                             
                             <div className="flex items-center gap-1.5 mb-2 pl-1">
+                              {selectable && (
+                                // stopPropagation no mousedown evita que o clique no
+                                // checkbox inicie o drag do card; no click evita abrir
+                                // o detalhe da tarefa.
+                                <span
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex items-center"
+                                >
+                                  <Checkbox
+                                    checked={selectedSet.has(task.id)}
+                                    onCheckedChange={() => onToggleTask?.(task.id)}
+                                    aria-label={`Selecionar tarefa ${task.title}`}
+                                    className="h-3.5 w-3.5 border-white/30"
+                                  />
+                                </span>
+                              )}
                               <div className={`h-1.5 w-1.5 rounded-full ${priorityConfig[task.priority]?.dot || "bg-muted-foreground"}`} />
-                              <span className="text-[10px] text-muted-foreground/50 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
+                              <span className="text-[10px] text-muted-foreground/85 flex-1 truncate font-medium uppercase tracking-tight">{task.clientName}</span>
                               {(task.isRecurring || task.parentTaskId) && (
                                 <span className="inline-flex items-center gap-0.5 text-[9px] text-primary/70" title={task.isRecurring ? `Recorrente: ${task.recurrenceType ? (recurrenceLabels[task.recurrenceType] || task.recurrenceType) : ''}` : 'Ocorrência de tarefa recorrente'}>
                                   <RefreshCw className="h-3 w-3" />
@@ -81,7 +128,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                             
                             <div className="flex items-center justify-between pl-1">
                               {task.responsible ? (
-                                <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1.5">
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
                                   <Avatar className="h-4 w-4 border border-border">
                                     {task.responsibleAvatarUrl && <AvatarImage src={task.responsibleAvatarUrl} />}
                                     <AvatarFallback className="text-[6px] bg-white/[0.1] text-muted-foreground">{task.responsible[0]}</AvatarFallback>
@@ -89,12 +136,12 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                                   {task.responsible.split(" ")[0]}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-muted-foreground/40">Sem responsável</span>
+                                <span className="text-[10px] text-muted-foreground/80">Sem responsável</span>
                               )}
                               
                               {task.dueDate && (
                                 <span className={`text-[10px] flex items-center gap-1 font-heading ${
-                                  isOverdue ? "text-red-400 font-bold" : "text-muted-foreground/50"
+                                  isOverdue ? "text-red-400 font-bold" : "text-muted-foreground/85"
                                 }`}>
                                   <Clock className="h-3 w-3" />
                                   {new Date(task.dueDate).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
@@ -112,7 +159,7 @@ function TaskKanbanComponent({ tasks, onStatusChange, onTaskClick }: TaskKanbanP
                                     transition={{ duration: 0.5 }}
                                   />
                                 </div>
-                                <span className="text-[10px] text-muted-foreground/70 font-heading">
+                                <span className="text-[10px] text-muted-foreground font-heading">
                                   {task.checklist.filter((c) => c.completed).length}/{task.checklist.length}
                                 </span>
                               </div>
