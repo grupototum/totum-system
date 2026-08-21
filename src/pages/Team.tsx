@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Briefcase, Loader2, Users, Filter } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useProfiles, useRoles, useDepartments } from "@/hooks/useProfiles";
 import { UserDetailSheet } from "@/components/users/UserDetailSheet";
 import { ProfileRow } from "@/hooks/useProfiles";
