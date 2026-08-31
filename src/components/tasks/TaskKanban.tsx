@@ -69,23 +69,30 @@ function TaskKanbanComponent({
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
-                  className={`flex-1 rounded-xl p-2 space-y-2 transition-colors ${
-                    snapshot.isDraggingOver ? "bg-white/[0.04]" : "bg-white/[0.01]"
+                  className={`flex-1 rounded-xl p-2 space-y-2 border transition-colors ${
+                    snapshot.isDraggingOver
+                      ? "bg-primary/[0.06] border-primary/30"
+                      : "bg-white/[0.01] border-transparent"
                   }`}
                 >
+                  {col.tasks.length === 0 && !snapshot.isDraggingOver && (
+                    <div className="flex items-center justify-center h-20 rounded-lg border border-dashed border-white/[0.08]">
+                      <span className="text-[11px] text-muted-foreground/60">Sem tarefas</span>
+                    </div>
+                  )}
                   {col.tasks.map((task, index) => (
                     <Draggable key={task.id} draggableId={task.id} index={index}>
                       {(provided, snapshot) => {
                         const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "concluido";
                         const priorityColor = priorityConfig[task.priority]?.color || "text-muted-foreground";
-                        
+
                         return (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             onClick={() => onTaskClick(task)}
-                            className={`glass-card rounded-xl p-3 cursor-pointer hover:bg-white/[0.06] transition-all relative overflow-hidden group border-l-4 ${priorityColor.replace('text-', 'border-')} ${
+                            className={`glass-card rounded-xl p-3 cursor-grab active:cursor-grabbing hover:bg-white/[0.06] hover:-translate-y-0.5 transition-all relative overflow-hidden group border-l-4 ${priorityColor.replace('text-', 'border-')} ${
                               snapshot.isDragging ? "opacity-70 shadow-2xl shadow-black/50 rotate-2 scale-105 z-50 border-white/20" : ""
                             } ${isOverdue ? "pulse-red" : ""} ${
                               selectedSet.has(task.id) ? "ring-2 ring-primary bg-white/[0.06]" : ""
